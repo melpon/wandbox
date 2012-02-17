@@ -8,12 +8,14 @@ Development:
   <<: *defaults
 
 Testing:
+  approot: "http://49.212.124.83:8080"
+  port: 8080
   <<: *defaults
-  port: 2999
 
 Staging:
   <<: *defaults
 
 Production:
-  approot: "http://www.example.com"
+  approot: "http://49.212.124.83"
+  port: 80
   <<: *defaults
