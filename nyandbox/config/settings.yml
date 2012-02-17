@@ -1,5 +1,5 @@
 Default: &defaults
-  host: "49.212.124.83"
+  host: ""
   port: 3000
   copyright: Insert copyright statement here
   #analytics: UA-YOURCODE

@@ -60,7 +60,12 @@ mkYesodData "Frontend" $(parseRoutesFile "config/routes")
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod Frontend where
+#ifdef DEVELOPMENT
+    approot = ApprootRelative
+#else
     approot = ApprootMaster $ appRoot . settings
+#endif
+
 
     -- Place the session key file in the config folder
     encryptKey _ = fmap Just $ getKey "config/client_session_key.aes"
@@ -81,9 +86,11 @@ instance Yesod Frontend where
 
     -- This is done to provide an optimization for serving static files from
     -- a separate domain. Please see the staticroot setting in Settings.hs
+#ifndef DEVELOPMENT
     urlRenderOverride y (StaticR s) =
         Just $ uncurry (joinPath y (Settings.staticRoot $ settings y)) $ renderRoute s
     urlRenderOverride _ _ = Nothing
+#endif
 
     messageLogger y loc level msg =
       formatLogText (getLogger y) loc level msg >>= logMsg (getLogger y)
