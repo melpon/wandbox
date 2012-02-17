@@ -1,2 +1,8 @@
-<h1>_{MsgHello}
-<h2 ##{h2id}>You do not have Javascript enabled.
+<div .container>
+  <h1>_{MsgHello}
+  <h2 ##{h2id}>You do not have jQuery enabled.
+  <div .row>
+    <div .span10>
+        <textarea .span10 rows="20">
+    <div .span2>
+        <a href="#" .btn>Run

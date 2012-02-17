@@ -1,6 +1,8 @@
 module Handler.Root where
 
 import Import
+--import Text.Julius (julius)
+import Yesod.Static
 
 -- This is a handler function for the GET request method on the RootR
 -- resource pattern. All of your resource patterns are defined in
@@ -13,5 +15,7 @@ getRootR :: Handler RepHtml
 getRootR = do
     defaultLayout $ do
         h2id <- lift newIdent
-        setTitle "nyandbox homepage"
+        setTitle "Wandbox"
+        addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+        addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
         $(widgetFile "homepage")
