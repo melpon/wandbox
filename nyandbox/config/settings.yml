@@ -9,6 +9,7 @@ Development:
 
 Testing:
   <<: *defaults
+  port: 2999
 
 Staging:
   <<: *defaults
