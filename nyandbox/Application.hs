@@ -18,8 +18,7 @@ import Yesod.Logger (Logger, logBS, toProduction)
 import Network.Wai.Middleware.RequestLogger (logCallback)
 #endif
 import Network.Wai (Application)
-import Data.IORef (newIORef)
-import qualified Data.Map as M (empty)
+import ChanMap (newChanMap)
 
 -- Import all relevant handler modules here.
 import Handler.Root
@@ -37,8 +36,8 @@ mkYesodDispatch "Frontend" resourcesFrontend
 getApplication :: AppConfig DefaultEnv Extra -> Logger -> IO Application
 getApplication conf logger = do
     s <- staticSite
-    ref <- liftIO $ newIORef M.empty
-    let foundation = Frontend conf setLogger s ref
+    cm <- liftIO $ newChanMap
+    let foundation = Frontend conf setLogger s cm
     app <- toWaiAppPlain foundation
     return $ logWare app
   where

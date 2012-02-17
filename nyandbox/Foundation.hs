@@ -22,11 +22,8 @@ import Settings (Extra (..), widgetFile)
 import Control.Monad.IO.Class (liftIO)
 import Web.ClientSession (getKey)
 import Text.Hamlet (hamletFile)
-import Network.Wai.EventSource (ServerEvent)
-import Data.Map (Map)
-import Data.IORef (IORef)
 import Data.Text (Text)
-import Control.Concurrent.Chan (Chan)
+import ChanMap (ChanMap)
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -36,7 +33,7 @@ data Frontend = Frontend
     { settings  :: AppConfig DefaultEnv Extra
     , getLogger :: Logger
     , getStatic :: Static -- ^ Settings for static file serving.
-    , getChanMapRef :: IORef (Map Text (Chan ServerEvent))
+    , getChanMap :: ChanMap
     }
 
 -- Set up i18n messages. See the message folder.
