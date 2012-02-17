@@ -1,4 +1,17 @@
 $(function() {
   $('h2').html('jQuery test');
+  $('a.compile').click(function(event) {
+    event.preventDefault();
+
+    var url = $(this).attr('href');
+    var code = $('#code').html();
+
+    var src = new EventSource("source");
+    src.onmessage = function(msg) {
+      $('<p>').html(msg.data).appendTo('#output');
+    };
+    $.post(url, { code: code }, function() { });
+  });
+  $('h2').html('jQuery test');
 });
 

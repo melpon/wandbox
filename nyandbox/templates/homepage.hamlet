@@ -3,6 +3,8 @@
   <h2 ##{h2id}>You do not have jQuery enabled.
   <div .row>
     <div .span10>
-        <textarea .span10 rows="20">
+        <textarea #code .span10 rows="20">
     <div .span2>
-        <a href="#" .btn>Run
+        <a href="#" .compile .btn>Run
+  <div .row>
+    <div .span12 #output>
