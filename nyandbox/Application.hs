@@ -18,9 +18,12 @@ import Yesod.Logger (Logger, logBS, toProduction)
 import Network.Wai.Middleware.RequestLogger (logCallback)
 #endif
 import Network.Wai (Application)
+import Data.IORef (newIORef)
+import qualified Data.Map as M (empty)
 
 -- Import all relevant handler modules here.
 import Handler.Root
+import Handler.Compile
 
 -- This line actually creates our YesodSite instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see
@@ -34,7 +37,8 @@ mkYesodDispatch "Frontend" resourcesFrontend
 getApplication :: AppConfig DefaultEnv Extra -> Logger -> IO Application
 getApplication conf logger = do
     s <- staticSite
-    let foundation = Frontend conf setLogger s
+    ref <- liftIO $ newIORef M.empty
+    let foundation = Frontend conf setLogger s ref
     app <- toWaiAppPlain foundation
     return $ logWare app
   where

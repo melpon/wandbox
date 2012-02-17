@@ -4,13 +4,15 @@ $(function() {
     event.preventDefault();
 
     var url = $(this).attr('href');
-    var code = $('#code').html();
+    var code = $('#code').val();
 
-    var src = new EventSource("source");
+    var src = new EventSource("/source");
     src.onmessage = function(msg) {
-      $('<p>').html(msg.data).appendTo('#output');
+      $.post('/compile/' + msg.data, { code: code }, function() { });
+      src.onmessage = function(msg) {
+        $('<p>').html(msg.data).appendTo('#output');
+      }
     };
-    $.post(url, { code: code }, function() { });
   });
   $('h2').html('jQuery test');
 });

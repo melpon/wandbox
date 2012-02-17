@@ -31,6 +31,7 @@ library
                      Settings
                      Settings.StaticFiles
                      Handler.Root
+                     Handler.Compile
 
     ghc-options:   -Wall -threaded -O0
     cpp-options:   -DDEVELOPMENT
@@ -82,3 +83,6 @@ executable         nyandbox
                  , yaml                          >= 0.5        && < 0.6
                  , shakespeare-js
                  , wai-eventsource
+                 , blaze-builder
+                 , containers
+                 , random
