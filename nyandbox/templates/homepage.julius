@@ -6,13 +6,18 @@ $(function() {
     var url = $(this).attr('href');
     var code = $('#code').val();
 
-    var src = new EventSource("/source");
+    var src = $.data(document.body, 'source');
+    if (src != null)
+      src.close();
+
+    src = new EventSource("/source");
     src.onmessage = function(msg) {
       $.post('/compile/' + msg.data, { code: code }, function() { });
       src.onmessage = function(msg) {
         $('<p>').html(msg.data).appendTo('#output');
       }
     };
+    $.data(document.body, 'source', src);
   });
   $('h2').html('jQuery test');
 });

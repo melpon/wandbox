@@ -7,13 +7,10 @@ module ChanMap (
 ) where
 
 import Prelude hiding (lookup,catch)
-import Control.Exception (IOException,catch)
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
-import Network.Wai.EventSource (ServerEvent(CommentEvent))
+import Network.Wai.EventSource (ServerEvent)
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Applicative ((<$>))
-import Control.Monad (forever, mapM_)
-import Blaze.ByteString.Builder.Char.Utf8 (fromString)
 import qualified Control.Concurrent.Chan as C
 import qualified Data.Map as M
 import qualified Data.Text as T
@@ -21,31 +18,22 @@ import qualified Data.Text as T
 type ChanEvent = C.Chan ServerEvent
 data ChanMap = ChanMap (IORef (M.Map T.Text ChanEvent))
 
-logging :: ChanMap -> IO ()
-logging (ChanMap ref) = forever $ do
-  threadDelay (15*1000*1000)
-  print "---- remain ----"
-  readIORef ref >>= mapM_ print . map fst . M.toList
-  print "----------------"
-
 newChanMap :: IO ChanMap
 newChanMap = do
   cm <- ChanMap <$> newIORef M.empty
-  --forkIO $ logging cm
   return cm
 
-checkAlive :: ChanMap -> T.Text -> IO ()
-checkAlive cm k = forever $ sendComment `catch` \e -> print (show (e :: IOException)) >> delete cm k
-  where
-    sendComment = do
-      threadDelay (15*1000*1000)
-      writeChan cm k $ CommentEvent $ fromString "checkAlive"
+timeDelete :: ChanMap -> T.Text -> IO ()
+timeDelete cm k = do
+  threadDelay (30*1000*1000)
+  delete cm k
 
 insert :: ChanMap -> T.Text -> IO ChanEvent
 insert cm@(ChanMap ref) k = do
   chan <- C.newChan
   _ <- atomicModifyIORef ref $ \m -> (M.insert k chan m, ())
-  --forkIO $ checkAlive cm k
+  -- this chan is removed from ChanMap after few seconds.
+  _ <- forkIO $ timeDelete cm k
   return chan
 
 delete :: ChanMap -> T.Text -> IO ()
