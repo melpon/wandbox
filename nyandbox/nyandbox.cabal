@@ -33,6 +33,9 @@ library
                      Handler.Root
                      Handler.Compile
                      ChanMap
+                     VM.Protocol
+                     VM.IpPortFile
+                     VM.Conduit
 
     ghc-options:   -Wall -threaded -O0
     cpp-options:   -DDEVELOPMENT
@@ -87,3 +90,7 @@ executable         nyandbox
                  , blaze-builder
                  , containers
                  , random
+                 , dataenc
+                 , attoparsec
+                 , network
+                 , conduit
