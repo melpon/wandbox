@@ -5,8 +5,10 @@ module VM.IpPortFile (
 import Import
 import System.IO (readFile)
 import Language.Haskell.TH
+import Network (PortID(PortNumber))
 
-ipPortFile :: FilePath -> Q Exp
-ipPortFile fp = do [ip, port] <- lines <$> runIO (readFile fp)
-                   return $ TupE [LitE $ StringL ip, AppE (ConE $ mkName "PortNumber") (LitE $ IntegerL $ read port)]
-
+ipPortFile :: FilePath -> Q Exp              
+ipPortFile fp = do                           
+  [ip, port] <- runIO $ lines <$> readFile fp
+  let port' = read port :: Int
+  [| (ip, PortNumber $ fromIntegral port') |]
