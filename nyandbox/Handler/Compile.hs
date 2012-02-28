@@ -1,7 +1,7 @@
 module Handler.Compile where
 
 import Import
-import Network.Wai.EventSource (ServerEvent(..), eventSourceApp)
+import Network.Wai.EventSource (ServerEvent(..), eventSourceAppChan)
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Monad (replicateM, forM_)
 import Blaze.ByteString.Builder.Char.Utf8 (fromText)
@@ -25,7 +25,7 @@ getSourceR = do
     chan <- liftIO $ CM.insert cm ident
 
     req <- waiRequest
-    res <- lift $ eventSourceApp chan req
+    res <- lift $ eventSourceAppChan chan req
 
     _ <- liftIO $ CM.writeChan cm ident $ ServerEvent Nothing Nothing [fromText ident]
 
