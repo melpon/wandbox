@@ -29,7 +29,7 @@ data ProtocolSpecifier =
   Signal
   deriving (Show)
 
-data Protocol = Protocol {
+data Protocol = ProtocolNil | Protocol {
   protoSpec :: ProtocolSpecifier,
   protoContents :: T.Text
   } deriving (Show)
@@ -56,15 +56,22 @@ specParser = do
   _ <- AB.word8 $ toWord8 ' '
   return r
 
-protocolParser :: AB.Parser Protocol
-protocolParser = do
+protocolParser' :: AB.Parser Protocol
+protocolParser' = do
   spec <- specParser
   len <- read . BC.unpack <$> AB.takeWhile1 (AB.inClass "0-9")
   _ <- AB.word8 $ toWord8 ':'
   contents <- join $ maybe (fail "failed to decode contents") return <$> decode <$> AB.take len
   return $ Protocol spec contents
 
+protocolParser :: AB.Parser Protocol
+protocolParser = do
+  proto <- (pure ProtocolNil <* AB.word8 0) <|> protocolParser'
+  AB.endOfInput
+  return proto
+
 toString :: Protocol -> B.ByteString
+toString ProtocolNil = B.singleton 0
 toString (Protocol spec contents) =
   let encstr = encode contents in
   B.concat [BC.pack $ show spec, " ", BC.pack $ show $ B.length encstr, ":", encstr]
