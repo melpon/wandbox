@@ -11,4 +11,4 @@ ipPortFile :: FilePath -> Q Exp
 ipPortFile fp = do                           
   [ip, port] <- runIO $ lines <$> readFile fp
   let port' = read port :: Int
-  [| (ip, PortNumber $ fromIntegral port') |]
+  [| (ip, PortNumber $([|port'|])) |]

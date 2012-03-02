@@ -13,7 +13,7 @@ import qualified Data.Conduit.List as CL
 import qualified Data.Attoparsec.ByteString as AB
 import qualified Data.ByteString as B
 import System.IO (Handle)
-import Network (connectTo, PortID(PortNumber))
+import Network (connectTo)
 
 import VM.IpPortFile (ipPortFile)
 import VM.Protocol (Protocol(..), protocolParser, toString)
