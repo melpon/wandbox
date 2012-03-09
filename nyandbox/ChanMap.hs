@@ -1,14 +1,14 @@
 module ChanMap (
   ChanMap,
   newChanMap,
-  insert,
+  insertLookup,
   delete,
   writeChan
 ) where
 
 import Prelude hiding (lookup,catch)
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
-import Network.Wai.EventSource (ServerEvent)
+import Network.Wai.EventSource (ServerEvent(CloseEvent))
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Applicative ((<$>))
 import qualified Control.Concurrent.Chan as C
@@ -25,16 +25,22 @@ newChanMap = do
 
 timeDelete :: ChanMap -> T.Text -> IO ()
 timeDelete cm k = do
-  threadDelay (30*1000*1000)
+  -- wait 2 hours
+  threadDelay (2*60*60*1000*1000)
+  writeChan cm k CloseEvent
   delete cm k
 
-insert :: ChanMap -> T.Text -> IO ChanEvent
-insert cm@(ChanMap ref) k = do
+insertLookup :: ChanMap -> T.Text -> IO ChanEvent
+insertLookup cm@(ChanMap ref) k = do
   chan <- C.newChan
-  _ <- atomicModifyIORef ref $ \m -> (M.insert k chan m, ())
+  chan' <- atomicModifyIORef ref (modify chan)
   -- this chan is removed from ChanMap after few seconds.
   _ <- forkIO $ timeDelete cm k
-  return chan
+  return chan'
+  where
+    modify chan m = let (mValue, m') = M.insertLookupWithKey oldValue k chan m
+                    in maybe (m', chan) ((,) m') mValue
+    oldValue _ _ old = old
 
 delete :: ChanMap -> T.Text -> IO ()
 delete (ChanMap ref) k = do

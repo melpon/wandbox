@@ -4,5 +4,5 @@
 /robots.txt RobotsR GET
 
 / RootR GET
-/source SourceR GET
+/source/#Text SourceR GET
 /compile/#Text CompileR POST

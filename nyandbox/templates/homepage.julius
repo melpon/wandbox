@@ -1,23 +1,16 @@
 $(function() {
-  $('h2').html('jQuery test');
+  src = new EventSource('/source/#{sourceId}');
+  src.onmessage = function(msg) {
+    $('<p>').html(msg.data).appendTo('#output');
+  };
+  
   $('a.compile').click(function(event) {
     event.preventDefault();
 
     var url = $(this).attr('href');
     var code = $('#code').val();
 
-    var src = $.data(document.body, 'source');
-    if (src != null)
-      src.close();
-
-    src = new EventSource("/source");
-    src.onmessage = function(msg) {
-      $.post('/compile/' + msg.data, { code: code }, function() { });
-      src.onmessage = function(msg) {
-        $('<p>').html(msg.data).appendTo('#output');
-      }
-    };
-    $.data(document.body, 'source', src);
+    $.post(url + '/#{sourceId}', { code: code }, function() { });
   });
   $('h2').html('jQuery test');
 });

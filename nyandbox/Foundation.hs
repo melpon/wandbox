@@ -22,7 +22,7 @@ import Settings (Extra (..), widgetFile)
 import Control.Monad.IO.Class (liftIO)
 import Web.ClientSession (getKey)
 import Text.Hamlet (hamletFile)
-import Data.Text (Text)
+import Data.Text(Text)
 import ChanMap (ChanMap)
 
 -- | The site argument for your application. This can be a good place to

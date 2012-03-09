@@ -1,10 +1,8 @@
 <div .container>
-  <h1>_{MsgHello}
-  <h2 ##{h2id}>You do not have jQuery enabled.
   <div .row>
     <div .span10>
         <textarea #code .span10 rows="20">
     <div .span2>
-        <a href="#" .compile .btn>Run
+        <a href="/compile" .compile .btn>Run
   <div .row>
     <div .span12 #output>
