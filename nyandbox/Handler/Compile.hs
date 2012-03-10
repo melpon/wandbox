@@ -5,19 +5,18 @@ module Handler.Compile (
 
 import Import
 import Network.Wai.EventSource (ServerEvent(..), eventSourceAppChan)
-import Control.Concurrent (forkIO, threadDelay)
-import Control.Monad (forM_)
-import Blaze.ByteString.Builder.Char.Utf8 (fromText)
+import Control.Concurrent (forkIO)
+import Blaze.ByteString.Builder.ByteString (fromByteString)
 import qualified Data.Text as T
 import qualified ChanMap as CM
 import Control.Exception (bracket)
-import System.IO (hClose)
+import System.IO (hClose, hFlush)
 
 import qualified Data.Conduit as C
-import Data.Conduit ((=$), ($=), ($$))
+import Data.Conduit (($$))
 import qualified Data.Conduit.List as CL
 
-import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
+import VM.Protocol (Protocol(..), ProtocolSpecifier(..), toString)
 import VM.Conduit (connectVM, sendVM, receiveVM)
 
 getSourceR :: Text -> Handler ()
@@ -30,11 +29,29 @@ getSourceR ident = do
 
     sendWaiResponse res
 
-vmHandle :: IO ()
-vmHandle =
+vmHandle :: T.Text -> C.Sink (Either String Protocol) IO () -> IO ()
+vmHandle code sink =
   bracket connectVM hClose $ \handle -> do
-    C.runResourceT $ CL.sourceList [Protocol Control "compiler=ghc"] $$ sendVM handle
-    C.runResourceT $ receiveVM handle $$ CL.mapM_ print
+    C.runResourceT $ CL.sourceList protos $$ sendVM handle
+    hFlush handle
+    C.runResourceT $ receiveVM handle $$ sink
+  where
+    protos = [Protocol Control "compiler=gcc",
+              Protocol CompilerSwitch "<optimize>2 <address-model>64",
+              Protocol Source code,
+              Protocol Control "run"]
+
+sinkProtocol :: (ServerEvent -> IO ()) -> C.Sink (Either String Protocol) IO ()
+sinkProtocol writeChan = C.sinkIO (return ()) return push close
+  where
+    push _ (Left str) = do putStrLn str
+                           return $ C.IODone Nothing ()
+    push _ (Right ProtocolNil) = do print ProtocolNil
+                                    return $ C.IODone Nothing ()
+    push _ (Right proto) = do
+      writeChan $ ServerEvent Nothing Nothing [fromByteString $ toString proto]
+      return C.IOProcessing
+    close _ = return ()
 
 postCompileR :: Text -> Handler ()
 postCompileR ident = do
@@ -43,9 +60,5 @@ postCompileR ident = do
   where
     go code = do
       cm <- getChanMap <$> getYesod
-      let codes = T.lines code
-      _ <- liftIO $ forkIO $ do
-              forM_ codes $ \line -> do
-                                     CM.writeChan cm ident $ ServerEvent Nothing Nothing [fromText line]
-                                     threadDelay (1000*1000)
+      _ <- liftIO $ forkIO $ vmHandle code $ sinkProtocol $ CM.writeChan cm ident
       return ()

@@ -25,7 +25,7 @@ connectVM :: IO Handle
 connectVM = uncurry connectTo $(ipPortFile "config/vmip")
 
 sendVM :: C.ResourceIO m => Handle -> C.Sink Protocol m ()
-sendVM handle = CL.map toString =$ CB.sinkHandle handle
+sendVM handle = CL.map (flip B.append "\n" . toString) =$ CB.sinkHandle handle
 
 receiveVM :: C.ResourceIO m => Handle -> C.Source m (Either String Protocol)
 receiveVM handle = CB.sourceHandle handle $= CB.lines $= parsePipe
