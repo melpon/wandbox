@@ -4,6 +4,7 @@ module Main where
 import qualified Network as N
 import System.IO (hGetLine, hPutStrLn, hFlush)
 import Control.Exception (bracket)
+import System.IO.Error (try)
 import Control.Monad (forever)
 import Control.Concurrent (forkIO, threadDelay)
 import qualified Data.Attoparsec.ByteString as AB
@@ -25,7 +26,7 @@ sendResult h = do
 
 receive h = do
   line <- hGetLine h
-  print line
+  _ <- try $ print line
   let eProto = AB.parseOnly P.protocolParser $ BC.pack line
   matchProto eProto
   where
@@ -36,7 +37,6 @@ receive h = do
 
 main :: IO ()
 main = N.withSocketsDo $ do
-  putStrLn "start listen"
   forever $
     bracket (N.listenOn (N.PortNumber 3001)) N.sClose $ \socket -> do
       (handle, _, _) <- N.accept socket
