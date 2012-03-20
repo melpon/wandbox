@@ -2,7 +2,7 @@
 -- includes database connection settings, static file locations, etc.
 -- In addition, you can configure a number of different aspects of Yesod
 -- by overriding methods in the Yesod typeclass. That instance is
--- declared in the nyandbox.hs file.
+-- declared in the kennel.hs file.
 module Settings
     ( widgetFile
     , staticRoot
@@ -34,10 +34,10 @@ staticDir = "static"
 -- please see:
 --   http://code.google.com/speed/page-speed/docs/request.html#ServeFromCookielessDomain
 --
--- If you change the resource pattern for StaticR in nyandbox.hs, you will
+-- If you change the resource pattern for StaticR in kennel.hs, you will
 -- have to make a corresponding change here.
 --
--- To see how this value is used, see urlRenderOverride in nyandbox.hs
+-- To see how this value is used, see urlRenderOverride in kennel.hs
 staticRoot :: AppConfig DefaultEnv a ->  Text
 staticRoot conf = [st|#{appRoot conf}/static|]
 

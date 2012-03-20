@@ -1,7 +1,5 @@
-name:              nyandbox
+name:              kennel
 version:           0.0.0
-license:           BSD3
-license-file:      LICENSE
 author:            melpon
 maintainer:        melpon
 synopsis:          The greatest Yesod web application ever.
@@ -10,7 +8,7 @@ category:          Web
 stability:         Experimental
 cabal-version:     >= 1.6
 build-type:        Simple
-homepage:          http://nyandbox.yesodweb.com/
+homepage:          http://kennel.yesodweb.com/
 
 Flag dev
     Description:   Turn on development settings, like auto-reload templates.
@@ -49,7 +47,7 @@ library
                 MultiParamTypeClasses
                 TypeFamilies
 
-executable         nyandbox
+executable         kennel
     if flag(library-only)
         Buildable: False
 
