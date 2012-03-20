@@ -11,7 +11,7 @@ namespace wandbox {
 	
 }
 
-int main(int argc, char **) {
+int main(int, char **) {
 	using namespace wandbox;
 	asio::io_service aio;
 
@@ -25,7 +25,7 @@ int main(int argc, char **) {
 	std::string request =
 		"Compiler 3:g++\n"
 		"CompilerOption 11:<optimize>2\n"
-		"Source 10:te=0D=0Ast\n"
+		"Source 48:#include<stdio.h>=0Aint main(){putchar('a');}=0A\n"
 		"Control 3:run\n";
 	asio::write(s, asio::buffer(request));
 
