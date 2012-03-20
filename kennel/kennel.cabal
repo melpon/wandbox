@@ -1,7 +1,5 @@
 name:              kennel
 version:           0.0.0
-license:           BSD3
-license-file:      LICENSE
 author:            melpon
 maintainer:        melpon
 synopsis:          The greatest Yesod web application ever.
