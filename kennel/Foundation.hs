@@ -63,12 +63,7 @@ mkYesodData "Frontend" $(parseRoutesFile "config/routes")
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod Frontend where
-#ifdef DEVELOPMENT
-    approot = ApprootRelative
-#else
     approot = ApprootMaster $ appRoot . settings
-#endif
-
 
     -- Place the session key file in the config folder
     encryptKey _ = fmap Just $ getKey "config/client_session_key.aes"

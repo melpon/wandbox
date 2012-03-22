@@ -1,5 +1,5 @@
 Default: &defaults
-  host: ""
+  approot: "wandbox"
   port: 3000
   copyright: Insert copyright statement here
   #analytics: UA-YOURCODE
@@ -8,14 +8,12 @@ Development:
   <<: *defaults
 
 Testing:
-  approot: "http://49.212.124.83:8080"
-  port: 8080
   <<: *defaults
 
 Staging:
   <<: *defaults
 
 Production:
-  approot: "http://49.212.124.83"
-  port: 80
+  approot: "http://melpon.org/wandbox"
+  port: 3100
   <<: *defaults
