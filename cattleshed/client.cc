@@ -33,6 +33,8 @@ int main(int, char **) {
 	boost::system::error_code ec;
 	asio::read(s, reply, ec);
 	std::cout << "Reply is: ";
-	std::cout << &reply;
-	std::cout << "\n";
+	const auto b = reply.data();
+	const auto p = asio::buffer_cast<const char *>(b);
+	const auto l = asio::buffer_size(b);
+	std::cout << decode_qp(boost::make_iterator_range(p, p+l)) << std::flush;
 }

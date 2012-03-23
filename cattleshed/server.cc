@@ -7,6 +7,10 @@
 #include <array>
 #include <thread>
 #include <mutex>
+#include <sstream>
+#include <set>
+#include <functional>
+#include <list>
 #include <condition_variable>
 #include <boost/range.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -25,12 +29,19 @@ namespace wandbox {
 
 	using std::shared_ptr;
 	using std::unique_ptr;
+	using std::make_shared;
 	using std::string;
 	using std::vector;
 	using std::array;
+	using std::list;
 	using std::size_t;
 	using std::move;
+	using std::ref;
+	using std::cref;
 	using boost::system::error_code;
+	using std::placeholders::_1;
+	using std::placeholders::_2;
+	using std::placeholders::_3;
 
 	struct ignore_param {
 		template <typename ...Args>
@@ -70,22 +81,6 @@ namespace wandbox {
 			qi::parse(ite, end, qi::as_string[qi::repeat(len)[qi::char_]][phx::ref(d.second) = qi::_1] >> qi::eoi);
 	}
 
-	template <typename Range, typename std::enable_if<std::is_convertible<typename boost::range_category<Range>::type, std::bidirectional_iterator_tag>::value>::type *& = enabler>
-	string decode_qp(const Range &r) {
-		auto ite = r.begin();
-		const auto end = r.end();
-		string ret;
-		qi::parse(ite, end, *((qi::char_ - '=') | (qi::lit("=\n")) | (qi::lit('=') > qi::uint_parser<char, 16, 2, 2>())), ret);
-		return ret;
-	}
-	template <typename Range>
-//	auto encode_qp(const Range &r) -> typename std::enable_if<std::is_convertible<typename std::iterator_traits<decltype(boost::begin(r))>::iterator_category, std::bidirectional_iterator_tag>::value, string>::type {
-	string encode_qp(const Range &r) {
-		if (r.begin() == r.end()) return {};
-		string ret;
-		karma::generate(back_inserter(ret), karma::repeat(1, 76)[karma::print | ('=' << karma::upper[karma::right_align(2, '0')[karma::uint_generator<unsigned char, 16>()]])] % "=\n", r);
-		return ret;
-	}
 //	inline string encode_qp(std::ostream &r) {
 //		r << karma::format(karma::repeat(1, 76)[karma::print | ('=' << karma::upper[karma::right_align(2, '0')[karma::uint_generator<unsigned char, 16>()]])] % "=\n", r);
 //	}
@@ -108,97 +103,6 @@ namespace wandbox {
 	constexpr int _P_OVERLAY = 2;
 	constexpr int _P_NOWAITO = 3;
 	constexpr int _P_DETACH = 4;
-
-	template <typename Fn>
-	intptr_t _spawnvX(Fn execer, int mode, const char *cmdname, const char *const *argv_) {
-		vector<char *> argv;
-		for (const char *const *p = argv_; *p; ++p) {
-			argv.push_back(::strdup(*p));
-		}
-		if (mode == _P_OVERLAY) {
-			execer(cmdname, argv.data());
-			exit(-1);
-		}
-		const pid_t pid = ::fork();
-		if (pid == 0) {
-			execer(cmdname, argv.data());
-			exit(-1);
-		} else if (pid > 0) {
-			std::for_each(argv.begin(), argv.end(), ::free);
-			int st;
-			if (mode ==  _P_WAIT) {
-				::waitpid(pid, &st, 0);
-				return st;
-			}
-			return pid;
-		} 
-		std::for_each(argv.begin(), argv.end(), ::free);
-		return -1;
-	}
-	template <typename Fn>
-	intptr_t _spawnlX2(Fn execer, int mode, const char *cmdname, vector<const char *> &&v) {
-		v.push_back(nullptr);
-		return _spawnvX(execer, mode, cmdname, v.data());
-	}
-	template <typename Fn, typename ...Args>
-	intptr_t _spawnlX2(Fn execer, int mode, const char *cmdname, vector<const char *> &&v, const char *arg0, Args &&...args) {
-		v.push_back(arg0);
-		return _spawnlX2(execer, mode, cmdname, move(v), std::forward<Args>(args)...);
-	}
-	template <typename Fn, typename ...Args>
-	intptr_t _spawnlX(Fn execer, int mode, const char *cmdname,  Args &&...args) {
-		return _spawnlX2(execer, mode, cmdname, {}, std::forward<Args>(args)...);
-	}
-	intptr_t _spawnv(int mode, const char *cmdname, const char *const *argv) {
-		return _spawnvX(&::execv, mode, cmdname, argv);
-	}
-//	intptr_t _spawnve(int mode, const char *cmdname, const char *const *argv) {
-//		return _spawnvX(&::execve, mode, cmdname, argv);
-//	}
-	intptr_t _spawnvp(int mode, const char *cmdname, const char *const *argv) {
-		return _spawnvX(&::execvp, mode, cmdname, argv);
-	}
-//	intptr_t _spawnvpe(int mode, const char *cmdname, const char *const *argv) {
-//		return _spawnvX(&::execvpe, mode, cmdname, argv);
-//	}
-	template <typename ...Args>
-	intptr_t _spawnl(int mode, const char *cmdname, Args &&...args) {
-		return _spawnlX(&::execv, mode, cmdname, std::forward<Args>(args)...);
-	}
-//	template <typename ...Args>
-//	intptr_t _spawnle(int mode, const char *cmdname, Args &&...args) {
-//		return _spawnlX(&::execve, mode, cmdname, std::forward<Args>(args)...);
-//	}
-	template <typename ...Args>
-	intptr_t _spawnlp(int mode, const char *cmdname, Args &&...args) {
-		return _spawnlX(&::execvp, mode, cmdname, std::forward<Args>(args)...);
-	}
-//	template <typename ...Args>
-//	intptr_t _spawnlpe(int mode, const char *cmdname, Args &&...args) {
-//		return _spawnlX(&::execvpe, mode, cmdname, std::forward<Args>(args)...);
-//	}
-
-	struct pipe_t {
-		explicit pipe_t(int flags = 0) {
-			if (pipe2(pipefd, flags) == -1) throw std::runtime_error("pipe creation failed");
-		}
-		~pipe_t() {
-			close(pipefd[0]);
-			close(pipefd[1]);
-		}
-		int rfd() const { return pipefd[0]; }
-		int wfd() const { return pipefd[1]; }
-		pipe_t(const pipe_t &) = delete;
-		pipe_t &operator =(const pipe_t &) = delete;
-		int pipefd[2];
-	};
-
-	inline void set_cloexec(int fd) {
-		fcntl(fd, F_SETFD, (long)FD_CLOEXEC);
-	}
-	inline int dup_cloexec(int fd) {
-		return fcntl(fd, F_DUPFD_CLOEXEC, (long)0);
-	}
 
 	struct child_process {
 		intptr_t pid;
@@ -288,255 +192,188 @@ namespace wandbox {
 		} 
 		std::for_each(argv.begin(), argv.end(), ::free);
 		return child_process { -1, -1, -1, -1 };
-/*
-		pipe_t child_stdin(O_CLOEXEC), child_stdout(O_CLOEXEC), child_stderr(O_CLOEXEC);
-		int parent_stdin = dup_cloexec(0);
-		int parent_stdout = dup_cloexec(1);
-		int parent_stderr = dup_cloexec(2);
-		print(std::cout, "spawn : ", args...) << std::endl;
-		dup2(child_stdin.rfd(), 0);
-		dup2(child_stdout.wfd(), 1);
-		dup2(child_stderr.wfd(), 2);
-		child_process child;
-		child.pid = _spawnlX(execv, mode, std::forward<Args>(args)...);
-		dup2(parent_stdin, 0);
-		dup2(parent_stdout, 1);
-		dup2(parent_stderr, 2);
-		close(parent_stdin);
-		close(parent_stdout);
-		close(parent_stderr);
-		child.fd_stdin = dup_cloexec(child_stdin.wfd());
-		child.fd_stdout = dup_cloexec(child_stdout.rfd());
-		child.fd_stderr = dup_cloexec(child_stderr.rfd());
-		return child;
-	*/
 	}
 }
 
-#include "yield.hpp"
-
 namespace wandbox {
 
-	struct compiler_bridge: coroutine {
-		template <typename Fn>
-		void operator ()(const std::string &msg, std::shared_ptr<asio::posix::stream_descriptor> pipe, Fn fn) try {
-			while (1) {
-				error_code ec;
-				asio::streambuf rbuf, wbuf;
-				const auto len = asio::read_until(*pipe, rbuf, '\n', ec);
-				std::cout << "pipe : " << msg << " : " << len << ", " << ec.message() << std::endl;
-				rbuf.commit(len);
+	struct thread_compare {
+		bool operator ()(const std::thread &x, const std::thread &y) const {
+			return x.get_id() < y.get_id();
+		}
+	};
+
+	struct compiler_bridge {
+		template <typename Stream>
+		struct stream_pair {
+			template <typename ...Args>
+			stream_pair(asio::io_service &aio, Args &&...args): stream(aio, std::forward<Args>(args)...), buf() { }
+			Stream stream;
+			asio::streambuf buf;
+		};
+		typedef stream_pair<asio::posix::stream_descriptor> stream_descriptor_pair;
+		void operator ()() {
+			// io thread
+			asio::streambuf rbuf;
+			std::map<std::string, std::string> received;
+
+			while (true) {
+				asio::read_until(sock, rbuf, '\n');
+				std::pair<string, string> d;
 				std::istream rd(&rbuf);
 				string line;
-				getline(rd, line);
-				if (rd) line += ('\n');
-				const string so = encode_qp(line);
-				std::cout << "'" << so << "'" << std::endl;
-				if (!so.empty()) {
-					std::ostream wr(&wbuf);
-					wr << msg << " " << so.length() << " : " << so << '\n';
-					std::mutex mut;
-					std::condition_variable cond;
-					std::unique_lock<std::mutex> lk(mut);
-					aio->post([&, this] {
-						error_code ec;
-						asio::write(*sock, wbuf, ec);
-						cond.notify_one();
-					});
-					cond.wait(lk);
+				if (getline(rd, line) && parse_line(line, d)) {
+					std::cout << "command: " << d.first << " : " << d.second << std::endl;
+					if (d.first == "Control" && d.second == "run") break;
+					received[d.first] += decode_qp(d.second);
 				}
-				if (ec) break;
 			}
-			error_code ec;
-			pipe->close(ec);
-			if (fn) fn(std::move(*this));
-		} catch (...) {
-			std::cout << "catch..." << std::endl;
+
+			const string srcname = "prog.cpp";
+			shared_ptr<FILE> fp(::fopen(srcname.c_str(), "w"), [srcname](FILE *fp) {
+				::unlink(srcname.c_str());
+			});
+			auto &s = received["Source"];
+			::fwrite(s.data(), 1, s.length(), fp.get());
+			::fclose(fp.get());
+			std::cout << "Source <<EOF\n" << s << "\nEOF" << std::endl;
+
+			const child_process c = piped_spawn(_P_NOWAIT, "/usr/bin/gcc", "/usr/bin/gcc", "-v", srcname.c_str());
+			std::cout << "gcc : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
+
+			asio::async_read_until(sock, rbuf, '\n', std::bind(ref(*this), ref(rbuf), _1, _2));
+
+			pipes.emplace_front(ref(aio), c.fd_stdout);
+			auto cc_stdout = pipes.begin();
+			asio::async_read_until(cc_stdout->stream, cc_stdout->buf, '\n',
+								   std::bind(ref(*this),
+											 cc_stdout,
+											 "CompilerMessageS",
+											 _1,
+											 _2));
+
+			pipes.emplace_front(ref(aio), c.fd_stderr);
+			auto cc_stderr = pipes.begin();
+			asio::async_read_until(cc_stderr->stream, cc_stderr->buf, '\n',
+								   std::bind(ref(*this),
+											 cc_stderr,
+											 "CompilerMessageE",
+											 _1,
+											 _2));
+
+			sig.async_wait(std::bind(ref(*this), c.pid, _1, _2));
+
+			aio.run();
 		}
-		void operator ()(error_code ec = error_code(), std::size_t length = 0) try {
-			reenter (this) {
-				std::cout << "listen" << std::endl;
-				fork compiler_bridge(*this)();
 
-				if (is_parent()) {
-					aio->run();
-					return;
-				}
+		void operator ()(asio::streambuf &, error_code, size_t) {
+		}
 
-				do {
-					sock = std::make_shared<tcp::socket>(*aio);
-					yield acc->async_accept(*sock, move(*this));
-					fork compiler_bridge(*this)();
-				} while (is_parent()) ;
-				std::cout << "accepted" << std::endl;
+		void operator ()(int pid, error_code, int) {
+			::waitpid(pid, 0, WNOHANG);
+			const string progname = "./a.out";
+			child_process c = piped_spawn(_P_NOWAIT, progname.c_str(), progname.c_str());
+			std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
 
-				while (true) {
-					yield asio::async_read_until(*sock, bufs->sock.read, '\n', move(*this));
-					std::pair<string, string> d;
-					bufs->sock.read.commit(length);
-					std::istream rd(&bufs->sock.read);
-					string line;
-					if (getline(rd, line) && parse_line(line, d)) {
-						std::cout << "command: " << d.first << " : " << d.second << std::endl;
-						if (d.first == "Control" && d.second == "run") break;
-						received[d.first] += decode_qp(d.second);
-					}
-				}
+			pipes.emplace_front(ref(aio), c.fd_stdout);
+			auto aout_stdout = pipes.begin();
+			asio::async_read_until(aout_stdout->stream, aout_stdout->buf, '\n',
+								   std::bind(ref(*this),
+											 aout_stdout,
+											 "StdOut",
+											 _1,
+											 _2));
 
-				do {
-					char tmpdirnamebase[] = "/tmp/wandbox/wandboxXXXXXX";
-					tmpdirname = ::mkdtemp(tmpdirnamebase);
-					tmpdir.reset(::opendir(tmpdirnamebase), ::closedir);
-				} while (!tmpdir && errno == ENOTDIR);
-				if (!tmpdir) throw std::runtime_error("cannot open temporary directory");
-				::fchdir(::dirfd(tmpdir.get()));
+			pipes.emplace_front(ref(aio), c.fd_stderr);
+			auto aout_stderr = pipes.begin();
+			asio::async_read_until(aout_stderr->stream, aout_stderr->buf, '\n',
+								   std::bind(ref(*this),
+											 aout_stderr,
+											 "StdErr",
+											 _1,
+											 _2));
 
-				std::cout << "set tmpdir to " << tmpdirname << std::endl;
+			pid = c.pid;
+			sig.async_wait([pid, this](error_code, int) {
+				::waitpid(pid, 0, WNOHANG);
+				aio.post([this] {
+					error_code ec;
+					const string str = "Control 6:Finish\n";
+					asio::write(sock, asio::buffer(str), ec);
+					sock.close();
+					aio.stop();
+					std::cout << "closed" << std::endl;
+				});
+			});
+		}
 
-				{
-					const auto srcname = tmpdirname + "/prog.cpp";
-					{
-						shared_ptr<FILE> fp(::fopen(srcname.c_str(), "w"), [srcname](FILE *fp) {
-							//						::unlink(srcname.c_str());
-							::fclose(fp);
-						});
-						auto &s = received["Source"];
-						::fwrite(s.data(), 1, s.length(), fp.get());
-						::fflush(fp.get());
-						std::cout << "Source <<EOF\n" << s << "\nEOF" << std::endl;
-					}
-
-					const child_process c = piped_spawn(_P_NOWAIT, "/usr/bin/gcc", "/usr/bin/gcc", "-v", srcname.c_str());
-					std::cout << "gcc : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
-					child_pid = c.pid;
-
-					std::thread thr_stdout(
-						*this,
-						"CompilerMessage",
-						std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdout),
-						[](compiler_bridge &&self) {
-							::sleep(1);
-							error_code ec;
-							self.sock->cancel(ec);
-						});
-					thr_stdout.detach();
-					std::thread thr_stderr(
-						*this,
-						"CompilerMessage",
-						std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stderr),
-						[](ignore_param){
-							::sleep(1);
-						});
-					thr_stderr.detach();
-				}
-
-				while (1) {
-					yield asio::async_read_until(*sock, bufs->sock.read, '\n', move(*this));
-					if (ec == asio::error::operation_aborted) break;
-					std::pair<string, string> d;
-					bufs->sock.read.commit(length);
-					std::istream rd(&bufs->sock.read);
-					string line;
-					if (getline(rd, line) && parse_line(line, d)) {
-					}
-				}
-				if (child_pid > 0) {
-					//::kill(child_pid, SIGTERM);
-					//::kill(child_pid, SIGKILL);
-					{
-						::waitpid(child_pid, 0, 0);
-					}
-				}
-
-				sleep(5);
-
-				{
-					const auto progname = tmpdirname + "/a.out";
-					const child_process c = piped_spawn(_P_NOWAIT, progname.c_str(), progname.c_str());
-					child_pid = c.pid;
-					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
-					//pipe = std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdin);
-					std::thread thr_stdout(
-						*this,
-						"StdOut",
-						std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdout),
-						[](compiler_bridge &&self) {
-							::sleep(1);
-							error_code ec;
-							self.sock->cancel(ec);
-						});
-					thr_stdout.detach();
-					std::thread thr_stderr(
-						*this,
-						"StdErr",
-						std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stderr),
-						[](ignore_param) {
-							::sleep(1);
-						});
-					thr_stderr.detach();
-				}
-
-				while (1) {
-					yield asio::async_read_until(*sock, bufs->sock.read, '\n', move(*this));
-					if (ec == asio::error::operation_aborted) break;
-					std::pair<string, string> d;
-					bufs->sock.read.commit(length);
-					std::istream rd(&bufs->sock.read);
-					string line;
-					if (getline(rd, line) && parse_line(line, d)) {
-					}
-				}
-				if (child_pid > 0) {
-					//::kill(child_pid, SIGTERM);
-					//::kill(child_pid, SIGKILL);
-					{
-						::waitpid(child_pid, 0, 0);
-					}
-				}
-
-				std::cout << "closed" << std::endl;
+		void operator ()(std::list<stream_descriptor_pair>::iterator p, const char *msg, error_code ec, size_t) {
+			auto &pipe = p->stream;
+			auto &rbuf = p->buf;
+			std::istream is(&rbuf);
+			string line;
+			getline(is, line);
+			if (is) line += '\n';
+			if (!is && line.empty() && ec) {
+				pipes.erase(p);
+				return;
 			}
-		} catch (...) {
-			std::cout << "catch..." << std::endl;
-			error_code ec;
-			sock->close(ec);
+			line = encode_qp(line);
+			const auto str = ([&]() -> string {
+				std::stringstream ss;
+				ss << msg << ' ' << line.length() << ':' << line << '\n';
+				return ss.str();
+			})();
+			std::cout << str << std::flush;
+			aio.post([this, str] {
+				error_code ec;
+				asio::write(sock, asio::buffer(str), ec);
+			});
+			asio::async_read_until(pipe, rbuf, '\n', std::bind(ref(*this), p, msg, _1, _2));
 		}
-		struct bufs_t {
-			struct {
-				asio::streambuf read;
-				asio::streambuf write;
-			} sock, pipe;
-		};
-		compiler_bridge(short port)
-			 : aio(std::make_shared<asio::io_service>()),
-			   acc(std::make_shared<tcp::acceptor>(*aio, tcp::endpoint(tcp::v4(), port))),
-			   bufs(std::make_shared<bufs_t>())
+
+		compiler_bridge(tcp::endpoint ep)
+			 : sock(aio), sig(aio, SIGCHLD)
 		{
-			::mkdir("/tmp/wandbox", 0700);
-			basedir.reset(::opendir("/tmp/wandbox"), &::closedir);
-			if (!basedir) throw std::runtime_error("cannot open working dir");
+			do {
+				char workdirnamebase[] = "wandboxXXXXXX";
+				workdirname = ::mkdtemp(workdirnamebase);
+				workdir.reset(::opendir(workdirnamebase), ::closedir);
+			} while (!workdir && errno == ENOTDIR);
+			if (!workdir) throw std::runtime_error("cannot open temporary directory");
+			::fchdir(::dirfd(workdir.get()));
+			tcp::acceptor acc(aio, ep);
+			acc.accept(sock);
 		}
 	private:
-		static shared_ptr<vector<asio::posix::stream_descriptor>> make_null_fds() {
-			return std::make_shared<vector<asio::posix::stream_descriptor>>();
-		}
+		asio::io_service aio;
+		tcp::socket sock;
+		asio::signal_set sig;
+		shared_ptr<DIR> workdir;
+		list<stream_descriptor_pair> pipes;
+		string workdirname;
+	};
 
-		shared_ptr<asio::io_service> aio;
-		shared_ptr<tcp::acceptor> acc;
-		shared_ptr<asio::posix::stream_descriptor> pipe;
-		shared_ptr<tcp::socket> sock;
+	struct listener {
+		template <typename ...Args>
+		void operator ()(Args &&...args) {
+			while (1) {
+				compiler_bridge cb({std::forward<Args>(args)...});
+				cb();
+			}
+		}
+		listener()
+			 : basedir((::mkdir("/tmp/wandbox", 0700), ::opendir("/tmp/wandbox")), &::closedir)
+		{
+			if (!basedir) throw std::runtime_error("cannot open working dir");
+			::fchdir(::dirfd(basedir.get()));
+		}
+	private:
 		shared_ptr<DIR> basedir;
-		shared_ptr<DIR> tmpdir;
-		string tmpdirname;
-		shared_ptr<bufs_t> bufs;
-		int child_pid;
-		std::map<std::string, std::string> received;
 	};
 }
 int main(int, char **) {
 	using namespace wandbox;
-	asio::io_service aio;
-
-	compiler_bridge s(listen_port);
-	s();
+	listener s;
+	s(boost::asio::ip::tcp::v4(), listen_port);
 }
