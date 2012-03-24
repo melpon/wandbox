@@ -20,8 +20,9 @@ import Data.Word (Word8)
 data ProtocolSpecifier =
   Control |
   Source |
-  CompilerSwitch |
-  CompilerMessage |
+  CompilerOption |
+  CompilerMessageE |
+  CompilerMessageS |
   StdIn |
   StdOut |
   StdErr |
@@ -46,8 +47,9 @@ specParser :: AB.Parser ProtocolSpecifier
 specParser = do
   r <- (pure Control         <* AB.try (AB.string "Control")) <|>
        (pure Source          <* AB.try (AB.string "Source")) <|>
-       (pure CompilerSwitch  <* AB.try (AB.string "CompilerSwitch")) <|>
-       (pure CompilerMessage <* AB.try (AB.string "CompilerMessage")) <|>
+       (pure CompilerOption  <* AB.try (AB.string "CompilerOption")) <|>
+       (pure CompilerMessageE <* AB.try (AB.string "CompilerMessageE")) <|>
+       (pure CompilerMessageS <* AB.try (AB.string "CompilerMessageS")) <|>
        (pure StdIn           <* AB.try (AB.string "StdIn")) <|>
        (pure StdOut          <* AB.try (AB.string "StdOut")) <|>
        (pure StdErr          <* AB.try (AB.string "StdErr")) <|>

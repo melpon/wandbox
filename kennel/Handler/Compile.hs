@@ -36,8 +36,8 @@ vmHandle code sink =
     hFlush handle
     C.runResourceT $ receiveVM handle $$ sink
   where
-    protos = [Protocol Control "compiler=gcc",
-              Protocol CompilerSwitch "<optimize>2 <address-model>64",
+    protos = [Protocol Control "compiler=g++",
+              Protocol CompilerOption "<optimize>2",
               Protocol Source code,
               Protocol Control "run"]
 

@@ -1,8 +1,13 @@
+function decode_qp(str) {
+  dec = str.replace(/=/g, '%');
+  return decodeURIComponent(dec);
+}
+
 $(function() {
   absUrl = '@{SourceR sourceId}';
   src = new EventSource($.url(absUrl).attr('path'));
   src.onmessage = function(msg) {
-    $('<p>').html(msg.data).appendTo('#output');
+    $('<p>').html(decode_qp(msg.data)).appendTo('#output');
   };
   
   $('a.compile').click(function(event) {

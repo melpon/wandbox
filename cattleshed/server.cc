@@ -1,4 +1,4 @@
-#define BOOST_ERROR_CODE_HEADER_ONLY
+//#define BOOST_ERROR_CODE_HEADER_ONLY
 
 #include "common.hpp"
 #include <map>

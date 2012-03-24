@@ -1,4 +1,4 @@
-#define BOOST_ERROR_CODE_HEADER_ONLY
+//#define BOOST_ERROR_CODE_HEADER_ONLY
 #include <iostream>
 #include <memory>
 #include <string>
@@ -60,7 +60,7 @@ namespace wandbox {
 	string encode_qp(const Range &r) {
 		if (r.begin() == r.end()) return {};
 		string ret;
-		karma::generate(back_inserter(ret), karma::repeat(1, 76)[&karma::char_('=') << "=3D" | karma::print | ('=' << karma::upper[karma::right_align(2, '0')[karma::uint_generator<unsigned char, 16>()]])] % "=\n", r);
+		karma::generate(back_inserter(ret), karma::repeat[&karma::char_('=') << "=3D" | karma::print | ('=' << karma::upper[karma::right_align(2, '0')[karma::uint_generator<unsigned char, 16>()]])], r);
 		return ret;
 	}
 }
