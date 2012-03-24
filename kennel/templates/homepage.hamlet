@@ -3,6 +3,6 @@
     <div .span10>
         <textarea #code .span10 rows="20">
     <div .span2>
-        <a href="/compile" .compile .btn>Run
+        <a href="compile" .compile .btn>Run
   <div .row>
     <div .span12 #output>

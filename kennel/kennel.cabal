@@ -53,7 +53,7 @@ executable         kennel
 
     if flag(dev)
         cpp-options:   -DDEVELOPMENT
-        ghc-options:   -Wall -threaded -O0
+        ghc-options:   -Wall -threaded -O0 -ddump-splices
     else
         ghc-options:   -Wall -threaded -O2
 
@@ -69,26 +69,25 @@ executable         kennel
                 TypeFamilies
 
     build-depends: base                          >= 4          && < 5
-                 , yesod-core                    >= 0.10       && < 0.11
-                 , yesod-static                  >= 0.10       && < 0.11
-                 , yesod-default                 >= 0.6        && < 0.7
-                 , clientsession                 >= 0.7.3      && < 0.8
-                 , bytestring                    >= 0.9        && < 0.10
-                 , text                          >= 0.11       && < 0.12
+                 , yesod-platform                == 0.10.3
+                 , text                          == 0.11.1.13
+                 , bytestring                    == 0.9.2.1
+                 , hamlet                        == 0.10.9.1
+                 , clientsession                 == 0.7.4.2
+                 , transformers                  == 0.2.2.0
+                 , yaml                          == 0.5.2
+                 , yesod-default                 == 0.6.1
+                 , shakespeare-text              == 0.11
+                 , yesod-core                    == 0.10.2.2
+                 , yesod-static                  == 0.10.1
+                 , conduit                       == 0.2.2
+                 , blaze-builder                 == 0.3.1.0
+                 , wai                           == 1.1.0.1
+                 , wai-extra                     == 1.1.0.1
                  , template-haskell
-                 , hamlet                        >= 0.10       && < 0.11
-                 , shakespeare-text              >= 0.10       && < 0.11
-                 , wai                           >= 1.1        && < 1.2
-                 , wai-extra                     >= 1.1        && < 1.2
-                 , transformers                  >= 0.2        && < 0.3
-                 , monad-control                 >= 0.3        && < 0.4
-                 , yaml                          >= 0.5        && < 0.6
-                 , shakespeare-js
                  , wai-eventsource
-                 , blaze-builder
                  , containers
                  , random
                  , dataenc
                  , attoparsec
                  , network
-                 , conduit

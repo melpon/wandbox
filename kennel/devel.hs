@@ -1,5 +1,5 @@
 {-# LANGUAGE PackageImports #-}
-import "nyandbox" Application (getApplicationDev)
+import "kennel" Application (getApplicationDev)
 import Network.Wai.Handler.Warp
     (runSettings, defaultSettings, settingsPort)
 import Control.Concurrent (forkIO)

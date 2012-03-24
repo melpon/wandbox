@@ -1,5 +1,5 @@
 Default: &defaults
-  approot: "wandbox"
+  approot: "/wandbox/test"
   port: 3000
   copyright: Insert copyright statement here
   #analytics: UA-YOURCODE
