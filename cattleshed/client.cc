@@ -2,6 +2,8 @@
 #include "yield.hpp"
 #include <map>
 #include <string>
+#include <sstream>
+#include <vector>
 #include <boost/lexical_cast.hpp>
 
 namespace wandbox {
@@ -22,12 +24,31 @@ int main(int, char **) {
     tcp::socket s(aio);
     asio::connect(s, iterator);
 
-	std::string request =
-		"Compiler 3:g++\n"
-		"CompilerOption 11:<optimize>2\n"
-		"Source 48:#include<stdio.h>=0Aint main(){putchar('a');}=0A\n"
-		"Control 3:run\n";
-	asio::write(s, asio::buffer(request));
+	const std::vector<std::pair<std::string, std::string>> requests = {
+		{"Compiler", "g++"},
+		{"CompilerOption", "<optimize>2"},
+		{"Source",
+			"#include <stdio.h>\n"
+			"#include <unistd.h>\n"
+			"#include <errno.h>\n"
+			"#include <string.h>\n"
+			"#include <stdlib.h>\n"
+			"int main() {\n"
+			"	puts(\"child process start\");\n"
+			"	fflush(stdout);\n"
+			"	system(\"echo hogeeeeeeeeeee\");"
+			"	perror(\"\");\n"
+			"	puts(\"child process finish\");\n"
+			"}\n" },
+		{"Control", "run"}};
+	std::stringstream request;
+	for (const auto &r: requests) {
+		const auto s = encode_qp(r.second);
+		request << r.first << ' ' << s.length() << ':' << s << '\n';
+	}
+	const auto r = request.str();
+	std::cout << r << std::endl;
+	asio::write(s, asio::buffer(r));
 
 	asio::streambuf reply;
 	boost::system::error_code ec;

@@ -71,14 +71,14 @@ namespace wandbox {
 
 
 	extern void *enabler;
-	
+
 	template <typename Range, typename std::enable_if<std::is_convertible<typename boost::range_category<Range>::type, std::bidirectional_iterator_tag>::value>::type *& = enabler>
 	bool parse_line(const Range &r, std::pair<string, string> &d) {
 		auto ite = boost::begin(r);
 		const auto end = boost::end(r);
 		int len;
 		return qi::parse(ite, end, qi::as_string[+qi::alpha][phx::ref(d.first) = qi::_1] >> *qi::space >> qi::int_[phx::ref(len) = qi::_1] >> ':') &&
-			qi::parse(ite, end, qi::as_string[qi::repeat(len)[qi::char_]][phx::ref(d.second) = qi::_1] >> qi::eoi);
+			qi::parse(ite, end, qi::as_string[qi::repeat(len)[qi::char_]][phx::ref(d.second) = qi::_1] >> qi::eol >> qi::eoi);
 	}
 
 	template <typename M>
@@ -190,6 +190,8 @@ namespace wandbox {
 
 namespace wandbox {
 
+	string ptracer;
+
 	struct thread_compare {
 		bool operator ()(const std::thread &x, const std::thread &y) const {
 			return x.get_id() < y.get_id();
@@ -218,15 +220,24 @@ namespace wandbox {
 			// io thread
 			asio::streambuf rbuf;
 
-			while (true) {
-				asio::read_until(sock, rbuf, '\n');
-				std::pair<string, string> d;
-				std::istream rd(&rbuf);
-				string line;
-				if (getline(rd, line) && parse_line(line, d)) {
-					std::cout << "command: " << d.first << " : " << d.second << std::endl;
-					if (d.first == "Control" && d.second == "run") break;
-					received[d.first] += decode_qp(d.second);
+			{
+				string buf;
+				while (true) {
+					asio::read_until(sock, rbuf, '\n');
+					std::pair<string, string> d;
+					{
+						std::istream rd(&rbuf);
+						string line;
+						getline(rd, line);
+						buf += line;
+						buf += '\n';
+					}
+					if (parse_line(buf, d)) {
+						std::cout << "command: " << d.first << " : " << d.second << std::endl;
+						if (d.first == "Control" && d.second == "run") break;
+						received[d.first] += decode_qp(d.second);
+						buf.clear();
+					}
 				}
 			}
 
@@ -295,7 +306,7 @@ namespace wandbox {
 					check_finish();
 				} else {
 					const string progname = get_progname();
-					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), {"./" + progname});
+					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), { ptracer, "./" + progname });
 					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
 					prog_pid = c.pid;
 
@@ -349,7 +360,7 @@ namespace wandbox {
 			asio::async_read_until(pipe, rbuf, '\n', std::bind(ref(*this), p, msg, _1, _2));
 		}
 
-		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio)
+		compiler_bridge(asio::io_service &main_aio, tcp::acceptor &acc): main_aio(main_aio), aio(), sock(aio)
 		{
 			acc.accept(sock);
 			do {
@@ -362,6 +373,7 @@ namespace wandbox {
 			prog_pid = 0;
 		}
 	private:
+		asio::io_service &main_aio;
 		asio::io_service aio;
 		tcp::socket sock;
 		shared_ptr<DIR> workdir;
@@ -378,7 +390,7 @@ namespace wandbox {
 			tcp::endpoint ep(std::forward<Args>(args)...);
 			tcp::acceptor acc(aio, ep);
 			while (1) {
-				shared_ptr<compiler_bridge> pcb(make_shared<compiler_bridge>(ref(acc)));
+				shared_ptr<compiler_bridge> pcb(make_shared<compiler_bridge>(ref(aio), ref(acc)));
 				std::thread([pcb] { (*pcb)(); }).detach();
 			}
 		}
@@ -392,6 +404,10 @@ namespace wandbox {
 }
 int main(int, char **) {
 	using namespace wandbox;
+	{
+		unique_ptr<char, void(*)(void *)> cwd(::getcwd(nullptr, 0), &::free);
+		ptracer = string(cwd.get()) + "/ptracer.exe";
+	}
 	listener s;
 	s(boost::asio::ip::tcp::v4(), listen_port);
 }
