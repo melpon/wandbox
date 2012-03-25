@@ -81,10 +81,6 @@ namespace wandbox {
 			qi::parse(ite, end, qi::as_string[qi::repeat(len)[qi::char_]][phx::ref(d.second) = qi::_1] >> qi::eoi);
 	}
 
-//	inline string encode_qp(std::ostream &r) {
-//		r << karma::format(karma::repeat(1, 76)[karma::print | ('=' << karma::upper[karma::right_align(2, '0')[karma::uint_generator<unsigned char, 16>()]])] % "=\n", r);
-//	}
-
 	template <typename M>
 	void print_map(const M &m) {
 		std::for_each(m.begin(), m.end(), [](const typename M::value_type &p) {
@@ -140,19 +136,16 @@ namespace wandbox {
 		return print(os << std::forward<A>(a) << ", ", std::forward<Args>(args)...);
 	}
 
-	inline void push_back_strdup_all(vector<char *> &) { }
-	template <typename A, typename ...Args>
-	void push_back_strdup_all(vector<char *> &argv, A &&a, Args &&...args) {
-		argv.push_back(strdup(a));
-		push_back_strdup_all(argv, std::forward<Args>(args)...);
-	}
-	template <typename ...Args>
-	child_process piped_spawn(int mode, const char *cmdname, Args &&...args) {
-		vector<char *> argv;
-		push_back_strdup_all(argv, args...);
-		argv.push_back(0);
+	child_process piped_spawn(int mode, DIR *workdir, const vector<string> &argv) {
+		vector<vector<char>> x;
+		for (const auto &s: argv) x.emplace_back(s.c_str(), s.c_str()+s.length()+1);
+		vector<char *> a;
+		for (auto &s: x) a.emplace_back(s.data());
+		a.push_back(nullptr);
 		if (mode == _P_OVERLAY) {
-			::execv(cmdname, argv.data());
+			::fchdir(::dirfd(workdir));
+			std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
+			std::cout << strerror(errno) << std::endl;
 			exit(-1);
 		}
 		int pipe_stdin[2], pipe_stdout[2], pipe_stderr[2];
@@ -161,6 +154,7 @@ namespace wandbox {
 		pipe(pipe_stderr);
 		const pid_t pid = ::fork();
 		if (pid == 0) {
+			::fchdir(::dirfd(workdir));
 			dup2(pipe_stdin[0], 0);
 			dup2(pipe_stdout[1], 1);
 			dup2(pipe_stderr[1], 2);
@@ -173,24 +167,23 @@ namespace wandbox {
 			fcntl(0, F_SETFD, (long)0);
 			fcntl(1, F_SETFD, (long)0);
 			fcntl(2, F_SETFD, (long)0);
-			::execv(cmdname, argv.data());
-			abort();
+			std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
+			std::cout << strerror(errno) << std::endl;
+			exit(-1);
 		} else if (pid > 0) {
 			close(pipe_stdin[0]);
 			close(pipe_stdout[1]);
 			close(pipe_stderr[1]);
-			
+
 			child_process child { pid, pipe_stdin[1], pipe_stdout[0], pipe_stderr[0] };
-			std::for_each(argv.begin(), argv.end(), ::free);
-			int st;
-			if (mode ==  _P_WAIT) {
+			if (mode == _P_WAIT) {
+				int st;
 				::waitpid(pid, &st, 0);
 				child.pid = st;
 				return child;
 			}
 			return child;
 		} 
-		std::for_each(argv.begin(), argv.end(), ::free);
 		return child_process { -1, -1, -1, -1 };
 	}
 }
@@ -204,6 +197,15 @@ namespace wandbox {
 	};
 
 	struct compiler_bridge {
+		string get_srcname() const {
+			return "prog.cpp";
+		}
+		string get_progname() const {
+			return "prog.exe";
+		}
+		vector<string> get_compiler_arg() const {
+			return { "/usr/bin/g++", get_srcname(), "-o", get_progname() };
+		}
 		template <typename Stream>
 		struct stream_pair {
 			template <typename ...Args>
@@ -215,7 +217,6 @@ namespace wandbox {
 		void operator ()() {
 			// io thread
 			asio::streambuf rbuf;
-			std::map<std::string, std::string> received;
 
 			while (true) {
 				asio::read_until(sock, rbuf, '\n');
@@ -229,17 +230,21 @@ namespace wandbox {
 				}
 			}
 
-			const string srcname = "prog.cpp";
-			shared_ptr<FILE> fp(::fopen(srcname.c_str(), "w"), [srcname](FILE *fp) {
-				::unlink(srcname.c_str());
-			});
+			const string srcname = get_srcname();
+
 			auto &s = received["Source"];
-			::fwrite(s.data(), 1, s.length(), fp.get());
-			::fclose(fp.get());
+			{
+				int fd = ::openat(::dirfd(workdir.get()), srcname.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC, 0600);
+				::write(fd, s.data(), s.length());
+				::fsync(fd);
+				::close(fd);
+			}
 			std::cout << "Source <<EOF\n" << s << "\nEOF" << std::endl;
 
-			const child_process c = piped_spawn(_P_NOWAIT, "/usr/bin/gcc", "/usr/bin/gcc", "-v", srcname.c_str());
+			const child_process c = piped_spawn(_P_NOWAIT, workdir.get(), get_compiler_arg());
 			std::cout << "gcc : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
+			::close(c.fd_stdin);
+			cc_pid = c.pid;
 
 			asio::async_read_until(sock, rbuf, '\n', std::bind(ref(*this), ref(rbuf), _1, _2));
 
@@ -261,50 +266,61 @@ namespace wandbox {
 											 _1,
 											 _2));
 
-			sig.async_wait(std::bind(ref(*this), c.pid, _1, _2));
-
 			aio.run();
 		}
 
-		void operator ()(asio::streambuf &, error_code, size_t) {
-		}
-
-		void operator ()(int pid, error_code, int) {
-			::waitpid(pid, 0, WNOHANG);
-			const string progname = "./a.out";
-			child_process c = piped_spawn(_P_NOWAIT, progname.c_str(), progname.c_str());
-			std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
-
-			pipes.emplace_front(ref(aio), c.fd_stdout);
-			auto aout_stdout = pipes.begin();
-			asio::async_read_until(aout_stdout->stream, aout_stdout->buf, '\n',
-								   std::bind(ref(*this),
-											 aout_stdout,
-											 "StdOut",
-											 _1,
-											 _2));
-
-			pipes.emplace_front(ref(aio), c.fd_stderr);
-			auto aout_stderr = pipes.begin();
-			asio::async_read_until(aout_stderr->stream, aout_stderr->buf, '\n',
-								   std::bind(ref(*this),
-											 aout_stderr,
-											 "StdErr",
-											 _1,
-											 _2));
-
-			pid = c.pid;
-			sig.async_wait([pid, this](error_code, int) {
-				::waitpid(pid, 0, WNOHANG);
+		void check_finish() {
+			if (!pipes.empty()) return;
+			if (prog_pid) {
+				{
+					int st;
+					::waitpid(prog_pid, &st, 0);
+					std::cout << "Program finished: code=" << st << std::endl;
+				}
 				aio.post([this] {
 					error_code ec;
 					const string str = "Control 6:Finish\n";
 					asio::write(sock, asio::buffer(str), ec);
 					sock.close();
-					aio.stop();
 					std::cout << "closed" << std::endl;
+					aio.post(std::bind(&asio::io_service::stop, ref(aio)));
 				});
-			});
+			} else {
+				int st;
+				::waitpid(cc_pid, &st, 0);
+				std::cout << "Compile finished: code=" << st << std::endl;
+				if (st) {
+					prog_pid = -1;
+					std::cout << "COMPILE ERROR" << std::endl;
+					check_finish();
+				} else {
+					const string progname = get_progname();
+					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), {"./" + progname});
+					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
+					prog_pid = c.pid;
+
+					pipes.emplace_front(ref(aio), c.fd_stdout);
+					auto aout_stdout = pipes.begin();
+					asio::async_read_until(aout_stdout->stream, aout_stdout->buf, '\n',
+										   std::bind(ref(*this),
+													 aout_stdout,
+													 "StdOut",
+													 _1,
+													 _2));
+
+					pipes.emplace_front(ref(aio), c.fd_stderr);
+					auto aout_stderr = pipes.begin();
+					asio::async_read_until(aout_stderr->stream, aout_stderr->buf, '\n',
+										   std::bind(ref(*this),
+													 aout_stderr,
+													 "StdErr",
+													 _1,
+													 _2));
+				}
+			}
+		}
+
+		void operator ()(asio::streambuf &, error_code, size_t) {
 		}
 
 		void operator ()(std::list<stream_descriptor_pair>::iterator p, const char *msg, error_code ec, size_t) {
@@ -316,6 +332,7 @@ namespace wandbox {
 			if (is) line += '\n';
 			if (!is && line.empty() && ec) {
 				pipes.erase(p);
+				check_finish();
 				return;
 			}
 			line = encode_qp(line);
@@ -332,39 +349,40 @@ namespace wandbox {
 			asio::async_read_until(pipe, rbuf, '\n', std::bind(ref(*this), p, msg, _1, _2));
 		}
 
-		compiler_bridge(tcp::endpoint ep)
-			 : sock(aio), sig(aio, SIGCHLD)
+		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio)
 		{
+			acc.accept(sock);
 			do {
 				char workdirnamebase[] = "wandboxXXXXXX";
 				workdirname = ::mkdtemp(workdirnamebase);
 				workdir.reset(::opendir(workdirnamebase), ::closedir);
 			} while (!workdir && errno == ENOTDIR);
 			if (!workdir) throw std::runtime_error("cannot open temporary directory");
-			::fchdir(::dirfd(workdir.get()));
-			tcp::acceptor acc(aio, ep);
-			acc.accept(sock);
+			cc_pid = 0;
+			prog_pid = 0;
 		}
 	private:
 		asio::io_service aio;
 		tcp::socket sock;
-		asio::signal_set sig;
 		shared_ptr<DIR> workdir;
 		list<stream_descriptor_pair> pipes;
 		string workdirname;
+		std::map<std::string, std::string> received;
+		int cc_pid, prog_pid;
 	};
 
 	struct listener {
 		template <typename ...Args>
 		void operator ()(Args &&...args) {
+			asio::io_service aio;
+			tcp::endpoint ep(std::forward<Args>(args)...);
+			tcp::acceptor acc(aio, ep);
 			while (1) {
-				compiler_bridge cb({std::forward<Args>(args)...});
-				cb();
+				shared_ptr<compiler_bridge> pcb(make_shared<compiler_bridge>(ref(acc)));
+				std::thread([pcb] { (*pcb)(); }).detach();
 			}
 		}
-		listener()
-			 : basedir((::mkdir("/tmp/wandbox", 0700), ::opendir("/tmp/wandbox")), &::closedir)
-		{
+		listener(): basedir((::mkdir("/tmp/wandbox", 0700), ::opendir("/tmp/wandbox")), &::closedir) {
 			if (!basedir) throw std::runtime_error("cannot open working dir");
 			::fchdir(::dirfd(basedir.get()));
 		}
