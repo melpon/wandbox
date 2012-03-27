@@ -1,0 +1,14 @@
+#output {
+  background-color: #000000;
+  color: #ffffff;
+  height: 400px;
+  overflow-y: scroll;
+  .CompilerMessageE {
+    color: #ff0000;
+  }
+  .StdOut {
+  }
+  .Control {
+    color: #00ff00;
+  }
+}

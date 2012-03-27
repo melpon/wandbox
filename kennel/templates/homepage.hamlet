@@ -1,8 +1,8 @@
 <div .container>
   <div .row>
-    <div .span10>
-        <textarea #code .span10 rows="20">
-    <div .span2>
-        <a href="compile" .compile .btn>Run
+    <div .span6>
+      <textarea .span6 #code rows=20>
+    <div .span6>
+      <div #output>
   <div .row>
-    <div .span12 #output>
+    <a href="compile" .btn #compile>Run (or Ctrl+Enter)

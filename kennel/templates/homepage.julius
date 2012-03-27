@@ -1,23 +1,44 @@
 function decode_qp(str) {
-  dec = str.replace(/=/g, '%');
+  var dec = str.replace(/=/g, '%');
   return decodeURIComponent(dec);
+}
+
+function parse(str) {
+  var index = str.indexOf(':');
+  return {
+    type: str.substring(0, index).split(' ')[0],
+    message: str.substring(index + 1),
+  };
+}
+
+function post_code() {
+  var url = $('#compile').attr('href');
+  var code = $('#code').val();
+
+  $.post('@{CompileR sourceId}', { code: code }, function() { });
 }
 
 $(function() {
   absUrl = '@{SourceR sourceId}';
   src = new EventSource($.url(absUrl).attr('path'));
   src.onmessage = function(msg) {
-    $('<p>').html(decode_qp(msg.data)).appendTo('#output');
+    data = parse(decode_qp(msg.data));
+    $('<p>').html(data.message)
+            .addClass(data.type)
+            .appendTo('#output');
+    $('#output')[0].scrollTop = $('#output')[0].scrollHeight;
   };
   
-  $('a.compile').click(function(event) {
+  $('#compile').click(function(event) {
     event.preventDefault();
-
-    var url = $(this).attr('href');
-    var code = $('#code').val();
-
-    $.post('@{CompileR sourceId}', { code: code }, function() { });
+    post_code();
   });
-  $('h2').html('jQuery test');
+  $('#code').keydown(function(event) {
+    if (event.keyCode == 10 ||
+        event.keyCode == 13 && event.ctrlKey) {
+      event.preventDefault();
+      post_code();
+    }
+  });
 });
 
