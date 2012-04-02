@@ -17,6 +17,8 @@ import Control.Applicative ((<*), (<|>))
 import Data.Char (ord)
 import Data.Word (Word8)
 
+import VM.QuotedPrintable (qpEncode, qpDecode)
+
 data ProtocolSpecifier =
   Control |
   Source |
@@ -39,9 +41,9 @@ toWord8 :: Char -> Word8
 toWord8 = fromIntegral . ord
 
 encode :: T.Text -> B.ByteString
-encode = BC.pack . QP.encode . B.unpack . TE.encodeUtf8
+encode = qpEncode . TE.encodeUtf8
 decode :: B.ByteString -> Maybe T.Text
-decode = (TE.decodeUtf8 . B.pack <$>) . QP.decode . BC.unpack
+decode = (TE.decodeUtf8 <$>) . qpDecode
 
 specParser :: AB.Parser ProtocolSpecifier
 specParser = do

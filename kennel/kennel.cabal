@@ -34,6 +34,7 @@ library
                      VM.Protocol
                      VM.IpPortFile
                      VM.Conduit
+                     VM.QuotedPrintable
 
     ghc-options:   -Wall -threaded -O0
     cpp-options:   -DDEVELOPMENT
