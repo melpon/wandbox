@@ -1,12 +1,11 @@
-function decode_qp(str) {
-  var dec = str.replace(/=/g, '%');
-  return decodeURIComponent(dec);
+function decode_uri(str) {
+  return decodeURIComponent(str);
 }
 
 function parse(str) {
   var index = str.indexOf(':');
   return {
-    type: str.substring(0, index).split(' ')[0],
+    type: str.substring(0, index),
     message: str.substring(index + 1),
   };
 }
@@ -22,7 +21,8 @@ $(function() {
   absUrl = '@{SourceR sourceId}';
   src = new EventSource($.url(absUrl).attr('path'));
   src.onmessage = function(msg) {
-    data = parse(decode_qp(msg.data));
+    console.log(msg.data);
+    data = parse(decode_uri(msg.data));
     $('<p>').html(data.message)
             .addClass(data.type)
             .appendTo('#output');

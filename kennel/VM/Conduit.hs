@@ -18,14 +18,27 @@ import Network (connectTo)
 import VM.IpPortFile (ipPortFile)
 import VM.Protocol (Protocol(..), protocolParser, toString)
 
-parsePipe :: Monad m => C.Conduit B.ByteString m (Either String Protocol)
-parsePipe = CL.map (AB.parseOnly protocolParser)
+type ProtoParse = B.ByteString -> AB.Result Protocol
+
+parsePipe :: C.Resource m => C.Conduit B.ByteString m (Either String Protocol)
+parsePipe = C.conduitState protoParse push close
+  where
+    protoParse = AB.parse protocolParser
+    parseWhile parse input =
+      case parse input of
+        (AB.Done remain result) -> let (parse',xs) = parseWhile protoParse remain
+                                   in (parse',Right result:xs)
+        (AB.Partial f)          -> (f,[])
+        (AB.Fail a b c)         -> (protoParse,[Left $ show (a,b,c)])
+    push parse input = let (parse',results) = parseWhile parse input
+                       in return $ C.StateProducing parse' results
+    close _ = return []
 
 connectVM :: IO Handle
 connectVM = uncurry connectTo $(ipPortFile "config/vmip")
 
 sendVM :: C.ResourceIO m => Handle -> C.Sink Protocol m ()
-sendVM handle = CL.map (flip B.append "\n" . toString) =$ CB.sinkHandle handle
+sendVM handle = CL.map toString =$ CB.sinkHandle handle
 
 receiveVM :: C.ResourceIO m => Handle -> C.Source m (Either String Protocol)
-receiveVM handle = CB.sourceHandle handle $= CB.lines $= parsePipe
+receiveVM handle = CB.sourceHandle handle $= parsePipe

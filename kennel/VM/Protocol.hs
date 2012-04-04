@@ -66,17 +66,17 @@ protocolParser' = do
   len <- read . BC.unpack <$> AB.takeWhile1 (AB.inClass "0-9")
   _ <- AB.word8 $ toWord8 ':'
   contents <- join $ maybe (fail "failed to decode contents") return <$> decode <$> AB.take len
+  _ <- AB.word8 $ toWord8 '\n'
   return $ Protocol spec contents
 
 protocolParser :: AB.Parser Protocol
 protocolParser = do
   proto <- (pure ProtocolNil <* AB.word8 0) <|> protocolParser'
-  AB.endOfInput
   return proto
 
 toString :: Protocol -> B.ByteString
 toString ProtocolNil = B.singleton 0
 toString (Protocol spec contents) =
   let encstr = encode contents in
-  B.concat [BC.pack $ show spec, " ", BC.pack $ show $ B.length encstr, ":", encstr]
+  B.concat [BC.pack $ show spec, " ", BC.pack $ show $ B.length encstr, ":", encstr, "\n"]
 
