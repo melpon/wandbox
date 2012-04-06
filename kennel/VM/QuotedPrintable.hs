@@ -10,8 +10,8 @@ import qualified Data.ByteString.Char8 as BC ()
 import Data.Word (Word8)
 import Data.Bits (shiftR, shiftL, (.&.), (.|.))
 
-toHex :: Word8 -> B.ByteString
-toHex w = B.pack [B.index tbl hn, B.index tbl ln]
+toHex :: Word8 -> (Word8, Word8)
+toHex w = (B.index tbl hn, B.index tbl ln)
   where
     tbl = "0123456789ABCDEF"
     hn = fromIntegral $ w `shiftR` 4
@@ -27,23 +27,21 @@ fromHex a b = dec <$> tbl a <*> tbl b
     dec hn ln = hn `shiftL` 4 .|. ln
 
 qpEncode :: B.ByteString -> B.ByteString
-qpEncode = softLineBreak . B.concatMap f
+qpEncode = B.pack . reverse . fst . B.foldl' f ([],0)
   where
-    f w | w < 33 || w == 61 || w > 126 = B.cons 61 $ toHex w
-        | otherwise                    = B.singleton w
-    softLineBreak = B.concat . split
-      where split xs | B.length xs > 76 = let (a, b) = B.splitAt 75 xs
-                                          in a : "=\n" : split b
-                     | otherwise        = [xs]
+    isEnc w = w < 33 || w == 61 || w > 126
+    f :: ([Word8],Int) -> Word8 -> ([Word8],Int)
+    f (rx,n) w | isEnc w && n >= 73 = let (a,b) = toHex w in (b:a:61:10:61:rx,3)
+               | isEnc w            = let (a,b) = toHex w in (b:a:61:rx,n+3)
+               |            n >= 75 = (w:10:61:rx,1)
+               | otherwise          = (w:rx,n+1)
 
 qpDecode :: B.ByteString -> Maybe B.ByteString
-qpDecode = (B.pack . reverse <$>) . decodeR [] . B.unpack . concatLineBreak
+qpDecode = (B.pack . reverse <$>) . decodeR . B.unpack
   where
-    concatLineBreak = B.concat . tokenize
-      where tokenize bs = let (a,b) = B.breakSubstring "=\n" bs
-                          in a : if B.null b then [] else tokenize (B.drop 2 b)
-    decodeR xs []          = Just xs
-    decodeR xs (61:a:b:ys) = do c <- fromHex a b
-                                decodeR (c:xs) ys
-    decodeR _  (61:_)      = Nothing
-    decodeR xs (y:ys)      = decodeR (y:xs) ys
+    decodeR []          = Just []
+    decodeR (61:10:ys)  = decodeR ys
+    decodeR (61:a:b:ys) = do c <- fromHex a b
+                             (c:) <$> decodeR ys
+    decodeR (61:_)      = Nothing
+    decodeR (x:ys)      = (x:) <$> decodeR ys
