@@ -33,7 +33,7 @@ qpEncode = softLineBreak . B.concatMap f
         | otherwise                    = B.singleton w
     softLineBreak = B.concat . split
       where split xs | B.length xs > 76 = let (a, b) = B.splitAt 75 xs
-                                          in a : "\n" : split b
+                                          in a : "=\n" : split b
                      | otherwise        = [xs]
 
 qpDecode :: B.ByteString -> Maybe B.ByteString
