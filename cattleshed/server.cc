@@ -257,12 +257,12 @@ namespace wandbox {
 			::close(c.fd_stdin);
 			cc_pid = c.pid;
 
-			asio::async_read_until(sock, rbuf, '\n', std::bind(ref(*this), ref(rbuf), _1, _2));
+			asio::async_read_until(sock, rbuf, '\n', std::bind<void>(ref(*this), ref(rbuf), _1, _2));
 
 			pipes.emplace_front(ref(aio), c.fd_stdout);
 			auto cc_stdout = pipes.begin();
 			asio::async_read_until(cc_stdout->stream, cc_stdout->buf, '\n',
-								   std::bind(ref(*this),
+								   std::bind<void>(ref(*this),
 											 cc_stdout,
 											 "CompilerMessageS",
 											 _1,
@@ -271,7 +271,7 @@ namespace wandbox {
 			pipes.emplace_front(ref(aio), c.fd_stderr);
 			auto cc_stderr = pipes.begin();
 			asio::async_read_until(cc_stderr->stream, cc_stderr->buf, '\n',
-								   std::bind(ref(*this),
+								   std::bind<void>(ref(*this),
 											 cc_stderr,
 											 "CompilerMessageE",
 											 _1,
@@ -294,7 +294,7 @@ namespace wandbox {
 					asio::write(sock, asio::buffer(str), ec);
 					sock.close();
 					std::cout << "closed" << std::endl;
-					aio.post(std::bind(&asio::io_service::stop, ref(aio)));
+					aio.post(std::bind<void>(&asio::io_service::stop, ref(aio)));
 				});
 			} else {
 				int st;
@@ -313,7 +313,7 @@ namespace wandbox {
 					pipes.emplace_front(ref(aio), c.fd_stdout);
 					auto aout_stdout = pipes.begin();
 					asio::async_read_until(aout_stdout->stream, aout_stdout->buf, '\n',
-										   std::bind(ref(*this),
+										   std::bind<void>(ref(*this),
 													 aout_stdout,
 													 "StdOut",
 													 _1,
@@ -322,7 +322,7 @@ namespace wandbox {
 					pipes.emplace_front(ref(aio), c.fd_stderr);
 					auto aout_stderr = pipes.begin();
 					asio::async_read_until(aout_stderr->stream, aout_stderr->buf, '\n',
-										   std::bind(ref(*this),
+										   std::bind<void>(ref(*this),
 													 aout_stderr,
 													 "StdErr",
 													 _1,
@@ -357,7 +357,7 @@ namespace wandbox {
 				error_code ec;
 				asio::write(sock, asio::buffer(str), ec);
 			});
-			asio::async_read_until(pipe, rbuf, '\n', std::bind(ref(*this), p, msg, _1, _2));
+			asio::async_read_until(pipe, rbuf, '\n', std::bind<void>(ref(*this), p, msg, _1, _2));
 		}
 
 		compiler_bridge(asio::io_service &main_aio, tcp::acceptor &acc): main_aio(main_aio), aio(), sock(aio)
