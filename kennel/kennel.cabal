@@ -70,21 +70,25 @@ executable         kennel
                 TypeFamilies
 
     build-depends: base                          >= 4          && < 5
-                 , yesod-platform                == 0.10.3
-                 , text                          == 0.11.1.13
+                 , yesod-platform                == 1.0.0
+                 , hamlet                        == 1.0.1
+                 , yesod-default                 == 1.0.0
+                 , shakespeare-text              == 1.0.0.1
+                 , shakespeare-css               == 1.0.1.1
+                 , yesod-core                    == 1.0.0.2
+                 , yesod-static                  == 1.0.0.1
+                 , wai                           == 1.2.0.1
+                 , wai-extra                     == 1.2.0.2
+                 , text                          == 0.11.2.0
                  , bytestring                    == 0.9.2.1
-                 , hamlet                        == 0.10.9.1
-                 , clientsession                 == 0.7.4.2
+                 , clientsession                 == 0.7.4.3
                  , transformers                  == 0.2.2.0
-                 , yaml                          == 0.5.2
-                 , yesod-default                 == 0.6.1
-                 , shakespeare-text              == 0.11
-                 , yesod-core                    == 0.10.2.2
-                 , yesod-static                  == 0.10.1
-                 , conduit                       == 0.2.2
+                 , yaml                          == 0.7.0
+                 , conduit                       == 0.4.0.1
                  , blaze-builder                 == 0.3.1.0
-                 , wai                           == 1.1.0.1
-                 , wai-extra                     == 1.1.0.1
+                 , hjsmin                        == 0.0.15
+                 , directory                     == 1.1.0.2
+                 , warp                          == 1.2.0.1
                  , template-haskell
                  , wai-eventsource
                  , containers

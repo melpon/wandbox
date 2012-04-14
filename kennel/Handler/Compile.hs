@@ -15,6 +15,7 @@ import Control.Exception (bracket)
 import System.IO (hClose, hFlush)
 import Codec.Binary.Url (encode)
 import Data.Text.Encoding (encodeUtf8)
+import Control.Monad.IO.Class (MonadIO)
 
 import qualified Data.Conduit as C
 import Data.Conduit (($$))
@@ -33,7 +34,7 @@ getSourceR ident = do
 
     sendWaiResponse res
 
-vmHandle :: T.Text -> C.Sink (Either String Protocol) IO () -> IO ()
+vmHandle :: T.Text -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
 vmHandle code sink =
   bracket connectVM hClose $ \handle -> do
     C.runResourceT $ CL.sourceList protos $$ sendVM handle
@@ -48,7 +49,7 @@ vmHandle code sink =
 urlEncode :: ProtocolSpecifier -> T.Text -> B.ByteString
 urlEncode spec contents = B.concat [BC.pack $ show spec, ":", BC.pack $ encode $ B.unpack $ encodeUtf8 contents]
 
-sinkProtocol :: (ServerEvent -> IO ()) -> C.Sink (Either String Protocol) IO ()
+sinkProtocol :: C.MonadResource m => (ServerEvent -> IO ()) -> C.Sink (Either String Protocol) m ()
 sinkProtocol writeChan = C.sinkState () push close
   where
     push _ (Left str) = do liftIO $ putStrLn str

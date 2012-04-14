@@ -20,7 +20,7 @@ import VM.Protocol (Protocol(..), protocolParser, toString)
 
 type ProtoParse = B.ByteString -> AB.Result Protocol
 
-parsePipe :: C.Resource m => C.Conduit B.ByteString m (Either String Protocol)
+parsePipe :: Monad m => C.Conduit B.ByteString m (Either String Protocol)
 parsePipe = C.conduitState protoParse push close
   where
     protoParse = AB.parse protocolParser
@@ -37,8 +37,8 @@ parsePipe = C.conduitState protoParse push close
 connectVM :: IO Handle
 connectVM = uncurry connectTo $(ipPortFile "config/vmip")
 
-sendVM :: C.ResourceIO m => Handle -> C.Sink Protocol m ()
+sendVM :: C.MonadResource m => Handle -> C.Sink Protocol m ()
 sendVM handle = CL.map toString =$ CB.sinkHandle handle
 
-receiveVM :: C.ResourceIO m => Handle -> C.Source m (Either String Protocol)
+receiveVM :: C.MonadResource m => Handle -> C.Source m (Either String Protocol)
 receiveVM handle = CB.sourceHandle handle $= parsePipe
