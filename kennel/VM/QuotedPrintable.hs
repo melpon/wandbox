@@ -37,7 +37,7 @@ qpEncode = B.pack . reverse . fst . B.foldl' f ([],0)
                | otherwise          = (w:rx,n+1)
 
 qpDecode :: B.ByteString -> Maybe B.ByteString
-qpDecode = (B.pack . reverse <$>) . decodeR . B.unpack
+qpDecode = (B.pack <$>) . decodeR . B.unpack
   where
     decodeR []          = Just []
     decodeR (61:10:ys)  = decodeR ys
