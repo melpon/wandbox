@@ -1,8 +1,18 @@
 <div .container>
   <div .row>
-    <div .span6>
-      <textarea .span6 #code rows=20>
-    <div .span6>
-      <div #output>
+    <div .span12 #header>
   <div .row>
-    <a href="compile" .btn #compile>Run (or Ctrl+Enter)
+    <div .span2 #langpanel>
+      <div .row>
+        <label>choose compiler:
+        <select multiple #compiler>
+          <option value="gcc" selected>gcc 4.7.0
+          <option value="ghc">ghc 7.4.1
+      <div .row>
+        <a href="compile" .btn #compile>Run (or Ctrl+Enter)
+    <div .span10 #codepanel>
+      <label .row .span10>input code:
+      <div .row .span10>
+        <textarea .span10 #code rows=15>
+      <div .row .span10>
+        <div #output>

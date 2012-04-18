@@ -1,7 +1,25 @@
+#header {
+  height: 40px;
+}
+
+#compiler {
+  width: 160px;
+}
+
+#compile {
+  width: 140px;
+}
+
+#code {
+  margin: 0px;
+}
+
 #output {
+  margin: 0px;
+
   background-color: #000000;
   color: #ffffff;
-  height: 400px;
+  height: 300px;
   overflow-y: scroll;
   .CompilerMessageE {
     color: #ff0000;
