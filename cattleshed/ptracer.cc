@@ -133,6 +133,14 @@ namespace wandbox {
 					case SYS_clock_gettime:
 					case SYS_clock_nanosleep:
 					case SYS_exit_group:
+
+					case SYS_execve:
+					case SYS_ioctl:
+					case SYS_set_robust_list:
+					case SYS_set_tid_address:
+					case SYS_timer_create:
+					case SYS_timer_delete:
+					case SYS_timer_settime:
 						noperm = false;
 						break;
 					case SYS_clone: // B
