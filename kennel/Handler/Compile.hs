@@ -34,15 +34,15 @@ getSourceR ident = do
 
     sendWaiResponse res
 
-vmHandle :: T.Text -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
-vmHandle code sink =
+vmHandle :: T.Text -> T.Text -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
+vmHandle compiler code sink =
   bracket connectVM hClose $ \handle -> do
     C.runResourceT $ CL.sourceList protos $$ sendVM handle
     hFlush handle
     C.runResourceT $ receiveVM handle $$ sink
   where
-    protos = [Protocol Control "compiler=g++",
-              Protocol CompilerOption "<optimize>2",
+    protos = [Protocol Control (T.append "compiler=" compiler),
+              Protocol CompilerOption "-O2",
               Protocol Source code,
               Protocol Control "run"]
 
@@ -63,10 +63,13 @@ sinkProtocol writeChan = C.sinkState () push close
 
 postCompileR :: Text -> Handler ()
 postCompileR ident = do
+  mCompiler <- lookupPostParam "compiler"
   mCode <- lookupPostParam "code"
-  maybe (return ()) go mCode
+  _ <- go mCompiler mCode
+  return ()
   where
-    go code = do
+    go (Just compiler) (Just code) = do
       cm <- getChanMap <$> getYesod
-      _ <- liftIO $ forkIO $ vmHandle code $ sinkProtocol $ CM.writeChan cm ident
+      _ <- liftIO $ forkIO $ vmHandle compiler code $ sinkProtocol $ CM.writeChan cm ident
       return ()
+    go _ _ = return ()

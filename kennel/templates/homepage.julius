@@ -12,9 +12,10 @@ function parse(str) {
 
 function post_code() {
   var url = $('#compile').attr('href');
+  var compiler = $('#compiler').val();
   var code = $('#code').val();
 
-  $.post('@{CompileR sourceId}', { code: code }, function() { });
+  $.post('@{CompileR sourceId}', { compiler: compiler, code: code }, function() { });
 }
 
 $(function() {

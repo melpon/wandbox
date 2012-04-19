@@ -200,13 +200,21 @@ namespace wandbox {
 
 	struct compiler_bridge {
 		string get_srcname() const {
-			return "prog.cpp";
+			if (received.at("Control") == "compiler=gcc") {
+				return "prog.cpp";
+			} else {
+				return "prog.hs";
+			}
 		}
 		string get_progname() const {
 			return "prog.exe";
 		}
 		vector<string> get_compiler_arg() const {
-			return { "/usr/bin/g++", get_srcname(), "-o", get_progname() };
+			if (received.at("Control") == "compiler=gcc") {
+				return { "/usr/bin/g++", get_srcname(), "-o", get_progname() };
+			} else {
+				return { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
+			}
 		}
 		template <typename Stream>
 		struct stream_pair {

@@ -5,7 +5,7 @@
     <div .span2 #langpanel>
       <div .row>
         <label>choose compiler:
-        <select multiple #compiler>
+        <select size=2 #compiler>
           <option value="gcc" selected>gcc 4.7.0
           <option value="ghc">ghc 7.4.1
       <div .row>
