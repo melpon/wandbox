@@ -211,7 +211,7 @@ namespace wandbox {
 		}
 		vector<string> get_compiler_arg() const {
 			if (received.at("Control") == "compiler=gcc") {
-				return { "/usr/bin/g++", get_srcname(), "-o", get_progname() };
+				return { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
 			} else {
 				return { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
 			}
