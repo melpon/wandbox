@@ -12,6 +12,7 @@
 
 #code {
   margin: 0px;
+  font-family: "Courier New", monospace;
 }
 
 #output {
@@ -21,6 +22,9 @@
   color: #ffffff;
   height: 300px;
   overflow-y: scroll;
+  span {
+    font-family: "Courier New", monospace;
+  }
   .CompilerMessageE {
     color: #ff0000;
   }
