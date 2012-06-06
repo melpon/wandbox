@@ -9,16 +9,21 @@ module Settings
     , staticDir
     , Extra (..)
     , parseExtra
+    , PersistConfig
     ) where
 
 import Prelude
 import Text.Shakespeare.Text (st)
 import Language.Haskell.TH.Syntax
 import Yesod.Default.Config
+import Database.Persist.Sqlite (SqliteConf)
 import qualified Yesod.Default.Util
 import Data.Text (Text)
 import Data.Yaml
 import Control.Applicative
+
+-- | Which Persistent backend this site is using.
+type PersistConfig = SqliteConf
 
 -- | The location of static files on your system. This is a file system
 -- path. The default value works properly with your scaffolded site.

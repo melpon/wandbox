@@ -1,0 +1,3 @@
+User
+    ident Text
+    UniqueUser ident

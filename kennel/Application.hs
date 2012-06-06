@@ -5,8 +5,9 @@ module Application
     ) where
 
 import Import
-import Settings (parseExtra)
+import Settings (parseExtra, PersistConfig)
 import Settings.StaticFiles (staticSite)
+import Yesod.Auth
 import Yesod.Default.Config
 import Yesod.Default.Main (defaultDevelApp)
 import Yesod.Default.Handlers (getFaviconR, getRobotsR)
@@ -19,6 +20,10 @@ import Network.Wai.Middleware.RequestLogger (logCallback)
 #endif
 import Network.Wai (Application)
 import ChanMap (newChanMap)
+import Model
+import qualified Database.Persist.Store
+import Database.Persist.GenericSql (runMigration)
+import Yesod.Auth.HashDB (migrateUsers)
 
 -- Import all relevant handler modules here.
 import Handler.Root
@@ -27,7 +32,7 @@ import Handler.Compile
 -- This line actually creates our YesodSite instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see
 -- the comments there for more details.
-mkYesodDispatch "Frontend" resourcesFrontend
+mkYesodDispatch "App" resourcesApp
 
 -- This function allocates resources (such as a database connection pool),
 -- performs initialization and creates a WAI application. This is also the
@@ -36,8 +41,15 @@ mkYesodDispatch "Frontend" resourcesFrontend
 getApplication :: AppConfig DefaultEnv Extra -> Logger -> IO Application
 getApplication conf logger = do
     s <- staticSite
+
+    dbconf <- withYamlEnvironment "config/sqlite.yml" (appEnv conf)
+              Database.Persist.Store.loadConfig >>=
+              Database.Persist.Store.applyEnv
+    p <- Database.Persist.Store.createPoolConfig (dbconf :: Settings.PersistConfig)
+    Database.Persist.Store.runPool dbconf (runMigration migrateUsers) p
+
     cm <- liftIO $ newChanMap
-    let foundation = Frontend conf setLogger s cm
+    let foundation = App conf setLogger s cm p dbconf
     app <- toWaiAppPlain foundation
     return $ logWare app
   where

@@ -26,6 +26,7 @@ library
     exposed-modules: Application
     other-modules:   Foundation
                      Import
+                     Model
                      Settings
                      Settings.StaticFiles
                      Handler.Root
@@ -36,7 +37,7 @@ library
                      VM.Conduit
                      VM.QuotedPrintable
 
-    ghc-options:   -Wall -threaded -O0
+    ghc-options:   -Wall -threaded -O0 -ddump-splices
     cpp-options:   -DDEVELOPMENT
 
     extensions: TemplateHaskell
@@ -44,7 +45,9 @@ library
                 OverloadedStrings
                 NoImplicitPrelude
                 CPP
+                GADTs
                 OverloadedStrings
+                FlexibleContexts
                 MultiParamTypeClasses
                 TypeFamilies
 
@@ -65,11 +68,14 @@ executable         kennel
                 OverloadedStrings
                 NoImplicitPrelude
                 CPP
+                GADTs
                 OverloadedStrings
+                FlexibleContexts
                 MultiParamTypeClasses
                 TypeFamilies
 
     build-depends: base                          >= 4          && < 5
+                 , yesod                         == 1.0.0.2
                  , yesod-platform                == 1.0.0
                  , hamlet                        == 1.0.1
                  , yesod-default                 == 1.0.0
@@ -89,6 +95,11 @@ executable         kennel
                  , hjsmin                        == 0.0.15
                  , directory                     == 1.1.0.2
                  , warp                          == 1.2.0.1
+                 , yesod-auth                    == 1.0.0
+                 , persistent                    == 0.9.0.1
+                 , persistent-sqlite             == 0.9.0
+                 , yesod-persistent              == 1.0.0
+                 , yesod-form                    == 1.0.0.1
                  , template-haskell
                  , wai-eventsource
                  , containers

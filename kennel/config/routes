@@ -6,3 +6,5 @@
 / RootR GET
 /source/#Text SourceR GET
 /compile/#Text CompileR POST
+
+/auth AuthR Auth getAuth
