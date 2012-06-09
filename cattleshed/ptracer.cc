@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 #include <unistd.h>
@@ -11,6 +12,8 @@
 #include <sys/user.h>
 #include <sys/syscall.h>
 #include <sys/reg.h>
+
+#include <syslog.h>
 
 #define PTRACE_SYSEMU ((enum __ptrace_request)31)
 
@@ -134,8 +137,8 @@ namespace wandbox {
 					case SYS_clock_nanosleep:
 					case SYS_exit_group:
 
-					case SYS_execve:
-					case SYS_ioctl:
+					//case SYS_execve:
+					//case SYS_ioctl:
 					case SYS_set_robust_list:
 					case SYS_set_tid_address:
 					case SYS_timer_create:
@@ -147,7 +150,11 @@ namespace wandbox {
 					default:
 						noperm = true;
 					}
-					//std::cout << "enter syscall " << (noperm ? "[blocked]" : "") << reg.orig_rax << '(' << reg.rdi << ", " << reg.rsi << ", " << reg.rdx << ", " << reg.r10 << ", " << reg.r8 << ", " << reg.r9 << ')' << std::endl;
+					//std::ostringstream oss;
+					//oss << "enter syscall " << (noperm ? "[blocked]" : "") << reg.orig_rax << '(' << reg.rdi << ", " << reg.rsi << ", " << reg.rdx << ", " << reg.r10 << ", " << reg.r8 << ", " << reg.r9 << ')' << std::endl;
+					//::openlog("ptracer", 0, LOG_LOCAL0);
+					//::syslog(LOG_DEBUG, oss.str().c_str());
+					//::closelog();
 					if (noperm) write_reg(pid, orig_rax, -1);
 				}
 				in_syscall = !in_syscall;
