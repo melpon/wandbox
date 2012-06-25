@@ -201,7 +201,8 @@ namespace wandbox {
 	struct compiler_bridge {
 		string get_srcname() const {
 			if (received.at("Control") == "compiler=gcc" ||
-				received.at("Control") == "compiler=gcc-4.6.3") {
+				received.at("Control") == "compiler=gcc-4.6.3" ||
+				received.at("Control") == "compiler=gcc-head") {
 				return "prog.cpp";
 			} else {
 				return "prog.hs";
@@ -215,6 +216,8 @@ namespace wandbox {
 				return { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
 			} else if (received.at("Control") == "compiler=gcc-4.6.3") {
 				return { "/usr/local/gcc-4.6.3/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname() };
+			} else if (received.at("Control") == "compiler=gcc-head") {
+				return { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
 			} else {
 				return { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
 			}
