@@ -273,6 +273,12 @@ namespace wandbox {
 
 			asio::async_read_until(sock, rbuf, '\n', std::bind<void>(ref(*this), ref(rbuf), _1, _2));
 
+			aio.post([this] {
+				error_code ec;
+				const string str = "Control 5:Start\n";
+				asio::write(sock, asio::buffer(str), ec);
+			});
+
 			pipes.emplace_front(ref(aio), c.fd_stdout);
 			auto cc_stdout = pipes.begin();
 			asio::async_read_until(cc_stdout->stream, cc_stdout->buf, '\n',
