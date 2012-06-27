@@ -11,6 +11,8 @@
           <option value="gcc-head">[C++] gcc HEAD
           <option value="ghc">[Haskell] ghc 7.4.2
       <div .row>
+        <input id="optimize" type="checkbox" value="optimize">最適化
+      <div .row>
         <a href="compile" .btn #compile>Run (or Ctrl+Enter)
     <div .span10 #codepanel>
       <label .row .span10>input code:

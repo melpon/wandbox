@@ -11,6 +11,7 @@ import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.Text as T
 import qualified ChanMap as CM
+import Data.Maybe (catMaybes)
 import Control.Exception (bracket)
 import System.IO (hClose, hFlush)
 import Codec.Binary.Url (encode)
@@ -34,17 +35,18 @@ getSourceR ident = do
 
     sendWaiResponse res
 
-vmHandle :: T.Text -> T.Text -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
-vmHandle compiler code sink =
+vmHandle :: T.Text -> T.Text -> Bool -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
+vmHandle compiler code opt sink =
   bracket connectVM hClose $ \handle -> do
     C.runResourceT $ CL.sourceList protos $$ sendVM handle
     hFlush handle
     C.runResourceT $ receiveVM handle $$ sink
   where
-    protos = [Protocol Control (T.append "compiler=" compiler),
-              Protocol CompilerOption "-O2",
-              Protocol Source code,
-              Protocol Control "run"]
+    protos = catMaybes [Just $ Protocol Control (T.append "compiler=" compiler),
+                        Just $ Protocol Source code,
+                        if opt then Just $ Protocol CompilerOption "optimize"
+                               else Nothing,
+                        Just $ Protocol Control "run"]
 
 urlEncode :: ProtocolSpecifier -> T.Text -> B.ByteString
 urlEncode spec contents = B.concat [BC.pack $ show spec, ":", BC.pack $ encode $ B.unpack $ encodeUtf8 contents]
@@ -65,11 +67,12 @@ postCompileR :: Text -> Handler ()
 postCompileR ident = do
   mCompiler <- lookupPostParam "compiler"
   mCode <- lookupPostParam "code"
-  _ <- go mCompiler mCode
+  mOpt <- lookupPostParam "optimize"
+  _ <- go mCompiler mCode mOpt
   return ()
   where
-    go (Just compiler) (Just code) = do
+    go (Just compiler) (Just code) (Just opt) = do
       cm <- getChanMap <$> getYesod
-      _ <- liftIO $ forkIO $ vmHandle compiler code $ sinkProtocol $ CM.writeChan cm ident
+      _ <- liftIO $ forkIO $ vmHandle compiler code (opt=="true") $ sinkProtocol $ CM.writeChan cm ident
       return ()
-    go _ _ = return ()
+    go _ _ _ = return ()

@@ -211,16 +211,26 @@ namespace wandbox {
 		string get_progname() const {
 			return "prog.exe";
 		}
+		bool has_optimization() const {
+			auto it = received.find("CompilerOption");
+			return it != received.end() && it->second == "optimize";
+		}
 		vector<string> get_compiler_arg() const {
+			vector<string> args;
 			if (received.at("Control") == "compiler=gcc") {
-				return { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				args = { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				if (has_optimization()) args.push_back("-O2");
 			} else if (received.at("Control") == "compiler=gcc-4.6.3") {
-				return { "/usr/local/gcc-4.6.3/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname() };
+				args = { "/usr/local/gcc-4.6.3/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname() };
+				if (has_optimization()) args.push_back("-O2");
 			} else if (received.at("Control") == "compiler=gcc-head") {
-				return { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				if (has_optimization()) args.push_back("-O2");
 			} else {
-				return { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
+				args = { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
+				if (has_optimization()) args.push_back("-O2");
 			}
+			return args;
 		}
 		template <typename Stream>
 		struct stream_pair {

@@ -14,8 +14,9 @@ function post_code() {
   var url = $('#compile').attr('href');
   var compiler = $('#compiler').val();
   var code = $('#code').val();
+  var optimize = $('#optimize').attr('checked')
 
-  $.post('@{CompileR sourceId}', { compiler: compiler, code: code }, function() { });
+  $.post('@{CompileR sourceId}', { compiler: compiler, code: code, optimize: optimize ? 'true' : 'false' }, function() { });
 }
 
 $(function() {
