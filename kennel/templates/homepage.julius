@@ -14,9 +14,14 @@ function post_code() {
   var url = $('#compile').attr('href');
   var compiler = $('#compiler').val();
   var code = $('#code').val();
-  var optimize = $('#optimize').attr('checked')
+  var optimize = $('#optimize').attr('checked');
+  var warning = $('#warning').attr('checked');
 
-  $.post('@{CompileR sourceId}', { compiler: compiler, code: code, optimize: optimize ? 'true' : 'false' }, function() { });
+  $.post('@{CompileR sourceId}', {
+    compiler: compiler,
+    code: code,
+    optimize: optimize ? 'true' : 'false',
+    warning: warning ? 'true' : 'false' }, function() { });
 }
 
 $(function() {

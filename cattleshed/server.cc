@@ -16,6 +16,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/istream_range.hpp>
 #include <boost/fusion/include/std_pair.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -211,24 +212,37 @@ namespace wandbox {
 		string get_progname() const {
 			return "prog.exe";
 		}
+		bool is_any_of(const string& str, const string& value) const {
+			vector<string> result;
+			boost::algorithm::split(result, str, [](char c) { return c == ','; });
+			return std::any_of(result.begin(), result.end(), [&](const string& v) { return v == value; });
+		}
 		bool has_optimization() const {
 			auto it = received.find("CompilerOption");
-			return it != received.end() && it->second == "optimize";
+			return it != received.end() && is_any_of(it->second, "optimize");
+		}
+		bool has_warning() const {
+			auto it = received.find("CompilerOption");
+			return it != received.end() && is_any_of(it->second, "warning");
 		}
 		vector<string> get_compiler_arg() const {
 			vector<string> args;
 			if (received.at("Control") == "compiler=gcc") {
 				args = { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
 				if (has_optimization()) args.push_back("-O2");
+				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=gcc-4.6.3") {
 				args = { "/usr/local/gcc-4.6.3/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname() };
 				if (has_optimization()) args.push_back("-O2");
+				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=gcc-head") {
 				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
 				if (has_optimization()) args.push_back("-O2");
+				if (has_warning()) args.push_back("-Wall");
 			} else {
 				args = { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
 				if (has_optimization()) args.push_back("-O2");
+				if (has_warning()) args.push_back("-Wall");
 			}
 			return args;
 		}

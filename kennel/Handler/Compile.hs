@@ -25,6 +25,13 @@ import qualified Data.Conduit.List as CL
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 
+data CompileData = CompileData
+  { coCompiler :: T.Text
+  , coCode :: T.Text
+  , coOptimize :: Bool
+  , coWarning :: Bool
+  }
+
 getSourceR :: Text -> Handler ()
 getSourceR ident = do
     cm <- getChanMap <$> getYesod
@@ -35,18 +42,26 @@ getSourceR ident = do
 
     sendWaiResponse res
 
-vmHandle :: T.Text -> T.Text -> Bool -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
-vmHandle compiler code opt sink =
+makeProtocols :: CompileData -> [Protocol]
+makeProtocols cdata =
+  catMaybes [Just $ Protocol Control (T.append "compiler=" $ coCompiler cdata),
+             Just $ Protocol Source $ coCode cdata,
+             Protocol CompilerOption <$> joinm (catMaybes [ifm (coOptimize cdata) "optimize", ifm (coWarning cdata) "warning"]),
+             Just $ Protocol Control "run"]
+  where
+    joinm [] = Nothing
+    joinm xs = Just $ T.pack $ joinm' xs
+      where joinm' (x:xs) = x ++ "," ++ joinm' xs
+            joinm' [] = ""
+    ifm True x = Just x
+    ifm False _ = Nothing
+
+vmHandle :: CompileData -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
+vmHandle cdata sink =
   bracket connectVM hClose $ \handle -> do
-    C.runResourceT $ CL.sourceList protos $$ sendVM handle
+    C.runResourceT $ CL.sourceList (makeProtocols cdata) $$ sendVM handle
     hFlush handle
     C.runResourceT $ receiveVM handle $$ sink
-  where
-    protos = catMaybes [Just $ Protocol Control (T.append "compiler=" compiler),
-                        Just $ Protocol Source code,
-                        if opt then Just $ Protocol CompilerOption "optimize"
-                               else Nothing,
-                        Just $ Protocol Control "run"]
 
 urlEncode :: ProtocolSpecifier -> T.Text -> B.ByteString
 urlEncode spec contents = B.concat [BC.pack $ show spec, ":", BC.pack $ encode $ B.unpack $ encodeUtf8 contents]
@@ -68,11 +83,16 @@ postCompileR ident = do
   mCompiler <- lookupPostParam "compiler"
   mCode <- lookupPostParam "code"
   mOpt <- lookupPostParam "optimize"
-  _ <- go mCompiler mCode mOpt
+  mWarn <- lookupPostParam "warning"
+  _ <- go $ CompileData <$> mCompiler
+                        <*> mCode
+                        <*> (bool <$> mOpt)
+                        <*> (bool <$> mWarn)
   return ()
   where
-    go (Just compiler) (Just code) (Just opt) = do
+    go (Just cdata) = do
       cm <- getChanMap <$> getYesod
-      _ <- liftIO $ forkIO $ vmHandle compiler code (opt=="true") $ sinkProtocol $ CM.writeChan cm ident
+      _ <- liftIO $ forkIO $ vmHandle cdata $ sinkProtocol $ CM.writeChan cm ident
       return ()
-    go _ _ _ = return ()
+    go _ = return ()
+    bool = (=="true")
