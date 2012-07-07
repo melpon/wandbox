@@ -1,10 +1,9 @@
 module Handler.Compile (
-  getSourceR,
   postCompileR
 ) where
 
 import Import
-import Network.Wai.EventSource (ServerEvent(..), eventSourceAppChan)
+import Network.Wai.EventSource (ServerEvent(..))
 import Control.Concurrent (forkIO)
 import Blaze.ByteString.Builder.ByteString (fromByteString)
 import qualified Data.ByteString as B
@@ -31,16 +30,6 @@ data CompileData = CompileData
   , coOptimize :: Bool
   , coWarning :: Bool
   }
-
-getSourceR :: Text -> Handler ()
-getSourceR ident = do
-    cm <- getChanMap <$> getYesod
-    chan <- liftIO $ CM.insertLookup cm ident
-
-    req <- waiRequest
-    res <- lift $ eventSourceAppChan chan req
-
-    sendWaiResponse res
 
 makeProtocols :: CompileData -> [Protocol]
 makeProtocols cdata =

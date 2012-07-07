@@ -31,6 +31,7 @@ library
                      Settings.StaticFiles
                      Handler.Root
                      Handler.Compile
+                     Handler.Source
                      ChanMap
                      VM.Protocol
                      VM.IpPortFile
