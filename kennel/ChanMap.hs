@@ -8,9 +8,10 @@ module ChanMap (
 
 import Prelude hiding (lookup,catch)
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
-import Network.Wai.EventSource (ServerEvent(CloseEvent))
+import Network.Wai.EventSource (ServerEvent(..))
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Applicative ((<$>))
+import Blaze.ByteString.Builder.ByteString (fromByteString)
 import qualified Control.Concurrent.Chan as C
 import qualified Data.Map as M
 import qualified Data.Text as T
@@ -30,12 +31,21 @@ timeDelete cm k = do
   writeChan cm k CloseEvent
   delete cm k
 
+heartbeat :: ChanMap -> T.Text -> IO ()
+heartbeat cm k = do
+  threadDelay (10*1000*1000)
+  chan <- lookup cm k
+  C.writeChan chan $ ServerEvent Nothing Nothing []
+  heartbeat cm k
+  
 insertLookup :: ChanMap -> T.Text -> IO ChanEvent
 insertLookup cm@(ChanMap ref) k = do
   chan <- C.newChan
   chan' <- atomicModifyIORef ref (modify chan)
   -- this chan is removed from ChanMap after few seconds.
   _ <- forkIO $ timeDelete cm k
+  -- heartbeat with CommentEvent.
+  _ <- forkIO $ heartbeat cm k
   return chan'
   where
     modify chan m = let (mValue, m') = M.insertLookupWithKey oldValue k chan m
