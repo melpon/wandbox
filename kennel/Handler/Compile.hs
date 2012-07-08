@@ -16,6 +16,7 @@ import System.IO (hClose, hFlush)
 import Codec.Binary.Url (encode)
 import Data.Text.Encoding (encodeUtf8)
 
+import Model (Code, codeCompiler, codeCode, codeOptimize, codeWarning, makeCode)
 import qualified Data.Conduit as C
 import Data.Conduit (($$))
 import qualified Data.Conduit.List as CL
@@ -23,18 +24,11 @@ import qualified Data.Conduit.List as CL
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 
-data CompileData = CompileData
-  { coCompiler :: T.Text
-  , coCode :: T.Text
-  , coOptimize :: Bool
-  , coWarning :: Bool
-  }
-
-makeProtocols :: CompileData -> [Protocol]
-makeProtocols cdata =
-  catMaybes [Just $ Protocol Control (T.append "compiler=" $ coCompiler cdata),
-             Just $ Protocol Source $ coCode cdata,
-             Protocol CompilerOption <$> joinm (catMaybes [ifm (coOptimize cdata) "optimize", ifm (coWarning cdata) "warning"]),
+makeProtocols :: Code -> [Protocol]
+makeProtocols code =
+  catMaybes [Just $ Protocol Control (T.append "compiler=" $ codeCompiler code),
+             Just $ Protocol Source $ codeCode code,
+             Protocol CompilerOption <$> joinm (catMaybes [ifm (codeOptimize code) "optimize", ifm (codeWarning code) "warning"]),
              Just $ Protocol Control "run"]
   where
     joinm [] = Nothing
@@ -44,10 +38,10 @@ makeProtocols cdata =
     ifm True x = Just x
     ifm False _ = Nothing
 
-vmHandle :: CompileData -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
-vmHandle cdata sink =
+vmHandle :: Code -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
+vmHandle code sink =
   bracket connectVM hClose $ \handle -> do
-    C.runResourceT $ CL.sourceList (makeProtocols cdata) $$ sendVM handle
+    C.runResourceT $ CL.sourceList (makeProtocols code) $$ sendVM handle
     hFlush handle
     C.runResourceT $ receiveVM handle $$ sink
 
@@ -72,15 +66,19 @@ postCompileR ident = do
   mCode <- lookupPostParam "code"
   mOpt <- lookupPostParam "optimize"
   mWarn <- lookupPostParam "warning"
-  _ <- go $ CompileData <$> mCompiler
-                        <*> mCode
-                        <*> (bool <$> mOpt)
-                        <*> (bool <$> mWarn)
+  -- liftIO . (Just <$>) :: Maybe (IO Code) -> Handler (Maybe Code)
+  mCodeInstance <- maybe (return Nothing) (liftIO . (Just <$>)) $
+                       -- Maybe (IO Code)
+                       makeCode <$> mCompiler
+                                <*> mCode
+                                <*> (bool <$> mOpt)
+                                <*> (bool <$> mWarn)
+  _ <- go mCodeInstance
   return ()
   where
-    go (Just cdata) = do
+    go (Just code) = do
       cm <- getChanMap <$> getYesod
-      _ <- liftIO $ forkIO $ vmHandle cdata $ sinkProtocol $ CM.writeChan cm ident
+      _ <- liftIO $ forkIO $ vmHandle code $ sinkProtocol $ CM.writeChan cm ident
       return ()
     go _ = return ()
     bool = (=="true")

@@ -32,6 +32,7 @@ library
                      Handler.Root
                      Handler.Compile
                      Handler.Source
+                     Handler.Permlink
                      ChanMap
                      VM.Protocol
                      VM.IpPortFile
@@ -81,6 +82,7 @@ executable         kennel
                  , yesod-default
                  , shakespeare-text
                  , shakespeare-css
+                 , shakespeare-js
                  , yesod-core
                  , yesod-static
                  , wai
@@ -107,3 +109,6 @@ executable         kennel
                  , dataenc
                  , attoparsec
                  , network
+                 , time
+                 , yesod-json
+                 , aeson

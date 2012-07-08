@@ -6,5 +6,7 @@
 / RootR GET
 /source/#Text SourceR GET
 /compile/#Text CompileR POST
+/permlink PermlinkR POST
+/permlink/#Text LinkedPermlinkR GET
 
 /auth AuthR Auth getAuth

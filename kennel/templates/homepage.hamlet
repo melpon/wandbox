@@ -16,6 +16,7 @@
         <input id="warning" type="checkbox" value="warning" checked>警告
       <div .row>
         <a href="compile" .btn #compile>Run (or Ctrl+Enter)
+      <div .row #permdiv>
     <div .span10 #codepanel>
       <label .row .span10>input code:
       <div .row .span10>

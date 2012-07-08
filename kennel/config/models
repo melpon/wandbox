@@ -1,3 +1,13 @@
-User
-    ident Text
-    UniqueUser ident
+Code
+    compiler Text
+    code Text
+    optimize Bool
+    warning Bool
+    createdAt UTCTime
+    UniqueCode compiler code optimize warning createdAt
+    deriving Show
+Link
+    permlink Text
+    code Code
+    UniqueLink permlink
+    deriving Show
