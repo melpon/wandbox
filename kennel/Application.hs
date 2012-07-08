@@ -20,7 +20,7 @@ import Network.Wai.Middleware.RequestLogger (logCallback)
 #endif
 import Network.Wai (Application)
 import ChanMap (newChanMap)
-import Model
+-- import Model
 import qualified Database.Persist.Store
 import Database.Persist.GenericSql (runMigration)
 import Yesod.Auth.HashDB (migrateUsers)

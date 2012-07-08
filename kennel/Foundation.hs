@@ -18,13 +18,11 @@ import Yesod.Default.Util (addStaticContentExternal)
 import Yesod.Static
 import Yesod.Persist
 import Yesod.Form
-import Settings.StaticFiles
 import Yesod.Logger (Logger, logMsg, formatLogText)
 import qualified Settings
 import qualified Database.Persist.Store
 import Database.Persist.GenericSql
 import Settings (Extra (..), widgetFile)
-import Model
 import qualified Yesod.Auth.HashDB as HDB
 import Control.Monad.IO.Class (liftIO)
 import Web.ClientSession (getKey)

@@ -15,7 +15,6 @@ import Control.Exception (bracket)
 import System.IO (hClose, hFlush)
 import Codec.Binary.Url (encode)
 import Data.Text.Encoding (encodeUtf8)
-import Control.Monad.IO.Class (MonadIO)
 
 import qualified Data.Conduit as C
 import Data.Conduit (($$))
@@ -40,7 +39,7 @@ makeProtocols cdata =
   where
     joinm [] = Nothing
     joinm xs = Just $ T.pack $ joinm' xs
-      where joinm' (x:xs) = x ++ "," ++ joinm' xs
+      where joinm' (y:ys) = y ++ "," ++ joinm' ys
             joinm' [] = ""
     ifm True x = Just x
     ifm False _ = Nothing

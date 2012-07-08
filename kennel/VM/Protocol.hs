@@ -9,7 +9,6 @@ import Import
 import qualified Data.Attoparsec.ByteString as AB
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
-import qualified Codec.Binary.QuotedPrintable as QP
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 import Control.Monad (join)

@@ -11,7 +11,6 @@ import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
 import Network.Wai.EventSource (ServerEvent(..))
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Applicative ((<$>))
-import Blaze.ByteString.Builder.ByteString (fromByteString)
 import qualified Control.Concurrent.Chan as C
 import qualified Data.Map as M
 import qualified Data.Text as T

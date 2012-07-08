@@ -1,7 +1,6 @@
 module Handler.Root where
 
 import Import
-import Yesod.Static
 import System.Random (randomRIO)
 import qualified Data.Text as T
 import Control.Monad (replicateM)
