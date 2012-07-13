@@ -2,6 +2,18 @@ function decode_uri(str) {
   return decodeURIComponent(str);
 }
 
+function encode_html_entity(str) {
+  return $.map(str, function(c) {
+    if (c == ' ') return '&nbsp;';
+    if (c == '<') return '&lt;';
+    if (c == '>') return '&gt;';
+    if (c == '&') return '&amp;';
+    if (c == '"') return '&quot;';
+    if (c == "'") return '&#39;';
+    return c;
+  }).join("");
+}
+
 function parse(str) {
   var index = str.indexOf(':');
   return {
@@ -70,7 +82,7 @@ $(function() {
   src.onmessage = function(msg) {
     console.log(msg.data);
     data = parse(decode_uri(msg.data));
-    $('<p>').html(data.message)
+    $('<p>').html(encode_html_entity(data.message))
             .addClass(data.type)
             .appendTo('#output');
     $('#output')[0].scrollTop = $('#output')[0].scrollHeight;
