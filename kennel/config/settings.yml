@@ -1,16 +1,17 @@
 Default: &defaults
   approot: "/wandbox/test"
   port: 3000
+  auth: true
   copyright: Insert copyright statement here
   #analytics: UA-YOURCODE
 
 Development:
   <<: *defaults
 
-Testing:
-  <<: *defaults
-
-Staging:
+Localhost:
+  approot: "localhost"
+  port: 8080
+  auth: false
   <<: *defaults
 
 Production:

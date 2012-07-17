@@ -103,7 +103,7 @@ executable         kennel
                  , yesod-persistent
                  , yesod-form
                  , template-haskell
-                 , wai-eventsource
+                 , wai-eventsource               == 1.2.0.3
                  , containers
                  , random
                  , dataenc

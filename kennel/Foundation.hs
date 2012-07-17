@@ -104,10 +104,15 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized _ _ = do
-        maid <- maybeAuthId
-        if isNothing maid
-            then return AuthenticationRequired
-            else return Authorized
+        y <- getYesod
+        if extraAuth $ appExtra $ settings y
+            then do
+                maid <- maybeAuthId
+                if isNothing maid
+                    then return AuthenticationRequired
+                    else return Authorized
+            else
+                return Authorized
 
     messageLogger y loc level msg =
       formatLogText (getLogger y) loc level msg >>= logMsg (getLogger y)
