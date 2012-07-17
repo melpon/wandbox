@@ -19,6 +19,8 @@ import Data.Word (Word8)
 import VM.QuotedPrintable (qpEncode, qpDecode)
 
 data ProtocolSpecifier =
+  Version |
+  VersionResult |
   Control |
   Source |
   CompilerOption |
@@ -46,7 +48,9 @@ decode = (TE.decodeUtf8 <$>) . qpDecode
 
 specParser :: AB.Parser ProtocolSpecifier
 specParser = do
-  r <- (pure Control         <* AB.try (AB.string "Control")) <|>
+  r <- (pure VersionResult   <* AB.try (AB.string "VersionResult")) <|>
+       (pure Version         <* AB.try (AB.string "Version")) <|>
+       (pure Control         <* AB.try (AB.string "Control")) <|>
        (pure Source          <* AB.try (AB.string "Source")) <|>
        (pure CompilerOption  <* AB.try (AB.string "CompilerOption")) <|>
        (pure CompilerMessageE <* AB.try (AB.string "CompilerMessageE")) <|>

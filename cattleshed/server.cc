@@ -246,6 +246,34 @@ namespace wandbox {
 			}
 			return args;
 		}
+		void send_version() {
+			const auto proc = [](const vector<string>& args) -> std::string {
+				shared_ptr<DIR> workdir(::opendir("/"), ::closedir);
+				const child_process c = piped_spawn(_P_WAIT, workdir.get(), args);
+				std::string out;
+				char buf[1024];
+				int r;
+				while ((r = ::read(c.fd_stdout, buf, sizeof(buf))) > 0)
+					out += std::string(buf, r);
+				return out;
+			};
+			string line =
+				"gcc,C++,gcc," + proc({ "/usr/bin/g++", "-dumpversion" }) +
+				"gcc-4.6.3,C++,gcc," + proc({ "/usr/local/gcc-4.6.3/bin/g++", "-dumpversion" }) +
+				"gcc-head,C++,gcc HEAD," + proc({ "/usr/local/gcc-head/bin/g++", "-dumpversion" }) +
+				"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" });
+			line = encode_qp(line);
+			const auto str = ([&]() -> string {
+				std::stringstream ss;
+				ss << "VersionResult " << line.length() << ':' << line << '\n';
+				return ss.str();
+			})();
+			aio.post([this, str] {
+				error_code ec;
+				asio::write(sock, asio::buffer(str), ec);
+			});
+			aio.run();
+		}
 		template <typename Stream>
 		struct stream_pair {
 			template <typename ...Args>
@@ -273,6 +301,10 @@ namespace wandbox {
 					if (parse_line(buf, d)) {
 						std::cout << "command: " << d.first << " : " << d.second << std::endl;
 						if (d.first == "Control" && d.second == "run") break;
+						if (d.first == "Version") {
+							send_version();
+							return;
+						}
 						received[d.first] += decode_qp(d.second);
 						buf.clear();
 					}

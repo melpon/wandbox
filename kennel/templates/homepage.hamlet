@@ -5,11 +5,9 @@
     <div .span2 #langpanel>
       <div .row>
         <label>choose compiler:
-        <select size=4 #compiler>
-          <option value="gcc" selected>[C++] gcc 4.7.1
-          <option value="gcc-4.6.3">[C++] gcc 4.6.3
-          <option value="gcc-head">[C++] gcc HEAD
-          <option value="ghc">[Haskell] ghc 7.4.2
+        <select size=#{length versions} #compiler>
+          $forall ver <- versions
+            <option value="#{(!!) ver 0}">[#{(!!) ver 1}] #{(!!) ver 2} #{(!!) ver 3}
       <div .row>
         <input id="optimize" type="checkbox" value="optimize">最適化
       <div .row>
