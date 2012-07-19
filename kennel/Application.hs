@@ -8,7 +8,7 @@ import Import
 import Settings (parseExtra, PersistConfig)
 import Settings.StaticFiles (staticSite)
 import Yesod.Auth
-import Yesod.Default.Config
+import Yesod.Default.Config (AppConfig(..), ConfigSettings(..), withYamlEnvironment, configSettings, loadConfig)
 import Yesod.Default.Main (defaultDevelApp)
 import Yesod.Default.Handlers (getFaviconR, getRobotsR)
 #if DEVELOPMENT
@@ -45,7 +45,7 @@ migrates = do
 -- performs initialization and creates a WAI application. This is also the
 -- place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-getApplication :: AppConfig DefaultEnv Extra -> Logger -> IO Application
+getApplication :: AppConfig AppEnv Extra -> Logger -> IO Application
 getApplication conf logger = do
     s <- staticSite
 

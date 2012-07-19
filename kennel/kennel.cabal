@@ -112,3 +112,4 @@ executable         kennel
                  , time
                  , yesod-json
                  , aeson
+                 , unordered-containers

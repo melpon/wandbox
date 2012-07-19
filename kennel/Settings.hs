@@ -7,6 +7,8 @@ module Settings
     ( widgetFile
     , staticRoot
     , staticDir
+    , AppEnv (..)
+    , loadConfigFromArgs
     , Extra (..)
     , parseExtra
     , PersistConfig
@@ -21,6 +23,10 @@ import qualified Yesod.Default.Util
 import Data.Text (Text)
 import Data.Yaml
 import Control.Applicative
+import System.Environment (getArgs, getProgName, getEnvironment)
+import System.Exit (exitFailure)
+import qualified Data.Text as T
+import qualified Data.HashMap.Strict as M
 
 -- | Which Persistent backend this site is using.
 type PersistConfig = SqliteConf
@@ -43,7 +49,7 @@ staticDir = "static"
 -- have to make a corresponding change here.
 --
 -- To see how this value is used, see urlRenderOverride in kennel.hs
-staticRoot :: AppConfig DefaultEnv a ->  Text
+staticRoot :: AppConfig e a ->  Text
 staticRoot conf = [st|#{appRoot conf}/static|]
 
 widgetFile :: String -> Q Exp
@@ -53,13 +59,52 @@ widgetFile = Yesod.Default.Util.widgetFileReload
 widgetFile = Yesod.Default.Util.widgetFileNoReload
 #endif
 
+-- Environment
+data AppEnv = Development
+            | Localhost
+            | Production deriving (Read, Show, Enum, Bounded)
+
+getEnv :: (Read env, Show env, Enum env, Bounded env)
+       => IO env
+getEnv = do
+    let envs = [minBound..maxBound]
+    args <- getArgs
+    case args of
+        [e] -> do
+            case reads e of
+                (e', _):_ -> return e'
+                [] -> do
+                    _ <- error $ "Invalid environment, valid entries are: " ++ show envs
+                    -- next line just provided to force the type of envs
+                    return $ head envs
+        _ -> do
+            pn <- getProgName
+            putStrLn $ "Usage: " ++ pn ++ " <environment>"
+            putStrLn $ "Valid environments: " ++ show envs
+            exitFailure
+
+-- | Load the app config from command line parameters
+loadConfigFromArgs :: (Read env, Show env, Enum env, Bounded env)
+                    => (env -> Object -> Parser extra)
+                    -> IO (AppConfig env extra)
+loadConfigFromArgs getExtra = do
+    env <- getEnv
+
+    let cs = (configSettings env)
+                { csParseExtra = getExtra
+                , csFile = \_ -> return "config/settings.yml"
+                }
+    config <- loadConfig cs
+
+    return config
+
 data Extra = Extra
     { extraCopyright :: Text
     , extraAuth :: Bool
     , extraAnalytics :: Maybe Text -- ^ Google Analytics
     }
 
-parseExtra :: DefaultEnv -> Object -> Parser Extra
+parseExtra :: AppEnv -> Object -> Parser Extra
 parseExtra _ o = Extra
     <$> o .:  "copyright"
     <*> o .:  "auth"

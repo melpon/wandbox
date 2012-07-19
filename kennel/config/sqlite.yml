@@ -5,13 +5,8 @@ Default: &defaults
 Development:
   <<: *defaults
 
-Testing:
-  database: kennel_test.sqlite3
-  <<: *defaults
-
-Staging:
-  database: kennel_staging.sqlite3
-  poolsize: 100
+Localhost:
+  database: kennel_localhost.sqlite3
   <<: *defaults
 
 Production:

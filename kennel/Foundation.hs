@@ -22,7 +22,7 @@ import Yesod.Logger (Logger, logMsg, formatLogText)
 import qualified Settings
 import qualified Database.Persist.Store
 import Database.Persist.GenericSql
-import Settings (Extra (..), widgetFile)
+import Settings (AppEnv(..), Extra(..), widgetFile)
 import qualified Yesod.Auth.HashDB as HDB
 import Control.Monad.IO.Class (liftIO)
 import Web.ClientSession (getKey)
@@ -37,7 +37,7 @@ import ChanMap (ChanMap)
 -- starts running, such as database connections. Every handler will have
 -- access to the data present here.
 data App = App
-    { settings  :: AppConfig DefaultEnv Extra
+    { settings  :: AppConfig AppEnv Extra
     , getLogger :: Logger
     , getStatic :: Static -- ^ Settings for static file serving.
     , getChanMap :: ChanMap
