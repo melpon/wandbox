@@ -144,9 +144,15 @@ namespace wandbox {
 					case SYS_timer_create:
 					case SYS_timer_delete:
 					case SYS_timer_settime:
+
+					case SYS_fcntl:
+					case SYS_futex:
+					case SYS_getcwd:
+					case SYS_sched_getaffinity:
+					case SYS_tgkill:
+					case SYS_clone: // B
 						noperm = false;
 						break;
-					case SYS_clone: // B
 					default:
 						noperm = true;
 					}

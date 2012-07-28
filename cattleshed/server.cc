@@ -203,14 +203,28 @@ namespace wandbox {
 		string get_srcname() const {
 			if (received.at("Control") == "compiler=gcc" ||
 				received.at("Control") == "compiler=gcc-4.6.3" ||
-				received.at("Control") == "compiler=gcc-head") {
+				received.at("Control") == "compiler=gcc-head" ||
+				received.at("Control") == "compiler=clang") {
 				return "prog.cpp";
+			} else if (received.at("Control") == "compiler=mcs") {
+				return "prog.cs";
 			} else {
 				return "prog.hs";
 			}
 		}
 		string get_progname() const {
 			return "prog.exe";
+		}
+		vector<string> get_runargs() const {
+			if (received.at("Control") == "compiler=gcc" ||
+				received.at("Control") == "compiler=gcc-4.6.3" ||
+				received.at("Control") == "compiler=gcc-head" ||
+				received.at("Control") == "compiler=clang" ||
+				received.at("Control") == "compiler=ghc") {
+				return { "./" + get_progname() };
+			} else {
+				return { "/usr/bin/mono", get_progname() };
+			}
 		}
 		bool is_any_of(const string& str, const string& value) const {
 			vector<string> result;
@@ -239,10 +253,18 @@ namespace wandbox {
 				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
-			} else {
+			} else if (received.at("Control") == "compiler=clang") {
+				args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				if (has_optimization()) args.push_back("-O2");
+				if (has_warning()) args.push_back("-Wall");
+			} else if (received.at("Control") == "compiler=ghc") {
 				args = { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
+			} else if (received.at("Control") == "compiler=mcs") {
+				args = { "/usr/bin/mcs", get_srcname(), "-out:" + get_progname() };
+				if (has_optimization()) args.push_back("-optimize");
+				//if (has_warning()) args.push_back("-warn:4"); // it is default.
 			}
 			return args;
 		}
@@ -261,7 +283,9 @@ namespace wandbox {
 				"gcc,C++,gcc," + proc({ "/usr/bin/g++", "-dumpversion" }) +
 				"gcc-4.6.3,C++,gcc," + proc({ "/usr/local/gcc-4.6.3/bin/g++", "-dumpversion" }) +
 				"gcc-head,C++,gcc HEAD," + proc({ "/usr/local/gcc-head/bin/g++", "-dumpversion" }) +
-				"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" });
+				"clang,C++,Clang,3.1\n" +
+				"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" }) +
+				"mcs,C#,Mono,2.8\n";
 			line = encode_qp(line);
 			const auto str = ([&]() -> string {
 				std::stringstream ss;
@@ -381,8 +405,9 @@ namespace wandbox {
 					std::cout << "COMPILE ERROR" << std::endl;
 					check_finish();
 				} else {
-					const string progname = get_progname();
-					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), { ptracer, "./" + progname });
+					vector<string> runargs = get_runargs();
+					runargs.insert(runargs.begin(), ptracer);
+					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
 					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
 					prog_pid = c.pid;
 
