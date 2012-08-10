@@ -34,7 +34,7 @@ postPermlinkR = do
     mCode <- lookupPostParam "code"
     mOpt <- lookupPostParam "optimize"
     mWarn <- lookupPostParam "warning"
-    -- liftIO . (Just <$>) :: Maybe (IO Code) -> Handler (Maybe Code)
+    -- liftIO . (Just <$>) :: IO Code -> Handler (Maybe Code)
     mCodeInstance <- maybe (return Nothing) (liftIO . (Just <$>)) $
                          -- Maybe (IO Code)
                          makeCode <$> mCompiler
