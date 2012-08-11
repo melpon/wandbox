@@ -23,10 +23,8 @@ import qualified Yesod.Default.Util
 import Data.Text (Text)
 import Data.Yaml
 import Control.Applicative
-import System.Environment (getArgs, getProgName, getEnvironment)
+import System.Environment (getArgs, getProgName)
 import System.Exit (exitFailure)
-import qualified Data.Text as T
-import qualified Data.HashMap.Strict as M
 
 -- | Which Persistent backend this site is using.
 type PersistConfig = SqliteConf
