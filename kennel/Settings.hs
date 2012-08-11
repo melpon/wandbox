@@ -65,34 +65,38 @@ data AppEnv = Development
             | Production deriving (Read, Show, Enum, Bounded)
 
 getEnv :: (Read env, Show env, Enum env, Bounded env)
-       => IO env
+       => IO (FilePath,env)
 getEnv = do
     let envs = [minBound..maxBound]
     args <- getArgs
     case args of
-        [e] -> do
-            case reads e of
-                (e', _):_ -> return e'
-                [] -> do
-                    _ <- error $ "Invalid environment, valid entries are: " ++ show envs
-                    -- next line just provided to force the type of envs
-                    return $ head envs
+        (path:e:_) -> do
+            e' <- loadEnv envs e
+            return (path,e')
         _ -> do
             pn <- getProgName
-            putStrLn $ "Usage: " ++ pn ++ " <environment>"
+            putStrLn $ "Usage: " ++ pn ++ " <configfile> <environment>"
             putStrLn $ "Valid environments: " ++ show envs
             exitFailure
+  where
+    loadEnv envs e =
+        case reads e of
+            (e', _):_ -> return e'
+            [] -> do
+                _ <- error $ "Invalid environment, valid entries are: " ++ show envs
+                -- next line just provided to force the type of envs
+                return $ head envs
 
 -- | Load the app config from command line parameters
 loadConfigFromArgs :: (Read env, Show env, Enum env, Bounded env)
                     => (env -> Object -> Parser extra)
                     -> IO (AppConfig env extra)
 loadConfigFromArgs getExtra = do
-    env <- getEnv
+    (path,env) <- getEnv
 
     let cs = (configSettings env)
                 { csParseExtra = getExtra
-                , csFile = \_ -> return "config/settings.yml"
+                , csFile = \_ -> return path
                 }
     config <- loadConfig cs
 
@@ -101,6 +105,9 @@ loadConfigFromArgs getExtra = do
 data Extra = Extra
     { extraCopyright :: Text
     , extraAuth :: Bool
+    , extraSessionKey :: FilePath
+    , extraSqliteSetting :: FilePath
+    , extraStaticDir :: FilePath
     , extraAnalytics :: Maybe Text -- ^ Google Analytics
     }
 
@@ -108,5 +115,8 @@ parseExtra :: AppEnv -> Object -> Parser Extra
 parseExtra _ o = Extra
     <$> o .:  "copyright"
     <*> o .:  "auth"
+    <*> o .:  "session_key"
+    <*> o .:  "sqlite_setting"
+    <*> o .:  "static_dir"
     <*> o .:? "analytics"
 

@@ -47,9 +47,10 @@ migrates = do
 -- migrations handled by Yesod.
 getApplication :: AppConfig AppEnv Extra -> Logger -> IO Application
 getApplication conf logger = do
-    s <- staticSite
+    s <- staticSite conf
+    let sqliteSetting = extraSqliteSetting $ appExtra conf
 
-    dbconf <- withYamlEnvironment "config/sqlite.yml" (appEnv conf)
+    dbconf <- withYamlEnvironment sqliteSetting (appEnv conf)
               Database.Persist.Store.loadConfig >>=
               Database.Persist.Store.applyEnv
     p <- Database.Persist.Store.createPoolConfig (dbconf :: Settings.PersistConfig)

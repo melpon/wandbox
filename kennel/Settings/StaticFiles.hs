@@ -1,18 +1,21 @@
 module Settings.StaticFiles where
 
-import Prelude (IO)
+import Prelude
 import Yesod.Static
 import qualified Yesod.Static as Static
-import Settings (staticDir)
+import Settings (staticDir,AppEnv,Extra(..))
+import Yesod.Default.Config (AppConfig(..))
 
 -- | use this to create your static file serving site
-staticSite :: IO Static.Static
-staticSite =
+staticSite :: AppConfig AppEnv Extra -> IO Static.Static
+staticSite conf =
 #ifdef DEVELOPMENT
-  Static.staticDevel staticDir
+    Static.staticDevel dir
 #else
-  Static.static staticDir
+    Static.static dir
 #endif
+  where
+    dir = extraStaticDir $ appExtra conf
 
 -- | This generates easy references to files in the static directory at compile time,
 --   giving you compile-time verification that referenced files exist.
