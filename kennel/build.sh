@@ -10,3 +10,5 @@ PATH=cabal-dev/alex/bin:$PATH
 PATH=cabal-dev/happy/bin:$PATH
 
 cabal-dev install
+
+cp config/settings.yml.template config/settings.yml
