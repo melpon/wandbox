@@ -1,0 +1,36 @@
+#!/bin/bash
+
+. /etc/rc.conf
+. /etc/rc.d/functions
+
+PREFIX=@PREFIX@
+NAME=kennel
+EXEC=$PREFIX/wandbox/kennel/bin/$NAME
+SETTINGS=$PREFIX/wandbox/kennel/config/settings.yml
+PID=@PID_DIR@/$NAME.pid
+
+case "$1" in
+  start)
+    stat_busy "Starting $NAME daemon"
+    start-stop-daemon --start --background --make-pidfile --pidfile $PID --exec $EXEC -- $SETTINGS Production
+    add_daemon $NAME
+    stat_done
+    ;;
+  
+  stop)
+    stat_busy "Stopping $NAME daemon"
+    start-stop-daemon --stop --oknodo --pidfile $PID
+    rm $PID
+    rm_daemon $NAME
+    stat_done
+    ;;
+  
+  restart)
+    $0 stop
+    sleep 3
+    $0 start
+    ;;
+
+  *)
+    echo "usage: $0 {start|stop|restart}"  
+esac

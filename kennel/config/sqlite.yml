@@ -10,6 +10,6 @@ Localhost:
   <<: *defaults
 
 Production:
-  database: kennel_production.sqlite3
+  database: "/usr/local/wandbox/kennel/kennel_production.sqlite3"
   poolsize: 100
   <<: *defaults

@@ -5,7 +5,6 @@ Default: &defaults
   session_key: "config/client_session_key.aes"
   sqlite_setting: "config/sqlite.yml"
   static_dir: "static"
-  daemonize: false
   copyright: Insert copyright statement here
   #analytics: UA-YOURCODE
 
@@ -20,5 +19,8 @@ Localhost:
 
 Production:
   approot: "http://melpon.org/wandbox"
+  session_key: "/usr/local/wandbox/kennel/config/client_session_key.aes"
+  sqlite_setting: "/usr/local/wandbox/kennel/config/sqlite.yml"
+  static_dir: "/usr/local/wandbox/kennel/static"
   port: 3100
   <<: *defaults
