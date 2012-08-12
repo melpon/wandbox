@@ -1,0 +1,41 @@
+[
+ {
+  "name":"bin-common",
+  "output-file":"a.out"
+  "run-command":"./a.out"
+ },{
+  "name":"g++-common",
+  "switches":{
+   "warning":"-Wall -Wextra",
+   "optimize":"-O2",
+   "C++11":"-std=c++0x",
+  },
+  "source-suffix":".cc",
+  "inherits":"bin-common"
+ },{
+  "name":"g++-4.6",
+  "compile-command":"g++-4.6 -oa.out",
+  "version-command":"g++-4.6 -dumpversion"
+  "inherits":["g++-common"],
+  "display":"[C++] g++-4.6"
+ },{
+  "name":"ghc-7.4",
+  "switches":{
+   "warning":"-Wall",
+   "optimize":"-O2"
+  },
+  "source-suffix"=".hs"
+  "compile-command":"ghc -o a.out",
+  "version-command":"ghc --numeric-version",
+  "display":"[Haskell] ghc-4.7"
+ },{
+  "name":"mono-2.8",
+  "switches":{
+   "optimize":"-optimize"
+  },
+  "source-suffix":".cs",
+  "version-command":"mcs -out:a.exe",
+  "output-file":"a.exe",
+  "run-command":"mono a.exe"
+ }
+}
