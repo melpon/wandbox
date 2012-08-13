@@ -46,7 +46,16 @@
 
  $ pacman -S start-stop-daemon
 
-2. ./deploy.sh を実行
+2. sqlite.yml, settings.yml の設定を確認する
+
+::
+
+ $ vim config/sqlite.yml
+ $ vim config/settings.yml
+
+本番では Production の設定が使われるので、各ファイルやフォルダを正しい場所に書き換えること。
+
+3. deploy.sh を実行
 
 ::
 
@@ -55,12 +64,10 @@
 この引数なら /usr/local/wandbox/kennel にそれぞれのファイルがコピーされる。
 また、実行した際には /var/run に PID ファイルが作られる。
 
-3. 起動スクリプトを実行
+4. 起動スクリプトを実行
 
 ::
 
  $ ./kennel.rc start
-
-/usr/local/wandbox/kennel/config/settings.yml の Production の設定が使われる。
 
 必要に応じて /etc/rc.d などに移動させること。
