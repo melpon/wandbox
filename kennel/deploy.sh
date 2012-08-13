@@ -1,5 +1,10 @@
-# ./deploy.sh <PREFIX> <PID_DIR> 
-# ./deploy.sh /usr/local /var/run
+
+if [ $# -ne 2 ]; then
+  echo 'Usage: ./deploy.sh <PREFIX> <PID_DIR>'
+  echo 'Example: ./deploy.sh /usr/local /var/run'
+  exit 1
+fi
+
 PREFIX=$1
 PID_DIR=$2
 KENNEL=$PREFIX/wandbox/kennel
