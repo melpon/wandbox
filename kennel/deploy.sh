@@ -10,7 +10,7 @@ PID_DIR=$2
 KENNEL=$PREFIX/wandbox/kennel
 
 mkdir -p $KENNEL
-cp -r static/ $KENNEL/static/
+cp -r static/ $KENNEL
 mkdir -p $KENNEL/config
 cp config/settings.yml $KENNEL/config
 cp config/sqlite.yml $KENNEL/config

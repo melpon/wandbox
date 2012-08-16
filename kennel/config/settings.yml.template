@@ -5,6 +5,7 @@ Default: &defaults
   session_key: "config/client_session_key.aes"
   sqlite_setting: "config/sqlite.yml"
   static_dir: "static"
+  static_temp_dir: "static"
   copyright: Insert copyright statement here
   #analytics: UA-YOURCODE
 
@@ -22,5 +23,6 @@ Production:
   session_key: "/usr/local/wandbox/kennel/config/client_session_key.aes"
   sqlite_setting: "/usr/local/wandbox/kennel/config/sqlite.yml"
   static_dir: "/usr/local/wandbox/kennel/static"
+  static_temp_dir: "/usr/local/wandbox/kennel/static"
   port: 3100
   <<: *defaults
