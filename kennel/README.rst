@@ -6,7 +6,7 @@
 ::
 
  #Arch Linux の場合
- $ pacman -S ghc cabal-install
+ $ sudo pacman -S ghc cabal-install
 
 2. cabal を使って cabal-dev をインストール
 
@@ -19,7 +19,7 @@
 
 ::
 
- ./build.sh
+ $ ./build.sh
 
 4. settings.yml, sqlite.yml を設定
 
@@ -44,7 +44,7 @@
 
 ::
 
- $ pacman -S start-stop-daemon
+ $ sudo pacman -S start-stop-daemon
 
 2. sqlite.yml, settings.yml の設定を確認する
 
@@ -59,7 +59,7 @@
 
 ::
 
- $ ./deploy.sh /usr/local /var/run
+ $ sudo ./deploy.sh /usr/local /var/run
 
 この引数なら /usr/local/wandbox/kennel にそれぞれのファイルがコピーされる。
 また、実行した際には /var/run に PID ファイルが作られる。
@@ -68,6 +68,6 @@
 
 ::
 
- $ ./kennel.rc start
+ $ sudo ./kennel.rc start
 
 必要に応じて /etc/rc.d などに移動させること。
