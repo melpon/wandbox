@@ -242,19 +242,19 @@ namespace wandbox {
 		vector<string> get_compiler_arg() const {
 			vector<string> args;
 			if (received.at("Control") == "compiler=gcc") {
-				args = { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				args = { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=gcc-4.6.3") {
-				args = { "/usr/local/gcc-4.6.3/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname() };
+				args = { "/usr/local/gcc-4.6.3/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=gcc-head") {
-				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=clang") {
-				args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "-std=c++11", "-o", get_progname() };
+				args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=ghc") {
