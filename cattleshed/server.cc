@@ -256,11 +256,11 @@ namespace wandbox {
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=clang-3.1") {
-				args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
+				args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=clang-3.2") {
-				args = { "/usr/local/llvm-3.2/bin/clang++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
+				args = { "/usr/local/llvm-3.2/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=ghc") {
