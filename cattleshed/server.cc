@@ -204,7 +204,8 @@ namespace wandbox {
 			if (received.at("Control") == "compiler=gcc" ||
 				received.at("Control") == "compiler=gcc-4.6.3" ||
 				received.at("Control") == "compiler=gcc-head" ||
-				received.at("Control") == "compiler=clang") {
+				received.at("Control") == "compiler=clang-3.1" ||
+				received.at("Control") == "compiler=clang-3.2") {
 				return "prog.cpp";
 			} else if (received.at("Control") == "compiler=mcs") {
 				return "prog.cs";
@@ -219,7 +220,8 @@ namespace wandbox {
 			if (received.at("Control") == "compiler=gcc" ||
 				received.at("Control") == "compiler=gcc-4.6.3" ||
 				received.at("Control") == "compiler=gcc-head" ||
-				received.at("Control") == "compiler=clang" ||
+				received.at("Control") == "compiler=clang-3.1" ||
+				received.at("Control") == "compiler=clang-3.2" ||
 				received.at("Control") == "compiler=ghc") {
 				return { "./" + get_progname() };
 			} else {
@@ -253,8 +255,12 @@ namespace wandbox {
 				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
-			} else if (received.at("Control") == "compiler=clang") {
+			} else if (received.at("Control") == "compiler=clang-3.1") {
 				args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
+				if (has_optimization()) args.push_back("-O2");
+				if (has_warning()) args.push_back("-Wall");
+			} else if (received.at("Control") == "compiler=clang-3.2") {
+				args = { "/usr/local/llvm-3.2/bin/clang++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
 				if (has_optimization()) args.push_back("-O2");
 				if (has_warning()) args.push_back("-Wall");
 			} else if (received.at("Control") == "compiler=ghc") {
@@ -283,7 +289,8 @@ namespace wandbox {
 				"gcc,C++,gcc," + proc({ "/usr/bin/g++", "-dumpversion" }) +
 				"gcc-4.6.3,C++,gcc," + proc({ "/usr/local/gcc-4.6.3/bin/g++", "-dumpversion" }) +
 				"gcc-head,C++,gcc HEAD," + proc({ "/usr/local/gcc-head/bin/g++", "-dumpversion" }) +
-				"clang,C++,Clang,3.1\n" +
+				"clang-3.1,C++,Clang,3.1\n" +
+				"clang-3.2,C++,Clang,3.2\n" +
 				"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" }) +
 				"mcs,C#,Mono,2.8\n";
 			line = encode_qp(line);
