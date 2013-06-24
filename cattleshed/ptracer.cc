@@ -145,7 +145,7 @@ namespace wandbox {
 	}
 	/// ファイルを開かせてもよいかどうか判断する
 	/// @return 開かせてよい時 @true
-	bool check_openable_file_p(const std::string &path, int flags, mode_t) {
+	bool is_file_openable(const std::string &path, int flags, mode_t) {
 		// TODO: この辺の許可リストは外から読むようにしたい
 		static const auto allowed_paths = []() -> std::vector<std::string> {
 			std::vector<std::string> l = {"/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat"};
@@ -161,21 +161,40 @@ namespace wandbox {
 		trace(LOG_DEBUG, "opening path '%s' is not allowed", path);
 		return false;
 	}
+	/// ファイルを stat してもよいかどうか判断する
+	/// @return 開かせてよい時 @true
+	bool is_file_stattable(const std::string &path) {
+		// FIXME: 上と完全に dup しているのでどうにかする
+		static const auto allowed_paths = []() -> std::vector<std::string> {
+			std::vector<std::string> l = {"/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat"};
+			std::sort(l.begin(), l.end());
+			return l;
+		}();
+		static const std::vector<std::string> allowed_prefixes = { "/lib", "/usr/lib", "/proc/self" };
+		const auto realpath = canonicalize_path(path);
+		if (rng::binary_search(allowed_paths, path)) return true;
+		if (rng::find_if(allowed_prefixes, std::bind(starts_with, realpath, std::placeholders::_1)) != allowed_prefixes.end()) return true;
+		if (!starts_with(realpath, "..") && !starts_with(realpath, "/")) return true;
+		trace(LOG_DEBUG, "statting path '%s' is not allowed", path);
+		return false;
+	}
 	/// システムコールの呼出しを許すかどうか判断する
 	/// @return 呼び出しを許す時 @true
-	bool check_syscall_permission(pid_t pid, user_regs_struct &reg) {
+	bool is_permitted_syscall(pid_t pid, user_regs_struct &reg) {
 		switch (reg.orig_rax) {
 			// ここにずらーーーーーーっと許可syscallを並べる
 			// Aは場合によってはblockしたい
 			// Bは場合によっては許可したい
 		case SYS_open: // B
-			return check_openable_file_p(read_cstring_from_process(pid, reg.rdi), reg.rsi, reg.rdx);
+			return is_file_openable(read_cstring_from_process(pid, reg.rdi), reg.rsi, reg.rdx);
+
+		case SYS_stat: // B
+			return is_file_stattable(read_cstring_from_process(pid, reg.rdi));
 
 		case SYS_read: // B
 		case SYS_write: // B
 
 		case SYS_close:
-		case SYS_stat:
 		case SYS_fstat:
 		case SYS_lstat:
 		case SYS_poll:
