@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <map>
 
 #include <boost/range.hpp>
 #include <boost/range/adaptors.hpp>
@@ -191,6 +192,9 @@ namespace wandbox {
 		case SYS_stat: // B
 			return is_file_stattable(read_cstring_from_process(pid, reg.rdi));
 
+		case SYS_clone: // B
+			return (read_reg(pid, rdi) | CLONE_THREAD) != 0;
+
 		case SYS_read: // B
 		case SYS_write: // B
 
@@ -260,11 +264,100 @@ namespace wandbox {
 		case SYS_getcwd:
 		case SYS_sched_getaffinity:
 		case SYS_tgkill:
-		case SYS_clone: // B
-			// TODO: clone(2) した先を ptrace(2) 出来るようにする
 			return true;
 		}
 		return false;
+	}
+	enum struct run_state_t {
+		running,
+		syscall_executing,
+		syscall_refused,
+	};
+	int trace_loop(const pid_t primary_pid, const sigset_t sigs) {
+		int exitcode = 0;
+		std::map<pid_t, run_state_t> states;
+		while (1) {
+			{
+				siginfo_t siginfo;
+				const int sig = sigwaitinfo(&sigs, &siginfo);
+				if (sig == -1) return -1;
+				if (sig != SIGCHLD) {
+					trace(LOG_DEBUG, "forwarding signal %s %s", primary_pid, siginfo.si_signo);
+					ptrace(PTRACE_SYSCALL, primary_pid, 0, siginfo.si_signo);
+					continue;
+				}
+			}
+
+			while (1) {
+				int status = 0;
+				errno = 0;
+				const int pid = ::waitpid(-1, &status, __WALL | WNOHANG);
+				if (pid == 0) break;
+				if (pid == -1) {
+					if (errno == ECHILD) return exitcode;
+					return -1;
+				}
+				if (WIFEXITED(status)) {
+					if (pid == primary_pid) exitcode = WEXITSTATUS(status);
+					continue;
+				}
+				if (WIFSIGNALED(status)) {
+					if (pid == primary_pid) exitcode = -WTERMSIG(status);
+					continue;
+				}
+				if (WIFCONTINUED(status)) {
+					ptrace(PTRACE_SYSCALL, pid, 0, 0);
+					continue;
+				}
+				const int stopsig = WSTOPSIG(status);
+
+				if (stopsig != (SIGTRAP|0x80)) {
+					unsigned long newpid = 0;
+					if (((status>>16) & PTRACE_EVENT_CLONE) != 0) {
+						ptrace(PTRACE_GETEVENTMSG, pid, 0, &newpid);
+					}
+					if (newpid != 0) {
+						trace(LOG_DEBUG, "[%s]cloned to %s", pid, newpid);
+						ptrace(PTRACE_SETOPTIONS, newpid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE);
+						ptrace(PTRACE_SYSCALL, newpid, 0, 0);
+						ptrace(PTRACE_SYSCALL, pid, 0, 0);
+					} else {
+						const int realsig = stopsig & ~0x80;
+						trace(LOG_DEBUG, "[%s]child signaled: %s", pid, realsig);
+						ptrace(PTRACE_SYSCALL, pid, 0, realsig);
+					}
+					continue;
+				}
+
+				user_regs_struct reg;
+				ptrace(PTRACE_GETREGS, pid, 0, &reg);
+				switch (states[pid]) {
+				case run_state_t::running:
+					{
+						const bool refused = !is_permitted_syscall(pid, reg);
+						trace(LOG_DEBUG, "[%s]enter syscall %s%s(%s, %s, %s, %s, %s, %s)", pid, refused?"[blocked] ":"", reg.orig_rax, reg.rdi, reg.rsi, reg.rdx, reg.r10, reg.r8, reg.r9);
+						if (refused) {
+							write_reg(pid, orig_rax, -1);
+							states[pid] = run_state_t::syscall_refused;
+						} else {
+							states[pid] = run_state_t::syscall_executing;
+						}
+					}
+					break;
+				case run_state_t::syscall_executing:
+					trace(LOG_DEBUG, "[%s]leave syscall %s (%s)", pid, reg.orig_rax, reg.rax);
+					states[pid] = run_state_t::running;
+					break;
+				case run_state_t::syscall_refused:
+					trace(LOG_DEBUG, "[%s]leave syscall [blocked] %s (%s)", pid, reg.orig_rax, reg.rax);
+					write_reg(pid, rax, -EPERM);
+					states[pid] = run_state_t::running;
+					break;
+				}
+				ptrace(PTRACE_SYSCALL, pid, 0, 0);
+			}
+		}
+		return 0;
 	}
 	int main(int argc, char **argv) {
 		if (argc < 2) return -1;
@@ -281,52 +374,11 @@ namespace wandbox {
 			++argv;
 			return ::execv(*argv, argv);
 		} else if (pid > 0) {
-			bool in_syscall = false;
-			bool noperm = false;
 			::openlog("ptracer", LOG_PID|LOG_CONS, LOG_AUTHPRIV);
 			::waitpid(pid, 0, 0);
-			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD);
+			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE);
 			ptrace(PTRACE_SYSCALL, pid, 0, 0);
-			while (1) {
-				{
-					siginfo_t siginfo;
-					const int sig = sigwaitinfo(&sigs, &siginfo);
-					if (sig == -1) return -1;
-					if (sig != SIGCHLD) {
-						ptrace(PTRACE_SYSCALL, siginfo.si_pid, 0, siginfo.si_signo);
-						continue;
-					}
-				}
-
-				siginfo_t siginfo;
-				siginfo.si_pid = 0;
-				if (::waitid(P_ALL, 0, &siginfo, WEXITED|WSTOPPED)) return -1;
-				if (siginfo.si_pid == 0) return siginfo.si_status;
-				if (siginfo.si_code == CLD_EXITED) return siginfo.si_status;
-				if (siginfo.si_code == CLD_KILLED) return -siginfo.si_status;
-				if (siginfo.si_code == CLD_DUMPED) return -siginfo.si_status;
-
-				if (siginfo.si_status != (SIGTRAP|0x80)) {
-					trace(LOG_DEBUG, "child signaled: %s", (siginfo.si_status&~0x80));
-					ptrace(PTRACE_SYSCALL, siginfo.si_pid, 0, siginfo.si_status & ~0x80);
-					continue;
-				}
-
-				user_regs_struct reg;
-				ptrace(PTRACE_GETREGS, siginfo.si_pid, 0, &reg);
-				if (in_syscall) {
-					trace(LOG_DEBUG, "leave syscall %s (%s)", reg.orig_rax, reg.rax);
-					if (noperm) write_reg(siginfo.si_pid, rax, -EPERM);
-					noperm = false;
-				} else {
-					noperm = !check_syscall_permission(siginfo.si_pid, reg);
-					trace(LOG_DEBUG, "enter syscall %s %s(%s, %s, %s, %s, %s, %s)", noperm?"[blocked]":"", reg.orig_rax, reg.rdi, reg.rsi, reg.rdx, reg.r10, reg.r8, reg.r9);
-					if (noperm) write_reg(siginfo.si_pid, orig_rax, -1);
-				}
-				in_syscall = !in_syscall;
-				ptrace(PTRACE_SYSCALL, pid, 0, 0);
-			}
-			return 0;
+			return trace_loop(pid, sigs);
 		} else {
 			return -1;
 		}
