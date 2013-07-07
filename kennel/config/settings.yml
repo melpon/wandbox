@@ -13,16 +13,12 @@ Development:
   <<: *defaults
 
 Localhost:
+  <<: *defaults
   approot: "localhost"
   port: 8080
   auth: false
-  <<: *defaults
 
 Production:
-  approot: "http://melpon.org/wandbox"
-  session_key: "/usr/local/wandbox/kennel/config/client_session_key.aes"
-  sqlite_setting: "/usr/local/wandbox/kennel/config/sqlite.yml"
-  static_dir: "/usr/local/wandbox/kennel/static"
-  static_temp_dir: "/usr/local/wandbox/kennel/static"
-  port: 3100
   <<: *defaults
+  approot: "http://melpon.org/wandbox"
+  port: 3100

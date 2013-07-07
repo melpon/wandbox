@@ -3,8 +3,6 @@ cabal-dev/
 config/client_session_key.aes
 dist/
 static/tmp/
-config/settings.yml
-config/sqlite.yml
 kennel.rc
 *.sqlite3
 nohup.out
