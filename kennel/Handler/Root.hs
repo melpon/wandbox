@@ -69,5 +69,5 @@ makeRootR code = do
 -- inclined, or create a single monolithic file.
 getRootR :: Handler RepHtml
 getRootR = do
-  emptyCode <- liftIO $ makeCode "gcc" "" False True
+  emptyCode <- liftIO $ makeCode "gcc-head" "" False True
   makeRootR emptyCode

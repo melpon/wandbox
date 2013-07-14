@@ -68,7 +68,7 @@ function post_permlink() {
       }
 
       $('#permlink').remove();
-      
+
       var approot = '@{RootR}'
       var url = approot + '/permlink/' + json.link;
       $('<a href="' + url + '" target="_blank" id="permlink">Permlink</a>')
@@ -87,7 +87,7 @@ $(function() {
             .appendTo('#output');
     $('#output')[0].scrollTop = $('#output')[0].scrollHeight;
   };
-  
+
   $('#compile').click(function(event) {
     event.preventDefault();
     post_code();
