@@ -201,32 +201,13 @@ namespace wandbox {
 
 	struct compiler_bridge {
 		string get_srcname() const {
-			if (received.at("Control") == "compiler=gcc" ||
-				received.at("Control") == "compiler=gcc-4.6.3" ||
-				received.at("Control") == "compiler=gcc-head" ||
-				received.at("Control") == "compiler=clang-3.1" ||
-				received.at("Control") == "compiler=clang-3.2") {
-				return "prog.cpp";
-			} else if (received.at("Control") == "compiler=mcs") {
-				return "prog.cs";
-			} else {
-				return "prog.hs";
-			}
+			return "prog.cpp";
 		}
 		string get_progname() const {
 			return "prog.exe";
 		}
 		vector<string> get_runargs() const {
-			if (received.at("Control") == "compiler=gcc" ||
-				received.at("Control") == "compiler=gcc-4.6.3" ||
-				received.at("Control") == "compiler=gcc-head" ||
-				received.at("Control") == "compiler=clang-3.1" ||
-				received.at("Control") == "compiler=clang-3.2" ||
-				received.at("Control") == "compiler=ghc") {
-				return { "./" + get_progname() };
-			} else {
-				return { "/usr/bin/mono", get_progname() };
-			}
+			return { "./" + get_progname() };
 		}
 		bool is_any_of(const string& str, const string& value) const {
 			vector<string> result;
@@ -243,35 +224,41 @@ namespace wandbox {
 		}
 		vector<string> get_compiler_arg() const {
 			vector<string> args;
-			if (received.at("Control") == "compiler=gcc") {
-				args = { "/usr/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
-				if (has_optimization()) args.push_back("-O2");
-				if (has_warning()) args.push_back("-Wall");
-			} else if (received.at("Control") == "compiler=gcc-4.6.3") {
-				args = { "/usr/local/gcc-4.6.3/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
-				if (has_optimization()) args.push_back("-O2");
-				if (has_warning()) args.push_back("-Wall");
-			} else if (received.at("Control") == "compiler=gcc-head") {
+			if (received.at("Control") == "compiler=gcc-head") {
 				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
-				if (has_optimization()) args.push_back("-O2");
-				if (has_warning()) args.push_back("-Wall");
-			} else if (received.at("Control") == "compiler=clang-3.1") {
-				args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
-				if (has_optimization()) args.push_back("-O2");
-				if (has_warning()) args.push_back("-Wall");
-			} else if (received.at("Control") == "compiler=clang-3.2") {
-				args = { "/usr/local/llvm-3.2/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
-				if (has_optimization()) args.push_back("-O2");
-				if (has_warning()) args.push_back("-Wall");
-			} else if (received.at("Control") == "compiler=ghc") {
-				args = { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
-				if (has_optimization()) args.push_back("-O2");
-				if (has_warning()) args.push_back("-Wall");
-			} else if (received.at("Control") == "compiler=mcs") {
-				args = { "/usr/bin/mcs", get_srcname(), "-out:" + get_progname() };
-				if (has_optimization()) args.push_back("-optimize");
-				//if (has_warning()) args.push_back("-warn:4"); // it is default.
+			} else if (received.at("Control") == "compiler=gcc-4.8.1") {
+				args = { "/usr/local/gcc-4.8.1/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
+			} else if (received.at("Control") == "compiler=gcc-4.7.3") {
+				args = { "/usr/local/gcc-4.7.3/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
+			} else if (received.at("Control") == "compiler=gcc-4.6.4") {
+				args = { "/usr/local/gcc-4.6.4/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
+			} else if (received.at("Control") == "compiler=gcc-4.5.4") {
+				args = { "/usr/local/gcc-4.5.4/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
+			} else if (received.at("Control") == "compiler=gcc-4.4.7") {
+				args = { "/usr/local/gcc-4.4.7/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
+			} else if (received.at("Control") == "compiler=gcc-4.3.6") {
+				args = { "/usr/local/gcc-4.3.6/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
 			}
+			if (has_optimization()) args.push_back("-O2");
+			if (has_warning()) args.push_back("-Wall");
+
+			//} else if (received.at("Control") == "compiler=clang-3.1") {
+			//	args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
+			//	if (has_optimization()) args.push_back("-O2");
+			//	if (has_warning()) args.push_back("-Wall");
+			//} else if (received.at("Control") == "compiler=clang-3.2") {
+			//	args = { "/usr/local/llvm-3.2/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
+			//	if (has_optimization()) args.push_back("-O2");
+			//	if (has_warning()) args.push_back("-Wall");
+			//} else if (received.at("Control") == "compiler=ghc") {
+			//	args = { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
+			//	if (has_optimization()) args.push_back("-O2");
+			//	if (has_warning()) args.push_back("-Wall");
+			//} else if (received.at("Control") == "compiler=mcs") {
+			//	args = { "/usr/bin/mcs", get_srcname(), "-out:" + get_progname() };
+			//	if (has_optimization()) args.push_back("-optimize");
+			//	//if (has_warning()) args.push_back("-warn:4"); // it is default.
+			//}
 			return args;
 		}
 		void send_version() {
