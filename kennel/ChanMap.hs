@@ -32,9 +32,10 @@ timeDelete cm k = do
 
 heartbeat :: ChanMap -> T.Text -> IO ()
 heartbeat cm k = do
-  threadDelay (10*1000*1000)
   chan <- lookup cm k
   C.writeChan chan $ ServerEvent Nothing Nothing []
+  C.writeChan chan $ ServerEvent Nothing Nothing []
+  threadDelay (2*1000*1000)
   heartbeat cm k
   
 insertLookup :: ChanMap -> T.Text -> IO ChanEvent
