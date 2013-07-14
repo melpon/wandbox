@@ -286,13 +286,18 @@ namespace wandbox {
 				return out;
 			};
 			string line =
-				"gcc,C++,gcc," + proc({ "/usr/bin/g++", "-dumpversion" }) +
-				"gcc-4.6.3,C++,gcc," + proc({ "/usr/local/gcc-4.6.3/bin/g++", "-dumpversion" }) +
 				"gcc-head,C++,gcc HEAD," + proc({ "/usr/local/gcc-head/bin/g++", "-dumpversion" }) +
-				"clang-3.1,C++,Clang,3.1\n" +
-				"clang-3.2,C++,Clang,3.2\n" +
-				"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" }) +
-				"mcs,C#,Mono,2.8\n";
+				"gcc-4.8.1,C++,gcc," + proc({ "/usr/local/gcc-4.8.1/bin/g++", "-dumpversion" }) +
+				"gcc-4.7.3,C++,gcc," + proc({ "/usr/local/gcc-4.7.3/bin/g++", "-dumpversion" }) +
+				"gcc-4.6.4,C++,gcc," + proc({ "/usr/local/gcc-4.6.4/bin/g++", "-dumpversion" }) +
+				"gcc-4.5.4,C++,gcc," + proc({ "/usr/local/gcc-4.5.4/bin/g++", "-dumpversion" }) +
+				"gcc-4.4.7,C++,gcc," + proc({ "/usr/local/gcc-4.4.7/bin/g++", "-dumpversion" }) +
+				"gcc-4.3.6,C++,gcc," + proc({ "/usr/local/gcc-4.3.6/bin/g++", "-dumpversion" }) +
+				"";
+				//"clang-3.1,C++,Clang,3.1\n" +
+				//"clang-3.2,C++,Clang,3.2\n" +
+				//"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" }) +
+				//"mcs,C#,Mono,2.8\n";
 			line = encode_qp(line);
 			const auto str = ([&]() -> string {
 				std::stringstream ss;
