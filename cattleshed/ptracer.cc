@@ -65,8 +65,8 @@ namespace wandbox {
 			return do_to_string_impl<
 				T,
 				std::is_convertible<T, std::string>::type::value,
-				decltype(check_std_to_string((T*)0))::type::value,
-				decltype(check_lexical_cast((T*)0))::type::value
+				boost::mpl::identity<decltype(check_std_to_string((T*)0))>::type::value,
+				boost::mpl::identity<decltype(check_lexical_cast((T*)0))>::type::value
 			>::call(x);
 		}
 	};
