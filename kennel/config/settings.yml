@@ -22,4 +22,4 @@ Production:
   <<: *defaults
   approot: "http://melpon.org/wandbox"
   port: 3100
-  auto: false
+  auth: false
