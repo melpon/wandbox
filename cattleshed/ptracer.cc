@@ -193,7 +193,7 @@ namespace wandbox {
 			return is_file_stattable(read_cstring_from_process(pid, reg.rdi));
 
 		case SYS_clone: // B
-			return (read_reg(pid, rdi) | CLONE_THREAD) != 0;
+			return (read_reg(pid, rdi) & CLONE_THREAD) != 0;
 
 		case SYS_read: // B
 		case SYS_write: // B
@@ -313,7 +313,7 @@ namespace wandbox {
 
 				if (stopsig != (SIGTRAP|0x80)) {
 					unsigned long newpid = 0;
-					if (((status>>16) & PTRACE_EVENT_CLONE) != 0) {
+					if (((status>>16) & (PTRACE_EVENT_CLONE|PTRACE_EVENT_FORK|PTRACE_EVENT_VFORK)) != 0) {
 						ptrace(PTRACE_GETEVENTMSG, pid, 0, &newpid);
 					}
 					if (newpid != 0) {
@@ -376,7 +376,7 @@ namespace wandbox {
 		} else if (pid > 0) {
 			::openlog("ptracer", LOG_PID|LOG_CONS, LOG_AUTHPRIV);
 			::waitpid(pid, 0, 0);
-			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE);
+			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
 			ptrace(PTRACE_SYSCALL, pid, 0, 0);
 			return trace_loop(pid, sigs);
 		} else {
