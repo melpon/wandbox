@@ -383,13 +383,15 @@ namespace wandbox {
 			aio.post([this,code] {
 				error_code ec;
 				string str;
-				if (code < -1) {
-					const char *sig = ::strsignal(-code);
+				if (WIFSIGNALED(code)) {
+					const char *sig = ::strsignal(WTERMSIG(code));
 					if (not sig) sig = "";
 					str += "Signal " + boost::lexical_cast<std::string>(::strlen(sig)) + ":" + sig + "\n";
 				}
-				const auto c = boost::lexical_cast<std::string>(code);
-				str += "ExitCode " + boost::lexical_cast<std::string>(c.length()) + ":" + c + "\n";
+				if (WIFEXITED(code)) {
+					const auto c = boost::lexical_cast<std::string>(WEXITSTATUS(code));
+					str += "ExitCode " + boost::lexical_cast<std::string>(c.length()) + ":" + c + "\n";
+				}
 				str += "Control 6:Finish\n";
 				asio::write(sock, asio::buffer(str), ec);
 				sock.close();
