@@ -379,22 +379,32 @@ namespace wandbox {
 			aio.run();
 		}
 
+		void send_exitcode(int code) {
+			aio.post([this,code] {
+				error_code ec;
+				string str;
+				if (code < -1) {
+					const char *sig = ::strsignal(-code);
+					if (not sig) sig = "";
+					str += "Signal " + boost::lexical_cast<std::string>(::strlen(sig)) + ":" + sig + "\n";
+				}
+				const auto c = boost::lexical_cast<std::string>(code);
+				str += "ExitCode " + boost::lexical_cast<std::string>(c.length()) + ":" + c + "\n";
+				str += "Control 6:Finish\n";
+				asio::write(sock, asio::buffer(str), ec);
+				sock.close();
+				std::cout << "closed" << std::endl;
+				aio.post(std::bind<void>(&asio::io_service::stop, ref(aio)));
+			});
+		}
+
 		void check_finish() {
 			if (!pipes.empty()) return;
 			if (prog_pid) {
-				{
-					int st;
-					::waitpid(prog_pid, &st, 0);
-					std::cout << "Program finished: code=" << st << std::endl;
-				}
-				aio.post([this] {
-					error_code ec;
-					const string str = "Control 6:Finish\n";
-					asio::write(sock, asio::buffer(str), ec);
-					sock.close();
-					std::cout << "closed" << std::endl;
-					aio.post(std::bind<void>(&asio::io_service::stop, ref(aio)));
-				});
+				int st;
+				::waitpid(prog_pid, &st, 0);
+				std::cout << "Program finished: code=" << st << std::endl;
+				send_exitcode(st);
 			} else {
 				int st;
 				::waitpid(cc_pid, &st, 0);
@@ -402,7 +412,7 @@ namespace wandbox {
 				if (st) {
 					prog_pid = -1;
 					std::cout << "COMPILE ERROR" << std::endl;
-					check_finish();
+					send_exitcode(st);
 				} else {
 					vector<string> runargs = get_runargs();
 					runargs.insert(runargs.begin(), ptracer);
