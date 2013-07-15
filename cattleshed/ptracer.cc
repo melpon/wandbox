@@ -42,6 +42,10 @@
 #define write_reg(pid, name, val) ptrace(PTRACE_POKEUSER, pid, offsetof(user_regs_struct, name), val)
 
 namespace wandbox {
+
+	/// 子プロセスの優先度を設定. あとで設定に追い出す.
+	constexpr int tracee_nice_value = 5;
+
 	template <typename T, bool ...>
 	struct do_to_string_impl;
 	template <typename T, bool ...B>
@@ -391,6 +395,7 @@ namespace wandbox {
 			sigprocmask(SIG_UNBLOCK, &sigs, 0);
 			ptrace(PTRACE_TRACEME, 0, 0, 0);
 			++argv;
+			::nice(tracee_nice_value);
 			return ::execv(*argv, argv);
 		} else if (pid > 0) {
 			::openlog("ptracer", LOG_PID|LOG_CONS, LOG_AUTHPRIV);
