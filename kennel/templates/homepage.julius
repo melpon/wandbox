@@ -1,3 +1,9 @@
+var keybindings = {
+    ace: null,
+    vim: require("ace/keyboard/vim").handler,
+    emacs: "ace/keyboard/emacs",
+};
+
 function decode_uri(str) {
   return decodeURIComponent(str);
 }
@@ -103,6 +109,10 @@ $(function() {
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/chrome");
   editor.getSession().setMode("ace/mode/c_cpp");
+  $("#keybinding").change(function() {
+        var value = $(this).val();
+        editor.setKeyboardHandler(keybindings[value]);
+  }).change();
 
   // initialize
   var compiler = decode_uri('#{urlEncode $ codeCompiler code}');

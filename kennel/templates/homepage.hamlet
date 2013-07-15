@@ -15,6 +15,12 @@
       <div .row>
         <a href="compile" .btn #compile>Run (or Ctrl+Enter)
       <div .row #permdiv>
+      <div .row>
+        <label>choose key binding:
+        <select size=3 #keybinding>
+          <option value="ace" selected>default
+          <option value="vim">Vim
+          <option value="emacs">Emacs
     <div .span10 #codepanel>
       <label .row .span10>input code:
       <div .row .span10>

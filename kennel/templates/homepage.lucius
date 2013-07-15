@@ -6,6 +6,10 @@
   width: 160px;
 }
 
+#keybinding {
+  width: 160px;
+}
+
 #compile {
   width: 140px;
 }
