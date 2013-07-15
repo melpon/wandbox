@@ -33,4 +33,10 @@
   .Control {
     color: #00ff00;
   }
+  .Signal {
+    color: #ff0000;
+  }
+  .ExitCode {
+    color: #ff00ff;
+  }
 }
