@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <string>
@@ -11,6 +12,7 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_match.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <cstddef>
@@ -29,6 +31,12 @@
 #include <sys/syscall.h>
 #include <sys/reg.h>
 #include <syslog.h>
+
+#ifndef PTRACE_O_EXITKILL
+#define PTRACE_O_EXITKILL (1 << 20)
+#undef  PTRACE_O_MASK
+#define PTRACE_O_MASK     (0x000000ff | PTRACE_O_EXITKILL)
+#endif
 
 #define read_reg(pid, name) ptrace(PTRACE_PEEKUSER, pid, offsetof(user_regs_struct, name), 0)
 #define write_reg(pid, name, val) ptrace(PTRACE_POKEUSER, pid, offsetof(user_regs_struct, name), val)
@@ -318,7 +326,7 @@ namespace wandbox {
 					}
 					if (newpid != 0) {
 						trace(LOG_DEBUG, "[%s]cloned to %s", pid, newpid);
-						ptrace(PTRACE_SETOPTIONS, newpid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE);
+						ptrace(PTRACE_SETOPTIONS, newpid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_EXITKILL);
 						ptrace(PTRACE_SYSCALL, newpid, 0, 0);
 						ptrace(PTRACE_SYSCALL, pid, 0, 0);
 					} else {
@@ -359,8 +367,19 @@ namespace wandbox {
 		}
 		return 0;
 	}
+
+	bool kernel_has_ptrace_o_exitkill() {
+		namespace qi = boost::spirit::qi;
+		std::ifstream ifs("/proc/version");
+		int major = 0, minor = 0;
+		ifs >> qi::match(qi::lit("Linux") >> qi::lit("version") >> qi::int_ >> '.' >> qi::int_, major, minor);
+		return major > 3 || (major == 3 && minor >= 8);
+	}
+
 	int main(int argc, char **argv) {
 		if (argc < 2) return -1;
+
+		if (not kernel_has_ptrace_o_exitkill()) return -1;
 
 		sigset_t sigs;
 		sigfillset(&sigs);
@@ -376,7 +395,7 @@ namespace wandbox {
 		} else if (pid > 0) {
 			::openlog("ptracer", LOG_PID|LOG_CONS, LOG_AUTHPRIV);
 			::waitpid(pid, 0, 0);
-			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
+			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_EXITKILL);
 			ptrace(PTRACE_SYSCALL, pid, 0, 0);
 			return trace_loop(pid, sigs);
 		} else {
