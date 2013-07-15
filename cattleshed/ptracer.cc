@@ -286,7 +286,7 @@ namespace wandbox {
 		syscall_refused,
 	};
 	int trace_loop(const pid_t primary_pid, const sigset_t sigs) {
-		int exitcode = 0;
+		int laststatus = 0;
 		std::map<pid_t, run_state_t> states;
 		while (1) {
 			{
@@ -306,15 +306,11 @@ namespace wandbox {
 				const int pid = ::waitpid(-1, &status, __WALL | WNOHANG);
 				if (pid == 0) break;
 				if (pid == -1) {
-					if (errno == ECHILD) return exitcode;
+					if (errno == ECHILD) return laststatus;
 					return -1;
 				}
-				if (WIFEXITED(status)) {
-					if (pid == primary_pid) exitcode = WEXITSTATUS(status);
-					continue;
-				}
-				if (WIFSIGNALED(status)) {
-					if (pid == primary_pid) exitcode = -WTERMSIG(status);
+				if (WIFEXITED(status) || WIFSIGNALED(status)) {
+					if (pid == primary_pid) laststatus = status;
 					continue;
 				}
 				if (WIFCONTINUED(status)) {
@@ -402,7 +398,18 @@ namespace wandbox {
 			::waitpid(pid, 0, 0);
 			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_EXITKILL);
 			ptrace(PTRACE_SYSCALL, pid, 0, 0);
-			return trace_loop(pid, sigs);
+			int status = trace_loop(pid, sigs);
+			if (WIFSIGNALED(status)) {
+				const int sig = WTERMSIG(status);
+				sigemptyset(&sigs);
+				sigaddset(&sigs, sig);
+				sigprocmask(SIG_UNBLOCK, &sigs, 0);
+				raise(sig);
+			}
+			if (WIFEXITED(status)) {
+				return WEXITSTATUS(status);
+			}
+			return -1;
 		} else {
 			return -1;
 		}
