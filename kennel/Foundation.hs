@@ -123,8 +123,7 @@ instance Yesod App where
     -- expiration dates to be set far in the future without worry of
     -- users receiving stale content.
     addStaticContent ext mimeType content = do
-        y <- getYesod
-        let dir = extraStaticTempDir $ appExtra $ settings y
+        let dir = Settings.staticDir
         addStaticContentExternal minifym base64md5 dir (StaticR . flip StaticRoute []) ext mimeType content
 
     -- Place Javascript at bottom of the body tag so the rest of the page loads first

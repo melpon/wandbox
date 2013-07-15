@@ -15,7 +15,7 @@ staticSite conf =
     Static.static dir
 #endif
   where
-    dir = extraStaticDir $ appExtra conf
+    dir = Settings.staticDir
 
 -- | This generates easy references to files in the static directory at compile time,
 --   giving you compile-time verification that referenced files exist.

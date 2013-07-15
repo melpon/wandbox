@@ -105,8 +105,6 @@ data Extra = Extra
     , extraAuth :: Bool
     , extraSessionKey :: FilePath
     , extraSqliteSetting :: FilePath
-    , extraStaticDir :: FilePath
-    , extraStaticTempDir :: FilePath
     , extraAnalytics :: Maybe Text -- ^ Google Analytics
     }
 
@@ -116,7 +114,5 @@ parseExtra _ o = Extra
     <*> o .:  "auth"
     <*> o .:  "session_key"
     <*> o .:  "sqlite_setting"
-    <*> o .:  "static_dir"
-    <*> o .:  "static_temp_dir"
     <*> o .:? "analytics"
 

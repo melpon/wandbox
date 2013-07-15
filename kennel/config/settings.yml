@@ -1,11 +1,9 @@
 Default: &defaults
   approot: "/wandbox/test"
   port: 3000
-  auth: true
+  auth: false
   session_key: "config/client_session_key.aes"
   sqlite_setting: "config/sqlite.yml"
-  static_dir: "static"
-  static_temp_dir: "static"
   copyright: Insert copyright statement here
   #analytics: UA-YOURCODE
 
