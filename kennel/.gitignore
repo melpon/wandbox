@@ -7,3 +7,4 @@ kennel.rc
 *.sqlite3
 nohup.out
 InsertPassword
+static/ace

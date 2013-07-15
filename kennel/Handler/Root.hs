@@ -7,7 +7,7 @@ import Import
 import System.Random (randomRIO)
 import qualified Data.Text as T
 import Control.Monad (replicateM)
-import Settings.StaticFiles (js_jquery_url_js)
+import Settings.StaticFiles (js_jquery_url_js, ace_ace_js)
 import Model
 import Text.Julius (ToJavascript(toJavascript))
 import Codec.Binary.Url (encode)
@@ -53,6 +53,7 @@ makeRootR code = do
         sourceId <- liftIO $ T.pack <$> (replicateM 16 $ randomRIO ('a','z'))
         addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
         addScript $ StaticR js_jquery_url_js
+        addScript $ StaticR ace_ace_js
         addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
         versions <- liftIO getVersion
         $(widgetFile "homepage")

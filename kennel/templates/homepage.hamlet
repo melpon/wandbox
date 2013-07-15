@@ -18,6 +18,6 @@
     <div .span10 #codepanel>
       <label .row .span10>input code:
       <div .row .span10>
-        <textarea .span10 #code rows=15>
+        <div .span10 #editor>
       <div .row .span10>
         <div #output>

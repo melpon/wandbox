@@ -25,7 +25,7 @@ function parse(str) {
 function post_code() {
   var url = $('#compile').attr('href');
   var compiler = $('#compiler').val();
-  var code = $('#code').val();
+  var code = ace.edit('editor').getValue();
   var optimize = $('#optimize').attr('checked');
   var warning = $('#warning').attr('checked');
 
@@ -52,7 +52,7 @@ function post_permlink() {
 
   var url = $('#compile').attr('href');
   var compiler = $('#compiler').val();
-  var code = $('#code').val();
+  var code = ace.edit('editor').getValue();
   var optimize = $('#optimize').attr('checked');
   var warning = $('#warning').attr('checked');
 
@@ -92,13 +92,17 @@ $(function() {
     event.preventDefault();
     post_code();
   });
-  $('#code').keydown(function(event) {
+  $('#editor').keydown(function(event) {
     if (event.keyCode == 10 ||
         event.keyCode == 13 && event.ctrlKey) {
       event.preventDefault();
       post_code();
     }
   });
+
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/chrome");
+  editor.getSession().setMode("ace/mode/c_cpp");
 
   // initialize
   var compiler = decode_uri('#{urlEncode $ codeCompiler code}');
@@ -109,7 +113,7 @@ $(function() {
     v ? elem.attr('checked', '') : elem.removeAttr('checked');
   }
   $('#compiler').val(compiler);
-  $('#code').val(code);
+  editor.setValue(code);
   check($('#optimize'), optimize);
   check($('#warning'), warning);
 });

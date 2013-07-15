@@ -10,8 +10,9 @@
   width: 140px;
 }
 
-#code {
+#editor {
   margin: 0px;
+  height: 300px;
   font-family: "Courier New", monospace;
 }
 

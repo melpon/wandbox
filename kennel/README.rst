@@ -15,7 +15,17 @@
  $ cabal install cabal-dev
  # ~/.cabal/bin へのパスを通しておくこと
 
-3. インストール
+3. submodule の追加
+
+::
+
+ $ cd wandbox
+ $ git submodule init
+ $ git submodule update
+ $ cd kennel/static
+ $ ln -s ../../submodules/ace-builds/src-min ace
+
+4. インストール
 
 ::
 
