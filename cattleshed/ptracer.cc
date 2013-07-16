@@ -29,7 +29,9 @@
 #include <sys/wait.h>
 #include <sys/user.h>
 #include <sys/syscall.h>
+#include <sys/time.h>
 #include <sys/reg.h>
+#include <sys/resource.h>
 #include <syslog.h>
 
 #ifndef PTRACE_O_EXITKILL
@@ -43,7 +45,18 @@
 
 namespace wandbox {
 
-	/// 子プロセスの優先度を設定. あとで設定に追い出す.
+	/// システムリソースの制限値. あとで設定に追い出す.
+	/// RLIMIT_AS(1024MiB)
+	constexpr int tracee_max_address_space = 1024 * 1024 * 1024;
+	/// RLIMIT_CPU(10min)
+	constexpr int tracee_max_cpu_time = 10 * 60;
+	/// RLIMIT_DATA(128MiB)
+	constexpr int tracee_max_data_segment = 128 * 1024 * 1024;
+	/// RLIMIT_FSIZE(128MiB)
+	constexpr int tracee_max_file_size = 128 * 1024 * 1024;
+	/// RLIMIT_NOFILE(16)
+	constexpr int tracee_max_open_file = 16;
+	/// 子プロセスの優先度.
 	constexpr int tracee_nice_value = 5;
 
 	template <typename T, bool ...>
@@ -368,6 +381,19 @@ namespace wandbox {
 		return 0;
 	}
 
+	void apply_system_resource_limits() {
+		const auto setrlimit = [](int resource, ::rlim_t lim) {
+			const ::rlimit xlim = { lim, lim };
+			::setrlimit(resource, &xlim);
+		};
+		setrlimit(RLIMIT_AS, tracee_max_address_space);
+		setrlimit(RLIMIT_CPU, tracee_max_cpu_time);
+		setrlimit(RLIMIT_DATA, tracee_max_data_segment);
+		setrlimit(RLIMIT_FSIZE, tracee_max_file_size);
+		setrlimit(RLIMIT_NOFILE, tracee_max_open_file);
+		::nice(tracee_nice_value);
+	}
+
 	bool kernel_has_ptrace_o_exitkill() {
 		namespace qi = boost::spirit::qi;
 		std::ifstream ifs("/proc/version");
@@ -388,10 +414,10 @@ namespace wandbox {
 		sigprocmask(SIG_BLOCK, &sigs, 0);
 		pid_t pid = ::fork();
 		if (pid == 0) {
+			apply_system_resource_limits();
 			sigprocmask(SIG_UNBLOCK, &sigs, 0);
 			ptrace(PTRACE_TRACEME, 0, 0, 0);
 			++argv;
-			::nice(tracee_nice_value);
 			return ::execv(*argv, argv);
 		} else if (pid > 0) {
 			::openlog("ptracer", LOG_PID|LOG_CONS, LOG_AUTHPRIV);
