@@ -1,29 +1,28 @@
-<div .container>
-  <div .row>
-    <div .span12 #header>
-  <div .row>
-    <div .span2 #langpanel>
-      <div .row>
-        <label>choose compiler:
-        <select size=#{length versions} #compiler>
-          $forall ver <- versions
-            <option value="#{(!!) ver 0}">[#{(!!) ver 1}] #{(!!) ver 2} #{(!!) ver 3}
-      <div .row>
-        <input id="optimize" type="checkbox" value="optimize">最適化
-      <div .row>
-        <input id="warning" type="checkbox" value="warning" checked>警告
-      <div .row>
-        <a href="compile" .btn #compile>Run (or Ctrl+Enter)
-      <div .row #permdiv>
-      <div .row>
-        <label>choose key binding:
-        <select size=3 #keybinding>
-          <option value="ace" selected>default
-          <option value="vim">Vim
-          <option value="emacs">Emacs
-    <div .span10 #codepanel>
-      <label .row .span10>input code:
-      <div .row .span10>
-        <div .span10 #editor>
-      <div .row .span10>
-        <div #output>
+<div .row>
+  <div .span12 #header>
+<div .row>
+  <div .span2 #langpanel>
+    <div .row>
+      <label>choose compiler:
+      <select size=#{length versions} #compiler>
+        $forall ver <- versions
+          <option value="#{(!!) ver 0}">[#{(!!) ver 1}] #{(!!) ver 2} #{(!!) ver 3}
+    <div .row>
+      <input id="optimize" type="checkbox" value="optimize">最適化
+    <div .row>
+      <input id="warning" type="checkbox" value="warning" checked>警告
+    <div .row>
+      <a href="compile" .btn #compile>Run (or Ctrl+Enter)
+    <div .row #permdiv>
+    <div .row>
+      <label>choose key binding:
+      <select size=3 #keybinding>
+        <option value="ace" selected>default
+        <option value="vim">Vim
+        <option value="emacs">Emacs
+  <div .span10 #codepanel>
+    <label .row .span10>input code:
+    <div .row .span10>
+      <div .span10 #editor>
+    <div .row .span10>
+      <div #output>

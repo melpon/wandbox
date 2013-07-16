@@ -1,5 +1,4 @@
-$maybe msg <- mmsg
-    <div #message>#{msg}
-^{widget}
-<!-- <footer>
-    #{extraCopyright $ appExtra $ settings master} -->
+<div .container>
+  ^{widget}
+  <footer>
+    <a target="_blank" href="https://github.com/melpon/wandbox">wandbox sources
