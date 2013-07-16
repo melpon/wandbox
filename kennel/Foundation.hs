@@ -31,6 +31,7 @@ import Text.Jasmine (minifym)
 import Data.Text(Text)
 import Data.Maybe (isNothing)
 import ChanMap (ChanMap)
+import Settings.StaticFiles (favicon_ico)
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
