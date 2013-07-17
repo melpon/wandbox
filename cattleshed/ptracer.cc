@@ -204,6 +204,10 @@ namespace wandbox {
 		trace(LOG_DEBUG, "statting path '%s' is not allowed", path);
 		return false;
 	}
+	bool is_acceptable_clone_flag(unsigned long flag) {
+		return (flag & CLONE_THREAD) != 0
+			&& (flag & CLONE_UNTRACED) == 0;
+	}
 	/// システムコールの呼出しを許すかどうか判断する
 	/// @return 呼び出しを許す時 @true
 	bool is_permitted_syscall(pid_t pid, user_regs_struct &reg) {
@@ -218,7 +222,7 @@ namespace wandbox {
 			return is_file_stattable(read_cstring_from_process(pid, reg.rdi));
 
 		case SYS_clone: // B
-			return (read_reg(pid, rdi) & CLONE_THREAD) != 0;
+			return is_acceptable_clone_flag(read_reg(pid, rdi));
 
 		case SYS_read: // B
 		case SYS_write: // B
