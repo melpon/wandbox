@@ -248,6 +248,7 @@ namespace wandbox {
 					"-stdlib=libc++",
 					"-I/usr/local/libcxx-3.3/include/c++/v1/",
 					"-L/usr/local/libcxx-3.3/lib",
+					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.3/lib",
 					"-nostdinc++",
 				};
 			} else if (received.at("Control") == "compiler=clang-3.2") {
@@ -259,6 +260,7 @@ namespace wandbox {
 					"-stdlib=libc++",
 					"-I/usr/local/libcxx-3.0/include/c++/v1/",
 					"-L/usr/local/libcxx-3.0/lib",
+					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.0/lib",
 					"-nostdinc++",
 				};
 			} else if (received.at("Control") == "compiler=clang-3.1") {
@@ -270,6 +272,7 @@ namespace wandbox {
 					"-stdlib=libc++",
 					"-I/usr/local/libcxx-3.0/include/c++/v1/",
 					"-L/usr/local/libcxx-3.0/lib",
+					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.0/lib",
 					"-nostdinc++",
 				};
 			} else if (received.at("Control") == "compiler=clang-3.0") {
@@ -281,6 +284,7 @@ namespace wandbox {
 					"-stdlib=libc++",
 					"-I/usr/local/libcxx-3.0/include/c++/v1/",
 					"-L/usr/local/libcxx-3.0/lib",
+					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.0/lib",
 					"-nostdinc++",
 				};
 			}
