@@ -17,6 +17,8 @@
 #include <boost/range/istream_range.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/spirit/include/qi_match.hpp>
+#include <boost/spirit/include/support_istream_iterator.hpp>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -70,18 +72,6 @@ namespace wandbox {
 			return std::search(boost::begin(r), boost::end(r), boost::begin(s), boost::end(s));
 		}
 	};
-
-
-	extern void *enabler;
-
-	template <typename Range, typename std::enable_if<std::is_convertible<typename boost::range_category<Range>::type, std::bidirectional_iterator_tag>::value>::type *& = enabler>
-	bool parse_line(const Range &r, std::pair<string, string> &d) {
-		auto ite = boost::begin(r);
-		const auto end = boost::end(r);
-		int len;
-		return qi::parse(ite, end, qi::as_string[+qi::alpha][phx::ref(d.first) = qi::_1] >> *qi::space >> qi::int_[phx::ref(len) = qi::_1] >> ':') &&
-			qi::parse(ite, end, qi::as_string[qi::repeat(len)[qi::char_]][phx::ref(d.second) = qi::_1] >> qi::eol >> qi::eoi);
-	}
 
 	template <typename M>
 	void print_map(const M &m) {
@@ -185,8 +175,27 @@ namespace wandbox {
 				return child;
 			}
 			return child;
-		} 
+		}
 		return child_process { -1, -1, -1, -1 };
+	}
+
+	struct end_read_condition {
+		template <typename Iter>
+		std::pair<Iter, bool> operator ()(Iter first, Iter last) const {
+			std::size_t limit = BUFSIZ;
+			while (first != last) {
+				if (*first++ == '\n') return { first, true };
+				if (--limit == 0) return { last, true };
+			}
+			return { last, false };
+		}
+	};
+}
+
+namespace boost {
+	namespace asio {
+		template <>
+		struct is_match_condition<wandbox::end_read_condition>: boost::mpl::true_ { };
 	}
 }
 
@@ -382,35 +391,39 @@ namespace wandbox {
 			asio::streambuf buf;
 		};
 		typedef stream_pair<asio::posix::stream_descriptor> stream_descriptor_pair;
+
+		bool wait_run_command() {
+			asio::streambuf buf;
+			while (true) {
+				asio::read_until(sock, buf, end_read_condition());
+				const auto begin = asio::buffer_cast<const char *>(buf.data());
+				auto ite = begin;
+				const auto end = ite + asio::buffer_size(buf.data());
+
+				do {
+					std::string command;
+					int len = 0;
+					if (!qi::parse(ite, end, +(qi::char_ - qi::space) > qi::omit[*qi::space] > qi::int_ > qi::omit[':'], command, len)) break;
+					std::string data;
+					if (!qi::parse(ite, end, qi::repeat(len)[qi::char_] >> qi::omit[qi::eol], data)) break;
+
+					std::cout << "command: " << command << " : " << data << std::endl;
+					if (command == "Control" && data == "run") return true;
+					if (command == "Version") {
+						send_version();
+						return false;
+					}
+					received[command] += decode_qp(data);
+				} while (true) ;
+				qi::parse(ite, end, *(qi::char_-qi::eol) >> qi::eol);
+				buf.consume(ite - begin);
+			}
+		}
+
 		void operator ()() {
 			// io thread
-			asio::streambuf rbuf;
 
-			{
-				string buf;
-				while (true) {
-					asio::read_until(sock, rbuf, '\n');
-					std::pair<string, string> d;
-					{
-						std::istream rd(&rbuf);
-						string line;
-						getline(rd, line);
-						buf += line;
-						buf += '\n';
-					}
-					if (parse_line(buf, d)) {
-						std::cout << "command: " << d.first << " : " << d.second << std::endl;
-						if (d.first == "Control" && d.second == "run") break;
-						if (d.first == "Version") {
-							send_version();
-							return;
-						}
-						received[d.first] += decode_qp(d.second);
-						buf.clear();
-					}
-				}
-			}
-
+			if (!wait_run_command()) return;
 			const string srcname = get_srcname();
 
 			auto &s = received["Source"];
@@ -427,8 +440,6 @@ namespace wandbox {
 			::close(c.fd_stdin);
 			cc_pid = c.pid;
 
-			asio::async_read_until(sock, rbuf, '\n', std::bind<void>(ref(*this), ref(rbuf), _1, _2));
-
 			aio.post([this] {
 				error_code ec;
 				const string str = "Control 5:Start\n";
@@ -437,21 +448,25 @@ namespace wandbox {
 
 			pipes.emplace_front(ref(aio), c.fd_stdout);
 			auto cc_stdout = pipes.begin();
-			asio::async_read_until(cc_stdout->stream, cc_stdout->buf, '\n',
-								   std::bind<void>(ref(*this),
-											 cc_stdout,
-											 "CompilerMessageS",
-											 _1,
-											 _2));
+			asio::async_read_until(
+				cc_stdout->stream, cc_stdout->buf, end_read_condition(),
+				std::bind<void>(
+					ref(*this),
+					cc_stdout,
+					"CompilerMessageS",
+					_1,
+					_2));
 
 			pipes.emplace_front(ref(aio), c.fd_stderr);
 			auto cc_stderr = pipes.begin();
-			asio::async_read_until(cc_stderr->stream, cc_stderr->buf, '\n',
-								   std::bind<void>(ref(*this),
-											 cc_stderr,
-											 "CompilerMessageE",
-											 _1,
-											 _2));
+			asio::async_read_until(
+				cc_stderr->stream, cc_stderr->buf, end_read_condition(),
+				std::bind<void>(
+					ref(*this),
+					cc_stderr,
+					"CompilerMessageE",
+					_1,
+					_2));
 
 			aio.run();
 		}
@@ -501,21 +516,25 @@ namespace wandbox {
 
 					pipes.emplace_front(ref(aio), c.fd_stdout);
 					auto aout_stdout = pipes.begin();
-					asio::async_read_until(aout_stdout->stream, aout_stdout->buf, '\n',
-										   std::bind<void>(ref(*this),
-													 aout_stdout,
-													 "StdOut",
-													 _1,
-													 _2));
+					asio::async_read_until(
+						aout_stdout->stream, aout_stdout->buf, end_read_condition(),
+						std::bind<void>(
+							ref(*this),
+							aout_stdout,
+							"StdOut",
+							_1,
+							_2));
 
 					pipes.emplace_front(ref(aio), c.fd_stderr);
 					auto aout_stderr = pipes.begin();
-					asio::async_read_until(aout_stderr->stream, aout_stderr->buf, '\n',
-										   std::bind<void>(ref(*this),
-													 aout_stderr,
-													 "StdErr",
-													 _1,
-													 _2));
+					asio::async_read_until(
+						aout_stderr->stream, aout_stderr->buf, end_read_condition(),
+						std::bind<void>(
+							ref(*this),
+							aout_stderr,
+							"StdErr",
+							_1,
+							_2));
 				}
 			}
 		}
@@ -526,17 +545,18 @@ namespace wandbox {
 		void operator ()(std::list<stream_descriptor_pair>::iterator p, const char *msg, error_code ec, size_t) {
 			auto &pipe = p->stream;
 			auto &rbuf = p->buf;
-			std::istream is(&rbuf);
-			string line;
-			getline(is, line);
-			if (is) line += '\n';
-			if (!is && line.empty() && ec) {
-				pipes.erase(p);
-				check_finish();
-				return;
+			std::vector<char> data(BUFSIZ);
+			{
+				data.resize(asio::buffer_copy(asio::buffer(data), rbuf.data()));
+				rbuf.consume(data.size());
+				if (data.empty() || ec) {
+					pipes.erase(p);
+					check_finish();
+					return;
+				}
 			}
-			line = encode_qp(line);
 			const auto str = ([&]() -> string {
+				const auto line = encode_qp(data);
 				std::stringstream ss;
 				ss << msg << ' ' << line.length() << ':' << line << '\n';
 				return ss.str();
@@ -546,7 +566,7 @@ namespace wandbox {
 				error_code ec;
 				asio::write(sock, asio::buffer(str), ec);
 			});
-			asio::async_read_until(pipe, rbuf, '\n', std::bind<void>(ref(*this), p, msg, _1, _2));
+			asio::async_read_until(pipe, rbuf, end_read_condition(), std::bind<void>(ref(*this), p, msg, _1, _2));
 		}
 
 		compiler_bridge(asio::io_service &main_aio, tcp::acceptor &acc): main_aio(main_aio), aio(), sock(aio)
