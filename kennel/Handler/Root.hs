@@ -49,7 +49,7 @@ getVersion = do
 makeRootR :: Code -> Handler RepHtml
 makeRootR code = do
     defaultLayout $ do
-        setTitle "Wandbox"
+        setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
         sourceId <- liftIO $ T.pack <$> (replicateM 16 $ randomRIO ('a','z'))
         addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
         addScript $ StaticR js_jquery_url_js
