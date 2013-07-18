@@ -354,7 +354,7 @@ namespace wandbox {
 				"gcc-4.5.4,C++,gcc," + proc({ "/usr/local/gcc-4.5.4/bin/g++", "-dumpversion" }) +
 				"gcc-4.4.7,C++,gcc," + proc({ "/usr/local/gcc-4.4.7/bin/g++", "-dumpversion" }) +
 				"gcc-4.3.6,C++,gcc," + proc({ "/usr/local/gcc-4.3.6/bin/g++", "-dumpversion" }) +
-				"clang-head,C++,clang," + get_clang_version("/usr/local/llvm-head/bin/clang++") + "\n" +
+				"clang-head,C++,clang HEAD," + get_clang_version("/usr/local/llvm-head/bin/clang++") + "\n" +
 				"clang-3.3,C++,clang,3.3\n" +
 				"clang-3.2,C++,clang,3.2\n" +
 				"clang-3.1,C++,clang,3.1\n" +
