@@ -178,7 +178,7 @@ namespace wandbox {
 			std::sort(l.begin(), l.end());
 			return l;
 		}();
-		static const std::vector<std::string> allowed_prefixes = { "/lib", "/usr/lib", "/proc/self" };
+		static const std::vector<std::string> allowed_prefixes = { "/lib", "/usr/lib", "/usr/local", "/proc/self" };
 		const auto realpath = canonicalize_path(path);
 		const int openmode = flags & O_ACCMODE;
 		if (rng::binary_search(allowed_paths, path) && openmode == O_RDONLY) return true;
@@ -196,7 +196,7 @@ namespace wandbox {
 			std::sort(l.begin(), l.end());
 			return l;
 		}();
-		static const std::vector<std::string> allowed_prefixes = { "/lib", "/usr/lib", "/proc/self" };
+		static const std::vector<std::string> allowed_prefixes = { "/lib", "/usr/lib", "/usr/local", "/proc/self" };
 		const auto realpath = canonicalize_path(path);
 		if (rng::binary_search(allowed_paths, path)) return true;
 		if (rng::find_if(allowed_prefixes, std::bind(starts_with, realpath, std::placeholders::_1)) != allowed_prefixes.end()) return true;
