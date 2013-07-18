@@ -138,7 +138,7 @@ namespace wandbox {
 		return print(os << std::forward<A>(a) << ", ", std::forward<Args>(args)...);
 	}
 
-	child_process piped_spawn(int mode, DIR *workdir, const vector<string> &argv, std::function<void ()> preexec_fn = std::function<void ()>()) {
+	child_process piped_spawn(int mode, DIR *workdir, const vector<string> &argv) {
 		vector<vector<char>> x;
 		for (const auto &s: argv) x.emplace_back(s.c_str(), s.c_str()+s.length()+1);
 		vector<char *> a;
@@ -169,8 +169,6 @@ namespace wandbox {
 			fcntl(0, F_SETFD, (long)0);
 			fcntl(1, F_SETFD, (long)0);
 			fcntl(2, F_SETFD, (long)0);
-			if (preexec_fn)
-				preexec_fn();
 			std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
 			std::cout << strerror(errno) << std::endl;
 			exit(-1);
@@ -470,9 +468,10 @@ namespace wandbox {
 					std::cout << "COMPILE ERROR" << std::endl;
 					send_exitcode(st);
 				} else {
+					set_environment();
 					vector<string> runargs = get_runargs();
 					runargs.insert(runargs.begin(), ptracer);
-					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs, [this]() { set_environment(); });
+					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
 					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
 					prog_pid = c.pid;
 
