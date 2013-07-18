@@ -239,6 +239,18 @@ namespace wandbox {
 				args = { "/usr/local/gcc-4.4.7/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
 			} else if (received.at("Control") == "compiler=gcc-4.3.6") {
 				args = { "/usr/local/gcc-4.3.6/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
+			} else if (received.at("Control") == "compiler=clang-head") {
+				args = {
+					"/usr/local/llvm-head/bin/clang++",
+					get_srcname(),
+					"-std=c++11",
+					"-o", get_progname(),
+					"-stdlib=libc++",
+					"-I/usr/local/libcxx-head/include/c++/v1/",
+					"-L/usr/local/libcxx-head/lib",
+					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-head/lib",
+					"-nostdinc++",
+				};
 			} else if (received.at("Control") == "compiler=clang-3.3") {
 				args = {
 					"/usr/local/llvm-3.3/bin/clang++",
@@ -313,6 +325,27 @@ namespace wandbox {
 					out += std::string(buf, r);
 				return out;
 			};
+			const auto get_clang_version = [&proc](const std::string& path) -> std::string {
+				/*
+				clang version 3.4 (trunk 186582)
+				Target: x86_64-unknown-linux-gnu
+				Thread model: posix
+				*/
+				const std::string version = proc({ path, "--version" });
+				const auto first_line = [&version]() -> std::string {
+					std::vector<std::string> result;
+					boost::algorithm::split(result, version, [](char c) { return c == '\n'; });
+					return result[0];
+				}();
+
+				const auto dumpversion = [&first_line]() -> std::string  {
+					std::vector<std::string> result;
+					boost::algorithm::split(result, first_line, [](char c) { return c == ' '; });
+					return result[2];
+				}();
+
+				return dumpversion;
+			};
 			string line =
 				"gcc-head,C++,gcc HEAD," + proc({ "/usr/local/gcc-head/bin/g++", "-dumpversion" }) +
 				"gcc-4.8.1,C++,gcc," + proc({ "/usr/local/gcc-4.8.1/bin/g++", "-dumpversion" }) +
@@ -321,6 +354,7 @@ namespace wandbox {
 				"gcc-4.5.4,C++,gcc," + proc({ "/usr/local/gcc-4.5.4/bin/g++", "-dumpversion" }) +
 				"gcc-4.4.7,C++,gcc," + proc({ "/usr/local/gcc-4.4.7/bin/g++", "-dumpversion" }) +
 				"gcc-4.3.6,C++,gcc," + proc({ "/usr/local/gcc-4.3.6/bin/g++", "-dumpversion" }) +
+				"clang-head,C++,clang," + get_clang_version("/usr/local/llvm-head/bin/clang++") + "\n" +
 				"clang-3.3,C++,clang,3.3\n" +
 				"clang-3.2,C++,clang,3.2\n" +
 				"clang-3.1,C++,clang,3.1\n" +
