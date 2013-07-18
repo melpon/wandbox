@@ -330,10 +330,10 @@ namespace wandbox {
 				"gcc-4.5.4,C++,gcc," + proc({ "/usr/local/gcc-4.5.4/bin/g++", "-dumpversion" }) +
 				"gcc-4.4.7,C++,gcc," + proc({ "/usr/local/gcc-4.4.7/bin/g++", "-dumpversion" }) +
 				"gcc-4.3.6,C++,gcc," + proc({ "/usr/local/gcc-4.3.6/bin/g++", "-dumpversion" }) +
-				"clang-3.3,C++,clang,3.3" +
-				"clang-3.2,C++,clang,3.2" +
-				"clang-3.1,C++,clang,3.1" +
-				"clang-3.0,C++,clang,3.0" +
+				"clang-3.3,C++,clang,3.3\n" +
+				"clang-3.2,C++,clang,3.2\n" +
+				"clang-3.1,C++,clang,3.1\n" +
+				"clang-3.0,C++,clang,3.0\n" +
 				"";
 				//"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" }) +
 				//"mcs,C#,Mono,2.8\n";
