@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 namespace wandbox {
 
@@ -238,18 +239,54 @@ namespace wandbox {
 				args = { "/usr/local/gcc-4.4.7/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
 			} else if (received.at("Control") == "compiler=gcc-4.3.6") {
 				args = { "/usr/local/gcc-4.3.6/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
+			} else if (received.at("Control") == "compiler=clang-3.3") {
+				args = {
+					"/usr/local/llvm-3.3/bin/clang++",
+					get_srcname(),
+					"-std=c++11",
+					"-o", get_progname(),
+					"-stdlib=libc++",
+					"-I/usr/local/libcxx-3.3/include/c++/v1/",
+					"-L/usr/local/libcxx-3.3/lib",
+					"-nostdinc++",
+				};
+			} else if (received.at("Control") == "compiler=clang-3.2") {
+				args = {
+					"/usr/local/llvm-3.2/bin/clang++",
+					get_srcname(),
+					"-std=c++11",
+					"-o", get_progname(),
+					"-stdlib=libc++",
+					"-I/usr/local/libcxx-3.0/include/c++/v1/",
+					"-L/usr/local/libcxx-3.0/lib",
+					"-nostdinc++",
+				};
+			} else if (received.at("Control") == "compiler=clang-3.1") {
+				args = {
+					"/usr/local/llvm-3.1/bin/clang++",
+					get_srcname(),
+					"-std=c++11",
+					"-o", get_progname(),
+					"-stdlib=libc++",
+					"-I/usr/local/libcxx-3.0/include/c++/v1/",
+					"-L/usr/local/libcxx-3.0/lib",
+					"-nostdinc++",
+				};
+			} else if (received.at("Control") == "compiler=clang-3.0") {
+				args = {
+					"/usr/local/llvm-3.0/bin/clang++",
+					get_srcname(),
+					"-std=c++11",
+					"-o", get_progname(),
+					"-stdlib=libc++",
+					"-I/usr/local/libcxx-3.0/include/c++/v1/",
+					"-L/usr/local/libcxx-3.0/lib",
+					"-nostdinc++",
+				};
 			}
 			if (has_optimization()) args.push_back("-O2");
 			if (has_warning()) args.push_back("-Wall");
 
-			//} else if (received.at("Control") == "compiler=clang-3.1") {
-			//	args = { "/usr/local/llvm-3.1/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
-			//	if (has_optimization()) args.push_back("-O2");
-			//	if (has_warning()) args.push_back("-Wall");
-			//} else if (received.at("Control") == "compiler=clang-3.2") {
-			//	args = { "/usr/local/llvm-3.2/bin/clang++", get_srcname(), "/usr/lib/libsupc++.a", "-stdlib=libc++", "-std=c++11", "-o", get_progname(), "-lpthread" };
-			//	if (has_optimization()) args.push_back("-O2");
-			//	if (has_warning()) args.push_back("-Wall");
 			//} else if (received.at("Control") == "compiler=ghc") {
 			//	args = { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
 			//	if (has_optimization()) args.push_back("-O2");
@@ -260,6 +297,19 @@ namespace wandbox {
 			//	//if (has_warning()) args.push_back("-warn:4"); // it is default.
 			//}
 			return args;
+		}
+		void set_environment() {
+			if (received.at("Control") == "compiler=clang-3.3") {
+				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.3/lib", 1);
+			} else if (received.at("Control") == "compiler=clang-3.2") {
+				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.0/lib", 1);
+			} else if (received.at("Control") == "compiler=clang-3.1") {
+				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.0/lib", 1);
+			} else if (received.at("Control") == "compiler=clang-3.0") {
+				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.0/lib", 1);
+			} else {
+				unsetenv("LD_LIBRARY_PATH");
+			}
 		}
 		void send_version() {
 			const auto proc = [](const vector<string>& args) -> std::string {
@@ -280,9 +330,11 @@ namespace wandbox {
 				"gcc-4.5.4,C++,gcc," + proc({ "/usr/local/gcc-4.5.4/bin/g++", "-dumpversion" }) +
 				"gcc-4.4.7,C++,gcc," + proc({ "/usr/local/gcc-4.4.7/bin/g++", "-dumpversion" }) +
 				"gcc-4.3.6,C++,gcc," + proc({ "/usr/local/gcc-4.3.6/bin/g++", "-dumpversion" }) +
+				"clang-3.3,C++,clang,3.3" +
+				"clang-3.2,C++,clang,3.2" +
+				"clang-3.1,C++,clang,3.1" +
+				"clang-3.0,C++,clang,3.0" +
 				"";
-				//"clang-3.1,C++,Clang,3.1\n" +
-				//"clang-3.2,C++,Clang,3.2\n" +
 				//"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" }) +
 				//"mcs,C#,Mono,2.8\n";
 			line = encode_qp(line);
@@ -416,6 +468,7 @@ namespace wandbox {
 					std::cout << "COMPILE ERROR" << std::endl;
 					send_exitcode(st);
 				} else {
+					set_environment();
 					vector<string> runargs = get_runargs();
 					runargs.insert(runargs.begin(), ptracer);
 					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
