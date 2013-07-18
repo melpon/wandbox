@@ -302,19 +302,6 @@ namespace wandbox {
 			//}
 			return args;
 		}
-		void set_environment() {
-			if (received.at("Control") == "compiler=clang-3.3") {
-				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.3/lib", 1);
-			} else if (received.at("Control") == "compiler=clang-3.2") {
-				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.0/lib", 1);
-			} else if (received.at("Control") == "compiler=clang-3.1") {
-				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.0/lib", 1);
-			} else if (received.at("Control") == "compiler=clang-3.0") {
-				setenv("LD_LIBRARY_PATH", "/usr/local/libcxx-3.0/lib", 1);
-			} else {
-				unsetenv("LD_LIBRARY_PATH");
-			}
-		}
 		void send_version() {
 			const auto proc = [](const vector<string>& args) -> std::string {
 				shared_ptr<DIR> workdir(::opendir("/"), ::closedir);
@@ -472,7 +459,6 @@ namespace wandbox {
 					std::cout << "COMPILE ERROR" << std::endl;
 					send_exitcode(st);
 				} else {
-					set_environment();
 					vector<string> runargs = get_runargs();
 					runargs.insert(runargs.begin(), ptracer);
 					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
