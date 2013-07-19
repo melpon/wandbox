@@ -134,48 +134,55 @@ namespace wandbox {
 		vector<char *> a;
 		for (auto &s: x) a.emplace_back(s.data());
 		a.push_back(nullptr);
+		int pipe_stdin[2] = { -1, -1 }, pipe_stdout[2] = { -1, -1 }, pipe_stderr[2] = { -1, -1 };
 		if (mode == _P_OVERLAY) {
-			::fchdir(::dirfd(workdir));
+			if (::fchdir(::dirfd(workdir)) == -1) goto end;;
 			std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
 			std::cout << strerror(errno) << std::endl;
 			exit(-1);
 		}
-		int pipe_stdin[2], pipe_stdout[2], pipe_stderr[2];
-		pipe(pipe_stdin);
-		pipe(pipe_stdout);
-		pipe(pipe_stderr);
-		const pid_t pid = ::fork();
-		if (pid == 0) {
-			::fchdir(::dirfd(workdir));
-			dup2(pipe_stdin[0], 0);
-			dup2(pipe_stdout[1], 1);
-			dup2(pipe_stderr[1], 2);
-			close(pipe_stdin[0]);
-			close(pipe_stdin[1]);
-			close(pipe_stdout[0]);
-			close(pipe_stdout[1]);
-			close(pipe_stderr[0]);
-			close(pipe_stderr[1]);
-			fcntl(0, F_SETFD, (long)0);
-			fcntl(1, F_SETFD, (long)0);
-			fcntl(2, F_SETFD, (long)0);
-			std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
-			std::cout << strerror(errno) << std::endl;
-			exit(-1);
-		} else if (pid > 0) {
-			close(pipe_stdin[0]);
-			close(pipe_stdout[1]);
-			close(pipe_stderr[1]);
-
-			child_process child { pid, pipe_stdin[1], pipe_stdout[0], pipe_stderr[0] };
-			if (mode == _P_WAIT) {
-				int st;
-				::waitpid(pid, &st, 0);
-				child.pid = st;
+		if (::pipe(pipe_stdin) == -1) goto end;
+		if (::pipe(pipe_stdout) == -1) goto end;
+		if (::pipe(pipe_stderr) == -1) goto end;
+		{
+			const pid_t pid = ::fork();
+			if (pid == 0) {
+				if (::fchdir(::dirfd(workdir)) == -1) exit(-1);
+				::dup2(pipe_stdin[0], 0);
+				::dup2(pipe_stdout[1], 1);
+				::dup2(pipe_stderr[1], 2);
+				::close(pipe_stdin[0]);
+				::close(pipe_stdin[1]);
+				::close(pipe_stdout[0]);
+				::close(pipe_stdout[1]);
+				::close(pipe_stderr[0]);
+				::close(pipe_stderr[1]);
+				::fcntl(0, F_SETFD, (long)0);
+				::fcntl(1, F_SETFD, (long)0);
+				::fcntl(2, F_SETFD, (long)0);
+				std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
+				std::cout << strerror(errno) << std::endl;
+				exit(-1);
+			} else if (pid > 0) {
+				::close(pipe_stdin[0]);
+				::close(pipe_stdout[1]);
+				::close(pipe_stderr[1]);
+				
+				child_process child { pid, pipe_stdin[1], pipe_stdout[0], pipe_stderr[0] };
+				if (mode == _P_WAIT) {
+					int st;
+					::waitpid(pid, &st, 0);
+					child.pid = st;
+					return child;
+				}
 				return child;
 			}
-			return child;
 		}
+	end:
+		const auto close = [](int fd) { if (fd != -1) ::close(fd); };
+		close(pipe_stdin[0]); close(pipe_stdin[1]);
+		close(pipe_stdout[0]); close(pipe_stderr[1]);
+		close(pipe_stdout[0]); close(pipe_stderr[1]);
 		return child_process { -1, -1, -1, -1 };
 	}
 
