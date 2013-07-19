@@ -1,6 +1,7 @@
 <div .row-fluid>
   <div .span12 #header>
 <div .row-fluid>
+  <div .span1 .margin>
   <div .span2 #langpanel>
     <div .row-fluid>
       <label>choose compiler:
@@ -17,9 +18,10 @@
         <option value="ace" selected>default
         <option value="vim">Vim
         <option value="emacs">Emacs
-  <div .span10 #codepanel>
-    <label .row-fluid .span10>input code:
-    <div .row-fluid .span10>
-      <div .span10 #editor>
-    <div .row-fluid .span10>
+  <div .span8 #codepanel>
+    <label .row-fluid>input code:
+    <div .row-fluid>
+      <div #editor>
+    <div .row-fluid>
       <div #output>
+  <div .span1 .margin>

@@ -112,13 +112,13 @@ function post_code() {
     options: options.get().join(',') }, function() { });
 
   // make permlink
-  //$('#permlink').remove();
-  //$('<a href="permlink" id="permlink" class="btn">Permlink</a>')
-  //  .appendTo('#permdiv');
-  //$('#permlink').click(function(event) {
-  //  event.preventDefault();
-  //  post_permlink();
-  //});
+  $('#permlink').remove();
+  $('<a href="permlink" id="permlink" class="btn">Permlink</a>')
+    .appendTo('#permdiv');
+  $('#permlink').click(function(event) {
+    event.preventDefault();
+    post_permlink();
+  });
 }
 
 function post_permlink() {
@@ -129,14 +129,12 @@ function post_permlink() {
   var url = $('#compile').attr('href');
   var compiler = $('#compiler').val();
   var code = ace.edit('editor').getValue();
-  var optimize = $('#optimize').attr('checked');
-  var warning = $('#warning').attr('checked');
+  var options = $("#compile_options").find(':checked').map(function(n,e) { return $(e).val(); });
 
   $.post('@{PermlinkR}', {
     compiler: compiler,
     code: code,
-    optimize: optimize ? 'true' : 'false',
-    warning: warning ? 'true' : 'false' },
+    options: options.get().join(',') },
     function(json) {
       if (!json.success) {
         $('#permlink').removeClass('disable');
