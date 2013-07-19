@@ -121,11 +121,11 @@ namespace cfg {
 			if (const auto &v = find(x, key)) {
 				std::map<cfg::string, std::vector<cfg::string>> ret;
 				for (const auto &p: boost::get<cfg::object>(*v)) {
-					const auto ite = ret.emplace(p.first, std::vector<std::string>{}).first;
+					auto &r = ret[p.first];
 					if (const auto *s = boost::get<cfg::string>(&p.second)) {
-						ite->second.emplace_back(*s);
+						r.emplace_back(*s);
 					} else {
-						for (const auto &s: boost::get<cfg::array>(p.second)) ite->second.emplace_back(boost::get<cfg::string>(s));
+						for (const auto &s: boost::get<cfg::array>(p.second)) r.emplace_back(boost::get<cfg::string>(s));
 					}
 				}
 				return ret;
