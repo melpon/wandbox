@@ -261,6 +261,7 @@ namespace wandbox {
 			};
 			string line;
 			for (const auto &c: compilers) {
+				if (!c.second.displayable) continue;
 				if (c.second.version_command.empty()) continue;
 				string ver;
 				{

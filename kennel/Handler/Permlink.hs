@@ -32,15 +32,13 @@ postPermlinkR :: Handler RepJson
 postPermlinkR = do
     mCompiler <- lookupPostParam "compiler"
     mCode <- lookupPostParam "code"
-    mOpt <- lookupPostParam "optimize"
-    mWarn <- lookupPostParam "warning"
+    mOpts <- lookupPostParam "options"
     -- liftIO . (Just <$>) :: IO Code -> Handler (Maybe Code)
     mCodeInstance <- maybe (return Nothing) (liftIO . (Just <$>)) $
                          -- Maybe (IO Code)
                          makeCode <$> mCompiler
                                   <*> mCode
-                                  <*> (bool <$> mOpt)
-                                  <*> (bool <$> mWarn)
+                                  <*> mOpts
     go mCodeInstance
   where
     go (Just code) = do

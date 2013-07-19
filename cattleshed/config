@@ -3,7 +3,7 @@
   "name":"bin-common",
   "displayable":false,
   "output-file":"prog.exe",
-  "run-command":"./prog.exe",
+  "run-command":"./prog.exe"
  },{
   "name":"gcc-common",
   "displayable":false,
@@ -14,21 +14,21 @@
     "name":"warning",
     "flags":["-Wall", "-Wextra"],
     "default":true,
-    "display-name":"警告",
+    "display-name":"警告"
    },{
     "name":"optimize",
     "flags":"-O2",
     "default":false,
-    "display-name":"最適化",
+    "display-name":"最適化"
    },{
     "name":"C++11",
     "flags":"-std=c++0x",
     "default":true,
-    "display-name":"C++11",
+    "display-name":"C++11"
    }
   ],
   "source-suffix":".cc",
-  "inherits":"bin-common",
+  "inherits":"bin-common"
  },{
   "name":"clang-common",
   "displayable":false,
@@ -38,10 +38,10 @@
     "name":"C++11",
     "flags":"-std=c++11",
     "default":true,
-    "display-name":"C++11",
+    "display-name":"C++11"
    }
   ],
-  "inherits":"gcc-common",
+  "inherits":"gcc-common"
  },{
   "name":"gcc-head",
   "displayable":true,
@@ -53,7 +53,7 @@
    "-L/usr/local/boost-1.47.0/lib",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"gcc-common",
@@ -62,12 +62,12 @@
     "name":"C++11",
     "flags":"-std=c++11",
     "default":false,
-    "display-name":"C++11",
+    "display-name":"C++11"
    },{
     "name":"C++14",
     "flags":"-std=c++1y",
     "default":true,
-    "display-name":"C++14",
+    "display-name":"C++14"
    }
   ]
  },{
@@ -80,7 +80,7 @@
    "-L/usr/local/boost-1.47.0/lib",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/usr/local/gcc-4.8.1/bin/g++", "-dumpversion"],
   "inherits":"gcc-common",
@@ -89,12 +89,12 @@
     "name":"C++11",
     "flags":"-std=c++11",
     "default":false,
-    "display-name":"C++11",
+    "display-name":"C++11"
    },{
     "name":"C++14",
     "flags":"-std=c++1y",
     "default":true,
-    "display-name":"C++14",
+    "display-name":"C++14"
    }
   ]
  },{
@@ -107,7 +107,7 @@
    "-L/usr/local/boost-1.47.0/lib",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/usr/local/gcc-4.7.3/bin/g++", "-dumpversion"],
   "inherits":"gcc-common",
@@ -116,7 +116,7 @@
     "name":"C++11",
     "flags":"-std=c++11",
     "default":true,
-    "display-name":"C++11",
+    "display-name":"C++11"
    }
   ]
  },{
@@ -129,10 +129,10 @@
    "-L/usr/local/boost-1.47.0/lib",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/usr/local/gcc-4.6.4/bin/g++", "-dumpversion"],
-  "inherits":"gcc-common",
+  "inherits":"gcc-common"
  },{
   "name":"gcc-4.5.4",
   "displayable": true,
@@ -143,10 +143,10 @@
    "-L/usr/local/boost-1.47.0/lib",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/usr/local/gcc-4.5.4/bin/g++", "-dumpversion"],
-  "inherits":"gcc-common",
+  "inherits":"gcc-common"
  },{
   "name":"gcc-4.4.7",
   "displayable":true,
@@ -157,11 +157,11 @@
    "-L/usr/local/boost-1.47.0/lib",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/usr/local/gcc-4.4.7/bin/g++", "-dumpversion"],
   "warning":["-Wall", "-W"],
-  "inherits":"gcc-common",
+  "inherits":"gcc-common"
  },{
   "name":"gcc-4.3.6",
   "displayable":true,
@@ -172,11 +172,11 @@
    "-L/usr/local/boost-1.47.0/lib",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/usr/local/gcc-4.3.6/bin/g++", "-dumpversion"],
   "warning":["-Wall", "-W"],
-  "inherits":"gcc-common",
+  "inherits":"gcc-common"
  },{
   "name":"clang-head",
   "displayable":true,
@@ -193,7 +193,7 @@
    "-nostdinc++",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"clang-common",
@@ -202,14 +202,14 @@
     "name":"C++11",
     "flags":"-std=c++11",
     "default":false,
-    "display-name":"C++11",
+    "display-name":"C++11"
    },{
     "name":"C++14",
     "flags":"-std=c++1y",
     "default":true,
-    "display-name":"C++14",
+    "display-name":"C++14"
    }
-  ],
+  ]
  },{
   "name":"clang-3.3",
   "displayable":true,
@@ -225,7 +225,7 @@
    "-nostdinc++",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"clang-common",
@@ -234,14 +234,14 @@
     "name":"C++11",
     "flags":"-std=c++11",
     "default":false,
-    "display-name":"C++11",
+    "display-name":"C++11"
    },{
     "name":"C++14",
     "flags":"-std=c++1y",
     "default":true,
-    "display-name":"C++14",
+    "display-name":"C++14"
    }
-  ],
+  ]
  },{
   "name":"clang-3.2",
   "displayable":true,
@@ -257,7 +257,7 @@
    "-nostdinc++",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.2/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"clang-common",
@@ -266,9 +266,9 @@
     "name":"C++14",
     "flags":"-std=c++1y",
     "default":true,
-    "display-name":"C++14",
+    "display-name":"C++14"
    }
-  ],
+  ]
  },{
   "name":"clang-3.1",
   "displayable":true,
@@ -284,10 +284,10 @@
    "-nostdinc++",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.1/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-  "inherits":"clang-common",
+  "inherits":"clang-common"
  },{
   "name":"clang-3.0",
   "displayable":true,
@@ -303,10 +303,10 @@
    "-nostdinc++",
    "-lboost_system",
    "-lpthread",
-   "prog.cc",
+   "prog.cc"
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.0/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-  "inherits":"clang-common",
+  "inherits":"clang-common"
  },{
   "name":"ghc-7.4",
   "displayable":false,
@@ -316,18 +316,18 @@
     "name":"warning",
     "flags":"-Wall",
     "default":true,
-    "display-name":"警告",
+    "display-name":"警告"
    },{
     "name":"optimize",
     "flags":"-O2",
     "default":false,
-    "display-name":"最適化",
+    "display-name":"最適化"
    }
   ],
   "source-suffix":".hs",
   "compile-command":["ghc", "-o", "prog.exe", "prog.hs"],
   "version-command":["ghc", "--numeric-version"],
-  "display-name":"ghc",
+  "display-name":"ghc"
  },{
   "name":"mono-2.8",
   "displayable":false,
@@ -337,7 +337,7 @@
     "name":"optimize",
     "flags":"-optimize",
     "default":false,
-    "display-name":"最適化",
+    "display-name":"最適化"
    }
   ],
   "source-suffix":".cs",
@@ -345,6 +345,6 @@
   "version-command":["mcs", "-v"],
   "output-file":"prog.exe",
   "display-name":"mono",
-  "run-command":["mono", "prog.exe"],
+  "run-command":["mono", "prog.exe"]
  }
 ]

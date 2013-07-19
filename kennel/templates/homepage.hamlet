@@ -1,28 +1,25 @@
-<div .row>
+<div .row-fluid>
   <div .span12 #header>
-<div .row>
+<div .row-fluid>
   <div .span2 #langpanel>
-    <div .row>
+    <div .row-fluid>
       <label>choose compiler:
-      <select size=#{length versions} #compiler>
+      <select .span12 size=#{length versions} #compiler>
         $forall ver <- versions
           <option value="#{(!!) ver 0}">[#{(!!) ver 1}] #{(!!) ver 2} #{(!!) ver 3}
-    <div .row>
-      <input id="optimize" type="checkbox" value="optimize">最適化
-    <div .row>
-      <input id="warning" type="checkbox" value="warning" checked>警告
-    <div .row>
+    <div .row-fluid #compile_options>
+    <div .row-fluid>
       <a href="compile" .btn #compile>Run (or Ctrl+Enter)
-    <div .row #permdiv>
-    <div .row>
+    <div .row-fluid #permdiv>
+    <div .row-fluid>
       <label>choose key binding:
-      <select size=3 #keybinding>
+      <select .span12 size=3 #keybinding>
         <option value="ace" selected>default
         <option value="vim">Vim
         <option value="emacs">Emacs
   <div .span10 #codepanel>
-    <label .row .span10>input code:
-    <div .row .span10>
+    <label .row-fluid .span10>input code:
+    <div .row-fluid .span10>
       <div .span10 #editor>
-    <div .row .span10>
+    <div .row-fluid .span10>
       <div #output>

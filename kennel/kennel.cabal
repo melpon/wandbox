@@ -29,6 +29,7 @@ library
                      Model
                      Settings
                      Settings.StaticFiles
+                     Settings.CompilerConfig
                      Handler.Root
                      Handler.Compile
                      Handler.Source

@@ -15,6 +15,6 @@ import Control.Applicative ((<$>))
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
 
-makeCode :: Text -> Text -> Bool -> Bool -> IO Code
-makeCode compiler code optimize warning =
-    Code compiler code optimize warning <$> getCurrentTime
+makeCode :: Text -> Text -> Text -> IO Code
+makeCode compiler code options =
+    Code compiler code False False options <$> getCurrentTime

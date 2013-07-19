@@ -8,7 +8,6 @@ module Settings
     , staticRoot
     , staticDir
     , AppEnv (..)
-    , loadConfigFromArgs
     , Extra (..)
     , parseExtra
     , PersistConfig
@@ -62,49 +61,12 @@ data AppEnv = Development
             | Localhost
             | Production deriving (Read, Show, Enum, Bounded)
 
-getEnv :: (Read env, Show env, Enum env, Bounded env)
-       => IO (FilePath,env)
-getEnv = do
-    let envs = [minBound..maxBound]
-    args <- getArgs
-    case args of
-        (path:e:_) -> do
-            e' <- loadEnv envs e
-            return (path,e')
-        _ -> do
-            pn <- getProgName
-            putStrLn $ "Usage: " ++ pn ++ " <configfile> <environment>"
-            putStrLn $ "Valid environments: " ++ show envs
-            exitFailure
-  where
-    loadEnv envs e =
-        case reads e of
-            (e', _):_ -> return e'
-            [] -> do
-                _ <- error $ "Invalid environment, valid entries are: " ++ show envs
-                -- next line just provided to force the type of envs
-                return $ head envs
-
--- | Load the app config from command line parameters
-loadConfigFromArgs :: (Read env, Show env, Enum env, Bounded env)
-                    => (env -> Object -> Parser extra)
-                    -> IO (AppConfig env extra)
-loadConfigFromArgs getExtra = do
-    (path,env) <- getEnv
-
-    let cs = (configSettings env)
-                { csParseExtra = getExtra
-                , csFile = \_ -> return path
-                }
-    config <- loadConfig cs
-
-    return config
-
 data Extra = Extra
     { extraCopyright :: Text
     , extraAuth :: Bool
     , extraSessionKey :: FilePath
     , extraSqliteSetting :: FilePath
+    , extraCompilerConfig :: FilePath
     , extraAnalytics :: Maybe Text -- ^ Google Analytics
     }
 
@@ -114,5 +76,6 @@ parseExtra _ o = Extra
     <*> o .:  "auth"
     <*> o .:  "session_key"
     <*> o .:  "sqlite_setting"
+    <*> o .:  "compiler_config"
     <*> o .:? "analytics"
 

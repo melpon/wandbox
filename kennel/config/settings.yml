@@ -5,6 +5,7 @@ Default: &defaults
   session_key: "config/client_session_key.aes"
   sqlite_setting: "config/sqlite.yml"
   copyright: Insert copyright statement here
+  compiler_config: "../cattleshed/config"
   #analytics: UA-YOURCODE
 
 Development:
@@ -14,10 +15,8 @@ Localhost:
   <<: *defaults
   approot: "localhost"
   port: 8080
-  auth: false
 
 Production:
   <<: *defaults
   approot: "http://melpon.org/wandbox"
   port: 3100
-  auth: false

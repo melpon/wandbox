@@ -1,4 +1,4 @@
-<div .container>
+<div .container-fluid>
   ^{widget}
   <footer>
     <a target="_blank" href="https://github.com/melpon/wandbox">wandbox sources

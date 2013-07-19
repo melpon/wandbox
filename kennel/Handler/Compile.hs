@@ -16,7 +16,7 @@ import System.IO (hClose, hFlush)
 import Codec.Binary.Url (encode)
 import Data.Text.Encoding (encodeUtf8)
 
-import Model (Code, codeCompiler, codeCode, codeOptimize, codeWarning, makeCode)
+import Model (Code, codeCompiler, codeCode, codeOptions, makeCode)
 import qualified Data.Conduit as C
 import Data.Conduit (($$))
 import qualified Data.Conduit.List as CL
@@ -28,7 +28,7 @@ makeProtocols :: Code -> [Protocol]
 makeProtocols code =
   catMaybes [Just $ Protocol Control (T.append "compiler=" $ codeCompiler code),
              Just $ Protocol Source $ codeCode code,
-             Protocol CompilerOption <$> joinm (catMaybes [ifm (codeOptimize code) "optimize", ifm (codeWarning code) "warning"]),
+             Just $ Protocol CompilerOption $ codeOptions code,
              Just $ Protocol Control "run"]
   where
     joinm [] = Nothing
@@ -64,15 +64,13 @@ postCompileR :: Text -> Handler ()
 postCompileR ident = do
   mCompiler <- lookupPostParam "compiler"
   mCode <- lookupPostParam "code"
-  mOpt <- lookupPostParam "optimize"
-  mWarn <- lookupPostParam "warning"
+  mOpts <- lookupPostParam "options"
   -- liftIO . (Just <$>) :: Maybe (IO Code) -> Handler (Maybe Code)
   mCodeInstance <- maybe (return Nothing) (liftIO . (Just <$>)) $
                        -- Maybe (IO Code)
                        makeCode <$> mCompiler
                                 <*> mCode
-                                <*> (bool <$> mOpt)
-                                <*> (bool <$> mWarn)
+                                <*> mOpts
   _ <- go mCodeInstance
   return ()
   where

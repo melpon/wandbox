@@ -15,6 +15,7 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Data.ByteString as B
 import Control.Exception (bracket)
 import System.IO (hClose, hFlush)
+import qualified Settings.CompilerConfig as CC
 
 import qualified Data.Conduit as C
 import Data.Conduit (($$))
@@ -48,6 +49,7 @@ getVersion = do
 
 makeRootR :: Code -> Handler RepHtml
 makeRootR code = do
+    app <- getYesod
     defaultLayout $ do
         setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
         sourceId <- liftIO $ T.pack <$> (replicateM 16 $ randomRIO ('a','z'))
@@ -58,6 +60,7 @@ makeRootR code = do
         addScript $ StaticR ace_keybinding_emacs_js
         addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
         versions <- liftIO getVersion
+        let decodedCompilerConfig = CC.tojson $ getCompilerConfig app
         $(widgetFile "homepage")
   where
     urlEncode = encode . B.unpack . encodeUtf8
@@ -72,5 +75,5 @@ makeRootR code = do
 -- inclined, or create a single monolithic file.
 getRootR :: Handler RepHtml
 getRootR = do
-  emptyCode <- liftIO $ makeCode "gcc-head" "" False True
+  emptyCode <- liftIO $ makeCode "gcc-head" "" ""
   makeRootR emptyCode

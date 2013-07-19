@@ -35,7 +35,7 @@ namespace cfg {
 			obj %= '{' > ((pair % ',') > -qi::lit(',')) > '}';
 			arr %= '[' > ((val % ',') > -qi::lit(',')) > ']';
 			str %= qi::lexeme['\"' > *(qi::char_-'\"') > '\"'];
-			bool_ %= qi::lit("true") | "false";
+			bool_ %= qi::bool_;
 			//debug(top);
 			//debug(val);
 			//debug(pair);
@@ -115,6 +115,7 @@ namespace cfg {
 		std::map<std::string, switch_trait> switches;
 		std::string source_suffix;
 		std::string display_name;
+		bool displayable;
 	};
 
 	namespace detail {
@@ -172,6 +173,7 @@ namespace cfg {
 			t.run_command = get_str_array(y, "run-command");
 			t.source_suffix = get_str(y, "source-suffix");
 			t.display_name = get_str(y, "display-name");
+			t.displayable = boost::get<cfg::bool_>(y.at("displayable"));
 			t.switches = get_switches(y, "switches");
 			const auto inherits = get_str_array(y, "inherits");
 			if (!inherits.empty()) inherit_map[t.name] = inherits;
