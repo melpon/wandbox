@@ -12,6 +12,7 @@
 
 ::
 
+ $ cabal update
  $ cabal install cabal-dev
  # ~/.cabal/bin へのパスを通しておくこと
 
