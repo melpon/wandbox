@@ -25,8 +25,9 @@ int main(int, char **) {
     asio::connect(s, iterator);
 
 	const std::vector<std::pair<std::string, std::string>> requests = {
-		{"Control", "compiler=gcc-head"},
-		{"CompilerOption", "optimize=2"},
+		{"Control", "compiler=gcc-4.8.1"},
+		{"CompilerOption", "optimize"},
+		{"CompilerOption", "C++11"},
 		{"Source",
 			"#include <stdio.h>\n"
 			"#include <unistd.h>\n"

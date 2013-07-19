@@ -1,6 +1,7 @@
 //#define BOOST_ERROR_CODE_HEADER_ONLY
 
 #include "common.hpp"
+#include "cfg.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -209,6 +210,7 @@ namespace boost {
 namespace wandbox {
 
 	string ptracer;
+	std::map<std::string, compiler_trait> compilers;
 
 	struct thread_compare {
 		bool operator ()(const std::thread &x, const std::thread &y) const {
@@ -217,117 +219,32 @@ namespace wandbox {
 	};
 
 	struct compiler_bridge {
-		string get_srcname() const {
-			return "prog.cpp";
-		}
-		string get_progname() const {
-			return "prog.exe";
-		}
-		vector<string> get_runargs() const {
-			return { "./" + get_progname() };
-		}
 		bool is_any_of(const string& str, const string& value) const {
 			vector<string> result;
 			boost::algorithm::split(result, str, [](char c) { return c == ','; });
 			return std::any_of(result.begin(), result.end(), [&](const string& v) { return v == value; });
 		}
-		bool has_optimization() const {
-			auto it = received.find("CompilerOption");
-			return it != received.end() && is_any_of(it->second, "optimize");
-		}
-		bool has_warning() const {
-			auto it = received.find("CompilerOption");
-			return it != received.end() && is_any_of(it->second, "warning");
+		const compiler_trait &get_compiler() const {
+			const auto compiler = [this]() -> string {
+				string ret;
+				const auto &s = received.at("Control");
+				auto ite = s.begin();
+				qi::parse(ite, s.end(), "compiler=" >> *qi::char_, ret);
+				return ret;
+			}();
+		    return compilers.at(compiler);
 		}
 		vector<string> get_compiler_arg() const {
-			vector<string> args;
-			if (received.at("Control") == "compiler=gcc-head") {
-				args = { "/usr/local/gcc-head/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
-			} else if (received.at("Control") == "compiler=gcc-4.8.1") {
-				args = { "/usr/local/gcc-4.8.1/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
-			} else if (received.at("Control") == "compiler=gcc-4.7.3") {
-				args = { "/usr/local/gcc-4.7.3/bin/g++", get_srcname(), "-std=c++11", "-o", get_progname(), "-lpthread" };
-			} else if (received.at("Control") == "compiler=gcc-4.6.4") {
-				args = { "/usr/local/gcc-4.6.4/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
-			} else if (received.at("Control") == "compiler=gcc-4.5.4") {
-				args = { "/usr/local/gcc-4.5.4/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
-			} else if (received.at("Control") == "compiler=gcc-4.4.7") {
-				args = { "/usr/local/gcc-4.4.7/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
-			} else if (received.at("Control") == "compiler=gcc-4.3.6") {
-				args = { "/usr/local/gcc-4.3.6/bin/g++", get_srcname(), "-std=c++0x", "-o", get_progname(), "-lpthread" };
-			} else if (received.at("Control") == "compiler=clang-head") {
-				args = {
-					"/usr/local/llvm-head/bin/clang++",
-					get_srcname(),
-					"-std=c++11",
-					"-o", get_progname(),
-					"-stdlib=libc++",
-					"-I/usr/local/libcxx-head/include/c++/v1/",
-					"-L/usr/local/libcxx-head/lib",
-					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-head/lib",
-					"-nostdinc++",
-				};
-			} else if (received.at("Control") == "compiler=clang-3.3") {
-				args = {
-					"/usr/local/llvm-3.3/bin/clang++",
-					get_srcname(),
-					"-std=c++11",
-					"-o", get_progname(),
-					"-stdlib=libc++",
-					"-I/usr/local/libcxx-3.3/include/c++/v1/",
-					"-L/usr/local/libcxx-3.3/lib",
-					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.3/lib",
-					"-nostdinc++",
-				};
-			} else if (received.at("Control") == "compiler=clang-3.2") {
-				args = {
-					"/usr/local/llvm-3.2/bin/clang++",
-					get_srcname(),
-					"-std=c++11",
-					"-o", get_progname(),
-					"-stdlib=libc++",
-					"-I/usr/local/libcxx-3.0/include/c++/v1/",
-					"-L/usr/local/libcxx-3.0/lib",
-					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.0/lib",
-					"-nostdinc++",
-				};
-			} else if (received.at("Control") == "compiler=clang-3.1") {
-				args = {
-					"/usr/local/llvm-3.1/bin/clang++",
-					get_srcname(),
-					"-std=c++11",
-					"-o", get_progname(),
-					"-stdlib=libc++",
-					"-I/usr/local/libcxx-3.0/include/c++/v1/",
-					"-L/usr/local/libcxx-3.0/lib",
-					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.0/lib",
-					"-nostdinc++",
-				};
-			} else if (received.at("Control") == "compiler=clang-3.0") {
-				args = {
-					"/usr/local/llvm-3.0/bin/clang++",
-					get_srcname(),
-					"-std=c++11",
-					"-o", get_progname(),
-					"-stdlib=libc++",
-					"-I/usr/local/libcxx-3.0/include/c++/v1/",
-					"-L/usr/local/libcxx-3.0/lib",
-					"-Xlinker", "-rpath", "-Xlinker", "/usr/local/libcxx-3.0/lib",
-					"-nostdinc++",
-				};
+			const auto &c = get_compiler();
+			vector<string> args = c.compile_command;
+			const auto it = received.find("CompilerOption");
+			if (it != received.end()) {
+				for (const auto &sw: c.switches) {
+					if (is_any_of(it->second, sw.first)) {
+						args.insert(args.end(), sw.second.begin(), sw.second.end());
+					}
+				}
 			}
-			if (has_optimization()) args.push_back("-O2");
-			if (has_warning()) args.push_back("-Wall");
-
-			//} else if (received.at("Control") == "compiler=ghc") {
-			//	args = { "/usr/bin/ghc", get_srcname(), "-o", get_progname() };
-			//	if (has_optimization()) args.push_back("-O2");
-			//	if (has_warning()) args.push_back("-Wall");
-			//} else if (received.at("Control") == "compiler=mcs") {
-			//	args = { "/usr/bin/mcs", get_srcname(), "-out:" + get_progname() };
-			//	if (has_optimization()) args.push_back("-optimize");
-			//	//if (has_warning()) args.push_back("-warn:4"); // it is default.
-			//}
 			return args;
 		}
 		void send_version() {
@@ -342,43 +259,17 @@ namespace wandbox {
 				asio::read(s.stream, s.buf, ec);
 				return std::string(asio::buffer_cast<const char *>(s.buf.data()), asio::buffer_size(s.buf.data()));
 			};
-			const auto get_clang_version = [&proc](const std::string& path) -> std::string {
-				/*
-				clang version 3.4 (trunk 186582)
-				Target: x86_64-unknown-linux-gnu
-				Thread model: posix
-				*/
-				const std::string version = proc({ path, "--version" });
-				const auto first_line = [&version]() -> std::string {
-					std::vector<std::string> result;
-					boost::algorithm::split(result, version, [](char c) { return c == '\n'; });
-					return result[0];
-				}();
-
-				const auto dumpversion = [&first_line]() -> std::string  {
-					std::vector<std::string> result;
-					boost::algorithm::split(result, first_line, [](char c) { return c == ' '; });
-					return result[2];
-				}();
-
-				return dumpversion;
-			};
-			string line =
-				"gcc-head,C++,gcc HEAD," + proc({ "/usr/local/gcc-head/bin/g++", "-dumpversion" }) +
-				"gcc-4.8.1,C++,gcc," + proc({ "/usr/local/gcc-4.8.1/bin/g++", "-dumpversion" }) +
-				"gcc-4.7.3,C++,gcc," + proc({ "/usr/local/gcc-4.7.3/bin/g++", "-dumpversion" }) +
-				"gcc-4.6.4,C++,gcc," + proc({ "/usr/local/gcc-4.6.4/bin/g++", "-dumpversion" }) +
-				"gcc-4.5.4,C++,gcc," + proc({ "/usr/local/gcc-4.5.4/bin/g++", "-dumpversion" }) +
-				"gcc-4.4.7,C++,gcc," + proc({ "/usr/local/gcc-4.4.7/bin/g++", "-dumpversion" }) +
-				"gcc-4.3.6,C++,gcc," + proc({ "/usr/local/gcc-4.3.6/bin/g++", "-dumpversion" }) +
-				"clang-head,C++,clang HEAD," + get_clang_version("/usr/local/llvm-head/bin/clang++") + "\n" +
-				"clang-3.3,C++,clang,3.3\n" +
-				"clang-3.2,C++,clang,3.2\n" +
-				"clang-3.1,C++,clang,3.1\n" +
-				"clang-3.0,C++,clang,3.0\n" +
-				"";
-				//"ghc,Haskell,ghc," + proc({ "/usr/bin/ghc", "--numeric-version" }) +
-				//"mcs,C#,Mono,2.8\n";
+			string line;
+			for (const auto &c: compilers) {
+				if (c.second.version_command.empty()) continue;
+				string ver;
+				{
+					std::stringstream ss(proc(c.second.version_command));
+					getline(ss, ver);
+				}
+				if (ver.empty()) continue;
+				line += c.second.name + "," + c.second.language + "," + c.second.display_name + "," + ver + "\n";
+			}
 			line = encode_qp(line);
 			const auto str = ([&]() -> string {
 				std::stringstream ss;
@@ -432,7 +323,7 @@ namespace wandbox {
 			// io thread
 
 			if (!wait_run_command()) return;
-			const string srcname = get_srcname();
+			const string srcname = "prog" + get_compiler().source_suffix;
 
 			auto &s = received["Source"];
 			{
@@ -516,7 +407,7 @@ namespace wandbox {
 					std::cout << "COMPILE ERROR" << std::endl;
 					send_exitcode(st);
 				} else {
-					vector<string> runargs = get_runargs();
+					vector<string> runargs = get_compiler().run_command;
 					runargs.insert(runargs.begin(), ptracer);
 					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
 					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
@@ -623,6 +514,14 @@ namespace wandbox {
 int main(int, char **) {
 	using namespace wandbox;
 	{
+		namespace spirit = boost::spirit;
+ 
+		std::cin.unsetf(std::ios::skipws); 
+		spirit::istream_iterator begin(std::cin);
+		spirit::istream_iterator end;
+ 
+		compilers = load_compiler_trait(begin, end);
+	} {
 		unique_ptr<char, void(*)(void *)> cwd(::getcwd(nullptr, 0), &::free);
 		ptracer = string(cwd.get()) + "/ptracer.exe";
 	}
