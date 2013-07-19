@@ -324,15 +324,16 @@ namespace wandbox {
 			return args;
 		}
 		void send_version() {
-			const auto proc = [](const vector<string>& args) -> std::string {
+			const auto proc = [this](const vector<string>& args) -> std::string {
 				shared_ptr<DIR> workdir(::opendir("/"), ::closedir);
 				const child_process c = piped_spawn(_P_WAIT, workdir.get(), args);
-				std::string out;
-				char buf[1024];
-				int r;
-				while ((r = ::read(c.fd_stdout, buf, sizeof(buf))) > 0)
-					out += std::string(buf, r);
-				return out;
+				::close(c.fd_stdin);
+				::close(c.fd_stderr);
+				stream_descriptor_pair s(aio, c.fd_stdout);
+				if (c.pid == -1 || !WIFEXITED(c.pid) || WEXITSTATUS(c.pid) != 0) return "";
+				error_code ec;
+				asio::read(s.stream, s.buf, ec);
+				return std::string(asio::buffer_cast<const char *>(s.buf.data()), asio::buffer_size(s.buf.data()));
 			};
 			const auto get_clang_version = [&proc](const std::string& path) -> std::string {
 				/*
@@ -512,6 +513,7 @@ namespace wandbox {
 					runargs.insert(runargs.begin(), ptracer);
 					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
 					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
+					::close(c.fd_stdin);
 					prog_pid = c.pid;
 
 					pipes.emplace_front(ref(aio), c.fd_stdout);
