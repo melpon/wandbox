@@ -15,24 +15,34 @@ namespace cfg {
 		wandbox_cfg_tag,
 		std::string,
 		std::vector<boost::recursive_variant_>,
-		std::unordered_map<std::string, boost::recursive_variant_>
+		std::unordered_map<std::string, boost::recursive_variant_>,
+		bool
 	>::type value;
 	typedef std::string string;
 	typedef std::unordered_map<string, value> object;
 	typedef std::vector<value> array;
+	typedef bool bool_;
 
 	namespace qi = boost::spirit::qi;
-	
+
 	template <typename Iter>
 	struct config_grammar: qi::grammar<Iter, value(), qi::space_type> {
 		config_grammar(): qi::grammar<Iter, value(), qi::space_type>(top) {
 			namespace phx = boost::phoenix;
 			top %= obj | arr;
-			val %= obj | arr | str;
+			val %= obj | arr | str | bool_;
 			pair %= str >> ':' >> val;
 			obj %= '{' > ((pair % ',') > -qi::lit(',')) > '}';
 			arr %= '[' > ((val % ',') > -qi::lit(',')) > ']';
 			str %= qi::lexeme['\"' > *(qi::char_-'\"') > '\"'];
+			bool_ %= qi::lit("true") | "false";
+			//debug(top);
+			//debug(val);
+			//debug(pair);
+			//debug(obj);
+			//debug(arr);
+			//debug(str);
+			//debug(bool_);
 		}
 		qi::rule<Iter, value(), qi::space_type> top;
 		qi::rule<Iter, std::pair<string, value>(), qi::space_type> pair;
@@ -40,6 +50,7 @@ namespace cfg {
 		qi::rule<Iter, array(), qi::space_type> arr;
 		qi::rule<Iter, value(), qi::space_type> val;
 		qi::rule<Iter, string(), qi::space_type> str;
+		qi::rule<Iter, bool(), qi::space_type> bool_;
 	};
 
 	struct operator_output: boost::static_visitor<std::ostream &> {
@@ -72,8 +83,11 @@ namespace cfg {
 			os << "]";
 			return os;
 		}
+		std::ostream &operator ()(const bool& bool_) const {
+			return os << (bool_ ? "true" : "false");
+		}
 		std::ostream &operator ()(const wandbox_cfg_tag &) const { return os; }
-	    void put_indent(int add) const {
+		void put_indent(int add) const {
 			os << std::string(indent+add, ' ');
 		}
 		std::ostream &os;
@@ -85,6 +99,12 @@ namespace cfg {
 	}
 }
 
+	struct switch_trait {
+		std::string name;
+		std::vector<std::string> flags;
+		bool default_;
+		std::string display_name;
+	};
 	struct compiler_trait {
 		std::string name;
 		std::string output_file;
@@ -92,7 +112,7 @@ namespace cfg {
 		std::vector<std::string> compile_command;
 		std::vector<std::string> version_command;
 		std::vector<std::string> run_command;
-		std::map<std::string, std::vector<std::string>> switches;
+		std::map<std::string, switch_trait> switches;
 		std::string source_suffix;
 		std::string display_name;
 	};
@@ -117,16 +137,17 @@ namespace cfg {
 			}
 			return {};
 		};
-		inline std::map<cfg::string, std::vector<cfg::string>> get_str_map(const cfg::object &x, const cfg::string &key) {
+		inline std::map<cfg::string, switch_trait> get_switches(const cfg::object &x, const cfg::string &key) {
 			if (const auto &v = find(x, key)) {
-				std::map<cfg::string, std::vector<cfg::string>> ret;
-				for (const auto &p: boost::get<cfg::object>(*v)) {
-					auto &r = ret[p.first];
-					if (const auto *s = boost::get<cfg::string>(&p.second)) {
-						r.emplace_back(*s);
-					} else {
-						for (const auto &s: boost::get<cfg::array>(p.second)) r.emplace_back(boost::get<cfg::string>(s));
-					}
+				std::map<cfg::string, switch_trait> ret;
+				for (const auto &a: boost::get<cfg::array>(*v)) {
+					const auto &s = boost::get<cfg::object>(a);
+					const auto name = boost::get<cfg::string>(s.at("name"));
+					auto &r = ret[name];
+					r.name = name;
+					r.flags = get_str_array(s, "flags");
+					r.default_ = boost::get<cfg::bool_>(s.at("default"));
+					r.display_name = boost::get<cfg::string>(s.at("display-name"));
 				}
 				return ret;
 			}
@@ -151,7 +172,7 @@ namespace cfg {
 			t.run_command = get_str_array(y, "run-command");
 			t.source_suffix = get_str(y, "source-suffix");
 			t.display_name = get_str(y, "display-name");
-			t.switches = get_str_map(y, "switches");
+			t.switches = get_switches(y, "switches");
 			const auto inherits = get_str_array(y, "inherits");
 			if (!inherits.empty()) inherit_map[t.name] = inherits;
 			ret[t.name] = t;
@@ -174,7 +195,7 @@ namespace cfg {
 				if (sub.source_suffix.empty()) sub.source_suffix = x.source_suffix;
 				if (sub.display_name.empty()) sub.display_name = x.display_name;
 				for (const auto &s: x.switches) {
-					if (sub.switches[s.first].empty()) sub.switches[s.first] = s.second;
+					sub.switches[s.first] = s.second;
 				}
 			}
 			inherit_map.erase(sub.name);

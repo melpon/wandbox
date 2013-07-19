@@ -1,28 +1,51 @@
 [
  {
   "name":"bin-common",
+  "displayable":false,
   "output-file":"prog.exe",
   "run-command":"./prog.exe",
  },{
   "name":"gcc-common",
+  "displayable":false,
   "display-name":"gcc",
   "language":"C++",
-  "switches":{
-   "warning":["-Wall", "-Wextra"],
-   "optimize":"-O2",
-   "C++11":"-std=c++0x",
-  },
+  "switches":[
+   {
+    "name":"warning",
+    "flags":["-Wall", "-Wextra"],
+    "default":true,
+    "display-name":"警告",
+   },{
+    "name":"optimize",
+    "flags":"-O2",
+    "default":false,
+    "display-name":"最適化",
+   },{
+    "name":"C++11",
+    "flags":"-std=c++0x",
+    "default":true,
+    "display-name":"C++11",
+   }
+  ],
   "source-suffix":".cc",
   "inherits":"bin-common",
  },{
   "name":"clang-common",
+  "displayable":false,
   "display-name":"clang",
-  "switches":{
-   "C++11":"-std=c++11",
-  },
+  "switches":[
+   {
+    "name":"C++11",
+    "flags":"-std=c++11",
+    "default":true,
+    "display-name":"C++11",
+   }
+  ],
   "inherits":"gcc-common",
  },{
   "name":"gcc-head",
+  "displayable":true,
+  "display-name":"gcc HEAD",
   "compile-command":[
    "/usr/local/gcc-head/bin/g++",
    "-oprog.exe",
@@ -34,12 +57,22 @@
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"gcc-common",
-  "switches":{
-   "C++11":"-std=c++11",
-   "C++14":"-std=c++1y",
-  }
+  "switches":[
+   {
+    "name":"C++11",
+    "flags":"-std=c++11",
+    "default":false,
+    "display-name":"C++11",
+   },{
+    "name":"C++14",
+    "flags":"-std=c++1y",
+    "default":true,
+    "display-name":"C++14",
+   }
+  ]
  },{
   "name":"gcc-4.8.1",
+  "displayable":true,
   "compile-command":[
    "/usr/local/gcc-4.8.1/bin/g++",
    "-oprog.exe",
@@ -51,12 +84,22 @@
   ],
   "version-command":["/usr/local/gcc-4.8.1/bin/g++", "-dumpversion"],
   "inherits":"gcc-common",
-  "switches":{
-   "C++11":"-std=c++11",
-   "C++14":"-std=c++1y",
-  }
+  "switches":[
+   {
+    "name":"C++11",
+    "flags":"-std=c++11",
+    "default":false,
+    "display-name":"C++11",
+   },{
+    "name":"C++14",
+    "flags":"-std=c++1y",
+    "default":true,
+    "display-name":"C++14",
+   }
+  ]
  },{
   "name":"gcc-4.7.3",
+  "displayable":true,
   "compile-command":[
    "/usr/local/gcc-4.7.3/bin/g++",
    "-oprog.exe",
@@ -68,11 +111,17 @@
   ],
   "version-command":["/usr/local/gcc-4.7.3/bin/g++", "-dumpversion"],
   "inherits":"gcc-common",
-  "switches":{
-   "C++11":"-std=c++11",
-  }
+  "switches":[
+   {
+    "name":"C++11",
+    "flags":"-std=c++11",
+    "default":true,
+    "display-name":"C++11",
+   }
+  ]
  },{
   "name":"gcc-4.6.4",
+  "displayable":true,
   "compile-command":[
    "/usr/local/gcc-4.6.4/bin/g++",
    "-oprog.exe",
@@ -86,6 +135,7 @@
   "inherits":"gcc-common",
  },{
   "name":"gcc-4.5.4",
+  "displayable": true,
   "compile-command":[
    "/usr/local/gcc-4.5.4/bin/g++",
    "-oprog.exe",
@@ -99,6 +149,7 @@
   "inherits":"gcc-common",
  },{
   "name":"gcc-4.4.7",
+  "displayable":true,
   "compile-command":[
    "/usr/local/gcc-4.4.7/bin/g++",
    "-oprog.exe",
@@ -113,6 +164,7 @@
   "inherits":"gcc-common",
  },{
   "name":"gcc-4.3.6",
+  "displayable":true,
   "compile-command":[
    "/usr/local/gcc-4.3.6/bin/g++",
    "-oprog.exe",
@@ -127,6 +179,8 @@
   "inherits":"gcc-common",
  },{
   "name":"clang-head",
+  "displayable":true,
+  "display-name":"clang HEAD",
   "compile-command":[
    "/usr/local/llvm-head/bin/clang++",
    "-oprog.exe",
@@ -143,11 +197,22 @@
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"clang-common",
-  "switches":{
-   "C++14":"-std=c++1y",
-  },
+  "switches":[
+   {
+    "name":"C++11",
+    "flags":"-std=c++11",
+    "default":false,
+    "display-name":"C++11",
+   },{
+    "name":"C++14",
+    "flags":"-std=c++1y",
+    "default":true,
+    "display-name":"C++14",
+   }
+  ],
  },{
   "name":"clang-3.3",
+  "displayable":true,
   "compile-command":[
    "/usr/local/llvm-3.3/bin/clang++",
    "-oprog.exe",
@@ -164,11 +229,22 @@
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"clang-common",
-  "switches":{
-   "C++14":"-std=c++1y",
-  },
+  "switches":[
+   {
+    "name":"C++11",
+    "flags":"-std=c++11",
+    "default":false,
+    "display-name":"C++11",
+   },{
+    "name":"C++14",
+    "flags":"-std=c++1y",
+    "default":true,
+    "display-name":"C++14",
+   }
+  ],
  },{
   "name":"clang-3.2",
+  "displayable":true,
   "compile-command":[
    "/usr/local/llvm-3.2/bin/clang++",
    "-oprog.exe",
@@ -185,11 +261,17 @@
   ],
   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.2/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
   "inherits":"clang-common",
-  "switches":{
-   "C++14":"-std=c++1y",
-  },
+  "switches":[
+   {
+    "name":"C++14",
+    "flags":"-std=c++1y",
+    "default":true,
+    "display-name":"C++14",
+   }
+  ],
  },{
   "name":"clang-3.1",
+  "displayable":true,
   "compile-command":[
    "/usr/local/llvm-3.1/bin/clang++",
    "-oprog.exe",
@@ -208,6 +290,7 @@
   "inherits":"clang-common",
  },{
   "name":"clang-3.0",
+  "displayable":true,
   "compile-command":[
    "/usr/local/llvm-3.0/bin/clang++",
    "-oprog.exe",
@@ -226,21 +309,37 @@
   "inherits":"clang-common",
  },{
   "name":"ghc-7.4",
+  "displayable":false,
   "language":"Haskell",
-  "switches":{
-   "warning":"-Wall",
-   "optimize":"-O2",
-  },
+  "switches":[
+   {
+    "name":"warning",
+    "flags":"-Wall",
+    "default":true,
+    "display-name":"警告",
+   },{
+    "name":"optimize",
+    "flags":"-O2",
+    "default":false,
+    "display-name":"最適化",
+   }
+  ],
   "source-suffix":".hs",
   "compile-command":["ghc", "-o", "prog.exe", "prog.hs"],
   "version-command":["ghc", "--numeric-version"],
   "display-name":"ghc",
  },{
   "name":"mono-2.8",
+  "displayable":false,
   "language":"C#",
-  "switches":{
-   "optimize":"-optimize"
-  },
+  "switches":[
+   {
+    "name":"optimize",
+    "flags":"-optimize",
+    "default":false,
+    "display-name":"最適化",
+   }
+  ],
   "source-suffix":".cs",
   "compile-command":["mcs", "-out:prog.exe", "prog.cs"],
   "version-command":["mcs", "-v"],

@@ -241,7 +241,7 @@ namespace wandbox {
 			if (it != received.end()) {
 				for (const auto &sw: c.switches) {
 					if (is_any_of(it->second, sw.first)) {
-						args.insert(args.end(), sw.second.begin(), sw.second.end());
+						args.insert(args.end(), sw.second.flags.begin(), sw.second.flags.end());
 					}
 				}
 			}
