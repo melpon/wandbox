@@ -20,21 +20,20 @@ AC_ARG_WITH(boost-lib,
 [AS_HELP_STRING([--with-boost-lib=PATH],
                 [specify directory for the installed Boost library])])
 
-boostlibs="-lboost_system -lboost_program_options"
+boostlibnames="-lboost_system -lboost_program_options"
 if test "x$with_boost" != x; then
-  boostlibs="-L$with_boost/lib -lboost_system"
+  boostlibs="-L$with_boost/lib"
   boostinc="-I$with_boost/include"
 fi
 if test "x$with_boost_include" != x; then
   boostinc="-I$with_boost_include"
 fi
 if test "x$with_boost_lib" != x; then
-  boostlibs="-L$with_boost_lib -lboost_system"
+  boostlibs="-L$with_boost_lib"
 fi
 
-have_boost=yes
 CXXFLAGS="$CXXFLAGS $boostinc"
-LIBS="$LIBS $boostlibs"
+LIBS="$LIBS $boostlibs $boostlibnames"
 AC_MSG_CHECKING([for boost])
 AC_LANG([C++])
 AC_TRY_LINK(
