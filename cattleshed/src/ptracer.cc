@@ -395,7 +395,7 @@ namespace wandbox {
 		setrlimit(RLIMIT_DATA, tracee_max_data_segment);
 		setrlimit(RLIMIT_FSIZE, tracee_max_file_size);
 		setrlimit(RLIMIT_NOFILE, tracee_max_open_file);
-		::nice(tracee_nice_value);
+		if (::nice(tracee_nice_value) < 0) throw std::runtime_error("nice(2) failed");
 	}
 
 	bool kernel_has_ptrace_o_exitkill() {

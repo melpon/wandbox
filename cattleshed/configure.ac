@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 AC_INIT([cattleshed], [0.0], [https://github.com/melpon/wandbox/issues])
 AM_INIT_AUTOMAKE([-Wall])
 AC_CONFIG_HEADERS([config.h])
@@ -35,11 +35,13 @@ fi
 have_boost=yes
 CXXFLAGS="$CXXFLAGS $boostinc"
 LIBS="$LIBS $boostlibs"
-AC_MSG_CHECKING([boost])
+AC_MSG_CHECKING([for boost])
 AC_LANG([C++])
 AC_TRY_LINK(
- [#include "boost/asio.hpp"],
  [
+  #include "boost/version.hpp"
+  #include "boost/system/error_code.hpp"
+ ], [
   #if !defined(BOOST_VERSION) || BOOST_VERSION < 104700
   choke me
   #endif
@@ -56,7 +58,6 @@ AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_HEADERS([fcntl.h stdlib.h sys/time.h syslog.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_MODE_T
 AC_TYPE_PID_T

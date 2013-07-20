@@ -340,7 +340,11 @@ namespace wandbox {
 			auto &s = received["Source"];
 			{
 				int fd = ::openat(::dirfd(workdir.get()), srcname.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC, 0600);
-				::write(fd, s.data(), s.length());
+				for (std::size_t offset = 0; offset < s.length(); ) {
+					const auto wrote = ::write(fd, s.data()+offset, s.length()-offset);
+					if (wrote < 0) throw std::runtime_error("write(2) failed");
+					offset += wrote;
+				}
 				::fsync(fd);
 				::close(fd);
 			}
@@ -516,7 +520,7 @@ namespace wandbox {
 		}
 		listener(): basedir((::mkdir("/tmp/wandbox", 0700), ::opendir("/tmp/wandbox")), &::closedir) {
 			if (!basedir) throw std::runtime_error("cannot open working dir");
-			::fchdir(::dirfd(basedir.get()));
+			if (::fchdir(::dirfd(basedir.get())) < 0) throw std::runtime_error("fchdir(2) failed");
 		}
 	private:
 		shared_ptr<DIR> basedir;
