@@ -26,12 +26,12 @@ namespace cfg {
 		std::string,
 		std::vector<boost::recursive_variant_>,
 		std::unordered_map<std::string, boost::recursive_variant_>,
+		int,
 		bool
 	>::type value;
 	typedef std::string string;
 	typedef std::unordered_map<string, value> object;
 	typedef std::vector<value> array;
-	typedef bool bool_;
 
 	namespace qi = boost::spirit::qi;
 
@@ -40,19 +40,17 @@ namespace cfg {
 		config_grammar(): qi::grammar<Iter, value(), qi::space_type>(top) {
 			namespace phx = boost::phoenix;
 			top %= obj | arr;
-			val %= obj | arr | str | bool_;
+			val %= obj | arr | str | qi::int_ | qi::bool_;
 			pair %= str > ':' > val;
 			obj %= '{' > ((pair % ',') > -qi::lit(',')) > '}';
 			arr %= '[' > ((val % ',') > -qi::lit(',')) > ']';
 			str %= qi::lexeme['\"' > *(('\\' > qi::char_("\\\"\'\t\r\n")) | (qi::char_-'\"')) > '\"'];
-			bool_ %= qi::bool_;
 			//debug(top);
 			//debug(val);
 			//debug(pair);
 			//debug(obj);
 			//debug(arr);
 			//debug(str);
-			//debug(bool_);
 		}
 		qi::rule<Iter, value(), qi::space_type> top;
 		qi::rule<Iter, std::pair<string, value>(), qi::space_type> pair;
@@ -60,7 +58,6 @@ namespace cfg {
 		qi::rule<Iter, array(), qi::space_type> arr;
 		qi::rule<Iter, value(), qi::space_type> val;
 		qi::rule<Iter, string(), qi::space_type> str;
-		qi::rule<Iter, bool(), qi::space_type> bool_;
 	};
 
 	struct operator_output: boost::static_visitor<std::ostream &> {
@@ -93,6 +90,9 @@ namespace cfg {
 			os << "]";
 			return os;
 		}
+		std::ostream &operator ()(const int &i) const {
+			return os << i;
+		}
 		std::ostream &operator ()(const bool& bool_) const {
 			return os << (bool_ ? "true" : "false");
 		}
@@ -120,6 +120,14 @@ namespace cfg {
 			if (const auto &v = find(x, key)) return boost::get<cfg::string>(*v);
 			return {};
 		};
+		inline int get_int(const cfg::object &x, const cfg::string &key) {
+			if (const auto &v = find(x, key)) return boost::get<int>(*v);
+			return 0;
+		}
+		inline bool get_bool(const cfg::object &x, const cfg::string &key) {
+			if (const auto &v = find(x, key)) return boost::get<bool>(*v);
+			return false;
+		}
 		inline std::vector<cfg::string> get_str_array(const cfg::object &x, const cfg::string &key) {
 			if (const auto &v = find(x, key)) {
 				if (const auto *s = boost::get<cfg::string>(&*v)) return { *s };
@@ -134,12 +142,11 @@ namespace cfg {
 				switch_set ret;
 				for (const auto &a: boost::get<cfg::array>(*v)) {
 					const auto &s = boost::get<cfg::object>(a);
-					const auto &name = boost::get<cfg::string>(s.at("name"));
 					switch_trait x;
-					x.name = name;
+					x.name = get_str(s, "name");
 					x.flags = get_str_array(s, "flags");
-					x.default_ = boost::get<cfg::bool_>(s.at("default"));
-					x.display_name = boost::get<cfg::string>(s.at("display-name"));
+					x.default_ = get_bool(s, "default");
+					x.display_name = get_str(s, "display-name");
 					ret.push_back(x);
 				}
 				return ret;
@@ -152,7 +159,7 @@ namespace cfg {
 		using namespace detail;
 		compiler_set ret;
 		std::unordered_map<std::string, std::vector<std::string>> inherit_map;
-		for (auto &x: boost::get<cfg::array>(o)) {
+		for (auto &x: boost::get<cfg::array>(boost::get<cfg::object>(o).at("compilers"))) {
 			auto &y = boost::get<cfg::object>(x);
 			compiler_trait t;
 			t.name = get_str(y, "name");
@@ -164,7 +171,7 @@ namespace cfg {
 			t.source_suffix = get_str(y, "source-suffix");
 			t.display_name = get_str(y, "display-name");
 			t.display_compile_command = get_str(y, "display-compile-command");
-			t.displayable = boost::get<cfg::bool_>(y.at("displayable"));
+			t.displayable = get_bool(y, "displayable");
 			t.switches = get_switches(y, "switches");
 			const auto inherits = get_str_array(y, "inherits");
 			if (!inherits.empty()) inherit_map[t.name] = inherits;
@@ -197,6 +204,33 @@ namespace cfg {
 		return ret;
 	}
 
+	network_config load_network_config(const cfg::value &values) {
+		using namespace detail;
+		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("network"));
+		return { get_int(o, "listen-port") };
+	}
+
+	jail_config load_jail_config(const cfg::value &values) {
+		using namespace detail;
+		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("jail"));
+		jail_config x;
+		x.exe = get_str(o, "jail");
+		x.basedir = get_str(o, "basedir");
+		x.max_address_space = get_int(o, "max-address-space");
+		x.max_cpu_time = get_int(o, "max-cpu-time");
+		x.max_data_segment = get_int(o, "max-data-segment");
+		x.max_file_size = get_int(o, "max-file-size");
+		x.max_open_file = get_int(o, "max-open-file");
+		x.nice = get_int(o, "nice");
+		for (const auto &y: get_str_array(o, "allow-file-exact")) {
+			x.allow_file_exact.insert(y);
+		}
+		for (const auto &y: get_str_array(o, "allow-file-prefix")) {
+			x.allow_file_prefix.insert(y);
+		}
+		return x;
+	}
+
 	server_config load_config(std::istream &is) {
 		boost::io::ios_flags_saver sv(is);
 		is.unsetf(std::ios::skipws);
@@ -206,6 +240,6 @@ namespace cfg {
 		auto first = (s::istream_iterator(is));
 		const auto last = decltype(first)();
 		qi::phrase_parse(first, last, cfg::config_grammar<decltype(first)>(), qi::space, o);
-		return { load_compiler_trait(o) };
+		return { load_network_config(o), load_jail_config(o), load_compiler_trait(o) };
 	}
 }

@@ -43,8 +43,6 @@ namespace wandbox {
 		~ctor_notifier() { print("dtor"); }
 	};
 
-	static const short listen_port = 2012;
-
 	extern void *enabler;
 
 	template <typename Range, typename std::enable_if<std::is_convertible<typename boost::range_category<Range>::type, std::bidirectional_iterator_tag>::value>::type *& = enabler>

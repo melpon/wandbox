@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <istream>
 
 #include <boost/multi_index_container.hpp>
@@ -32,7 +33,26 @@ namespace wandbox {
 	};
 	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
 
+	struct network_config {
+		int listen_port;
+	};
+
+	struct jail_config {
+		std::string exe;
+		std::string basedir;
+		int max_address_space;
+		int max_cpu_time;
+		int max_data_segment;
+		int max_file_size;
+		int max_open_file;
+		int nice;
+		std::unordered_set<std::string> allow_file_exact;
+		std::unordered_set<std::string> allow_file_prefix;
+	};
+
 	struct server_config {
+		network_config network;
+		jail_config jail;
 		compiler_set compilers;
 	};
 

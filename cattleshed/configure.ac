@@ -20,7 +20,7 @@ AC_ARG_WITH(boost-lib,
 [AS_HELP_STRING([--with-boost-lib=PATH],
                 [specify directory for the installed Boost library])])
 
-boostlibs="-lboost_system"
+boostlibs="-lboost_system -lboost_program_options"
 if test "x$with_boost" != x; then
   boostlibs="-L$with_boost/lib -lboost_system"
   boostinc="-I$with_boost/include"
@@ -28,7 +28,7 @@ fi
 if test "x$with_boost_include" != x; then
   boostinc="-I$with_boost_include"
 fi
-if test "x$with_mpc_lib" != x; then
+if test "x$with_boost_lib" != x; then
   boostlibs="-L$with_boost_lib -lboost_system"
 fi
 

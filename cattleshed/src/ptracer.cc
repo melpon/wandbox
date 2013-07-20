@@ -24,6 +24,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -33,6 +34,8 @@
 #include <sys/reg.h>
 #include <sys/resource.h>
 #include <syslog.h>
+
+#include "load_config.hpp"
 
 #ifndef PTRACE_O_EXITKILL
 #define PTRACE_O_EXITKILL (1 << 20)
@@ -45,19 +48,7 @@
 
 namespace wandbox {
 
-	/// システムリソースの制限値. あとで設定に追い出す.
-	/// RLIMIT_AS(1024MiB)
-	constexpr int tracee_max_address_space = 1024 * 1024 * 1024;
-	/// RLIMIT_CPU(10min)
-	constexpr int tracee_max_cpu_time = 10 * 60;
-	/// RLIMIT_DATA(128MiB)
-	constexpr int tracee_max_data_segment = 128 * 1024 * 1024;
-	/// RLIMIT_FSIZE(128MiB)
-	constexpr int tracee_max_file_size = 128 * 1024 * 1024;
-	/// RLIMIT_NOFILE(16)
-	constexpr int tracee_max_open_file = 16;
-	/// 子プロセスの優先度.
-	constexpr int tracee_nice_value = 5;
+	server_config config;
 
 	template <typename T, bool ...>
 	struct do_to_string_impl;
@@ -169,39 +160,42 @@ namespace wandbox {
 	inline bool starts_with(const std::string &tested, const std::string &prefix) {
 		return tested.length() >= prefix.length() && tested.substr(0, prefix.length()) == prefix;
 	}
+	enum struct allowed_access_mode {
+		none,
+		readonly,
+		readwrite
+	};
+	allowed_access_mode get_file_accessiblity(const std::string &path) {
+		const auto realpath = canonicalize_path(path);
+		if (config.jail.allow_file_exact.count(path) == 1) return allowed_access_mode::readonly;
+		if (rng::find_if(config.jail.allow_file_prefix, std::bind(starts_with, realpath, std::placeholders::_1)) != config.jail.allow_file_prefix.end()) return allowed_access_mode::readonly;
+		if (!starts_with(realpath, "..") && !starts_with(realpath, "/")) return allowed_access_mode::readwrite;
+		return allowed_access_mode::none;
+	}
 	/// ファイルを開かせてもよいかどうか判断する
 	/// @return 開かせてよい時 @true
 	bool is_file_openable(const std::string &path, int flags, mode_t) {
-		// TODO: この辺の許可リストは外から読むようにしたい
-		static const auto allowed_paths = []() -> std::vector<std::string> {
-			std::vector<std::string> l = {"/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat"};
-			std::sort(l.begin(), l.end());
-			return l;
-		}();
-		static const std::vector<std::string> allowed_prefixes = { "/lib", "/usr/lib", "/usr/local", "/proc/self" };
-		const auto realpath = canonicalize_path(path);
 		const int openmode = flags & O_ACCMODE;
-		if (rng::binary_search(allowed_paths, path) && openmode == O_RDONLY) return true;
-		if (rng::find_if(allowed_prefixes, std::bind(starts_with, realpath, std::placeholders::_1)) != allowed_prefixes.end() && openmode == O_RDONLY) return true;
-		if (!starts_with(realpath, "..") && !starts_with(realpath, "/")) return true;
-		trace(LOG_DEBUG, "opening path '%s' is not allowed", path);
+		switch (get_file_accessiblity(path)) {
+		case allowed_access_mode::readonly:
+			return openmode == O_RDONLY;
+		case allowed_access_mode::readwrite:
+			return true;
+		default:
+			trace(LOG_DEBUG, "opening path '%s' is not allowed", path);
+		}
 		return false;
 	}
 	/// ファイルを stat してもよいかどうか判断する
 	/// @return 開かせてよい時 @true
 	bool is_file_stattable(const std::string &path) {
-		// FIXME: 上と完全に dup しているのでどうにかする
-		static const auto allowed_paths = []() -> std::vector<std::string> {
-			std::vector<std::string> l = {"/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat"};
-			std::sort(l.begin(), l.end());
-			return l;
-		}();
-		static const std::vector<std::string> allowed_prefixes = { "/lib", "/usr/lib", "/usr/local", "/proc/self" };
-		const auto realpath = canonicalize_path(path);
-		if (rng::binary_search(allowed_paths, path)) return true;
-		if (rng::find_if(allowed_prefixes, std::bind(starts_with, realpath, std::placeholders::_1)) != allowed_prefixes.end()) return true;
-		if (!starts_with(realpath, "..") && !starts_with(realpath, "/")) return true;
-		trace(LOG_DEBUG, "statting path '%s' is not allowed", path);
+		switch (get_file_accessiblity(path)) {
+		case allowed_access_mode::readonly:
+		case allowed_access_mode::readwrite:
+			return true;
+		default:
+			trace(LOG_DEBUG, "statting path '%s' is not allowed", path);
+		}
 		return false;
 	}
 	bool is_acceptable_clone_flag(unsigned long flag) {
@@ -390,12 +384,12 @@ namespace wandbox {
 			const ::rlimit xlim = { lim, lim };
 			::setrlimit(resource, &xlim);
 		};
-		setrlimit(RLIMIT_AS, tracee_max_address_space);
-		setrlimit(RLIMIT_CPU, tracee_max_cpu_time);
-		setrlimit(RLIMIT_DATA, tracee_max_data_segment);
-		setrlimit(RLIMIT_FSIZE, tracee_max_file_size);
-		setrlimit(RLIMIT_NOFILE, tracee_max_open_file);
-		if (::nice(tracee_nice_value) < 0) throw std::runtime_error("nice(2) failed");
+		setrlimit(RLIMIT_AS, config.jail.max_address_space);
+		setrlimit(RLIMIT_CPU, config.jail.max_cpu_time);
+		setrlimit(RLIMIT_DATA, config.jail.max_data_segment);
+		setrlimit(RLIMIT_FSIZE, config.jail.max_file_size);
+		setrlimit(RLIMIT_NOFILE, config.jail.max_open_file);
+		if (::nice(config.jail.nice) < 0) throw std::runtime_error("nice(2) failed");
 	}
 
 	bool kernel_has_ptrace_o_exitkill() {
@@ -406,11 +400,7 @@ namespace wandbox {
 		return major > 3 || (major == 3 && minor >= 8);
 	}
 
-	int main(int argc, char **argv) {
-		if (argc < 2) return -1;
-
-		if (not kernel_has_ptrace_o_exitkill()) return -1;
-
+	int do_fork_exec(char **argv) {
 		sigset_t sigs;
 		sigfillset(&sigs);
 		sigdelset(&sigs, SIGKILL);
@@ -421,7 +411,6 @@ namespace wandbox {
 			apply_system_resource_limits();
 			sigprocmask(SIG_UNBLOCK, &sigs, 0);
 			ptrace(PTRACE_TRACEME, 0, 0, 0);
-			++argv;
 			return ::execv(*argv, argv);
 		} else if (pid > 0) {
 			::openlog("ptracer", LOG_PID|LOG_CONS, LOG_AUTHPRIV);
@@ -443,6 +432,51 @@ namespace wandbox {
 		} else {
 			return -1;
 		}
+	}
+
+	int main(int argc, char **argv) {
+		if (not kernel_has_ptrace_o_exitkill()) return -1;
+
+		std::string config_file = std::string(DATADIR) + "/config";
+
+		{
+			const ::option opts[] = {
+				{ "help", no_argument, nullptr, 'h' },
+				{ "config", required_argument, nullptr, 'c' },
+				{ },
+			};
+			while (true) {
+				const int c = ::getopt_long(argc, argv, "hc:", opts, nullptr);
+				switch (c) {
+				case -1: goto end_getopt;
+				case 'c':
+					config_file = ::optarg;
+					break;
+				case 'h':
+					std::cout << "usage: " << argv[0] << " {-c configfile} -- commands..." << std::endl;
+					return 0;
+				case '?':
+					std::cerr << "unknown option '" << (char)optopt << "'" << std::endl;
+					return -1;
+				default:
+					std::cerr << "unknown option '" << (char)c << "'" << std::endl;
+					return -1;
+				}
+			}
+		end_getopt:;
+		} {
+			const std::shared_ptr<char> p(::realpath(config_file.c_str(), nullptr), &::free);
+			if (!p) {
+				std::cerr << "config file '" << config_file << "'not found" << std::endl;
+				return -1;
+			}
+			config_file = p.get();
+		} {
+			std::ifstream f(config_file.c_str());
+			config = load_config(f);
+		}
+
+		return do_fork_exec(argv+optind);
 	}
 }
 

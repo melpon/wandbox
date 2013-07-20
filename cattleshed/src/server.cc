@@ -7,19 +7,20 @@
 #include <vector>
 #include <array>
 #include <thread>
-#include <mutex>
 #include <sstream>
 #include <set>
 #include <functional>
 #include <list>
-#include <condition_variable>
+#include <fstream>
+#include <system_error>
 #include <boost/range.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/istream_range.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include <boost/spirit/include/qi_match.hpp>
+#include <boost/program_options.hpp>
+#include <boost/system/system_error.hpp>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -27,6 +28,7 @@
 #include <dirent.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <libgen.h>
 
 namespace wandbox {
 
@@ -198,6 +200,50 @@ namespace wandbox {
 			return { last, false };
 		}
 	};
+	__attribute__((noreturn)) void throw_system_error(int err) {
+		throw std::system_error(err, std::system_category());
+	}
+	string dirname(const string &path) {
+		std::vector<char> buf(path.begin(), path.end());
+		buf.push_back(0);
+		return ::dirname(buf.data());
+	}
+	string basename(const string &path) {
+		std::vector<char> buf(path.begin(), path.end());
+		buf.push_back(0);
+		return ::basename(buf.data());
+	}
+	string readlink(const string &path) {
+		std::vector<char> buf(PATH_MAX);
+		while (true) {
+			const int ret = ::readlink(path.c_str(), buf.data(), buf.size());
+			if (ret < 0) throw_system_error(errno);
+			if (ret < buf.size()) return { buf.begin(), buf.begin()+ret };
+			buf.resize(buf.size()*2);
+		}
+	}
+	string realpath(const string &path) {
+		const std::shared_ptr<char> p(::realpath(path.c_str(), nullptr), &::free);
+		if (!p) throw_system_error(errno);
+		return p.get();
+	}
+
+	void mkdir(const string &path, ::mode_t mode) {
+		if (::mkdir(path.c_str(), mode) < 0) throw_system_error(errno);
+	}
+
+	std::shared_ptr<DIR> opendir(const string &path) {
+		DIR *dir = ::opendir(path.c_str());
+		if (!dir) throw_system_error(errno);
+		return std::shared_ptr<DIR>(dir, &::closedir);
+	}
+
+	string mkdtemp(const string &base) {
+		std::vector<char> buf(base.begin(), base.end());
+		buf.push_back(0);
+		if (!::mkdtemp(buf.data())) throw_system_error(errno);
+		return buf.data();
+	}
 }
 
 namespace boost {
@@ -210,6 +256,7 @@ namespace boost {
 namespace wandbox {
 
 	string ptracer;
+	string config_file;
 	server_config config;
 
 	struct thread_compare {
@@ -249,7 +296,7 @@ namespace wandbox {
 		}
 		void send_version() {
 			const auto proc = [this](const vector<string>& args) -> std::string {
-				shared_ptr<DIR> workdir(::opendir("/"), ::closedir);
+				const auto workdir = opendir("/");
 				const child_process c = piped_spawn(_P_WAIT, workdir.get(), args);
 				::close(c.fd_stdin);
 				::close(c.fd_stderr);
@@ -424,7 +471,7 @@ namespace wandbox {
 					send_exitcode(st);
 				} else {
 					vector<string> runargs = get_compiler().run_command;
-					runargs.insert(runargs.begin(), ptracer);
+					runargs.insert(runargs.begin(), { ptracer, "--config=" + config_file, "--" });
 					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
 					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
 					::close(c.fd_stdin);
@@ -489,11 +536,12 @@ namespace wandbox {
 		{
 			acc.accept(sock);
 			do {
-				char workdirnamebase[] = "wandboxXXXXXX";
-				workdirname = ::mkdtemp(workdirnamebase);
-				workdir.reset(::opendir(workdirnamebase), ::closedir);
+				try {
+					workdir = opendir(mkdtemp("wandboxXXXXXX"));
+				} catch (std::system_error &e) {
+					if (e.code().value() != ENOTDIR) throw;
+				}
 			} while (!workdir && errno == ENOTDIR);
-			if (!workdir) throw std::runtime_error("cannot open temporary directory");
 			cc_pid = 0;
 			prog_pid = 0;
 		}
@@ -502,7 +550,6 @@ namespace wandbox {
 		tcp::socket sock;
 		shared_ptr<DIR> workdir;
 		list<stream_descriptor_pair> pipes;
-		string workdirname;
 		std::map<std::string, std::string> received;
 		int cc_pid, prog_pid;
 	};
@@ -518,21 +565,53 @@ namespace wandbox {
 				std::thread([pcb] { (*pcb)(); }).detach();
 			}
 		}
-		listener(): basedir((::mkdir("/tmp/wandbox", 0700), ::opendir("/tmp/wandbox")), &::closedir) {
-			if (!basedir) throw std::runtime_error("cannot open working dir");
-			if (::fchdir(::dirfd(basedir.get())) < 0) throw std::runtime_error("fchdir(2) failed");
+		listener() {
+			try {
+				mkdir(config.jail.basedir, 0700);
+			} catch (std::system_error &e) {
+				if (e.code().value() != EEXIST) throw;
+			}
+			basedir = opendir(config.jail.basedir);
+			if (::fchdir(::dirfd(basedir.get())) < 0) throw_system_error(errno);
 		}
 	private:
 		shared_ptr<DIR> basedir;
 	};
 }
-int main(int, char **) {
+int main(int argc, char **argv) {
 	using namespace wandbox;
-	config = load_config(std::cin);
+
 	{
-		unique_ptr<char, void(*)(void *)> cwd(::getcwd(nullptr, 0), &::free);
-		ptracer = string(cwd.get()) + "/ptracer.exe";
+		namespace po = boost::program_options;
+
+		{
+			string config_file_raw;
+			po::options_description opt("options");
+			opt.add_options()
+				("help,h", "show this help")
+				("config,c", po::value<string>(&config_file_raw)->default_value(string(DATADIR) + "/config"), "specify config file")
+			;
+			
+			po::variables_map vm;
+			po::store(po::parse_command_line(argc, argv, opt), vm);
+			po::notify(vm);
+
+			if (vm.count("help")) {
+				std::cout << opt << std::endl;
+				return 0;
+			}
+
+			config_file = realpath(config_file_raw);
+			if (config_file.empty()) {
+				std::cerr << "config file '" << config_file_raw << "'not found" << std::endl;
+				return 1;
+			}
+		}
+		std::ifstream f(config_file);
+		config = load_config(f);
+	} {
+		ptracer = realpath(dirname(realpath("/proc/self/exe")) + "/" + config.jail.exe);
 	}
 	listener s;
-	s(boost::asio::ip::tcp::v4(), listen_port);
+	s(boost::asio::ip::tcp::v4(), config.network.listen_port);
 }
