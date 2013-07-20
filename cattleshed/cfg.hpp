@@ -210,9 +210,7 @@ namespace cfg {
 				if (sub.source_suffix.empty()) sub.source_suffix = x.source_suffix;
 				if (sub.display_name.empty()) sub.display_name = x.display_name;
 				if (sub.display_compile_command.empty()) sub.display_compile_command = x.display_compile_command;
-				for (const auto &s: x.switches) {
-					if (sub.switches.template get<1>().count(s.name) == 0) sub.switches.push_back(s);
-				}
+				if (sub.switches.empty()) sub.switches = x.switches;
 				ret.get<1>().replace(pos, sub);
 			}
 			inherit_map.erase(sub.name);

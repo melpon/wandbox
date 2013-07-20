@@ -282,6 +282,7 @@ namespace wandbox {
 						"\t" + sw.display_name;
 				}
 				line += "\n";
+                std::cout << line << std::endl;
 			}
 			line = encode_qp(line);
 			const auto str = ([&]() -> string {
