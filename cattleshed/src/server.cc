@@ -190,15 +190,16 @@ namespace wandbox {
 	}
 
 	struct end_read_condition {
+		explicit end_read_condition(std::size_t min = 0): min(min) { }
 		template <typename Iter>
 		std::pair<Iter, bool> operator ()(Iter first, Iter last) const {
-			std::size_t limit = BUFSIZ;
-			while (first != last) {
-				if (*first++ == '\n') return { first, true };
-				if (--limit == 0) return { last, true };
-			}
-			return { last, false };
+			const auto d = std::distance(first, last);
+			if (d < min) return { first, false };
+			if (d >= BUFSIZ) return { last, true };
+			const auto ite = std::find(first, last, '\n');
+			return { ite, ite != last };
 		}
+		std::size_t min;
 	};
 	__attribute__((noreturn)) void throw_system_error(int err) {
 		throw std::system_error(err, std::system_category());
@@ -352,18 +353,18 @@ namespace wandbox {
 
 		bool wait_run_command() {
 			asio::streambuf buf;
+			bool exhausted = false;
 			while (true) {
-				asio::read_until(sock, buf, end_read_condition());
+				asio::read_until(sock, buf, end_read_condition(asio::buffer_size(buf.data()) + (exhausted ? 1 : 0)));
 				const auto begin = asio::buffer_cast<const char *>(buf.data());
 				auto ite = begin;
 				const auto end = ite + asio::buffer_size(buf.data());
 
-				do {
-					std::string command;
-					int len = 0;
-					if (!qi::parse(ite, end, +(qi::char_ - qi::space) > qi::omit[*qi::space] > qi::int_ > qi::omit[':'], command, len)) break;
-					std::string data;
-					if (!qi::parse(ite, end, qi::repeat(len)[qi::char_] >> qi::omit[qi::eol], data)) break;
+				std::string command;
+				int len = 0;
+				std::string data;
+				std::cout << std::string(ite, end) << std::endl;
+				if (qi::parse(ite, end, +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) {
 
 					std::cout << "command: " << command << " : " << data << std::endl;
 					if (command == "Control" && data == "run") return true;
@@ -372,8 +373,10 @@ namespace wandbox {
 						return false;
 					}
 					received[command] += decode_qp(data);
-				} while (true) ;
-				qi::parse(ite, end, *(qi::char_-qi::eol) >> qi::eol);
+					exhausted = false;
+				} else {
+					exhausted = true;
+				}
 				buf.consume(ite - begin);
 			}
 		}
