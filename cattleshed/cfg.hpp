@@ -1,7 +1,12 @@
+#include <map>
 #include <string>
 #include <vector>
 #include <unordered_map>
 
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/hashed_index.hpp>
 #include <boost/variant.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -34,7 +39,7 @@ namespace cfg {
 			pair %= str >> ':' >> val;
 			obj %= '{' > ((pair % ',') > -qi::lit(',')) > '}';
 			arr %= '[' > ((val % ',') > -qi::lit(',')) > ']';
-			str %= qi::lexeme['\"' > *(qi::char_-'\"') > '\"'];
+			str %= qi::lexeme['\"' > *(('\\' >> qi::char_("\\\"\'\t\r\n")) | (qi::char_-'\"')) > '\"'];
 			bool_ %= qi::bool_;
 			//debug(top);
 			//debug(val);
@@ -99,12 +104,15 @@ namespace cfg {
 	}
 }
 
+	namespace mendex = boost::multi_index;
+
 	struct switch_trait {
 		std::string name;
 		std::vector<std::string> flags;
 		bool default_;
 		std::string display_name;
 	};
+	typedef mendex::multi_index_container<switch_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<switch_trait, std::string, &switch_trait::name>>>> switch_set;
 	struct compiler_trait {
 		std::string name;
 		std::string output_file;
@@ -112,11 +120,12 @@ namespace cfg {
 		std::vector<std::string> compile_command;
 		std::vector<std::string> version_command;
 		std::vector<std::string> run_command;
-		std::map<std::string, switch_trait> switches;
+		switch_set switches;
 		std::string source_suffix;
 		std::string display_name;
 		bool displayable;
 	};
+	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
 
 	namespace detail {
 		template <typename Map>
@@ -138,17 +147,18 @@ namespace cfg {
 			}
 			return {};
 		};
-		inline std::map<cfg::string, switch_trait> get_switches(const cfg::object &x, const cfg::string &key) {
+		inline switch_set get_switches(const cfg::object &x, const cfg::string &key) {
 			if (const auto &v = find(x, key)) {
-				std::map<cfg::string, switch_trait> ret;
+				switch_set ret;
 				for (const auto &a: boost::get<cfg::array>(*v)) {
 					const auto &s = boost::get<cfg::object>(a);
-					const auto name = boost::get<cfg::string>(s.at("name"));
-					auto &r = ret[name];
-					r.name = name;
-					r.flags = get_str_array(s, "flags");
-					r.default_ = boost::get<cfg::bool_>(s.at("default"));
-					r.display_name = boost::get<cfg::string>(s.at("display-name"));
+					const auto &name = boost::get<cfg::string>(s.at("name"));
+					switch_trait x;
+					x.name = name;
+					x.flags = get_str_array(s, "flags");
+					x.default_ = boost::get<cfg::bool_>(s.at("default"));
+					x.display_name = boost::get<cfg::string>(s.at("display-name"));
+					ret.push_back(x);
 				}
 				return ret;
 			}
@@ -156,12 +166,12 @@ namespace cfg {
 		};
 	}
 	template <typename Iter>
-	std::map<std::string, compiler_trait> load_compiler_trait(Iter begin, Iter end) {
+	compiler_set load_compiler_trait(Iter begin, Iter end) {
 		using namespace detail;
 		cfg::value o;
 		qi::phrase_parse(begin, end, cfg::config_grammar<Iter>(), qi::space, o);
-		std::map<std::string, compiler_trait> ret;
-		std::map<std::string, std::vector<std::string>> inherit_map;
+		compiler_set ret;
+		std::unordered_map<std::string, std::vector<std::string>> inherit_map;
 		for (auto &x: boost::get<cfg::array>(o)) {
 			auto &y = boost::get<cfg::object>(x);
 			compiler_trait t;
@@ -177,7 +187,7 @@ namespace cfg {
 			t.switches = get_switches(y, "switches");
 			const auto inherits = get_str_array(y, "inherits");
 			if (!inherits.empty()) inherit_map[t.name] = inherits;
-			ret[t.name] = t;
+			ret.push_back(t);
 		}
 		while (!inherit_map.empty()) {
 			const auto ite = std::find_if(inherit_map.begin(), inherit_map.end(), [&](const std::pair<const std::string, std::vector<std::string>> &p) {
@@ -186,9 +196,10 @@ namespace cfg {
 				});
 			});
 			if (ite == inherit_map.end()) break;
-			auto &sub = ret[ite->first];
+			const auto pos = ret.get<1>().find(ite->first);
+			auto sub = *pos;
 			for (const auto &target: ite->second) {
-				const auto &x = ret[target];
+				const auto &x = *ret.get<1>().find(target);
 				if (sub.output_file.empty()) sub.output_file = x.output_file;
 				if (sub.language.empty()) sub.language = x.language;
 				if (sub.compile_command.empty()) sub.compile_command = x.compile_command;
@@ -197,8 +208,9 @@ namespace cfg {
 				if (sub.source_suffix.empty()) sub.source_suffix = x.source_suffix;
 				if (sub.display_name.empty()) sub.display_name = x.display_name;
 				for (const auto &s: x.switches) {
-					sub.switches[s.first] = s.second;
+					if (sub.switches.template get<1>().count(s.name) == 0) sub.switches.push_back(s);
 				}
+				ret.get<1>().replace(pos, sub);
 			}
 			inherit_map.erase(sub.name);
 		}

@@ -168,7 +168,7 @@ namespace wandbox {
 				::close(pipe_stdin[0]);
 				::close(pipe_stdout[1]);
 				::close(pipe_stderr[1]);
-				
+
 				child_process child { pid, pipe_stdin[1], pipe_stdout[0], pipe_stderr[0] };
 				if (mode == _P_WAIT) {
 					int st;
@@ -210,7 +210,7 @@ namespace boost {
 namespace wandbox {
 
 	string ptracer;
-	std::map<std::string, compiler_trait> compilers;
+	compiler_set compilers;
 
 	struct thread_compare {
 		bool operator ()(const std::thread &x, const std::thread &y) const {
@@ -232,7 +232,7 @@ namespace wandbox {
 				qi::parse(ite, s.end(), "compiler=" >> *qi::char_, ret);
 				return ret;
 			}();
-		    return compilers.at(compiler);
+		    return *compilers.get<1>().find(compiler);
 		}
 		vector<string> get_compiler_arg() const {
 			const auto &c = get_compiler();
@@ -240,8 +240,8 @@ namespace wandbox {
 			const auto it = received.find("CompilerOption");
 			if (it != received.end()) {
 				for (const auto &sw: c.switches) {
-					if (is_any_of(it->second, sw.first)) {
-						args.insert(args.end(), sw.second.flags.begin(), sw.second.flags.end());
+					if (is_any_of(it->second, sw.name)) {
+						args.insert(args.end(), sw.flags.begin(), sw.flags.end());
 					}
 				}
 			}
@@ -261,15 +261,15 @@ namespace wandbox {
 			};
 			string line;
 			for (const auto &c: compilers) {
-				if (!c.second.displayable) continue;
-				if (c.second.version_command.empty()) continue;
+				if (!c.displayable) continue;
+				if (c.version_command.empty()) continue;
 				string ver;
 				{
-					std::stringstream ss(proc(c.second.version_command));
+					std::stringstream ss(proc(c.version_command));
 					getline(ss, ver);
 				}
 				if (ver.empty()) continue;
-				line += c.second.name + "," + c.second.language + "," + c.second.display_name + "," + ver + "\n";
+				line += c.name + "," + c.language + "," + c.display_name + "," + ver + "\n";
 			}
 			line = encode_qp(line);
 			const auto str = ([&]() -> string {
@@ -516,11 +516,11 @@ int main(int, char **) {
 	using namespace wandbox;
 	{
 		namespace spirit = boost::spirit;
- 
-		std::cin.unsetf(std::ios::skipws); 
+
+		std::cin.unsetf(std::ios::skipws);
 		spirit::istream_iterator begin(std::cin);
 		spirit::istream_iterator end;
- 
+
 		compilers = load_compiler_trait(begin, end);
 	} {
 		unique_ptr<char, void(*)(void *)> cwd(::getcwd(nullptr, 0), &::free);
