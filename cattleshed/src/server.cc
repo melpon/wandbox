@@ -1,7 +1,7 @@
 //#define BOOST_ERROR_CODE_HEADER_ONLY
 
 #include "common.hpp"
-#include "cfg.hpp"
+#include "load_config.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -20,7 +20,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/spirit/include/qi_match.hpp>
-#include <boost/spirit/include/support_istream_iterator.hpp>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -211,7 +210,7 @@ namespace boost {
 namespace wandbox {
 
 	string ptracer;
-	compiler_set compilers;
+	server_config config;
 
 	struct thread_compare {
 		bool operator ()(const std::thread &x, const std::thread &y) const {
@@ -233,7 +232,7 @@ namespace wandbox {
 				qi::parse(ite, s.end(), "compiler=" >> *qi::char_, ret);
 				return ret;
 			}();
-		    return *compilers.get<1>().find(compiler);
+		    return *config.compilers.get<1>().find(compiler);
 		}
 		vector<string> get_compiler_arg() const {
 			const auto &c = get_compiler();
@@ -261,7 +260,7 @@ namespace wandbox {
 				return std::string(asio::buffer_cast<const char *>(s.buf.data()), asio::buffer_size(s.buf.data()));
 			};
 			string line;
-			for (const auto &c: compilers) {
+			for (const auto &c: config.compilers) {
 				if (!c.displayable) continue;
 				if (c.version_command.empty()) continue;
 				string ver;
@@ -482,7 +481,7 @@ namespace wandbox {
 			asio::async_read_until(pipe, rbuf, end_read_condition(), std::bind<void>(ref(*this), p, msg, _1, _2));
 		}
 
-		compiler_bridge(asio::io_service &main_aio, tcp::acceptor &acc): main_aio(main_aio), aio(), sock(aio)
+		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio)
 		{
 			acc.accept(sock);
 			do {
@@ -495,7 +494,6 @@ namespace wandbox {
 			prog_pid = 0;
 		}
 	private:
-		asio::io_service &main_aio;
 		asio::io_service aio;
 		tcp::socket sock;
 		shared_ptr<DIR> workdir;
@@ -512,7 +510,7 @@ namespace wandbox {
 			tcp::endpoint ep(std::forward<Args>(args)...);
 			tcp::acceptor acc(aio, ep);
 			while (1) {
-				shared_ptr<compiler_bridge> pcb(make_shared<compiler_bridge>(ref(aio), ref(acc)));
+				shared_ptr<compiler_bridge> pcb(make_shared<compiler_bridge>(ref(acc)));
 				std::thread([pcb] { (*pcb)(); }).detach();
 			}
 		}
@@ -526,15 +524,8 @@ namespace wandbox {
 }
 int main(int, char **) {
 	using namespace wandbox;
+	config = load_config(std::cin);
 	{
-		namespace spirit = boost::spirit;
-
-		std::cin.unsetf(std::ios::skipws);
-		spirit::istream_iterator begin(std::cin);
-		spirit::istream_iterator end;
-
-		compilers = load_compiler_trait(begin, end);
-	} {
 		unique_ptr<char, void(*)(void *)> cwd(::getcwd(nullptr, 0), &::free);
 		ptracer = string(cwd.get()) + "/ptracer.exe";
 	}

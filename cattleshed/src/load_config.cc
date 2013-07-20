@@ -1,3 +1,5 @@
+#include "load_config.hpp"
+
 #include <map>
 #include <string>
 #include <vector>
@@ -10,8 +12,11 @@
 #include <boost/variant.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_istream_iterator.hpp>
+#include <boost/spirit/include/support_line_pos_iterator.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/fusion/include/io.hpp>
+#include <boost/io/ios_state.hpp>
 
 namespace wandbox {
 namespace cfg {
@@ -36,10 +41,10 @@ namespace cfg {
 			namespace phx = boost::phoenix;
 			top %= obj | arr;
 			val %= obj | arr | str | bool_;
-			pair %= str >> ':' >> val;
+			pair %= str > ':' > val;
 			obj %= '{' > ((pair % ',') > -qi::lit(',')) > '}';
 			arr %= '[' > ((val % ',') > -qi::lit(',')) > ']';
-			str %= qi::lexeme['\"' > *(('\\' >> qi::char_("\\\"\'\t\r\n")) | (qi::char_-'\"')) > '\"'];
+			str %= qi::lexeme['\"' > *(('\\' > qi::char_("\\\"\'\t\r\n")) | (qi::char_-'\"')) > '\"'];
 			bool_ %= qi::bool_;
 			//debug(top);
 			//debug(val);
@@ -104,30 +109,6 @@ namespace cfg {
 	}
 }
 
-	namespace mendex = boost::multi_index;
-
-	struct switch_trait {
-		std::string name;
-		std::vector<std::string> flags;
-		bool default_;
-		std::string display_name;
-	};
-	typedef mendex::multi_index_container<switch_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<switch_trait, std::string, &switch_trait::name>>>> switch_set;
-	struct compiler_trait {
-		std::string name;
-		std::string output_file;
-		std::string language;
-		std::vector<std::string> compile_command;
-		std::vector<std::string> version_command;
-		std::vector<std::string> run_command;
-		switch_set switches;
-		std::string source_suffix;
-		std::string display_name;
-		std::string display_compile_command;
-		bool displayable;
-	};
-	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
-
 	namespace detail {
 		template <typename Map>
 		boost::optional<const typename Map::mapped_type &> find(const Map &m, const typename Map::key_type &k) {
@@ -166,11 +147,9 @@ namespace cfg {
 			return {};
 		};
 	}
-	template <typename Iter>
-	compiler_set load_compiler_trait(Iter begin, Iter end) {
+
+	compiler_set load_compiler_trait(const cfg::value &o) {
 		using namespace detail;
-		cfg::value o;
-		qi::phrase_parse(begin, end, cfg::config_grammar<Iter>(), qi::space, o);
 		compiler_set ret;
 		std::unordered_map<std::string, std::vector<std::string>> inherit_map;
 		for (auto &x: boost::get<cfg::array>(o)) {
@@ -218,4 +197,15 @@ namespace cfg {
 		return ret;
 	}
 
+	server_config load_config(std::istream &is) {
+		boost::io::ios_flags_saver sv(is);
+		is.unsetf(std::ios::skipws);
+		cfg::value o;
+		namespace s = boost::spirit;
+		namespace qi = boost::spirit::qi;
+		auto first = (s::istream_iterator(is));
+		const auto last = decltype(first)();
+		qi::phrase_parse(first, last, cfg::config_grammar<decltype(first)>(), qi::space, o);
+		return { load_compiler_trait(o) };
+	}
 }
