@@ -1,3 +1,4 @@
 #!/bin/bash
 source /etc/profile.d/boost.sh
-./server.exe < config
+cd src
+exec ./server.exe < ../config
