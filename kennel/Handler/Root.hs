@@ -15,7 +15,6 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Data.ByteString as B
 import Control.Exception (bracket)
 import System.IO (hClose, hFlush)
-import qualified Settings.CompilerConfig as CC
 
 import qualified Data.Conduit as C
 import Data.Conduit (($$))
@@ -28,12 +27,32 @@ instance ToJavascript Bool where
   toJavascript True = "true"
   toJavascript False = "false"
 
-getVersion :: IO [[T.Text]]
-getVersion = do
+data CompilerSwitch = CompilerSwitch
+  { swName :: Text
+  , swFlags :: Text
+  , swDefault :: Bool
+  , swDisplayName :: Text
+  }
+
+data CompilerVersion = CompilerVersion
+  { verName :: Text
+  , verLanguage :: Text
+  , verDisplayName :: Text
+  , verVersion :: Text
+  , verCompileCommand :: Text
+  }
+
+data CompilerInfo = CompilerInfo
+  { ciVersion :: CompilerVersion
+  , ciSwitches :: [CompilerSwitch]
+  }
+
+getCompilerInfos :: IO [CompilerInfo]
+getCompilerInfos = do
     text <- fromVM
     let ls = init $ T.split (=='\n') text
     let datas = map (T.split (==',')) ls
-    return datas
+    return $ map makeCompilerInfo  datas
   where
     fromVM = do
       bracket connectVM hClose $ \handle -> do
@@ -46,6 +65,15 @@ getVersion = do
                 (Just (Left err)) -> fail err
                 (Just (Right (Protocol VersionResult version))) -> return version
                 (Just (Right _)) -> fail $ "pattern is not match"
+    makeCompilerInfo xs =
+        CompilerInfo version switches
+      where
+        version = CompilerVersion (xs !! 0) (xs !! 1) (xs !! 2) (xs !! 3) (xs !! 4)
+        switches = map makeSwitch $ drop 5 xs
+    makeSwitch tsv =
+        CompilerSwitch (xs !! 0) (xs !! 1) ((xs !! 2) == "true") (xs !! 3)
+      where
+        xs = T.split (=='\t') tsv
 
 makeRootR :: Code -> Handler RepHtml
 makeRootR code = do
@@ -59,8 +87,7 @@ makeRootR code = do
         addScript $ StaticR ace_keybinding_vim_js
         addScript $ StaticR ace_keybinding_emacs_js
         addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
-        versions <- liftIO getVersion
-        let decodedCompilerConfig = CC.tojson $ getCompilerConfig app
+        compilerInfos <- liftIO getCompilerInfos
         $(widgetFile "homepage")
   where
     urlEncode = encode . B.unpack . encodeUtf8

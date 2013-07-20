@@ -123,6 +123,7 @@ namespace cfg {
 		switch_set switches;
 		std::string source_suffix;
 		std::string display_name;
+		std::string display_compile_command;
 		bool displayable;
 	};
 	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
@@ -183,6 +184,7 @@ namespace cfg {
 			t.run_command = get_str_array(y, "run-command");
 			t.source_suffix = get_str(y, "source-suffix");
 			t.display_name = get_str(y, "display-name");
+			t.display_compile_command = get_str(y, "display-compile-command");
 			t.displayable = boost::get<cfg::bool_>(y.at("displayable"));
 			t.switches = get_switches(y, "switches");
 			const auto inherits = get_str_array(y, "inherits");
@@ -207,6 +209,7 @@ namespace cfg {
 				if (sub.run_command.empty()) sub.run_command = x.run_command;
 				if (sub.source_suffix.empty()) sub.source_suffix = x.source_suffix;
 				if (sub.display_name.empty()) sub.display_name = x.display_name;
+				if (sub.display_compile_command.empty()) sub.display_compile_command = x.display_compile_command;
 				for (const auto &s: x.switches) {
 					if (sub.switches.template get<1>().count(s.name) == 0) sub.switches.push_back(s);
 				}

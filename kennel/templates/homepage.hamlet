@@ -5,10 +5,18 @@
   <div .span2 #langpanel>
     <div .row-fluid>
       <label>choose compiler:
-      <select .span12 size=#{length versions} #compiler>
-        $forall ver <- versions
-          <option value="#{(!!) ver 0}">[#{(!!) ver 1}] #{(!!) ver 2} #{(!!) ver 3}
+      <select .span12 size=#{length compilerInfos} #compiler>
+        $forall ver <- map ciVersion compilerInfos
+          <option value="#{verName ver}" command="#{verCompileCommand ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
     <div .row-fluid #compile_options>
+      $forall info <- compilerInfos
+        <div #option-#{verName $ ciVersion info}>
+          $forall sw <- ciSwitches info
+            <div .row-fluid>
+              $if swDefault sw
+                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}" checked>#{swDisplayName sw}
+              $else
+                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}">#{swDisplayName sw}
     <div .row-fluid>
       <a href="compile" .btn #compile>Run (or Ctrl+Enter)
     <div .row-fluid #permdiv>
@@ -22,6 +30,8 @@
     <label .row-fluid>input code:
     <div .row-fluid>
       <div #editor>
+    <div .row-fluid>
+      <p #compile_command>
     <div .row-fluid>
       <div #output>
   <div .span1 .margin>

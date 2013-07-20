@@ -15,6 +15,13 @@
 #compile {
 }
 
+#compile_options > div {
+  display: none;
+}
+#compile_options > .selected {
+  display: block;
+}
+
 #editor {
   margin: 0px;
   height: 300px;

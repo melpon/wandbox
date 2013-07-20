@@ -18,6 +18,7 @@
 #include <boost/range/istream_range.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/spirit/include/qi_match.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
 
@@ -269,7 +270,18 @@ namespace wandbox {
 					getline(ss, ver);
 				}
 				if (ver.empty()) continue;
-				line += c.name + "," + c.language + "," + c.display_name + "," + ver + "\n";
+				// NOTE: Each variables must not contain <LF> or <COMMA> or <TAB>.
+				// <line> ::= name,language,display_name,ver,display_compile_command<switches><LF>
+				// <switches> ::= (,name<TAB>flags<TAB>default<TAB>display_name)*
+				line += c.name + "," + c.language + "," + c.display_name + "," + ver + "," + c.display_compile_command;
+				for (const auto &sw: c.switches) {
+					line +=
+						"," + sw.name +
+						"\t" + boost::algorithm::join(sw.flags, " ") +
+						"\t" + (sw.default_ ? "true" : "false") +
+						"\t" + sw.display_name;
+				}
+				line += "\n";
 			}
 			line = encode_qp(line);
 			const auto str = ([&]() -> string {

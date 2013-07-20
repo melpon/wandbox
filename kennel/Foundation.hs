@@ -32,7 +32,6 @@ import Data.Text(Text)
 import Data.Maybe (isNothing)
 import ChanMap (ChanMap)
 import Settings.StaticFiles (favicon_ico)
-import qualified Settings.CompilerConfig as CC
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -45,7 +44,6 @@ data App = App
     , getChanMap :: ChanMap
     , connPool :: Database.Persist.Store.PersistConfigPool Settings.PersistConfig
     , persistConfig :: Settings.PersistConfig
-    , getCompilerConfig :: CC.Config
     }
 
 -- Set up i18n messages. See the message folder.

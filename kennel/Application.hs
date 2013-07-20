@@ -24,7 +24,6 @@ import Model
 import qualified Database.Persist.Store
 import Database.Persist.GenericSql (runMigration, SqlPersist)
 import Yesod.Auth.HashDB (migrateUsers)
-import qualified Settings.CompilerConfig as CC
 
 -- Import all relevant handler modules here.
 import Handler.Root
@@ -58,8 +57,7 @@ getApplication conf logger = do
     Database.Persist.Store.runPool dbconf migrates p
 
     cm <- liftIO $ newChanMap
-    cc <- liftIO $ CC.loadConfig $ extraCompilerConfig $ appExtra conf
-    let foundation = App conf setLogger s cm p dbconf cc
+    let foundation = App conf setLogger s cm p dbconf
     app <- toWaiAppPlain foundation
     return $ logWare app
   where

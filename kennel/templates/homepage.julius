@@ -1,75 +1,3 @@
-var compiler_config = #{decodedCompilerConfig};
-function ArrayMap(field, init) {
-  var self = this;
-  self.keys = {};
-  self.array = [];
-  self.has_key = function(key) {
-    return key in self.keys;
-  };
-  self.push = function(obj) {
-    var key = obj[field];
-    if (self.has_key(key))
-      return;
-    self.array.push(obj);
-    self.keys[key] = obj;
-  };
-
-  (init || []).forEach(function(v) {
-    self.push(v);
-  });
-};
-var mapped_compiler_config = new ArrayMap('name', compiler_config);
-
-function CompilerConfig(compiler_name) {
-  var self = this;
-  var as_array = function(obj) {
-    if (typeof(obj) != "object" || obj.length === undefined) return [obj];
-    else return obj;
-  };
-
-  var get_with_parents = function(compiler, key) {
-    if (key in compiler)
-      return compiler[key];
-    var parents = as_array(compiler.inherits || []);
-    for (var i = 0; i < parents.length; i++) {
-      var cpr = mapped_compiler_config.keys[parents[i]];
-      var result = get_with_parents(cpr, key)
-      if (result !== undefined)
-        return result;
-    }
-  };
-
-  self.get = function(key) {
-    var compiler = mapped_compiler_config.keys[compiler_name];
-    return get_with_parents(compiler, key);
-  };
-
-  var Switch = function(obj) {
-    this.get = function(key) {
-      return key == 'flags' ? as_array(obj[key]) : obj[key];
-    };
-  };
-
-  var get_switches_with_parents = function(compiler, results) {
-    var parents = as_array(compiler.inherits || []);
-    for (var i = 0; i < parents.length; i++) {
-      var cpr = mapped_compiler_config.keys[parents[i]];
-      get_switches_with_parents(cpr, results)
-    }
-    switches_ = compiler.switches || [];
-    for (var i = 0; i < switches_.length; i++) {
-      results.push(switches_[i]);
-    }
-  };
-
-  self.get_switches = function() {
-    var compiler = mapped_compiler_config.keys[compiler_name];
-    var results = new ArrayMap('name');
-    get_switches_with_parents(compiler, results);
-    return results.array.map(function(v) { return new Switch(v); });
-  };
-}
-
 var keybindings = {
     ace: null,
     vim: require("ace/keyboard/vim").handler,
@@ -104,7 +32,7 @@ function post_code() {
   var url = $('#compile').attr('href');
   var compiler = $('#compiler').val();
   var code = ace.edit('editor').getValue();
-  var options = $("#compile_options").find(':checked').map(function(n,e) { return $(e).val(); });
+  var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); });
 
   $.post('@{CompileR sourceId}', {
     compiler: compiler,
@@ -148,6 +76,20 @@ function post_permlink() {
       $('<a href="' + url + '" target="_blank" id="permlink">Permlink</a>')
         .appendTo('#permdiv');
     });
+}
+
+function to_id(id) {
+  return id.replace(/\./g, "\\.");
+}
+
+function update_compile_command() {
+  var compiler = $('#compiler').val();
+  var command = $('#compiler > option:selected').attr('command');
+  var options = $('#option-' + to_id(compiler)).find(':checked').map(function(n,e) { return $(e).attr('flags'); });
+
+  var compile_command = '$ ' + command + ' ' + options.get().join(' ');
+  $('#compile_command').html('<code>' + compile_command + '</code>');
+
 }
 
 $(function() {
@@ -194,14 +136,12 @@ $(function() {
   //check($('#warning'), warning);
 
   $("#compiler").change(function() {
-    $("#compile_options").empty();
-
-    var compiler = new CompilerConfig($(this).val());
-    var switches = compiler.get_switches();
-    switches.forEach(function(v) {
-      var checkbox = $('<div class="row-fluid"><input type="checkbox" value="' + v.get('name') + '"' + (v.get('default') ? 'checked' : '') + '>' + v.get('display-name') + '</input></div>');
-      $("#compile_options").append(checkbox);
-    });
+    $("#compile_options").children().removeClass('selected');
+    $("#option-" + to_id($(this).val())).addClass('selected')
+    update_compile_command();
   }).change();
+  $("#compile_options input").change(function() {
+    update_compile_command();
+  });
 });
 
