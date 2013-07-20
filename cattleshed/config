@@ -194,7 +194,7 @@
    "prog.cc"
   ],
   "version-command":["/usr/local/gcc-4.6.4/bin/g++", "-dumpversion"],
-  "inherits":"gcc-common"
+  "inherits":["gcc-common", "gcc-4.3-switches"]
  },{
   "name":"gcc-4.5.4",
   "displayable": true,
