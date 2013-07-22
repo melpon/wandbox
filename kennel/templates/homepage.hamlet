@@ -1,8 +1,7 @@
 <div .row-fluid>
   <div .span12 #header>
 <div .row-fluid>
-  <div .span1 .margin>
-  <div .span2 #langpanel>
+  <div .span2 .offset1 #langpanel>
     <div .row-fluid>
       <label>choose compiler:
       <select .span12 size=#{length compilerInfos} #compiler>
@@ -34,4 +33,3 @@
       <p #compile_command>
     <div .row-fluid>
       <div #output>
-  <div .span1 .margin>

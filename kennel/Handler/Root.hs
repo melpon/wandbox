@@ -86,7 +86,8 @@ makeRootR code = do
         addScript $ StaticR ace_ace_js
         addScript $ StaticR ace_keybinding_vim_js
         addScript $ StaticR ace_keybinding_emacs_js
-        addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
+        addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
+        -- addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
         compilerInfos <- liftIO getCompilerInfos
         $(widgetFile "homepage")
   where
