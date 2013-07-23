@@ -35,6 +35,8 @@
   color: #ffffff;
   height: 300px;
   overflow-y: scroll;
+  white-space: pre-wrap;
+
   span {
     font-family: "Courier New", monospace;
   }
