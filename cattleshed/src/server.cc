@@ -191,14 +191,14 @@ namespace wandbox {
 
 			auto &s = received["Source"];
 			{
-				int fd = ::openat(::dirfd(workdir.get()), srcname.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC, 0600);
+				unique_fd fd(::openat(::dirfd(workdir.get()), srcname.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC, 0600));
 				for (std::size_t offset = 0; offset < s.length(); ) {
-					const auto wrote = ::write(fd, s.data()+offset, s.length()-offset);
+					const auto wrote = ::write(fd.get(), s.data()+offset, s.length()-offset);
 					if (wrote < 0 && errno != EINTR) throw_system_error(errno);
 					offset += wrote;
 				}
-				::fsync(fd);
-				::close(fd);
+				::fsync(fd.get());
+				::close(fd.get());
 			}
 
 			auto c = piped_spawn(_P_NOWAIT, workdir, get_compiler_arg());

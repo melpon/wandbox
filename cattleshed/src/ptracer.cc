@@ -36,6 +36,7 @@
 #include <syslog.h>
 
 #include "load_config.hpp"
+#include "posixapi.hpp"
 
 #ifndef PTRACE_O_EXITKILL
 #define PTRACE_O_EXITKILL (1 << 20)
@@ -122,62 +123,38 @@ namespace wandbox {
 		}
 		return buf.data();
 	}
-	/// パスコンポーネントを正規化する(./ と ../ を削除する)
-	/// @param src 入力パス(絶対パスのみ)
-	/// @return 正規化パスまたは空文字列
-	std::string canonicalize_path(const std::string &src) {
-		// realpath(3) は symlink を解決してしまう
-		// boost::filesystem::canonical はファイルが存在しないと失敗する
-		// ので、/proc/self の場合どちらも役に立たない
-		if (src.empty() || src[0] != '/') return "";
-		const bool absolutep = src[0] == '/';
-
-		std::vector<std::string> dirs;
-		auto ite = src.begin();
-		if (absolutep) ++ite;
-		const auto end = src.end();
-		namespace qi = boost::spirit::qi;
-		qi::parse(ite, end, *(qi::char_ - '/') % '/', dirs);
-		return (absolutep ? "/" : "") + rng::accumulate1(
-			rng::accumulate(
-				dirs | rng::filtered([](const std::string &s) { return !s.empty() && s != "."; }),
-				std::vector<std::string>(),
-				[absolutep](std::vector<std::string> a, std::string s) -> std::vector<std::string> {
-					if (s == "..") {
-						if (absolutep) {
-							if (!a.empty()) a.pop_back();
-						} else {
-							if (a.empty() || a.back() == "..") a.push_back("..");
-							else a.pop_back();
-						}
-					} else {
-						a.emplace_back(move(s));
-					}
-					return move(a);
-				}),
-			[](const std::string &a, const std::string &b) { return a + "/" + b; });
-	}
-	inline bool starts_with(const std::string &tested, const std::string &prefix) {
-		return tested.length() >= prefix.length() && tested.substr(0, prefix.length()) == prefix;
+	bool is_file_prefixed_by(const std::string &path, const std::string &prefix) {
+		return path.length() == prefix.length() 
+			? path == prefix
+			: prefix.length() < path.length() && std::equal(prefix.begin(), prefix.end(), path.begin()) && path[prefix.length()] == '/';
 	}
 	enum struct allowed_access_mode {
 		none,
 		readonly,
 		readwrite
 	};
-	allowed_access_mode get_file_accessiblity(const std::string &path) {
-		const auto realpath = canonicalize_path(path);
-		if (config.jail.allow_file_exact.count(path) == 1) return allowed_access_mode::readonly;
-		if (rng::find_if(config.jail.allow_file_prefix, std::bind(starts_with, realpath, std::placeholders::_1)) != config.jail.allow_file_prefix.end()) return allowed_access_mode::readonly;
-		if (!starts_with(realpath, "..") && !starts_with(realpath, "/")) return allowed_access_mode::readwrite;
+	/// path に対して許可されたアクセスモードを判定する
+	/// $PWD に対する読み書きアクセスと, config で列挙された対象または /proc/self/* に対する読み込みアクセスが可能
+	allowed_access_mode get_file_accessiblity(pid_t pid, const std::string &path) try {
+		const auto r = realpath_allowing_noent(path);
+		const auto procself = realpath("/proc/" + std::to_string(pid));
+		const auto is_prefixing = [&](const std::string &prefix) { return is_file_prefixed_by(r, prefix); };
+		if (is_prefixing(getcwd())) return allowed_access_mode::readwrite;
+		if (config.jail.allow_file_exact.count(r) == 1) return allowed_access_mode::readonly;
+		if (rng::find_if(config.jail.allow_file_prefix, is_prefixing) != config.jail.allow_file_prefix.end()) return allowed_access_mode::readonly;
+		if (is_prefixing(realpath(procself + "/exe"))) return allowed_access_mode::readonly;
+		return allowed_access_mode::none;
+	} catch (std::system_error &) {
 		return allowed_access_mode::none;
 	}
+
 	/// ファイルを開かせてもよいかどうか判断する
 	/// @return 開かせてよい時 @true
-	bool is_file_openable(const std::string &path, int flags, mode_t) {
+	bool is_file_openable(pid_t pid, const std::string &path, int flags, mode_t) {
 		const int openmode = flags & O_ACCMODE;
-		switch (get_file_accessiblity(path)) {
+		switch (get_file_accessiblity(pid, path)) {
 		case allowed_access_mode::readonly:
+			if (openmode != O_RDONLY) trace(LOG_DEBUG, "opening to write path '%s' is not allowed", path);
 			return openmode == O_RDONLY;
 		case allowed_access_mode::readwrite:
 			return true;
@@ -188,8 +165,8 @@ namespace wandbox {
 	}
 	/// ファイルを stat してもよいかどうか判断する
 	/// @return 開かせてよい時 @true
-	bool is_file_stattable(const std::string &path) {
-		switch (get_file_accessiblity(path)) {
+	bool is_file_stattable(pid_t pid, const std::string &path) {
+		switch (get_file_accessiblity(pid, path)) {
 		case allowed_access_mode::readonly:
 		case allowed_access_mode::readwrite:
 			return true;
@@ -210,10 +187,10 @@ namespace wandbox {
 			// Aは場合によってはblockしたい
 			// Bは場合によっては許可したい
 		case SYS_open: // B
-			return is_file_openable(read_cstring_from_process(pid, reg.rdi), reg.rsi, reg.rdx);
+			return is_file_openable(pid, read_cstring_from_process(pid, reg.rdi), reg.rsi, reg.rdx);
 
 		case SYS_stat: // B
-			return is_file_stattable(read_cstring_from_process(pid, reg.rdi));
+			return is_file_stattable(pid, read_cstring_from_process(pid, reg.rdi));
 
 		case SYS_clone: // B
 			return is_acceptable_clone_flag(read_reg(pid, rdi));
@@ -224,6 +201,7 @@ namespace wandbox {
 		case SYS_close:
 		case SYS_fstat:
 		case SYS_lstat:
+		case SYS_readlink:
 		case SYS_poll:
 
 		case SYS_lseek:

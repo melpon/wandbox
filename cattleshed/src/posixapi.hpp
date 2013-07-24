@@ -83,6 +83,19 @@ namespace wandbox {
 		if (!p) throw_system_error(errno);
 		return p.get();
 	}
+	std::string realpath_allowing_noent(const std::string &path) {
+		const auto p = make_unique(::realpath(path.c_str(), nullptr), &::free);
+		if (p) return p.get();
+		const auto d = dirname(path) + "/";
+		const auto q = make_unique(::realpath(d.c_str(), nullptr), &::free);
+		if (!q) throw_system_error(errno);
+		return d + q.get();
+	}
+
+	std::string getcwd() {
+		const auto p = make_unique(::getcwd(nullptr, 0), &::free);
+		return p.get();
+	}
 
 	void mkdir(const std::string &path, ::mode_t mode) {
 		if (::mkdir(path.c_str(), mode) < 0) throw_system_error(errno);
