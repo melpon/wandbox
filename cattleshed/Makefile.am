@@ -1,2 +1,2 @@
-SUBDIRS = src
+SUBDIRS = src test
 TESTS = test/jail.sh

@@ -66,5 +66,5 @@ AC_TYPE_SIZE_T
 AC_FUNC_FORK
 AC_CHECK_FUNCS([dup2 fchdir getcwd mkdir realpath strerror])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
 AC_OUTPUT
