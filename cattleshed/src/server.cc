@@ -309,15 +309,8 @@ namespace wandbox {
 			auto &pipe = p->stream;
 			auto &rbuf = p->buf;
 			std::vector<char> data(BUFSIZ);
-			{
-				data.resize(asio::buffer_copy(asio::buffer(data), rbuf.data()));
-				rbuf.consume(data.size());
-				if (data.empty() || ec) {
-					pipes.erase(p);
-					check_finish();
-					return;
-				}
-			}
+			data.resize(asio::buffer_copy(asio::buffer(data), rbuf.data()));
+			rbuf.consume(data.size());
 			const auto str = ([&]() -> string {
 				const auto line = encode_qp(data);
 				std::stringstream ss;
@@ -328,7 +321,13 @@ namespace wandbox {
 				error_code ec;
 				asio::write(sock, asio::buffer(str), ec);
 			});
-			asio::async_read_until(pipe, rbuf, end_read_condition(), std::bind<void>(ref(*this), p, msg, _1, _2));
+			if (data.empty() || ec) {
+				pipes.erase(p);
+				check_finish();
+				return;
+			} else {
+				asio::async_read_until(pipe, rbuf, end_read_condition(), std::bind<void>(ref(*this), p, msg, _1, _2));
+			}
 		}
 
 		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio)
