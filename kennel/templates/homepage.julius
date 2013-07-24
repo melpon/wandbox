@@ -72,6 +72,9 @@ function post_permlink() {
       $('#permlink').remove();
 
       var approot = '@{RootR}'
+      if (approot[approot.length - 1] == '/') {
+        approot = approot.substr(0, approot.length - 1);
+      }
       var url = approot + '/permlink/' + json.link;
       $('<a href="' + url + '" target="_blank" id="permlink">Permlink</a>')
         .appendTo('#permdiv');
