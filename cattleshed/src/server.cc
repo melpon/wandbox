@@ -167,10 +167,8 @@ namespace wandbox {
 				std::string command;
 				int len = 0;
 				std::string data;
-				std::cout << std::string(ite, end) << std::endl;
 				if (qi::parse(ite, end, +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) {
 
-					std::cout << "command: " << command << " : " << data << std::endl;
 					if (command == "Control" && data == "run") return true;
 					if (command == "Version") {
 						send_version();
@@ -202,7 +200,6 @@ namespace wandbox {
 				::fsync(fd);
 				::close(fd);
 			}
-			std::cout << "Source <<EOF\n" << s << "\nEOF" << std::endl;
 
 			auto c = piped_spawn(_P_NOWAIT, workdir, get_compiler_arg());
 			cc_pid = c.pid;
@@ -256,7 +253,6 @@ namespace wandbox {
 				str += "Control 6:Finish\n";
 				asio::write(sock, asio::buffer(str), ec);
 				sock.close();
-				std::cout << "closed" << std::endl;
 				aio.post(std::bind<void>(&asio::io_service::stop, ref(aio)));
 			});
 		}
@@ -266,15 +262,12 @@ namespace wandbox {
 			if (prog_pid) {
 				int st;
 				waitpid(prog_pid, &st, 0);
-				std::cout << "Program finished: code=" << st << std::endl;
 				send_exitcode(st);
 			} else {
 				int st;
 				waitpid(cc_pid, &st, 0);
-				std::cout << "Compile finished: code=" << st << std::endl;
 				if (st) {
 					prog_pid = -1;
-					std::cout << "COMPILE ERROR" << std::endl;
 					send_exitcode(st);
 				} else {
 					vector<string> runargs = get_compiler().run_command;
@@ -331,7 +324,6 @@ namespace wandbox {
 				ss << msg << ' ' << line.length() << ':' << line << '\n';
 				return ss.str();
 			})();
-			std::cout << str << std::flush;
 			aio.post([this, str] {
 				error_code ec;
 				asio::write(sock, asio::buffer(str), ec);

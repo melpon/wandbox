@@ -305,7 +305,6 @@ namespace wandbox {
 				const int sig = sigwaitinfo(&sigs, &siginfo);
 				if (sig == -1) return -1;
 				if (sig != SIGCHLD) {
-					trace(LOG_DEBUG, "forwarding signal %s %s", primary_pid, siginfo.si_signo);
 					ptrace(PTRACE_SYSCALL, primary_pid, 0, siginfo.si_signo);
 					continue;
 				}
@@ -336,13 +335,12 @@ namespace wandbox {
 						ptrace(PTRACE_GETEVENTMSG, pid, 0, &newpid);
 					}
 					if (newpid != 0) {
-						trace(LOG_DEBUG, "[%s]cloned to %s", pid, newpid);
+						trace(LOG_DEBUG, "[%s] cloned to %s", pid, newpid);
 						ptrace(PTRACE_SETOPTIONS, newpid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_EXITKILL);
 						ptrace(PTRACE_SYSCALL, newpid, 0, 0);
 						ptrace(PTRACE_SYSCALL, pid, 0, 0);
 					} else {
 						const int realsig = stopsig & ~0x80;
-						trace(LOG_DEBUG, "[%s]child signaled: %s", pid, realsig);
 						ptrace(PTRACE_SYSCALL, pid, 0, realsig);
 					}
 					continue;
@@ -354,7 +352,9 @@ namespace wandbox {
 				case run_state_t::running:
 					{
 						const bool refused = !is_permitted_syscall(pid, reg);
-						trace(LOG_DEBUG, "[%s]enter syscall %s%s(%s, %s, %s, %s, %s, %s)", pid, refused?"[blocked] ":"", reg.orig_rax, reg.rdi, reg.rsi, reg.rdx, reg.r10, reg.r8, reg.r9);
+						if (refused) {
+							trace(LOG_DEBUG, "[%s] blocked syscall %s (%s, %s, %s, %s, %s, %s)", pid, reg.orig_rax, reg.rdi, reg.rsi, reg.rdx, reg.r10, reg.r8, reg.r9);
+						}
 						if (refused) {
 							write_reg(pid, orig_rax, -1);
 							states[pid] = run_state_t::syscall_refused;
@@ -364,11 +364,9 @@ namespace wandbox {
 					}
 					break;
 				case run_state_t::syscall_executing:
-					trace(LOG_DEBUG, "[%s]leave syscall %s (%s)", pid, reg.orig_rax, reg.rax);
 					states[pid] = run_state_t::running;
 					break;
 				case run_state_t::syscall_refused:
-					trace(LOG_DEBUG, "[%s]leave syscall [blocked] %s (%s)", pid, reg.orig_rax, reg.rax);
 					write_reg(pid, rax, -EPERM);
 					states[pid] = run_state_t::running;
 					break;
