@@ -227,6 +227,7 @@ namespace wandbox {
 		case SYS_writev:
 		case SYS_access:
 		case SYS_pipe:
+		case SYS_pipe2:
 		case SYS_select:
 
 		case SYS_sched_yield:

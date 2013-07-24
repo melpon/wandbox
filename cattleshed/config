@@ -11,7 +11,7 @@
   "max-file-size":134217728,
   "max-open-file":16,
   "nice":5,
-  "allow-file-exact":["/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat"],
+  "allow-file-exact":["/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat", "/dev/urandom"],
   "allow-file-prefix":["/lib", "/usr/lib", "/usr/local", "/proc/self"],
  },
  "compilers":[
@@ -392,6 +392,39 @@
    "display-name":"mono",
    "display-compile-command":"mcs prog.cs",
    "run-command":["mono", "prog.exe"]
+  },{
+   "name":"perl",
+   "displayable":true,
+   "output-file":"prog.pl",
+   "run-command":["/usr/bin/perl", "prog.pl"],
+   "display-name":"perl",
+   "display-compile-command":"perl",
+   "language":"Perl",
+   "source-suffix":".pl",
+   "compile-command":"/bin/true",
+   "version-command":["/usr/bin/perl", "-e", "print $^V"],
+  },{
+   "name":"python2",
+   "displayable":true,
+   "output-file":"prog.py",
+   "run-command":["/usr/bin/python2", "prog.py"],
+   "display-name":"python2",
+   "display-compile-command":"python2",
+   "language":"Python",
+   "source-suffix":".py",
+   "compile-command":"/bin/true",
+   "version-command":["/usr/bin/python2", "-c", "import sys; print(sys.version.split()[0])"],
+  },{
+   "name":"ruby",
+   "displayable":true,
+   "output-file":"prog.rb",
+   "run-command":["/usr/bin/ruby", "prog.rb"],
+   "display-name":"ruby",
+   "display-compile-command":"ruby",
+   "language":"Ruby",
+   "source-suffix":".rb",
+   "compile-command":"/bin/true",
+   "version-command":["/usr/bin/ruby", "-e", "print RUBY_VERSION"],
   }
  ]
 }
