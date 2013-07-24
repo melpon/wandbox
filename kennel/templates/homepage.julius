@@ -135,6 +135,7 @@ $(function() {
   }
   $('#compiler').val(compiler);
   editor.setValue(code);
+  editor.setShowPrintMargin(false);
   //check($('#optimize'), optimize);
   //check($('#warning'), warning);
 
