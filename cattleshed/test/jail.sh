@@ -18,4 +18,5 @@ is-same-output /usr/bin/size /proc/self/exe
 ! ptracer /usr/bin/size /bin/echo 2> /dev/null
 # accessible to working directory
 is-same-output /usr/bin/wc -c "$(ls -1 | head -1)"
-
+# fail if trying to exec a command that does not exist
+test ! -x /bin/this-command-should-not-exist && ! ptracer /bin/this-command-should-not-exist

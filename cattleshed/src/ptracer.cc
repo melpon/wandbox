@@ -195,6 +195,14 @@ namespace wandbox {
 		case SYS_clone: // B
 			return is_acceptable_clone_flag(read_reg(pid, rdi));
 
+		case SYS_execve:
+		{
+			static bool first_exec_already_called = false;
+			if (first_exec_already_called) return false;
+			first_exec_already_called = true;
+			return true;
+		}
+
 		case SYS_read: // B
 		case SYS_write: // B
 
@@ -309,17 +317,22 @@ namespace wandbox {
 
 				if (stopsig != (SIGTRAP|0x80)) {
 					unsigned long newpid = 0;
+					if (((status>>16) & PTRACE_EVENT_EXEC) != 0) {
+						ptrace(PTRACE_SYSCALL, pid, 0, 0);
+						continue;
+					}
 					if (((status>>16) & (PTRACE_EVENT_CLONE|PTRACE_EVENT_FORK|PTRACE_EVENT_VFORK)) != 0) {
 						ptrace(PTRACE_GETEVENTMSG, pid, 0, &newpid);
 					}
 					if (newpid != 0) {
 						trace(LOG_DEBUG, "[%s] cloned to %s", pid, newpid);
-						ptrace(PTRACE_SETOPTIONS, newpid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_EXITKILL);
+						ptrace(PTRACE_SETOPTIONS, newpid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC | PTRACE_O_EXITKILL);
 						ptrace(PTRACE_SYSCALL, newpid, 0, 0);
 						ptrace(PTRACE_SYSCALL, pid, 0, 0);
 					} else {
-						const int realsig = stopsig & ~0x80;
-						ptrace(PTRACE_SYSCALL, pid, 0, realsig);
+						siginfo_t realsig;
+						ptrace(PTRACE_GETSIGINFO, pid, 0, &realsig);
+						ptrace(PTRACE_SYSCALL, pid, 0, realsig.si_signo);
 					}
 					continue;
 				}
@@ -387,11 +400,12 @@ namespace wandbox {
 			apply_system_resource_limits();
 			sigprocmask(SIG_UNBLOCK, &sigs, 0);
 			ptrace(PTRACE_TRACEME, 0, 0, 0);
-			return ::execv(*argv, argv);
+			::raise(SIGSTOP);
+			::exit(::execv(*argv, argv));
 		} else if (pid > 0) {
 			::openlog("ptracer", LOG_PID|LOG_CONS, LOG_AUTHPRIV);
 			::waitpid(pid, 0, 0);
-			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_EXITKILL);
+			ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD | PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC | PTRACE_O_EXITKILL);
 			ptrace(PTRACE_SYSCALL, pid, 0, 0);
 			int status = trace_loop(pid, sigs);
 			if (WIFSIGNALED(status)) {
