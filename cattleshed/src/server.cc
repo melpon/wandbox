@@ -1,18 +1,11 @@
-//#define BOOST_ERROR_CODE_HEADER_ONLY
-
-#include "common.hpp"
-#include "load_config.hpp"
 #include <map>
 #include <string>
 #include <vector>
-#include <array>
 #include <thread>
 #include <sstream>
-#include <set>
 #include <functional>
 #include <list>
 #include <fstream>
-#include <system_error>
 #include <boost/range.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/istream_range.hpp>
@@ -22,13 +15,9 @@
 #include <boost/program_options.hpp>
 #include <boost/system/system_error.hpp>
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <libgen.h>
+#include "common.hpp"
+#include "load_config.hpp"
+#include "posixapi.hpp"
 
 namespace wandbox {
 
@@ -39,7 +28,6 @@ namespace wandbox {
 	using std::make_shared;
 	using std::string;
 	using std::vector;
-	using std::array;
 	using std::list;
 	using std::size_t;
 	using std::move;
@@ -50,144 +38,15 @@ namespace wandbox {
 	using std::placeholders::_2;
 	using std::placeholders::_3;
 
-	struct ignore_param {
+	template <typename Stream>
+	struct stream_pair {
 		template <typename ...Args>
-		ignore_param(Args &&...) {}
+		stream_pair(asio::io_service &aio, Args &&...args): stream(aio, std::forward<Args>(args)...), buf() { }
+		Stream stream;
+		asio::streambuf buf;
 	};
+	typedef stream_pair<asio::posix::stream_descriptor> stream_descriptor_pair;
 
-	template <typename T>
-	inline boost::iterator_range<T *> make_iterator_range_from_memory(T *head, size_t size) {
-		return boost::make_iterator_range(head, head + size);
-	}
-	template <typename T>
-	inline boost::iterator_range<const T *> make_iterator_range_from_memory(const T *head, size_t size) {
-		return boost::make_iterator_range(head, head + size);
-	}
-	template <typename Ptr>
-	inline boost::iterator_range<Ptr> make_iterator_range_from_buffer(const asio::const_buffer &b) {
-		return make_iterator_range_from_memory(asio::buffer_cast<Ptr>(b), asio::buffer_size(b));
-	}
-	struct lazy_range_search_t {
-		template <typename R, typename S>
-		struct result { typedef  typename boost::range_iterator<const R>::type type; };
-		template <typename R, typename S>
-		typename result<R, S>::type operator ()(const R &r, const S &s) const {
-			return std::search(boost::begin(r), boost::end(r), boost::begin(s), boost::end(s));
-		}
-	};
-
-	template <typename M>
-	void print_map(const M &m) {
-		std::for_each(m.begin(), m.end(), [](const typename M::value_type &p) {
-			std::cout << p.first << ':' << p.second << '\n';
-		});
-		std::cout << std::flush;
-	}
-
-#undef _P_WAIT
-#undef _P_NOWAIT
-#undef _P_OVERLAY
-#undef _P_NOWAITO
-#undef _P_DETACH
-	constexpr int _P_WAIT = 0;
-	constexpr int _P_NOWAIT = 1;
-	constexpr int _P_OVERLAY = 2;
-	constexpr int _P_NOWAITO = 3;
-	constexpr int _P_DETACH = 4;
-
-	struct child_process {
-		intptr_t pid;
-		int fd_stdin;
-		int fd_stdout;
-		int fd_stderr;
-	};
-	struct unique_fd {
-		unique_fd(int fd): fd(fd) { }
-		~unique_fd() { close(); }
-		unique_fd(const unique_fd &) = delete;
-		unique_fd(unique_fd &&o): fd(-1) {
-			std::swap(fd, o.fd);
-		}
-		unique_fd &operator =(const unique_fd &) = delete;
-		unique_fd &operator =(unique_fd &&o) {
-			std::swap(fd, o.fd);
-			if (fd != o.fd) o.close();
-			return *this;
-		}
-		int get() const { return fd; }
-		explicit operator bool() const { return fd != 1; }
-		bool operator !() const { return fd == -1; }
-	private:
-		void close() {
-			if (*this) ::close(fd);
-			fd = -1;
-		}
-		int fd;
-	};
-
-	inline std::ostream &print(std::ostream &os) { return os; }
-	template <typename A, typename ...Args>
-	std::ostream &print(std::ostream &os, A &&a, Args &&...args) {
-		return print(os << std::forward<A>(a) << ", ", std::forward<Args>(args)...);
-	}
-
-	child_process piped_spawn(int mode, DIR *workdir, const vector<string> &argv) {
-		vector<vector<char>> x;
-		for (const auto &s: argv) x.emplace_back(s.c_str(), s.c_str()+s.length()+1);
-		vector<char *> a;
-		for (auto &s: x) a.emplace_back(s.data());
-		a.push_back(nullptr);
-		int pipe_stdin[2] = { -1, -1 }, pipe_stdout[2] = { -1, -1 }, pipe_stderr[2] = { -1, -1 };
-		if (mode == _P_OVERLAY) {
-			if (::fchdir(::dirfd(workdir)) == -1) goto end;;
-			std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
-			std::cout << strerror(errno) << std::endl;
-			exit(-1);
-		}
-		if (::pipe(pipe_stdin) == -1) goto end;
-		if (::pipe(pipe_stdout) == -1) goto end;
-		if (::pipe(pipe_stderr) == -1) goto end;
-		{
-			const pid_t pid = ::fork();
-			if (pid == 0) {
-				if (::fchdir(::dirfd(workdir)) == -1) exit(-1);
-				::dup2(pipe_stdin[0], 0);
-				::dup2(pipe_stdout[1], 1);
-				::dup2(pipe_stderr[1], 2);
-				::close(pipe_stdin[0]);
-				::close(pipe_stdin[1]);
-				::close(pipe_stdout[0]);
-				::close(pipe_stdout[1]);
-				::close(pipe_stderr[0]);
-				::close(pipe_stderr[1]);
-				::fcntl(0, F_SETFD, (long)0);
-				::fcntl(1, F_SETFD, (long)0);
-				::fcntl(2, F_SETFD, (long)0);
-				std::cout << "exec error : " << ::execv(x.front().data(), a.data()) << ',';
-				std::cout << strerror(errno) << std::endl;
-				exit(-1);
-			} else if (pid > 0) {
-				::close(pipe_stdin[0]);
-				::close(pipe_stdout[1]);
-				::close(pipe_stderr[1]);
-
-				child_process child { pid, pipe_stdin[1], pipe_stdout[0], pipe_stderr[0] };
-				if (mode == _P_WAIT) {
-					int st;
-					::waitpid(pid, &st, 0);
-					child.pid = st;
-					return child;
-				}
-				return child;
-			}
-		}
-	end:
-		const auto close = [](int fd) { if (fd != -1) ::close(fd); };
-		close(pipe_stdin[0]); close(pipe_stdin[1]);
-		close(pipe_stdout[0]); close(pipe_stderr[1]);
-		close(pipe_stdout[0]); close(pipe_stderr[1]);
-		return child_process { -1, -1, -1, -1 };
-	}
 
 	struct end_read_condition {
 		explicit end_read_condition(std::size_t min = 0): min(min) { }
@@ -201,50 +60,6 @@ namespace wandbox {
 		}
 		std::size_t min;
 	};
-	__attribute__((noreturn)) void throw_system_error(int err) {
-		throw std::system_error(err, std::system_category());
-	}
-	string dirname(const string &path) {
-		std::vector<char> buf(path.begin(), path.end());
-		buf.push_back(0);
-		return ::dirname(buf.data());
-	}
-	string basename(const string &path) {
-		std::vector<char> buf(path.begin(), path.end());
-		buf.push_back(0);
-		return ::basename(buf.data());
-	}
-	string readlink(const string &path) {
-		std::vector<char> buf(PATH_MAX);
-		while (true) {
-			const int ret = ::readlink(path.c_str(), buf.data(), buf.size());
-			if (ret < 0) throw_system_error(errno);
-			if (ret < buf.size()) return { buf.begin(), buf.begin()+ret };
-			buf.resize(buf.size()*2);
-		}
-	}
-	string realpath(const string &path) {
-		const std::shared_ptr<char> p(::realpath(path.c_str(), nullptr), &::free);
-		if (!p) throw_system_error(errno);
-		return p.get();
-	}
-
-	void mkdir(const string &path, ::mode_t mode) {
-		if (::mkdir(path.c_str(), mode) < 0) throw_system_error(errno);
-	}
-
-	std::shared_ptr<DIR> opendir(const string &path) {
-		DIR *dir = ::opendir(path.c_str());
-		if (!dir) throw_system_error(errno);
-		return std::shared_ptr<DIR>(dir, &::closedir);
-	}
-
-	string mkdtemp(const string &base) {
-		std::vector<char> buf(base.begin(), base.end());
-		buf.push_back(0);
-		if (!::mkdtemp(buf.data())) throw_system_error(errno);
-		return buf.data();
-	}
 }
 
 namespace boost {
@@ -297,11 +112,8 @@ namespace wandbox {
 		}
 		void send_version() {
 			const auto proc = [this](const vector<string>& args) -> std::string {
-				const auto workdir = opendir("/");
-				const child_process c = piped_spawn(_P_WAIT, workdir.get(), args);
-				::close(c.fd_stdin);
-				::close(c.fd_stderr);
-				stream_descriptor_pair s(aio, c.fd_stdout);
+				auto c = piped_spawn(_P_WAIT, opendir("/"), args);
+				stream_descriptor_pair s(aio, c.fd_stdout.release());
 				if (c.pid == -1 || !WIFEXITED(c.pid) || WEXITSTATUS(c.pid) != 0) return "";
 				error_code ec;
 				asio::read(s.stream, s.buf, ec);
@@ -342,14 +154,6 @@ namespace wandbox {
 			});
 			aio.run();
 		}
-		template <typename Stream>
-		struct stream_pair {
-			template <typename ...Args>
-			stream_pair(asio::io_service &aio, Args &&...args): stream(aio, std::forward<Args>(args)...), buf() { }
-			Stream stream;
-			asio::streambuf buf;
-		};
-		typedef stream_pair<asio::posix::stream_descriptor> stream_descriptor_pair;
 
 		bool wait_run_command() {
 			asio::streambuf buf;
@@ -392,7 +196,7 @@ namespace wandbox {
 				int fd = ::openat(::dirfd(workdir.get()), srcname.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC, 0600);
 				for (std::size_t offset = 0; offset < s.length(); ) {
 					const auto wrote = ::write(fd, s.data()+offset, s.length()-offset);
-					if (wrote < 0) throw std::runtime_error("write(2) failed");
+					if (wrote < 0 && errno != EINTR) throw_system_error(errno);
 					offset += wrote;
 				}
 				::fsync(fd);
@@ -400,9 +204,7 @@ namespace wandbox {
 			}
 			std::cout << "Source <<EOF\n" << s << "\nEOF" << std::endl;
 
-			const child_process c = piped_spawn(_P_NOWAIT, workdir.get(), get_compiler_arg());
-			std::cout << "gcc : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
-			::close(c.fd_stdin);
+			auto c = piped_spawn(_P_NOWAIT, workdir, get_compiler_arg());
 			cc_pid = c.pid;
 
 			aio.post([this] {
@@ -411,8 +213,9 @@ namespace wandbox {
 				asio::write(sock, asio::buffer(str), ec);
 			});
 
-			pipes.emplace_front(ref(aio), c.fd_stdout);
+			pipes.emplace_front(ref(aio));
 			auto cc_stdout = pipes.begin();
+			cc_stdout->stream.assign(c.fd_stdout.release());
 			asio::async_read_until(
 				cc_stdout->stream, cc_stdout->buf, end_read_condition(),
 				std::bind<void>(
@@ -422,8 +225,9 @@ namespace wandbox {
 					_1,
 					_2));
 
-			pipes.emplace_front(ref(aio), c.fd_stderr);
+			pipes.emplace_front(ref(aio));
 			auto cc_stderr = pipes.begin();
+			cc_stderr->stream.assign(c.fd_stderr.release());
 			asio::async_read_until(
 				cc_stderr->stream, cc_stderr->buf, end_read_condition(),
 				std::bind<void>(
@@ -461,12 +265,12 @@ namespace wandbox {
 			if (!pipes.empty()) return;
 			if (prog_pid) {
 				int st;
-				::waitpid(prog_pid, &st, 0);
+				waitpid(prog_pid, &st, 0);
 				std::cout << "Program finished: code=" << st << std::endl;
 				send_exitcode(st);
 			} else {
 				int st;
-				::waitpid(cc_pid, &st, 0);
+				waitpid(cc_pid, &st, 0);
 				std::cout << "Compile finished: code=" << st << std::endl;
 				if (st) {
 					prog_pid = -1;
@@ -475,13 +279,12 @@ namespace wandbox {
 				} else {
 					vector<string> runargs = get_compiler().run_command;
 					runargs.insert(runargs.begin(), { ptracer, "--config=" + config_file, "--" });
-					child_process c = piped_spawn(_P_NOWAIT, workdir.get(), runargs);
-					std::cout << "a.out : { " << c.pid << ", " << c.fd_stdin << ", " << c.fd_stdout << ", " << c.fd_stderr << " }" << std::endl;
-					::close(c.fd_stdin);
+					auto c = piped_spawn(_P_NOWAIT, workdir, runargs);
 					prog_pid = c.pid;
 
-					pipes.emplace_front(ref(aio), c.fd_stdout);
+					pipes.emplace_front(ref(aio));
 					auto aout_stdout = pipes.begin();
+					aout_stdout->stream.assign(c.fd_stdout.release());
 					asio::async_read_until(
 						aout_stdout->stream, aout_stdout->buf, end_read_condition(),
 						std::bind<void>(
@@ -491,8 +294,9 @@ namespace wandbox {
 							_1,
 							_2));
 
-					pipes.emplace_front(ref(aio), c.fd_stderr);
+					pipes.emplace_front(ref(aio));
 					auto aout_stderr = pipes.begin();
+					aout_stderr->stream.assign(c.fd_stderr.release());
 					asio::async_read_until(
 						aout_stderr->stream, aout_stderr->buf, end_read_condition(),
 						std::bind<void>(
@@ -575,7 +379,7 @@ namespace wandbox {
 				if (e.code().value() != EEXIST) throw;
 			}
 			basedir = opendir(config.jail.basedir);
-			if (::fchdir(::dirfd(basedir.get())) < 0) throw_system_error(errno);
+			chdir(basedir);
 		}
 	private:
 		shared_ptr<DIR> basedir;
@@ -594,7 +398,7 @@ int main(int argc, char **argv) {
 				("help,h", "show this help")
 				("config,c", po::value<string>(&config_file_raw)->default_value(string(DATADIR) + "/config"), "specify config file")
 			;
-			
+
 			po::variables_map vm;
 			po::store(po::parse_command_line(argc, argv, opt), vm);
 			po::notify(vm);

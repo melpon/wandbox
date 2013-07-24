@@ -1,4 +1,3 @@
-//#define BOOST_ERROR_CODE_HEADER_ONLY
 #include <iostream>
 #include <memory>
 #include <string>
@@ -21,28 +20,6 @@ namespace wandbox {
 	using std::placeholders::_3;
 	using std::string;
 
-	enum struct compile_opt_shifts {
-		none,
-		O0,
-		O1,
-		O2,
-		Os,
-		Ofast,
-		Wall,
-		Wextra,
-	};
-
-	struct ctor_notifier {
-		std::ostream &print(const char *text) { return std::cout << this << ' ' << text << std::endl; }
-		std::ostream &print(const char *text, const void *p) { return std::cout << this << ' ' << text << ' ' << p << std::endl; }
-		ctor_notifier() { print("default ctor"); }
-		ctor_notifier(const ctor_notifier &o) { print("copy ctor from", &o); }
-		ctor_notifier(ctor_notifier &&o) { print("move ctor from", &o); }
-		ctor_notifier &operator =(const ctor_notifier &o) { print("copy assign from", &o); return *this; }
-		ctor_notifier &operator =(ctor_notifier &&o) { print("move assign from", &o); return *this; }
-		~ctor_notifier() { print("dtor"); }
-	};
-
 	extern void *enabler;
 
 	template <typename Range, typename std::enable_if<std::is_convertible<typename boost::range_category<Range>::type, std::bidirectional_iterator_tag>::value>::type *& = enabler>
@@ -54,7 +31,6 @@ namespace wandbox {
 		return ret;
 	}
 	template <typename Range>
-//	auto encode_qp(const Range &r) -> typename std::enable_if<std::is_convertible<typename std::iterator_traits<decltype(boost::begin(r))>::iterator_category, std::bidirectional_iterator_tag>::value, string>::type {
 	string encode_qp(const Range &r) {
 		if (r.begin() == r.end()) return {};
 		string ret;
