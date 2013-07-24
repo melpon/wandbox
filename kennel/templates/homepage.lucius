@@ -36,10 +36,8 @@
   height: 300px;
   overflow-y: scroll;
   white-space: pre-wrap;
+  font-family: "Courier New", monospace;
 
-  span {
-    font-family: "Courier New", monospace;
-  }
   .CompilerMessageE {
     color: #ff0000;
   }
