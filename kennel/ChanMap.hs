@@ -11,6 +11,7 @@ import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
 import Network.Wai.EventSource (ServerEvent(..))
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Applicative ((<$>))
+import Control.Exception (finally)
 import qualified Control.Concurrent.Chan as C
 import qualified Data.Map as M
 import qualified Data.Text as T
@@ -25,10 +26,11 @@ newChanMap = do
 
 timeDelete :: ChanMap -> T.Text -> IO ()
 timeDelete cm k = do
-  -- wait 2 hours
-  threadDelay (2*60*60*1000*1000)
-  writeChan cm k CloseEvent
-  delete cm k
+    -- wait 2 minutes
+    threadDelay (2*60*1000*1000)
+    writeChan cm k CloseEvent
+  `finally`
+    delete cm k
 
 heartbeat :: ChanMap -> T.Text -> IO ()
 heartbeat cm k = do
@@ -41,15 +43,20 @@ heartbeat cm k = do
 insertLookup :: ChanMap -> T.Text -> IO ChanEvent
 insertLookup cm@(ChanMap ref) k = do
   chan <- C.newChan
-  chan' <- atomicModifyIORef ref (modify chan)
-  -- this chan is removed from ChanMap after few seconds.
-  _ <- forkIO $ timeDelete cm k
-  -- heartbeat with CommentEvent.
-  _ <- forkIO $ heartbeat cm k
-  return chan'
+  mChan <- atomicModifyIORef ref (modify chan)
+  case mChan of
+    -- chan already exists.
+    (Just chan') -> return chan'
+    -- inserted chan
+    Nothing -> do
+      -- this chan is removed from ChanMap after few seconds.
+      _ <- forkIO $ timeDelete cm k
+      -- heartbeat with CommentEvent.
+      _ <- forkIO $ heartbeat cm k
+      return chan
   where
     modify chan m = let (mValue, m') = M.insertLookupWithKey oldValue k chan m
-                    in maybe (m', chan) ((,) m') mValue
+                    in (m', mValue)
     oldValue _ _ old = old
 
 delete :: ChanMap -> T.Text -> IO ()

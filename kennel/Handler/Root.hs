@@ -80,7 +80,8 @@ makeRootR code = do
     app <- getYesod
     defaultLayout $ do
         setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
-        sourceId <- liftIO $ T.pack <$> (replicateM 16 $ randomRIO ('a','z'))
+        -- sourceId <- liftIO $ T.pack <$> (replicateM 16 $ randomRIO ('a','z'))
+        empty <- return T.empty
         addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
         addScript $ StaticR js_jquery_url_js
         addScript $ StaticR ace_ace_js

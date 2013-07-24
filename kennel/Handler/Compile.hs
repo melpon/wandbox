@@ -62,21 +62,14 @@ sinkProtocol writeChan = C.sinkState () push close
 
 postCompileR :: Text -> Handler ()
 postCompileR ident = do
-  mCompiler <- lookupPostParam "compiler"
-  mCode <- lookupPostParam "code"
-  mOpts <- lookupPostParam "options"
-  -- liftIO . (Just <$>) :: Maybe (IO Code) -> Handler (Maybe Code)
-  mCodeInstance <- maybe (return Nothing) (liftIO . (Just <$>)) $
-                       -- Maybe (IO Code)
-                       makeCode <$> mCompiler
-                                <*> mCode
-                                <*> mOpts
-  _ <- go mCodeInstance
+  (Just compiler) <- lookupPostParam "compiler"
+  (Just code) <- lookupPostParam "code"
+  (Just options) <- lookupPostParam "options"
+  codeInstance <- liftIO $ makeCode compiler code options
+  _ <- go codeInstance
   return ()
   where
-    go (Just code) = do
+    go codeInstance = do
       cm <- getChanMap <$> getYesod
-      _ <- liftIO $ forkIO $ vmHandle code $ sinkProtocol $ CM.writeChan cm ident
+      _ <- liftIO $ forkIO $ vmHandle codeInstance $ sinkProtocol $ CM.writeChan cm ident
       return ()
-    go _ = return ()
-    bool = (=="true")

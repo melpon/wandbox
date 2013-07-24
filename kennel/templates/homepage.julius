@@ -20,6 +20,15 @@ function encode_html_entity(str) {
   }).join("");
 }
 
+function random_string(n) {
+    var a = 'abcdefghijklmnopqrstuvwxyz'
+    var s = '';
+    for (var i = 0; i < n; i++) {
+        s += a[Math.floor(Math.random() * a.length)];
+    }
+    return s;
+}
+
 function parse(str) {
   var index = str.indexOf(':');
   return {
@@ -28,25 +37,62 @@ function parse(str) {
   };
 }
 
+var BASE_SOURCE_URL = '@{SourceR empty}'
+var BASE_COMPILE_URL = '@{CompileR empty}'
+var global_running = false;
+
 function post_code() {
-  var url = $('#compile').attr('href');
-  var compiler = $('#compiler').val();
-  var code = ace.edit('editor').getValue();
-  var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); });
+  if (global_running) {
+    return;
+  }
+  var post_id = random_string(16);
+  var url = BASE_SOURCE_URL + post_id;
 
-  $.post('@{CompileR sourceId}', {
-    compiler: compiler,
-    code: code,
-    options: options.get().join(',') }, function() { });
+  var src = new EventSource($.url(url).attr('path'));
 
-  // make permlink
-  $('#permlink').remove();
-  $('<a href="permlink" id="permlink" class="btn">Permlink</a>')
-    .appendTo('#permdiv');
-  $('#permlink').click(function(event) {
-    event.preventDefault();
-    post_permlink();
-  });
+  global_running = true;
+  var finalize = function() {
+    src.close();
+    global_running = false;
+  };
+
+  src.onmessage = function(msg) {
+    data = parse(decode_uri(msg.data));
+    $('<p>').html(encode_html_entity(data.message))
+            .addClass(data.type)
+            .appendTo('#output');
+    $('#output')[0].scrollTop = $('#output')[0].scrollHeight;
+
+    if (data.type == 'Control' && data.message == 'Finish') {
+        finalize();
+    }
+  };
+
+  src.onopen = function() {
+    var url = $('#compile').attr('href');
+    var compiler = $('#compiler').val();
+    var code = ace.edit('editor').getValue();
+    var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); });
+
+    $.post(BASE_COMPILE_URL + post_id, {
+      compiler: compiler,
+      code: code,
+      options: options.get().join(',') }, function() { });
+
+    // make permlink
+    $('#permlink').remove();
+    $('<a href="permlink" id="permlink" class="btn">Permlink</a>')
+      .appendTo('#permdiv');
+    $('#permlink').click(function(event) {
+      event.preventDefault();
+      post_permlink();
+    });
+
+  };
+
+  src.onerror = function() {
+    finalize();
+  }
 }
 
 function post_permlink() {
@@ -96,17 +142,6 @@ function update_compile_command() {
 }
 
 $(function() {
-  absUrl = '@{SourceR sourceId}';
-  src = new EventSource($.url(absUrl).attr('path'));
-  src.onmessage = function(msg) {
-    console.log(msg.data);
-    data = parse(decode_uri(msg.data));
-    $('<p>').html(encode_html_entity(data.message))
-            .addClass(data.type)
-            .appendTo('#output');
-    $('#output')[0].scrollTop = $('#output')[0].scrollHeight;
-  };
-
   $('#compile').click(function(event) {
     event.preventDefault();
     post_code();
@@ -136,8 +171,6 @@ $(function() {
   $('#compiler').val(compiler);
   editor.setValue(code);
   editor.setShowPrintMargin(false);
-  //check($('#optimize'), optimize);
-  //check($('#warning'), warning);
 
   $("#compiler").change(function() {
     $("#compile_options").children().removeClass('selected');
