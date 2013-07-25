@@ -418,18 +418,18 @@
    "display-compile-command":"mcs prog.cs",
    "run-command":["mono", "prog.exe"]
   },{
-   "name":"perl",
+   "name":"perl-5.18.0",
    "displayable":true,
    "output-file":"prog.pl",
-   "run-command":["/usr/bin/perl", "prog.pl"],
+   "run-command":["/usr/local/perl-5.18.0/bin/perl", "prog.pl"],
    "display-name":"perl",
    "display-compile-command":"perl",
    "language":"Perl",
    "source-suffix":".pl",
    "compile-command":"/bin/true",
-   "version-command":["/usr/bin/perl", "-e", "print $^V"],
+   "version-command":["/usr/local/perl-5.18.0/bin/perl", "-e", "print $^V"],
   },{
-   "name":"python2.7.3",
+   "name":"python-2.7.3",
    "displayable":true,
    "output-file":"prog.py",
    "run-command":["/usr/local/python-2.7.3/bin/python", "prog.py"],
