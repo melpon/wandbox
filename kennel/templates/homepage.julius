@@ -1,6 +1,7 @@
+var vim_handler = require("ace/keyboard/vim").handler
 var keybindings = {
     ace: null,
-    vim: require("ace/keyboard/vim").handler,
+    vim: vim_handler,
     emacs: "ace/keyboard/emacs",
 };
 
@@ -146,13 +147,13 @@ $(function() {
     event.preventDefault();
     post_code();
   });
-  $('#editor').keydown(function(event) {
-    if (event.keyCode == 10 ||
-        event.keyCode == 13 && event.ctrlKey) {
-      event.preventDefault();
-      post_code();
-    }
-  });
+  //$('#editor').keydown(function(event) {
+  //  if (event.keyCode == 10 ||
+  //      event.keyCode == 13 && event.ctrlKey) {
+  //    event.preventDefault();
+  //    post_code();
+  //  }
+  //});
 
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/chrome");
@@ -163,6 +164,20 @@ $(function() {
   }).change();
 
   editor.focus();
+
+  editor.commands.addCommand({
+    name: 'run',
+    bindKey: { win: 'Ctrl-Enter',  mac: 'Ctrl-Enter' },
+    exec: function(editor) {
+      post_code();
+    },
+    readOnly: true
+  });
+  vim_handler.actions['ctrl-return'] = {
+    fn: function(editor, range, count, param) {
+      post_code();
+    },
+  };
 
   // initialize
   var compiler = decode_uri('#{urlEncode $ codeCompiler code}');
