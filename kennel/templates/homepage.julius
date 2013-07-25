@@ -162,6 +162,8 @@ $(function() {
         editor.setKeyboardHandler(keybindings[value]);
   }).change();
 
+  editor.focus();
+
   // initialize
   var compiler = decode_uri('#{urlEncode $ codeCompiler code}');
   var code = decode_uri('#{urlEncode $ codeCode code}');
