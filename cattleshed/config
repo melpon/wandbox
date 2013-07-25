@@ -12,7 +12,7 @@
   "max-open-file":16,
   "nice":5,
   "allow-file-exact":["/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat", "/dev/urandom"],
-  "allow-file-prefix":["/lib", "/usr/lib", "/usr/local", "/proc/self"],
+  "allow-file-prefix":["/lib", "/usr/lib", "/usr/local", "/proc/self", "/usr/share/perl", "/usr/include/python2.7"],
  },
  "compilers":[
   {
