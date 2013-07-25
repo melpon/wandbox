@@ -49,6 +49,11 @@
      "default":false,
      "display-name":"最適化"
     },{
+     "name":"verbose",
+     "flags":"-v",
+     "default":false,
+     "display-name":"詳細"
+    },{
      "name":"C++11",
      "flags":"-std=c++11",
      "default":false,
@@ -75,6 +80,11 @@
      "default":false,
      "display-name":"最適化"
     },{
+     "name":"verbose",
+     "flags":"-v",
+     "default":false,
+     "display-name":"詳細"
+    },{
      "name":"C++11",
      "flags":"-std=c++0x",
      "default":true,
@@ -95,6 +105,11 @@
      "flags":"-O2",
      "default":false,
      "display-name":"最適化"
+    },{
+     "name":"verbose",
+     "flags":"-v",
+     "default":false,
+     "display-name":"詳細"
     },{
      "name":"C++11",
      "flags":"-std=c++11",
@@ -122,6 +137,11 @@
      "default":false,
      "display-name":"最適化"
     },{
+     "name":"verbose",
+     "flags":"-v",
+     "default":false,
+     "display-name":"詳細"
+    },{
      "name":"C++11",
      "flags":"-std=c++0x",
      "default":false,
@@ -147,6 +167,11 @@
      "flags":"-O2",
      "default":false,
      "display-name":"最適化"
+    },{
+     "name":"verbose",
+     "flags":"-v",
+     "default":false,
+     "display-name":"詳細"
     },{
      "name":"C++11",
      "flags":"-std=c++0x",
