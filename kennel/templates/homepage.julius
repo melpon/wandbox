@@ -5,6 +5,18 @@ var keybindings = {
     emacs: "ace/keyboard/emacs",
 };
 
+var EDITOR_MODE_MAPPING = {
+  'C++': 'ace/mode/c_cpp',
+  'Ruby': 'ace/mode/ruby',
+  'Python': 'ace/mode/python',
+  'Perl': 'ace/mode/perl',
+  'Erlang': 'ace/mode/erlang',
+  'C#': 'ace/mode/csharp',
+}
+function get_editor_mode(lang) {
+  return EDITOR_MODE_MAPPING[lang]
+}
+
 function decode_uri(str) {
   return decodeURIComponent(str);
 }
@@ -147,20 +159,12 @@ $(function() {
     event.preventDefault();
     post_code();
   });
-  //$('#editor').keydown(function(event) {
-  //  if (event.keyCode == 10 ||
-  //      event.keyCode == 13 && event.ctrlKey) {
-  //    event.preventDefault();
-  //    post_code();
-  //  }
-  //});
 
   var editor = ace.edit("editor");
-  editor.setTheme("ace/theme/chrome");
-  editor.getSession().setMode("ace/mode/c_cpp");
+  editor.setTheme("ace/theme/textmate");
   $("#keybinding").change(function() {
-        var value = $(this).val();
-        editor.setKeyboardHandler(keybindings[value]);
+    var value = $(this).val();
+    editor.setKeyboardHandler(keybindings[value]);
   }).change();
 
   editor.focus();
@@ -190,6 +194,10 @@ $(function() {
   editor.setShowPrintMargin(false);
 
   $("#compiler").change(function() {
+    var lang = $('#compiler > option:selected').attr('language');
+    console.log(lang, get_editor_mode(lang));
+    editor.getSession().setMode(get_editor_mode(lang));
+
     $("#compile_options").children().removeClass('selected');
     $("#option-" + to_id($(this).val())).addClass('selected')
     update_compile_command();
