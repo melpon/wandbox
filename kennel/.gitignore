@@ -8,3 +8,4 @@ kennel.rc
 nohup.out
 InsertPassword
 static/ace
+static/polyfills

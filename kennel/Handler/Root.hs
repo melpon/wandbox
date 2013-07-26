@@ -7,7 +7,7 @@ import Import
 import System.Random (randomRIO)
 import qualified Data.Text as T
 import Control.Monad (replicateM)
-import Settings.StaticFiles (js_jquery_url_js, ace_ace_js, ace_keybinding_vim_js, ace_keybinding_emacs_js)
+import Settings.StaticFiles (js_jquery_url_js, ace_ace_js, ace_keybinding_vim_js, ace_keybinding_emacs_js, polyfills_EventSource_js)
 import Model
 import Text.Julius (ToJavascript(toJavascript))
 import Codec.Binary.Url (encode)
@@ -87,6 +87,7 @@ makeRootR code = do
         addScript $ StaticR ace_ace_js
         addScript $ StaticR ace_keybinding_vim_js
         addScript $ StaticR ace_keybinding_emacs_js
+        addScript $ StaticR polyfills_EventSource_js
         addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
         -- addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
         compilerInfos <- liftIO getCompilerInfos
