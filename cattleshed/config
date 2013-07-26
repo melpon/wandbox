@@ -446,6 +446,17 @@
    "compile-command":"/bin/true",
    "version-command":["/usr/local/perl-5.18.0/bin/perl", "-e", "print $^V"],
   },{
+   "name":"perl-5.19.2",
+   "displayable":true,
+   "output-file":"prog.pl",
+   "run-command":["/usr/local/perl-5.19.2/bin/perl5.19.2", "prog.pl"],
+   "display-name":"perl-devel",
+   "display-compile-command":"perl5.19.2 prog.pl",
+   "language":"Perl",
+   "source-suffix":".pl",
+   "compile-command":"/bin/true",
+   "version-command":["/usr/local/perl-5.19.2/bin/perl5.19.2", "-e", "print $^V"],
+  },{
    "name":"python-2.7.3",
    "displayable":true,
    "output-file":"prog.py",
