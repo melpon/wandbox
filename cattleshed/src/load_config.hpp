@@ -46,6 +46,9 @@ namespace wandbox {
 		int max_file_size;
 		int max_open_file;
 		int nice;
+		int program_duration;
+		int compile_time_limit;
+		int kill_wait;
 		std::unordered_set<std::string> allow_file_exact;
 		std::unordered_set<std::string> allow_file_prefix;
 	};

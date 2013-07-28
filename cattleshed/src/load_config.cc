@@ -222,6 +222,9 @@ namespace cfg {
 		x.max_file_size = get_int(o, "max-file-size");
 		x.max_open_file = get_int(o, "max-open-file");
 		x.nice = get_int(o, "nice");
+		x.program_duration = get_int(o, "program-duration");
+		x.compile_time_limit = get_int(o, "compile-time-limit");
+		x.kill_wait = get_int(o, "kill-wait");
 		for (const auto &y: get_str_array(o, "allow-file-exact")) {
 			x.allow_file_exact.insert(y);
 		}

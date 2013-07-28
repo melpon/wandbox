@@ -292,7 +292,7 @@ namespace wandbox {
 				const int sig = sigwaitinfo(&sigs, &siginfo);
 				if (sig == -1) return -1;
 				if (sig != SIGCHLD) {
-					ptrace(PTRACE_SYSCALL, primary_pid, 0, siginfo.si_signo);
+					::kill(primary_pid, siginfo.si_signo);
 					continue;
 				}
 			}

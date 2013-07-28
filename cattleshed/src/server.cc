@@ -22,6 +22,7 @@
 namespace wandbox {
 
 	namespace brange = boost::range;
+	namespace ptime = boost::posix_time;
 
 	using std::shared_ptr;
 	using std::unique_ptr;
@@ -234,6 +235,9 @@ namespace wandbox {
 					_1,
 					_2));
 
+			timer.expires_from_now(ptime::seconds(config.jail.compile_time_limit));
+			timer.async_wait(std::bind<void>(ref(*this), _1, cc_pid, SIGXCPU));
+
 			aio.run();
 		}
 
@@ -262,10 +266,12 @@ namespace wandbox {
 			if (prog_pid) {
 				int st;
 				waitpid(prog_pid, &st, 0);
+				timer.cancel();
 				send_exitcode(st);
 			} else {
 				int st;
 				waitpid(cc_pid, &st, 0);
+				timer.cancel();
 				if (st) {
 					prog_pid = -1;
 					send_exitcode(st);
@@ -298,7 +304,19 @@ namespace wandbox {
 							"StdErr",
 							_1,
 							_2));
+
+					timer.expires_from_now(ptime::seconds(config.jail.program_duration));
+					timer.async_wait(std::bind<void>(ref(*this), _1, prog_pid, SIGXCPU));
 				}
+			}
+		}
+
+		void operator ()(error_code ec, pid_t pid, int sig) {
+			if (ec) return;
+			::kill(pid, sig);
+			if (sig != SIGKILL) {
+				timer.expires_from_now(ptime::seconds(config.jail.kill_wait));
+				timer.async_wait(std::bind<void>(ref(*this), _1, pid, SIGKILL));
 			}
 		}
 
@@ -330,7 +348,7 @@ namespace wandbox {
 			}
 		}
 
-		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio)
+		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio), timer(aio)
 		{
 			acc.accept(sock);
 			do {
@@ -346,6 +364,7 @@ namespace wandbox {
 	private:
 		asio::io_service aio;
 		tcp::socket sock;
+		asio::deadline_timer timer;
 		shared_ptr<DIR> workdir;
 		list<stream_descriptor_pair> pipes;
 		std::map<std::string, std::string> received;
