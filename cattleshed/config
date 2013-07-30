@@ -397,8 +397,8 @@
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.0/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
    "inherits":["clang-common", "clang-3.0-switches"]
   },{
-   "name":"ghc-7.4",
-   "displayable":false,
+   "name":"ghc-7.6.3",
+   "displayable":true,
    "language":"Haskell",
    "switches":[
     {
@@ -414,10 +414,11 @@
     }
    ],
    "source-suffix":".hs",
-   "compile-command":["ghc", "-o", "prog.exe", "prog.hs"],
-   "version-command":["ghc", "--numeric-version"],
+   "compile-command":["/usr/local/ghc-7.6.3/bin/ghc", "-o", "prog.exe", "prog.hs"],
+   "version-command":["/usr/local/ghc-7.6.3/bin/ghc", "--numeric-version"],
    "display-name":"ghc",
-   "display-compile-command":"ghc prog.hs"
+   "display-compile-command":"ghc prog.hs",
+   "run-command":["./prog.exe"]
   },{
    "name":"mono-2.8",
    "displayable":false,

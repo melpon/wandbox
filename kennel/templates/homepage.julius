@@ -12,6 +12,7 @@ var EDITOR_MODE_MAPPING = {
   'Perl': 'ace/mode/perl',
   'Erlang': 'ace/mode/erlang',
   'C#': 'ace/mode/csharp',
+  'Haskell': 'ace/mode/haskell',
 }
 function get_editor_mode(lang) {
   return EDITOR_MODE_MAPPING[lang]
