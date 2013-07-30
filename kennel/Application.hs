@@ -1,80 +1,92 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Application
-    ( getApplication
+    ( makeApplication
     , getApplicationDev
+    , makeFoundation
     ) where
 
 import Import
-import Settings (parseExtra, PersistConfig)
-import Settings.StaticFiles (staticSite)
+import Settings
 import Yesod.Auth
-import Yesod.Default.Config (AppConfig(..), ConfigSettings(..), withYamlEnvironment, configSettings, loadConfig)
-import Yesod.Default.Main (defaultDevelApp)
-import Yesod.Default.Handlers (getFaviconR, getRobotsR)
-#if DEVELOPMENT
-import Yesod.Logger (Logger, logBS)
-import Network.Wai.Middleware.RequestLogger (logCallbackDev)
-#else
-import Yesod.Logger (Logger, logBS, toProduction)
-import Network.Wai.Middleware.RequestLogger (logCallback)
-#endif
-import Network.Wai (Application)
-import ChanMap (newChanMap)
-import Model
-import qualified Database.Persist.Store
-import Database.Persist.GenericSql (runMigration, SqlPersist)
+import Yesod.Default.Config
+import Yesod.Default.Main
+import Yesod.Default.Handlers
+import Network.Wai.Middleware.RequestLogger
+import qualified Database.Persist
+import Database.Persist.Sql (runMigration)
+import Network.HTTP.Conduit (newManager, def)
+import Control.Monad.Logger (runLoggingT)
+import System.IO (stdout)
+import System.Log.FastLogger (mkLogger)
+
 import Yesod.Auth.HashDB (migrateUsers)
+import ChanMap (newChanMap)
+import Database.Persist.Sql (SqlPersistT)
+import Control.Monad.Logger (LoggingT)
 
 -- Import all relevant handler modules here.
+-- Don't forget to add new modules to your cabal file!
 import Handler.Root
 import Handler.Compile
 import Handler.Source
 import Handler.Permlink
 
--- This line actually creates our YesodSite instance. It is the second half
--- of the call to mkYesodData which occurs in Foundation.hs. Please see
--- the comments there for more details.
+-- This line actually creates our YesodDispatch instance. It is the second half
+-- of the call to mkYesodData which occurs in Foundation.hs. Please see the
+-- comments there for more details.
 mkYesodDispatch "App" resourcesApp
-
-migrates :: SqlPersist IO ()
-migrates = do
-    runMigration migrateUsers
-    runMigration migrateAll
 
 -- This function allocates resources (such as a database connection pool),
 -- performs initialization and creates a WAI application. This is also the
 -- place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-getApplication :: AppConfig AppEnv Extra -> Logger -> IO Application
-getApplication conf logger = do
-    s <- staticSite conf
-    let sqliteSetting = extraSqliteSetting $ appExtra conf
+makeApplication :: AppConfig DefaultEnv Extra -> IO Application
+makeApplication conf = do
+    foundation <- makeFoundation conf
 
-    dbconf <- withYamlEnvironment sqliteSetting (appEnv conf)
-              Database.Persist.Store.loadConfig >>=
-              Database.Persist.Store.applyEnv
-    p <- Database.Persist.Store.createPoolConfig (dbconf :: Settings.PersistConfig)
-    Database.Persist.Store.runPool dbconf migrates p
+    -- Initialize the logging middleware
+    logWare <- mkRequestLogger def
+        { outputFormat =
+            if development
+                then Detailed True
+                else Apache FromSocket
+        , destination = Logger $ appLogger foundation
+        }
 
-    cm <- liftIO $ newChanMap
-    let foundation = App conf setLogger s cm p dbconf
+    -- Create the WAI application and apply middlewares
     app <- toWaiAppPlain foundation
     return $ logWare app
-  where
-#ifdef DEVELOPMENT
-    logWare = logCallbackDev (logBS setLogger)
-    setLogger = logger
-#else
-    setLogger = toProduction logger -- by default the logger is set for development
-    logWare = logCallback (logBS setLogger)
-#endif
+
+migrates :: SqlPersistT (LoggingT IO) ()
+migrates = do
+    runMigration migrateUsers
+    runMigration migrateAll
+
+-- | Loads up any necessary settings, creates your foundation datatype, and
+-- performs some initialization.
+makeFoundation :: AppConfig DefaultEnv Extra -> IO App
+makeFoundation conf = do
+    s <- staticSite
+    dbconf <- withYamlEnvironment "config/sqlite.yml" (appEnv conf)
+              Database.Persist.loadConfig >>=
+              Database.Persist.applyEnv
+    p <- Database.Persist.createPoolConfig (dbconf :: Settings.PersistConf)
+    logger <- mkLogger True stdout
+    cm <- liftIO $ newChanMap
+    let foundation = App conf s p dbconf logger cm
+
+    -- Perform database migration using our application's logging settings.
+    runLoggingT
+        (Database.Persist.runPool dbconf migrates p)
+        (messageLoggerSource foundation logger)
+
+    return foundation
 
 -- for yesod devel
 getApplicationDev :: IO (Int, Application)
 getApplicationDev =
-    defaultDevelApp loader getApplication
+    defaultDevelApp loader makeApplication
   where
-    loader = loadConfig (configSettings Development)
+    loader = Yesod.Default.Config.loadConfig (configSettings Development)
         { csParseExtra = parseExtra
         }
-

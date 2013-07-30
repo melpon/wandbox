@@ -2,31 +2,26 @@
 -- includes database connection settings, static file locations, etc.
 -- In addition, you can configure a number of different aspects of Yesod
 -- by overriding methods in the Yesod typeclass. That instance is
--- declared in the kennel.hs file.
-module Settings
-    ( widgetFile
-    , staticRoot
-    , staticDir
-    , AppEnv (..)
-    , Extra (..)
-    , parseExtra
-    , PersistConfig
-    ) where
+-- declared in the Foundation.hs file.
+module Settings where
 
 import Prelude
 import Text.Shakespeare.Text (st)
 import Language.Haskell.TH.Syntax
-import Yesod.Default.Config
 import Database.Persist.Sqlite (SqliteConf)
-import qualified Yesod.Default.Util
+import Yesod.Default.Config
+import Yesod.Default.Util
 import Data.Text (Text)
 import Data.Yaml
 import Control.Applicative
-import System.Environment (getArgs, getProgName)
-import System.Exit (exitFailure)
+import Settings.Development
+import Data.Default (def)
+import Text.Hamlet
 
 -- | Which Persistent backend this site is using.
-type PersistConfig = SqliteConf
+type PersistConf = SqliteConf
+
+-- Static setting below. Changing these requires a recompile
 
 -- | The location of static files on your system. This is a file system
 -- path. The default value works properly with your scaffolded site.
@@ -42,40 +37,40 @@ staticDir = "static"
 -- please see:
 --   http://code.google.com/speed/page-speed/docs/request.html#ServeFromCookielessDomain
 --
--- If you change the resource pattern for StaticR in kennel.hs, you will
+-- If you change the resource pattern for StaticR in Foundation.hs, you will
 -- have to make a corresponding change here.
 --
--- To see how this value is used, see urlRenderOverride in kennel.hs
-staticRoot :: AppConfig e a ->  Text
+-- To see how this value is used, see urlRenderOverride in Foundation.hs
+staticRoot :: AppConfig DefaultEnv x -> Text
 staticRoot conf = [st|#{appRoot conf}/static|]
 
-widgetFile :: String -> Q Exp
-#if DEVELOPMENT
-widgetFile = Yesod.Default.Util.widgetFileReload
-#else
-widgetFile = Yesod.Default.Util.widgetFileNoReload
-#endif
+-- | Settings for 'widgetFile', such as which template languages to support and
+-- default Hamlet settings.
+--
+-- For more information on modifying behavior, see:
+--
+-- https://github.com/yesodweb/yesod/wiki/Overriding-widgetFile
+widgetFileSettings :: WidgetFileSettings
+widgetFileSettings = def
+    { wfsHamletSettings = defaultHamletSettings
+        { hamletNewlines = AlwaysNewlines
+        }
+    }
 
--- Environment
-data AppEnv = Development
-            | Localhost
-            | Production deriving (Read, Show, Enum, Bounded)
+-- The rest of this file contains settings which rarely need changing by a
+-- user.
+
+widgetFile :: String -> Q Exp
+widgetFile = (if development then widgetFileReload
+                             else widgetFileNoReload)
+              widgetFileSettings
 
 data Extra = Extra
     { extraCopyright :: Text
     , extraAuth :: Bool
-    , extraSessionKey :: FilePath
-    , extraSqliteSetting :: FilePath
-    , extraCompilerConfig :: FilePath
-    , extraAnalytics :: Maybe Text -- ^ Google Analytics
-    }
+    } deriving Show
 
-parseExtra :: AppEnv -> Object -> Parser Extra
+parseExtra :: DefaultEnv -> Object -> Parser Extra
 parseExtra _ o = Extra
     <$> o .:  "copyright"
     <*> o .:  "auth"
-    <*> o .:  "session_key"
-    <*> o .:  "sqlite_setting"
-    <*> o .:  "compiler_config"
-    <*> o .:? "analytics"
-

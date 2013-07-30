@@ -22,10 +22,8 @@ import qualified Data.Conduit.List as CL
 
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
-
-instance ToJavascript Bool where
-  toJavascript True = "true"
-  toJavascript False = "false"
+import qualified Data.List (init)
+import qualified Data.Aeson as JS (Value(String))
 
 data CompilerSwitch = CompilerSwitch
   { swName :: Text
@@ -50,7 +48,7 @@ data CompilerInfo = CompilerInfo
 getCompilerInfos :: IO [CompilerInfo]
 getCompilerInfos = do
     text <- fromVM
-    let ls = init $ T.split (=='\n') text
+    let ls = Data.List.init $ T.split (=='\n') text
     let datas = map (T.split (==',')) ls
     return $ map makeCompilerInfo  datas
   where
@@ -80,8 +78,6 @@ makeRootR code = do
     app <- getYesod
     defaultLayout $ do
         setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
-        -- sourceId <- liftIO $ T.pack <$> (replicateM 16 $ randomRIO ('a','z'))
-        empty <- return T.empty
         addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
         addScript $ StaticR js_jquery_url_js
         addScript $ StaticR ace_ace_js
@@ -89,11 +85,10 @@ makeRootR code = do
         addScript $ StaticR ace_keybinding_emacs_js
         addScript $ StaticR polyfills_EventSource_js
         addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
-        -- addStylesheet $ StaticR $ StaticRoute ["bootstrap", "css", "bootstrap.min.css"] []
         compilerInfos <- liftIO getCompilerInfos
         $(widgetFile "homepage")
   where
-    urlEncode = encode . B.unpack . encodeUtf8
+    urlEncode = JS.String . T.pack . encode . B.unpack . encodeUtf8
 
 
 -- This is a handler function for the GET request method on the RootR

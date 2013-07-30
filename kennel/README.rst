@@ -32,7 +32,7 @@
 ::
 
  $ cd wandbox/kennel
- $ cabal-dev install yesod-platform-1.0.0 --force-reinstalls
+ $ cabal-dev install yesod-platform-1.2.3 --force-reinstalls
  $ cabal-dev install
 
 テスト実行
@@ -41,6 +41,7 @@
 ::
 
  $ cd wandbox/kennel
+ $ cabal-dev install yesod-bin
  $ cabal-dev/bin/yesod --dev devel
 
 config/settings.yml の Development の設定が使われるので、適宜良い感じにしておくこと。

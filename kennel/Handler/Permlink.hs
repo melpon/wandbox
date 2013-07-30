@@ -5,10 +5,9 @@ module Handler.Permlink (
 
 import Import
 import Yesod.Persist (runDB, getBy404)
-import Yesod.Json (jsonToRepJson, object, (.=))
+import Yesod.Core.Json (returnJson, object, (.=))
 import Handler.Root (makeRootR)
-import Database.Persist (insert)
-import Database.Persist.Store (entityVal)
+import Database.Persist (insert, entityVal)
 import qualified Data.Text as T
 import System.Random (Random, randomRIO)
 import Control.Monad (replicateM)
@@ -28,7 +27,7 @@ isLinkCode n | 65 <= n && n <= 90 = True -- A-Z
 isLinkCode n | 97 <= n && n <= 122 = True -- a-z
 isLinkCode _ = False
 
-postPermlinkR :: Handler RepJson
+postPermlinkR :: Handler Value
 postPermlinkR = do
     mCompiler <- lookupPostParam "compiler"
     mCode <- lookupPostParam "code"
@@ -45,10 +44,10 @@ postPermlinkR = do
       link <- liftIO $ T.pack <$> (replicateM 16 $ chr <$> randomRAny (0,255) isLinkCode)
       _ <- runDB (insert $ Link link code)
       let json = object ["success" .= True, "link" .= link]
-      jsonToRepJson json
+      returnJson json
     go _ = do
       let json = object ["success" .= False]
-      jsonToRepJson json
+      returnJson json
     bool = (=="true")
 
 getLinkedPermlinkR :: Text -> Handler RepHtml

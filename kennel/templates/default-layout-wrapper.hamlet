@@ -1,3 +1,4 @@
+$newline never
 \<!doctype html>
 \<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
 \<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
@@ -13,8 +14,6 @@
 
         <meta name="viewport" content="width=device-width,initial-scale=1">
 
-        <link rel="icon" href=@{StaticR favicon_ico} type="image/vnd.microsoft.icon">
-
         ^{pageHead pc}
 
         \<!--[if lt IE 9]>
@@ -24,18 +23,11 @@
         <script>
           document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
     <body>
-        <div>
+        <div class="container">
             <header>
             <div id="main" role="main">
               ^{pageBody pc}
-            <footer>
 
-        $maybe analytics <- extraAnalytics $ appExtra $ settings master
-            <script>
-                window._gaq = [['_setAccount','#{analytics}'],['_trackPageview'],['_trackPageLoadTime']];
-                YepNope.load({
-                \  load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js'
-                });
         \<!-- Prompt IE 6 users to install Chrome Frame. Remove this if you want to support IE 6.  chromium.org/developers/how-tos/chrome-frame-getting-started -->
         \<!--[if lt IE 7 ]>
             <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js">

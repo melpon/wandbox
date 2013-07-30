@@ -1,20 +1,20 @@
 Default: &defaults
-  approot: "/wandbox/test"
+  host: "*4" # any IPv4 host
   port: 3000
-  auth: false
-  session_key: "config/client_session_key.aes"
-  sqlite_setting: "config/sqlite.yml"
+  approot: "http://localhost:3000"
   copyright: Insert copyright statement here
-  compiler_config: "../cattleshed/config"
+  auth: false
   #analytics: UA-YOURCODE
 
 Development:
   <<: *defaults
+  approot: "/wandbox/test"
 
-Localhost:
+Testing:
   <<: *defaults
-  approot: "localhost"
-  port: 8080
+
+Staging:
+  <<: *defaults
 
 Production:
   <<: *defaults

@@ -50,8 +50,8 @@ function parse(str) {
   };
 }
 
-var BASE_SOURCE_URL = '@{SourceR empty}'
-var BASE_COMPILE_URL = '@{CompileR empty}'
+var BASE_SOURCE_URL = '@{EmptySourceR}'
+var BASE_COMPILE_URL = '@{EmptyCompileR}'
 var global_running = false;
 
 function post_code() {
@@ -59,7 +59,7 @@ function post_code() {
     return;
   }
   var post_id = random_string(16);
-  var url = BASE_SOURCE_URL + post_id;
+  var url = BASE_SOURCE_URL + '/' + post_id;
 
   var src = new EventSource($.url(url).attr('path'));
 
@@ -87,7 +87,7 @@ function post_code() {
     var code = ace.edit('editor').getValue();
     var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); });
 
-    $.post(BASE_COMPILE_URL + post_id, {
+    $.post(BASE_COMPILE_URL + '/' + post_id, {
       compiler: compiler,
       code: code,
       options: options.get().join(',') }, function() { });
@@ -116,7 +116,7 @@ function post_permlink() {
   var url = $('#compile').attr('href');
   var compiler = $('#compiler').val();
   var code = ace.edit('editor').getValue();
-  var options = $("#compile_options").find(':checked').map(function(n,e) { return $(e).val(); });
+  var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); });
 
   $.post('@{PermlinkR}', {
     compiler: compiler,
@@ -184,8 +184,8 @@ $(function() {
   };
 
   // initialize
-  var compiler = decode_uri('#{urlEncode $ codeCompiler code}');
-  var code = decode_uri('#{urlEncode $ codeCode code}');
+  var compiler = decode_uri(#{urlEncode $ codeCompiler code});
+  var code = decode_uri(#{urlEncode $ codeCode code});
   var check = function(elem, v) {
     v ? elem.attr('checked', '') : elem.removeAttr('checked');
   }

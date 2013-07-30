@@ -1,5 +1,6 @@
 module Handler.Compile (
   postCompileR
+, getEmptyCompileR
 ) where
 
 import Import
@@ -49,16 +50,22 @@ urlEncode :: ProtocolSpecifier -> T.Text -> B.ByteString
 urlEncode spec contents = B.concat [BC.pack $ show spec, ":", BC.pack $ encode $ B.unpack $ encodeUtf8 contents]
 
 sinkProtocol :: C.MonadResource m => (ServerEvent -> IO ()) -> C.Sink (Either String Protocol) m ()
-sinkProtocol writeChan = C.sinkState () push close
-  where
-    push _ (Left str) = do liftIO $ putStrLn str
-                           return $ C.StateDone Nothing ()
-    push _ (Right ProtocolNil) = do liftIO $ print ProtocolNil
-                                    return $ C.StateDone Nothing ()
-    push _ (Right (Protocol spec contents)) = do
+sinkProtocol writeChan = do
+  mValue <- C.await
+  case mValue of
+    Nothing -> return ()
+    (Just (Left str)) -> do
+      liftIO $ putStrLn str
+      return ()
+    (Just (Right ProtocolNil)) -> do
+      liftIO $ print ProtocolNil
+      return ()
+    (Just (Right (Protocol spec contents))) -> do
       liftIO $ writeChan $ ServerEvent Nothing Nothing [fromByteString $ urlEncode spec contents]
-      return $ C.StateProcessing ()
-    close _ = return ()
+      sinkProtocol writeChan
+
+getEmptyCompileR :: Handler ()
+getEmptyCompileR = notFound
 
 postCompileR :: Text -> Handler ()
 postCompileR ident = do

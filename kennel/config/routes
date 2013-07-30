@@ -1,12 +1,13 @@
 /static StaticR Static getStatic
+/auth   AuthR   Auth   getAuth
 
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
 / RootR GET
+/source EmptySourceR GET
 /source/#Text SourceR GET
+/compile EmptyCompileR GET
 /compile/#Text CompileR POST
 /permlink PermlinkR POST
 /permlink/#Text LinkedPermlinkR GET
-
-/auth AuthR Auth getAuth

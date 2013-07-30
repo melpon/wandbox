@@ -21,7 +21,26 @@ import VM.Protocol (Protocol(..), protocolParser, toString)
 type ProtoParse = B.ByteString -> AB.Result Protocol
 
 parsePipe :: Monad m => C.Conduit B.ByteString m (Either String Protocol)
-parsePipe = C.conduitState protoParse push close
+parsePipe = go protoParse
+  where
+    go parse = do
+      mInput <- C.await
+      case mInput of
+        Nothing -> return ()
+        (Just input) -> do
+          let (parse',results) = parseWhile parse input
+          mapM_ C.yield results
+          go parse'
+    protoParse = AB.parse protocolParser
+    parseWhile parse input = do
+      case parse input of
+        (AB.Done remain result) -> let (parse',xs) = parseWhile protoParse remain
+                                   in (parse',Right result:xs)
+        (AB.Partial f)          -> (f,[])
+        (AB.Fail a b c)         -> (protoParse,[Left $ show (a,b,c)])
+
+{-
+C.conduitState protoParse push close
   where
     protoParse = AB.parse protocolParser
     parseWhile parse input =
@@ -33,6 +52,7 @@ parsePipe = C.conduitState protoParse push close
     push parse input = let (parse',results) = parseWhile parse input
                        in return $ C.StateProducing parse' results
     close _ = return []
+-}
 
 connectVM :: IO Handle
 connectVM = uncurry connectTo $(ipPortFile "config/vmip")
