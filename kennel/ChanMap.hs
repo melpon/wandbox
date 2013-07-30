@@ -9,15 +9,21 @@ module ChanMap (
 import Prelude hiding (lookup,catch)
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
 import Network.Wai.EventSource (ServerEvent(..))
+import qualified Network.Wai.EventSource.EventStream as EventStream (eventToBuilder)
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Applicative ((<$>))
 import Control.Exception (finally)
 import qualified Control.Concurrent.Chan as C
 import qualified Data.Map as M
 import qualified Data.Text as T
+import qualified Data.ByteString.Lazy as BSL
+import Data.Maybe (fromJust)
+import qualified Blaze.ByteString.Builder as Blaze
+import qualified Data.Int
 
 type ChanEvent = C.Chan ServerEvent
-data ChanMap = ChanMap (IORef (M.Map T.Text ChanEvent))
+type SendBytes = Data.Int.Int64
+data ChanMap = ChanMap (IORef (M.Map T.Text (ChanEvent, SendBytes)))
 
 newChanMap :: IO ChanMap
 newChanMap = do
@@ -55,21 +61,33 @@ insertLookup cm@(ChanMap ref) k = do
       _ <- forkIO $ heartbeat cm k
       return chan
   where
-    modify chan m = let (mValue, m') = M.insertLookupWithKey oldValue k chan m
-                    in (m', mValue)
+    modify chan map = let (mValue, map') = M.insertLookupWithKey oldValue k (chan, 0) map
+                    in (map', fst <$> mValue)
     oldValue _ _ old = old
 
 delete :: ChanMap -> T.Text -> IO ()
 delete (ChanMap ref) k = do
-  atomicModifyIORef ref $ \m -> (M.delete k m, ())
+  atomicModifyIORef ref $ \map -> (M.delete k map, ())
 
 lookup :: ChanMap -> T.Text -> IO ChanEvent
 lookup (ChanMap ref) k = do
-  m <- readIORef ref
-  maybe (fail "key not found") return $ M.lookup k m
+  map <- readIORef ref
+  maybe (fail "key not found") (return . fst) $ M.lookup k map
 
 writeChan :: ChanMap -> T.Text -> ServerEvent -> IO ()
-writeChan cm k event = do
-  chan <- lookup cm k
-  C.writeChan chan event
-
+writeChan (ChanMap ref) k event = do
+  map <- readIORef ref
+  (Just (chan, sendSize)) <- atomicModifyIORef ref modify
+  if sendSize >= 10 * 1024
+    then fail "size that written a chan is too large."
+    else C.writeChan chan event
+  where
+    modify map =
+        case mResult of
+          Nothing -> (map, Nothing)
+          (Just (mValue, map')) -> (map', mValue)
+      where
+        mEventSize = BSL.length <$> Blaze.toLazyByteString <$> EventStream.eventToBuilder event
+        update eventSize = M.updateLookupWithKey (newValue eventSize) k map
+        newValue eventSize _ v = Just (fst v, snd v + eventSize)
+        mResult = update <$> mEventSize
