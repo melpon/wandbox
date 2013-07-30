@@ -442,13 +442,21 @@
    "name":"perl-5.18.0",
    "displayable":true,
    "output-file":"prog.pl",
-   "run-command":["/usr/local/perl-5.18.0/bin/perl", "-M5.18.0", "prog.pl"],
+   "run-command":["/usr/local/perl-5.18.0/bin/perl", "prog.pl"],
    "display-name":"perl",
-   "display-compile-command":"perl -M5.18.0 prog.pl",
+   "display-compile-command":"perl prog.pl",
    "language":"Perl",
    "source-suffix":".pl",
    "compile-command":"/bin/true",
    "version-command":["/usr/local/perl-5.18.0/bin/perl", "-e", "print $^V"],
+   "switches":[
+    {
+     "name":"m5_18_0",
+     "flags":"-M5.18.0",
+     "default":true,
+     "display-name":"use 5.18.0"
+    }
+   ],
   },{
    "name":"perl-5.19.2",
    "displayable":true,
