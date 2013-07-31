@@ -48,10 +48,13 @@ sinkProtocol writeChan = do
     Nothing -> return ()
     (Just (Left str)) -> do
       liftIO $ putStrLn str
-      return ()
+      liftIO $ writeChan $ CloseEvent
     (Just (Right ProtocolNil)) -> do
       liftIO $ print ProtocolNil
-      return ()
+    (Just (Right (Protocol spec@Control contents@"Finish"))) -> do
+      liftIO $ putStrLn $ T.unpack contents
+      liftIO $ writeChan $ ServerEvent Nothing Nothing [fromByteString $ urlEncode spec contents]
+      liftIO $ writeChan $ CloseEvent
     (Just (Right (Protocol spec contents))) -> do
       liftIO $ writeChan $ ServerEvent Nothing Nothing [fromByteString $ urlEncode spec contents]
       sinkProtocol writeChan

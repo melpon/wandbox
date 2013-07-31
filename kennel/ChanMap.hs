@@ -2,90 +2,76 @@ module ChanMap (
   ChanMap,
   newChanMap,
   insertLookup,
-  delete,
   writeChan
 ) where
 
-import Prelude hiding (lookup)
-import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
+import Prelude
+import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
 import Network.Wai.EventSource (ServerEvent(..))
-import qualified Network.Wai.EventSource.EventStream as EventStream (eventToBuilder)
-import Control.Concurrent (forkIO, threadDelay)
+import Control.Concurrent (forkIO, threadDelay, killThread, ThreadId)
 import Control.Applicative ((<$>))
 import Control.Exception (finally)
 import qualified Control.Concurrent.Chan as C
 import qualified Data.Map as M
 import qualified Data.Text as T
-import qualified Data.ByteString.Lazy as BSL
-import qualified Blaze.ByteString.Builder as Blaze
-import qualified Data.Int
+import qualified System.Mem as Mem
 
 type ChanEvent = C.Chan ServerEvent
-type SendBytes = Data.Int.Int64
-data ChanMap = ChanMap (IORef (M.Map T.Text (ChanEvent, SendBytes)))
+data ChanMap = ChanMap (IORef (M.Map T.Text (ChanEvent, [ThreadId])))
 
 newChanMap :: IO ChanMap
 newChanMap = do
   cm <- ChanMap <$> newIORef M.empty
   return cm
 
-timeDelete :: ChanMap -> T.Text -> IO ()
-timeDelete cm k = do
+setTimeout :: ChanMap -> T.Text -> IO ()
+setTimeout cm k = do
     -- wait 2 minutes
+    -- FIXME: This timeout should be elonged by timing of any data transmitted.
     threadDelay (2*60*1000*1000)
+    `finally`
     writeChan cm k CloseEvent
-  `finally`
-    delete cm k
 
-heartbeat :: ChanMap -> T.Text -> IO ()
-heartbeat cm k = do
-  chan <- lookup cm k
-  C.writeChan chan $ ServerEvent Nothing Nothing []
-  C.writeChan chan $ ServerEvent Nothing Nothing []
-  threadDelay (2*1000*1000)
-  heartbeat cm k
+heartbeat :: ChanEvent -> IO ()
+heartbeat chan = do
+    C.writeChan chan $ ServerEvent Nothing Nothing []
+    threadDelay (2*1000*1000)
+    heartbeat chan
 
 insertLookup :: ChanMap -> T.Text -> IO ChanEvent
 insertLookup cm@(ChanMap ref) k = do
-  chan <- C.newChan
-  mChan <- atomicModifyIORef ref (modify chan)
-  case mChan of
-    -- chan already exists.
-    (Just chan') -> return chan'
-    -- inserted chan
-    Nothing -> do
-      -- this chan is removed from ChanMap after few seconds.
-      _ <- forkIO $ timeDelete cm k
-      -- heartbeat with CommentEvent.
-      _ <- forkIO $ heartbeat cm k
-      return chan
-  where
-    modify chan map_ = let (mValue, map') = M.insertLookupWithKey oldValue k (chan, 0) map_
-                    in (map', fst <$> mValue)
-    oldValue _ _ old = old
-
-delete :: ChanMap -> T.Text -> IO ()
-delete (ChanMap ref) k = do
-  atomicModifyIORef ref $ \map_ -> (M.delete k map_, ())
-
-lookup :: ChanMap -> T.Text -> IO ChanEvent
-lookup (ChanMap ref) k = do
-  map_ <- readIORef ref
-  maybe (fail "key not found") (return . fst) $ M.lookup k map_
+    chan <- C.newChan
+    tidTimeout <- forkIO $ setTimeout cm k
+    tidHeartbeat <- forkIO $ heartbeat chan
+    mChan <- atomicModifyIORef' ref (ins chan [tidTimeout, tidHeartbeat])
+    case mChan of
+        -- chan already exists.
+        (Just chan') -> return $ fst chan'
+        -- inserted chan
+        Nothing -> return chan
+ where
+     ins chan tid map_ =
+         let (mValue, map') = M.insertLookupWithKey oldValue k (chan, tid) map_
+         in (map', mValue)
+     oldValue _ _ old = old
 
 writeChan :: ChanMap -> T.Text -> ServerEvent -> IO ()
+writeChan (ChanMap ref) k CloseEvent = do
+    maybeChan <- atomicModifyIORef' ref modify
+    case maybeChan of
+        Just chan -> do
+            _ <- mapM killThread (snd chan)
+            C.writeChan (fst chan) CloseEvent
+            Mem.performGC
+        Nothing -> return ()
+ where
+     modify map_ =
+         case M.updateLookupWithKey (\_ -> \_ -> Nothing) k map_ of
+             (Nothing, _) -> (map_, Nothing)
+             (Just mValue, map') -> (map', Just $ mValue)
+
 writeChan (ChanMap ref) k event = do
-  (Just (chan, sendSize)) <- atomicModifyIORef ref modify
-  if sendSize >= 10 * 1024
-    then fail "size that written a chan is too large."
-    else C.writeChan chan event
-  where
-    modify map_ =
-        case mResult of
-          Nothing -> (map_, Nothing)
-          (Just (mValue, map')) -> (map', mValue)
-      where
-        mEventSize = BSL.length <$> Blaze.toLazyByteString <$> EventStream.eventToBuilder event
-        update eventSize = M.updateLookupWithKey (newValue eventSize) k map_
-        newValue eventSize _ v = Just (fst v, snd v + eventSize)
-        mResult = update <$> mEventSize
+    maybeChan <- M.lookup k <$> readIORef ref
+    case maybeChan of
+        Just chan -> C.writeChan (fst chan) event
+        Nothing -> Mem.performGC
