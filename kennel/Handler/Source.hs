@@ -6,7 +6,7 @@ module Handler.Source (
 import Import
 import Network.Wai.EventSource (eventSourceAppChan)
 import qualified ChanMap as CM
-import Data.Conduit (ResourceT, runResourceT)
+import Data.Conduit (runResourceT)
 
 getSourceR :: Text -> Handler ()
 getSourceR ident = do

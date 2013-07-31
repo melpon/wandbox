@@ -4,12 +4,7 @@ module Handler.Root (
 ) where
 
 import Import
-import System.Random (randomRIO)
 import qualified Data.Text as T
-import Control.Monad (replicateM)
-import Settings.StaticFiles (js_jquery_url_js, ace_ace_js, ace_keybinding_vim_js, ace_keybinding_emacs_js, polyfills_EventSource_js)
-import Model
-import Text.Julius (ToJavascript(toJavascript))
 import Codec.Binary.Url (encode)
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.ByteString as B
@@ -73,7 +68,7 @@ getCompilerInfos = do
       where
         xs = T.split (=='\t') tsv
 
-makeRootR :: Code -> Handler RepHtml
+makeRootR :: Code -> Handler Html
 makeRootR code = do
     app <- getYesod
     defaultLayout $ do
@@ -98,7 +93,7 @@ makeRootR code = do
 -- The majority of the code you will write in Yesod lives in these handler
 -- functions. You can spread them across multiple files if you are so
 -- inclined, or create a single monolithic file.
-getRootR :: Handler RepHtml
+getRootR :: Handler Html
 getRootR = do
   emptyCode <- liftIO $ makeCode "gcc-head" "" ""
   makeRootR emptyCode
