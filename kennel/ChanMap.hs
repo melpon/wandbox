@@ -73,7 +73,7 @@ writeChan (ChanMap ref) k CloseEvent = do
      modify map_ =
          case M.updateLookupWithKey (\_ -> \_ -> Nothing) k map_ of
              (Nothing, _) -> (map_, Nothing)
-             (Just mValue, map') -> (map', Just mValue)
+             (mValue, map') -> (map', mValue)
 
 writeChan (ChanMap ref) k event = do
     maybeChan <- M.lookup k <$> readIORef ref
