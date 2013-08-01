@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 #include <sstream>
 #include <functional>
 #include <list>
@@ -80,6 +83,38 @@ namespace wandbox {
 		bool operator ()(const std::thread &x, const std::thread &y) const {
 			return x.get_id() < y.get_id();
 		}
+	};
+
+	struct child_pid {
+		explicit child_pid(pid_t pid = 0): pid(pid) { }
+		child_pid(const child_pid &) = delete;
+		child_pid(child_pid &&other): pid(0) {
+			std::swap(pid, other.pid);
+		}
+		child_pid &operator =(const child_pid &) = delete;
+		child_pid &operator =(child_pid &&other) {
+			std::swap(pid, other.pid);
+			if (pid != other.pid) other.do_wait();
+			return *this;
+		}
+		~child_pid() {
+			do_wait();
+		}
+		int wait() {
+			return do_wait();
+		}
+		pid_t get() const noexcept { return pid; }
+		explicit operator bool() const noexcept { return pid != 0; }
+		bool operator !() const noexcept { return pid == 0; }
+	private:
+		int do_wait() {
+			if (pid == 0) return 0;
+			int st = 0;
+			if (::waitpid(pid, &st, 0) <= 0) return 0;
+			pid = 0;
+			return st;
+		}
+		pid_t pid;
 	};
 
 	struct compiler_bridge {
@@ -193,17 +228,17 @@ namespace wandbox {
 			auto &s = received["Source"];
 			{
 				unique_fd fd(::openat(::dirfd(workdir.get()), srcname.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC, 0600));
+				if (!fd) throw_system_error(errno);
 				for (std::size_t offset = 0; offset < s.length(); ) {
 					const auto wrote = ::write(fd.get(), s.data()+offset, s.length()-offset);
 					if (wrote < 0 && errno != EINTR) throw_system_error(errno);
 					offset += wrote;
 				}
 				::fsync(fd.get());
-				::close(fd.get());
 			}
 
 			auto c = piped_spawn(_P_NOWAIT, workdir, get_compiler_arg());
-			cc_pid = c.pid;
+			cc_pid = child_pid(c.pid);
 
 			aio.post([this] {
 				error_code ec;
@@ -213,32 +248,34 @@ namespace wandbox {
 
 			pipes.emplace_front(ref(aio));
 			auto cc_stdout = pipes.begin();
-			cc_stdout->stream.assign(c.fd_stdout.release());
+			cc_stdout->stream.assign(c.fd_stdout.get());
+			c.fd_stdout.release();
 			asio::async_read_until(
 				cc_stdout->stream, cc_stdout->buf, end_read_condition(),
 				std::bind<void>(
 					ref(*this),
 					cc_stdout,
-					cc_pid,
+					cc_pid.get(),
 					"CompilerMessageS",
 					_1,
 					_2));
 
 			pipes.emplace_front(ref(aio));
 			auto cc_stderr = pipes.begin();
-			cc_stderr->stream.assign(c.fd_stderr.release());
+			cc_stderr->stream.assign(c.fd_stderr.get());
+			c.fd_stdout.release();
 			asio::async_read_until(
 				cc_stderr->stream, cc_stderr->buf, end_read_condition(),
 				std::bind<void>(
 					ref(*this),
 					cc_stderr,
-					cc_pid,
+					cc_pid.get(),
 					"CompilerMessageE",
 					_1,
 					_2));
 
 			timer.expires_from_now(ptime::seconds(config.jail.compile_time_limit));
-			timer.async_wait(std::bind<void>(ref(*this), _1, cc_pid, SIGXCPU));
+			timer.async_wait(std::bind<void>(ref(*this), _1, cc_pid.get(), SIGXCPU));
 
 			aio.run();
 		}
@@ -258,7 +295,7 @@ namespace wandbox {
 				}
 				str += "Control 6:Finish\n";
 				asio::write(sock, asio::buffer(str), ec);
-				sock.close();
+				sock.close(ec);
 				aio.post(std::bind<void>(&asio::io_service::stop, ref(aio)));
 			});
 		}
@@ -266,51 +303,49 @@ namespace wandbox {
 		void check_finish() {
 			if (!pipes.empty()) return;
 			if (prog_pid) {
-				int st;
-				waitpid(prog_pid, &st, 0);
 				timer.cancel();
-				send_exitcode(st);
+				send_exitcode(prog_pid.wait());
 			} else {
-				int st;
-				waitpid(cc_pid, &st, 0);
 				timer.cancel();
-				if (st) {
-					prog_pid = -1;
+				const int st = cc_pid.wait();
+				if (st != 0) {
 					send_exitcode(st);
 				} else {
 					vector<string> runargs = get_compiler().run_command;
 					runargs.insert(runargs.begin(), { ptracer, "--config=" + config_file, "--" });
 					auto c = piped_spawn(_P_NOWAIT, workdir, runargs);
-					prog_pid = c.pid;
+					prog_pid = child_pid(c.pid);
 
 					pipes.emplace_front(ref(aio));
 					auto aout_stdout = pipes.begin();
-					aout_stdout->stream.assign(c.fd_stdout.release());
+					aout_stdout->stream.assign(c.fd_stdout.get());
+					c.fd_stdout.release();
 					asio::async_read_until(
 						aout_stdout->stream, aout_stdout->buf, end_read_condition(),
 						std::bind<void>(
 							ref(*this),
 							aout_stdout,
-							prog_pid,
+							prog_pid.get(),
 							"StdOut",
 							_1,
 							_2));
 
 					pipes.emplace_front(ref(aio));
 					auto aout_stderr = pipes.begin();
-					aout_stderr->stream.assign(c.fd_stderr.release());
+					aout_stderr->stream.assign(c.fd_stderr.get());
+					c.fd_stderr.release();
 					asio::async_read_until(
 						aout_stderr->stream, aout_stderr->buf, end_read_condition(),
 						std::bind<void>(
 							ref(*this),
 							aout_stderr,
-							prog_pid,
+							prog_pid.get(),
 							"StdErr",
 							_1,
 							_2));
 
 					timer.expires_from_now(ptime::seconds(config.jail.program_duration));
-					timer.async_wait(std::bind<void>(ref(*this), _1, prog_pid, SIGXCPU));
+					timer.async_wait(std::bind<void>(ref(*this), _1, prog_pid.get(), SIGXCPU));
 				}
 			}
 		}
@@ -354,7 +389,7 @@ namespace wandbox {
 			else if (output_size > config.jail.output_limit_warn) ::kill(pid, SIGXFSZ);
 		}
 
-		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio), timer(aio), workdir(), pipes(), received(), cc_pid(), prog_pid(), output_size()
+		compiler_bridge(tcp::acceptor &acc, std::shared_ptr<std::condition_variable> notify_at_quit): aio(), sock(aio), timer(aio), workdir(), pipes(), received(), cc_pid(), prog_pid(), output_size(), notify_at_quit(notify_at_quit)
 		{
 			acc.accept(sock);
 			do {
@@ -364,8 +399,12 @@ namespace wandbox {
 					if (e.code().value() != ENOTDIR) throw;
 				}
 			} while (!workdir && errno == ENOTDIR);
-			cc_pid = 0;
-			prog_pid = 0;
+		}
+		compiler_bridge(const compiler_bridge &) = delete;
+		~compiler_bridge() {
+			if (cc_pid) ::kill(cc_pid.get(), SIGTERM);
+			if (prog_pid) ::kill(prog_pid.get(), SIGKILL);
+			notify_at_quit->notify_one();
 		}
 	private:
 		asio::io_service aio;
@@ -374,8 +413,9 @@ namespace wandbox {
 		shared_ptr<DIR> workdir;
 		list<stream_descriptor_pair> pipes;
 		std::map<std::string, std::string> received;
-		int cc_pid, prog_pid;
+		child_pid cc_pid, prog_pid;
 		std::size_t output_size;
+		std::shared_ptr<std::condition_variable> notify_at_quit;
 	};
 
 	struct listener {
@@ -384,9 +424,26 @@ namespace wandbox {
 			asio::io_service aio;
 			tcp::endpoint ep(std::forward<Args>(args)...);
 			tcp::acceptor acc(aio, ep);
-			while (1) {
-				shared_ptr<compiler_bridge> pcb(make_shared<compiler_bridge>(ref(acc)));
-				std::thread([pcb] { (*pcb)(); }).detach();
+			auto cv = std::make_shared<std::condition_variable>();
+			auto m = std::make_shared<std::mutex>();
+			std::unique_lock<std::mutex> lk(*m);
+			while (1) try {
+				shared_ptr<compiler_bridge> pcb(make_shared<compiler_bridge>(ref(acc), cv));
+				std::thread([pcb] {
+					try {
+						(*pcb)();
+					} catch (std::exception &e) {
+						std::cerr << "uncaught exception -- " << e.what() << '\n';
+					} catch (...) {
+						std::cerr << "uncaught unknown exception\n";
+					}
+				}).detach();
+			} catch (std::exception &e) {
+				std::cerr << "uncaught exception -- " << e.what() << '\n';
+				cv->wait_for(lk, std::chrono::seconds(1));
+			} catch (...) {
+				std::cerr << "uncaught unknown exception\n";
+				cv->wait_for(lk, std::chrono::seconds(1));
 			}
 		}
 		listener() {
