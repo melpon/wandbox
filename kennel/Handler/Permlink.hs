@@ -4,16 +4,11 @@ module Handler.Permlink (
 ) where
 
 import Import
-import Yesod.Persist (runDB, getBy404)
-import Yesod.Core.Json (returnJson, object, (.=))
 import Handler.Root (makeRootR)
-import Database.Persist (insert, entityVal)
 import qualified Data.Text as T
 import System.Random (Random, randomRIO)
 import Control.Monad (replicateM)
 import Data.Char (chr)
-
-import Model
 
 randomRAny :: Random a => (a,a) -> (a -> Bool) -> IO a
 randomRAny range p = do
@@ -48,9 +43,8 @@ postPermlinkR = do
     go _ = do
       let json = object ["success" .= False]
       returnJson json
-    bool = (=="true")
 
-getLinkedPermlinkR :: Text -> Handler RepHtml
+getLinkedPermlinkR :: Text -> Handler Html
 getLinkedPermlinkR link = do
     permlink <- runDB (getBy404 $ UniqueLink link)
     let code = linkCode $ entityVal permlink

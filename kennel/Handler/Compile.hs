@@ -17,7 +17,6 @@ import System.IO (hClose, hFlush)
 import Codec.Binary.Url (encode)
 import Data.Text.Encoding (encodeUtf8)
 
-import Model (Code, codeCompiler, codeCode, codeOptions, makeCode)
 import qualified Data.Conduit as C
 import Data.Conduit (($$))
 import qualified Data.Conduit.List as CL
@@ -31,13 +30,6 @@ makeProtocols code =
              Just $ Protocol Source $ codeCode code,
              Just $ Protocol CompilerOption $ codeOptions code,
              Just $ Protocol Control "run"]
-  where
-    joinm [] = Nothing
-    joinm xs = Just $ T.pack $ joinm' xs
-      where joinm' (y:ys) = y ++ "," ++ joinm' ys
-            joinm' [] = ""
-    ifm True x = Just x
-    ifm False _ = Nothing
 
 vmHandle :: Code -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
 vmHandle code sink =
@@ -56,10 +48,13 @@ sinkProtocol writeChan = do
     Nothing -> return ()
     (Just (Left str)) -> do
       liftIO $ putStrLn str
-      return ()
+      liftIO $ writeChan $ CloseEvent
     (Just (Right ProtocolNil)) -> do
       liftIO $ print ProtocolNil
-      return ()
+    (Just (Right (Protocol spec@Control contents@"Finish"))) -> do
+      liftIO $ putStrLn $ T.unpack contents
+      liftIO $ writeChan $ ServerEvent Nothing Nothing [fromByteString $ urlEncode spec contents]
+      liftIO $ writeChan $ CloseEvent
     (Just (Right (Protocol spec contents))) -> do
       liftIO $ writeChan $ ServerEvent Nothing Nothing [fromByteString $ urlEncode spec contents]
       sinkProtocol writeChan
