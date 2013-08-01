@@ -54,7 +54,7 @@ ResultWindow.prototype._output_window = function() {
 ResultWindow.prototype.permlink = function(compiler, code, options) {
   var self = this;
 
-  var a = $('<a href="#" class="btn">Permlink</a>')
+  var a = $('<a href="#" class="btn">Create Permlink</a>')
     .appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();
@@ -91,6 +91,28 @@ ResultWindow.prototype.post_permlink = function(compiler, code, options) {
     });
 }
 
+ResultWindow.prototype.code_window = function(compiler, code, options) {
+  var show_code = $('<code><a href="#">Show Code</a></code>');
+  var hide_code = $('<code><a href="#">Hide Code</a></code>');
+  var pre = $('<pre>' + encode_html_entity(code) + '</pre>');
+
+  hide_code.toggle(false);
+  pre.toggle(false);
+
+  var toggle_func = function(event) {
+    event.preventDefault();
+    show_code.toggle();
+    hide_code.toggle();
+    pre.toggle();
+  };
+  show_code.click(toggle_func);
+  hide_code.click(toggle_func);
+
+  this._code_window().append(show_code);
+  this._code_window().append(hide_code);
+  this._code_window().append(pre);
+}
+
 ResultWindow.prototype.post_code = function(compiler, code, options) {
   var self = this;
 
@@ -98,6 +120,8 @@ ResultWindow.prototype.post_code = function(compiler, code, options) {
   var url = BASE_SOURCE_URL + '/' + post_id;
 
   var src = new EventSource($.url(url).attr('path'));
+
+  this.code_window(compiler, code, options);
 
   var finalize = function() {
     src.close();
