@@ -62,11 +62,26 @@ ResultWindow.prototype.post_code = function(compiler, code, options) {
     });
   };
 
+  var preview_paragraph = null;
   src.onmessage = function(msg) {
-    data = parse(decode_uri(msg.data));
-    $('<p>').html(encode_html_entity(data.message))
-            .addClass(data.type)
-            .appendTo(self.id);
+    var data = parse(decode_uri(msg.data));
+    var is_message = function(type) {
+      return data.type == "CompilerMessageS" ||
+             data.type == "CompilerMessageE" ||
+             data.type == "StdOut" ||
+             data.type == "StdErr";
+    };
+    if (is_message(data.type) &&
+        preview_paragraph &&
+        preview_paragraph.hasClass(data.type)) {
+      var p = preview_paragraph;
+      p.html(p.html() + encode_html_entity(data.message))
+    } else {
+      var p = $('<p>').addClass(data.type)
+                      .html(encode_html_entity(data.message))
+                      .appendTo(self.id);
+      preview_paragraph = p;
+    }
     $(self.id)[0].scrollTop = $(self.id)[0].scrollHeight;
 
     if (data.type == 'Control' && data.message == 'Finish') {
