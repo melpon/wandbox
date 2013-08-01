@@ -34,6 +34,8 @@ setTimeout cm k = do
 
 heartbeat :: ChanEvent -> IO ()
 heartbeat chan = do
+    -- send an empty 2 times to force flush
+    C.writeChan chan $ ServerEvent Nothing Nothing []
     C.writeChan chan $ ServerEvent Nothing Nothing []
     threadDelay (2*1000*1000)
     heartbeat chan
@@ -60,7 +62,10 @@ writeChan (ChanMap ref) k CloseEvent = do
     maybeChan <- atomicModifyIORef' ref modify
     case maybeChan of
         Just chan -> do
-            _ <- mapM killThread (snd chan)
+            mapM_ killThread (snd chan)
+            -- send an empty 2 times to force flush
+            C.writeChan (fst chan) $ ServerEvent Nothing Nothing []
+            C.writeChan (fst chan) $ ServerEvent Nothing Nothing []
             C.writeChan (fst chan) CloseEvent
             Mem.performGC
         Nothing -> return ()
@@ -68,7 +73,7 @@ writeChan (ChanMap ref) k CloseEvent = do
      modify map_ =
          case M.updateLookupWithKey (\_ -> \_ -> Nothing) k map_ of
              (Nothing, _) -> (map_, Nothing)
-             (Just mValue, map') -> (map', Just $ mValue)
+             (Just mValue, map') -> (map', Just mValue)
 
 writeChan (ChanMap ref) k event = do
     maybeChan <- M.lookup k <$> readIORef ref
