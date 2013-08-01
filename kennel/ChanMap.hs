@@ -6,7 +6,7 @@ module ChanMap (
 ) where
 
 import Prelude
-import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
+import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
 import Network.Wai.EventSource (ServerEvent(..))
 import Control.Concurrent (forkIO, threadDelay, killThread, ThreadId)
 import Control.Applicative ((<$>))
@@ -45,7 +45,7 @@ insertLookup cm@(ChanMap ref) k = do
     chan <- C.newChan
     tidTimeout <- forkIO $ setTimeout cm k
     tidHeartbeat <- forkIO $ heartbeat chan
-    mChan <- atomicModifyIORef' ref (ins chan [tidTimeout, tidHeartbeat])
+    mChan <- atomicModifyIORef ref (ins chan [tidTimeout, tidHeartbeat])
     case mChan of
         -- chan already exists.
         (Just chan') -> return $ fst chan'
@@ -59,7 +59,7 @@ insertLookup cm@(ChanMap ref) k = do
 
 writeChan :: ChanMap -> T.Text -> ServerEvent -> IO ()
 writeChan (ChanMap ref) k CloseEvent = do
-    maybeChan <- atomicModifyIORef' ref modify
+    maybeChan <- atomicModifyIORef ref modify
     case maybeChan of
         Just chan -> do
             mapM_ killThread (snd chan)
