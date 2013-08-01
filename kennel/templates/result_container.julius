@@ -1,0 +1,58 @@
+
+function ResultContainer(id) {
+  this.id = id;
+  this.name = 1;
+  this.running = false;
+}
+
+ResultContainer.prototype._nav_tabs = function() {
+  return $(this.id + ' .tabbable ul');
+}
+
+ResultContainer.prototype._tab_content = function() {
+  return $(this.id + ' .tab-content');
+}
+
+ResultContainer.prototype._next_name = function() {
+  var name = this.name + '';
+  this.name += 1;
+  return name;
+}
+
+ResultContainer.prototype.post_code = function(compiler, code, options) {
+  var self = this;
+
+  if (this.running) {
+    return;
+  }
+  this.running = true;
+
+  var TAB_PREFIX = 'result-container-tab-';
+
+  var name = this._next_name();
+  var id_name = TAB_PREFIX + name;
+  var tab = $('<li><button type="button" class="close" href="#">&times;</button><a data-toggle="tab" href="#' + id_name + '">#' + name + '</a></li>');
+  var content = $('<div class="tab-pane active result-window" id="' + id_name + '">');
+
+  var close = tab.find('.close');
+  close.click(function() {
+    if (tab.hasClass('active')) {
+      tab.prev().find('a').tab('show');
+      tab.next().find('a').tab('show');
+    }
+    tab.remove();
+    content.remove();
+  });
+
+  this._nav_tabs().prepend(tab);
+  this._tab_content().prepend(content);
+
+  tab.find('a').tab('show');
+
+  var result_window = new ResultWindow('#' + id_name);
+  result_window.post_code(compiler, code, options);
+
+  result_window.onfinish = function() {
+    self.running = false;
+  };
+}

@@ -1,4 +1,7 @@
-.result_window {
+.permlink {
+  background-color: #888888;
+}
+.output-window {
   margin: 0px;
 
   background-color: #000000;

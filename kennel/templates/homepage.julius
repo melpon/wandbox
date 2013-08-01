@@ -22,39 +22,12 @@ function decode_uri(str) {
   return decodeURIComponent(str);
 }
 
-function post_code(result_window) {
+function post_code(result_container) {
   var compiler = $('#compiler').val();
   var code = ace.edit('editor').getValue();
   var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); }).get();
 
-  result_window.post_code(compiler, code, options);
-}
-
-function post_permlink(compiler, code, options) {
-  var pm = $('#permlink');
-  if (pm.hasClass('disable')) return;
-  pm.addClass('disable');
-
-  $.post('@{PermlinkR}', {
-    compiler: compiler,
-    code: code,
-    options: options.join(',') },
-    function(json) {
-      if (!json.success) {
-        $('#permlink').removeClass('disable');
-        return;
-      }
-
-      $('#permlink').remove();
-
-      var approot = '@{RootR}'
-      if (approot[approot.length - 1] == '/') {
-        approot = approot.substr(0, approot.length - 1);
-      }
-      var url = approot + '/permlink/' + json.link;
-      $('<a href="' + url + '" target="_blank" id="permlink">Permlink</a>')
-        .appendTo('#permdiv');
-    });
+  result_container.post_code(compiler, code, options);
 }
 
 function to_id(id) {
@@ -72,11 +45,11 @@ function update_compile_command() {
 }
 
 $(function() {
-  var result_window = new ResultWindow('#output')
+  var result_container = new ResultContainer('#result-container')
 
   $('#compile').click(function(event) {
     event.preventDefault();
-    post_code(result_window);
+    post_code(result_container);
   });
 
   var editor = ace.edit("editor");
@@ -92,13 +65,13 @@ $(function() {
     name: 'run',
     bindKey: { win: 'Ctrl-Enter',  mac: 'Ctrl-Enter' },
     exec: function(editor) {
-      post_code(result_window);
+      post_code(result_container);
     },
     readOnly: true
   });
   vim_handler.actions['ctrl-return'] = {
     fn: function(editor, range, count, param) {
-      post_code(result_window);
+      post_code(result_container);
     },
   };
 

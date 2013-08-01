@@ -29,41 +29,89 @@ function random_string(n) {
 
 var BASE_SOURCE_URL = '@{EmptySourceR}'
 var BASE_COMPILE_URL = '@{EmptyCompileR}'
-var global_running = false;
 
 function ResultWindow(id) {
   this.id = id;
+  $(this.id).empty();
+  var permlink = $('<div class="row-fluid permlink"></div>');
+  var code = $('<div class="row-fluid code-window"></div>');
+  var output = $('<div class="row-fluid output-window"></div>');
+  $(this.id).append(permlink);
+  $(this.id).append(code);
+  $(this.id).append(output);
+}
+
+ResultWindow.prototype._permlink = function() {
+  return $(this.id).find('.permlink');
+}
+ResultWindow.prototype._code_window = function() {
+  return $(this.id).find('.code-window');
+}
+ResultWindow.prototype._output_window = function() {
+  return $(this.id).find('.output-window');
+}
+
+ResultWindow.prototype.permlink = function(compiler, code, options) {
+  var self = this;
+
+  var a = $('<a href="#" class="btn">Permlink</a>')
+    .appendTo(this._permlink());
+  a.click(function(event) {
+    event.preventDefault();
+    self.post_permlink(compiler, code, options);
+  });
+}
+
+ResultWindow.prototype.post_permlink = function(compiler, code, options) {
+  var self = this;
+
+  var pm = this._permlink().find('a');
+  if (pm.hasClass('disable')) return;
+  pm.addClass('disable');
+
+  $.post('@{PermlinkR}', {
+    compiler: compiler,
+    code: code,
+    options: options.join(',') },
+    function(json) {
+      if (!json.success) {
+        pm.removeClass('disable');
+        return;
+      }
+
+      pm.remove();
+
+      var approot = '@{RootR}'
+      if (approot[approot.length - 1] == '/') {
+        approot = approot.substr(0, approot.length - 1);
+      }
+      var url = approot + '/permlink/' + json.link;
+      $('<a href="' + url + '" target="_blank" id="permlink">Permlink</a>')
+        .appendTo(self._permlink());
+    });
 }
 
 ResultWindow.prototype.post_code = function(compiler, code, options) {
   var self = this;
 
-  if (global_running) {
-    return;
-  }
   var post_id = random_string(16);
   var url = BASE_SOURCE_URL + '/' + post_id;
 
   var src = new EventSource($.url(url).attr('path'));
 
-  global_running = true;
   var finalize = function() {
     src.close();
-    global_running = false;
 
-    // make permlink
-    $('#permlink').remove();
-    $('<a href="permlink" id="permlink" class="btn">Permlink</a>')
-      .appendTo('#permdiv');
-    $('#permlink').click(function(event) {
-      event.preventDefault();
-      // TODO
-      post_permlink(compiler, code, options);
-    });
+    self.permlink(compiler, code, options);
+
+    if (self.onfinish)
+      self.onfinish();
   };
 
   var preview_paragraph = null;
   src.onmessage = function(msg) {
+    var output = self._output_window()
+
     var data = parse(decode_uri(msg.data));
     var is_message = function(type) {
       return data.type == "CompilerMessageS" ||
@@ -79,10 +127,10 @@ ResultWindow.prototype.post_code = function(compiler, code, options) {
     } else {
       var p = $('<p>').addClass(data.type)
                       .html(encode_html_entity(data.message))
-                      .appendTo(self.id);
+                      .appendTo(output);
       preview_paragraph = p;
     }
-    $(self.id)[0].scrollTop = $(self.id)[0].scrollHeight;
+    output[0].scrollTop = output[0].scrollHeight;
 
     if (data.type == 'Control' && data.message == 'Finish') {
         finalize();

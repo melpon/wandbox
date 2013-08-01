@@ -13,6 +13,7 @@
 }
 
 #compile {
+  margin-bottom: 10px;
 }
 
 #compile_options > div {

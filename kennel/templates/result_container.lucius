@@ -1,0 +1,9 @@
+.tab-content {
+  margin-left: 0px;
+}
+.tabs-left > .nav-tabs {
+  margin-right: 1px;
+}
+#result-container > div {
+  background-color: #ddd;
+}

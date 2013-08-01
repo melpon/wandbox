@@ -1,0 +1,5 @@
+<div .row-fluid>
+  <div #result-container>
+    <div .tabbable .tabs-left>
+      <ul .nav .nav-tabs>
+      <div .tab-content>

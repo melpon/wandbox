@@ -16,19 +16,19 @@
                 <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}" checked>#{swDisplayName sw}
               $else
                 <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}">#{swDisplayName sw}
-    <div .row-fluid>
-      <a href="compile" .btn #compile>Run (or Ctrl+Enter)
-    <div .row-fluid #permdiv>
-    <div .row-fluid>
-      <label>choose key binding:
-      <select .span12 size=3 #keybinding>
-        <option value="ace" selected>default
-        <option value="vim">Vim
-        <option value="emacs">Emacs
   <div .span8 #codepanel>
-    <label .row-fluid>input code:
     <div .row-fluid>
-      <div #editor>
+      <div .span10>
+        <label .row-fluid>input code:
+        <div #editor>
+      <div .span2>
+        <label .row-fluid>choose key binding:
+        <select .span12 size=3 #keybinding>
+          <option value="ace" selected>default
+          <option value="vim">Vim
+          <option value="emacs">Emacs
     <div .row-fluid>
       <p #compile_command>
-    ^{resultWindow}
+    <div .row-fluid>
+      <a href="compile" .btn #compile>Run (or Ctrl+Enter)
+    ^{resultContainer}

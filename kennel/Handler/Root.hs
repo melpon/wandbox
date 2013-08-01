@@ -68,6 +68,11 @@ getCompilerInfos = do
       where
         xs = T.split (=='\t') tsv
 
+resultContainer :: Widget
+resultContainer = do
+  addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+  $(widgetFile "result_container")
+
 resultWindow :: Widget
 resultWindow = do
   addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
@@ -80,12 +85,14 @@ makeRootR code = do
     defaultLayout $ do
         setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
         addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+        addScriptRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"
         addScript $ StaticR js_jquery_url_js
         addScript $ StaticR ace_ace_js
         addScript $ StaticR ace_keybinding_vim_js
         addScript $ StaticR ace_keybinding_emacs_js
-        addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
+        addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
         compilerInfos <- liftIO getCompilerInfos
+        resultWindow
         $(widgetFile "homepage")
   where
     urlEncode = JS.String . T.pack . encode . B.unpack . encodeUtf8
