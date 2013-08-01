@@ -22,107 +22,23 @@ function decode_uri(str) {
   return decodeURIComponent(str);
 }
 
-function encode_html_entity(str) {
-  return $.map(str, function(c) {
-    if (c == ' ') return '&nbsp;';
-    if (c == '<') return '&lt;';
-    if (c == '>') return '&gt;';
-    if (c == '&') return '&amp;';
-    if (c == '"') return '&quot;';
-    if (c == "'") return '&#39;';
-    return c;
-  }).join("");
+function post_code(result_window) {
+  var compiler = $('#compiler').val();
+  var code = ace.edit('editor').getValue();
+  var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); }).get();
+
+  result_window.post_code(compiler, code, options);
 }
 
-function random_string(n) {
-    var a = 'abcdefghijklmnopqrstuvwxyz'
-    var s = '';
-    for (var i = 0; i < n; i++) {
-        s += a[Math.floor(Math.random() * a.length)];
-    }
-    return s;
-}
-
-function parse(str) {
-  var index = str.indexOf(':');
-  return {
-    type: str.substring(0, index),
-    message: str.substring(index + 1),
-  };
-}
-
-var BASE_SOURCE_URL = '@{EmptySourceR}'
-var BASE_COMPILE_URL = '@{EmptyCompileR}'
-var global_running = false;
-
-function post_code() {
-  if (global_running) {
-    return;
-  }
-  var post_id = random_string(16);
-  var url = BASE_SOURCE_URL + '/' + post_id;
-
-  var src = new EventSource($.url(url).attr('path'));
-
-  global_running = true;
-  var finalize = function() {
-    src.close();
-    global_running = false;
-  };
-
-  src.onmessage = function(msg) {
-    data = parse(decode_uri(msg.data));
-    $('<p>').html(encode_html_entity(data.message))
-            .addClass(data.type)
-            .appendTo('#output');
-    $('#output')[0].scrollTop = $('#output')[0].scrollHeight;
-
-    if (data.type == 'Control' && data.message == 'Finish') {
-        finalize();
-    }
-  };
-
-  src.onopen = function() {
-    var url = $('#compile').attr('href');
-    var compiler = $('#compiler').val();
-    var code = ace.edit('editor').getValue();
-    var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); });
-
-    $.post(BASE_COMPILE_URL + '/' + post_id, {
-      compiler: compiler,
-      code: code,
-      options: options.get().join(',') }, function() { });
-
-    // make permlink
-    $('#permlink').remove();
-    $('<a href="permlink" id="permlink" class="btn">Permlink</a>')
-      .appendTo('#permdiv');
-    $('#permlink').click(function(event) {
-      event.preventDefault();
-      post_permlink();
-    });
-
-  };
-
-  src.onerror = function() {
-    finalize();
-  }
-}
-
-function post_permlink() {
+function post_permlink(compiler, code, options) {
   var pm = $('#permlink');
   if (pm.hasClass('disable')) return;
   pm.addClass('disable');
 
-  var url = $('#compile').attr('href');
-  var compiler = $('#compiler').val();
-  var code = ace.edit('editor').getValue();
-  var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); });
-
   $.post('@{PermlinkR}', {
     compiler: compiler,
     code: code,
-    options: options.get().join(',') },
+    options: options.join(',') },
     function(json) {
       if (!json.success) {
         $('#permlink').removeClass('disable');
@@ -156,9 +72,11 @@ function update_compile_command() {
 }
 
 $(function() {
+  var result_window = new ResultWindow('#output')
+
   $('#compile').click(function(event) {
     event.preventDefault();
-    post_code();
+    post_code(result_window);
   });
 
   var editor = ace.edit("editor");
@@ -174,13 +92,13 @@ $(function() {
     name: 'run',
     bindKey: { win: 'Ctrl-Enter',  mac: 'Ctrl-Enter' },
     exec: function(editor) {
-      post_code();
+      post_code(result_window);
     },
     readOnly: true
   });
   vim_handler.actions['ctrl-return'] = {
     fn: function(editor, range, count, param) {
-      post_code();
+      post_code(result_window);
     },
   };
 

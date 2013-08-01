@@ -68,6 +68,12 @@ getCompilerInfos = do
       where
         xs = T.split (=='\t') tsv
 
+resultWindow :: Widget
+resultWindow = do
+  addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+  addScript $ StaticR polyfills_EventSource_js
+  $(widgetFile "result_window")
+
 makeRootR :: Code -> Handler Html
 makeRootR code = do
     app <- getYesod
@@ -78,7 +84,6 @@ makeRootR code = do
         addScript $ StaticR ace_ace_js
         addScript $ StaticR ace_keybinding_vim_js
         addScript $ StaticR ace_keybinding_emacs_js
-        addScript $ StaticR polyfills_EventSource_js
         addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
         compilerInfos <- liftIO getCompilerInfos
         $(widgetFile "homepage")

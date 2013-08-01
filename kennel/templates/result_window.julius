@@ -1,0 +1,88 @@
+function parse(str) {
+  var index = str.indexOf(':');
+  return {
+    type: str.substring(0, index),
+    message: str.substring(index + 1),
+  };
+}
+
+function encode_html_entity(str) {
+  return $.map(str, function(c) {
+    if (c == ' ') return '&nbsp;';
+    if (c == '<') return '&lt;';
+    if (c == '>') return '&gt;';
+    if (c == '&') return '&amp;';
+    if (c == '"') return '&quot;';
+    if (c == "'") return '&#39;';
+    return c;
+  }).join("");
+}
+
+function random_string(n) {
+    var a = 'abcdefghijklmnopqrstuvwxyz'
+    var s = '';
+    for (var i = 0; i < n; i++) {
+        s += a[Math.floor(Math.random() * a.length)];
+    }
+    return s;
+}
+
+var BASE_SOURCE_URL = '@{EmptySourceR}'
+var BASE_COMPILE_URL = '@{EmptyCompileR}'
+var global_running = false;
+
+function ResultWindow(id) {
+  this.id = id;
+}
+
+ResultWindow.prototype.post_code = function(compiler, code, options) {
+  var self = this;
+
+  if (global_running) {
+    return;
+  }
+  var post_id = random_string(16);
+  var url = BASE_SOURCE_URL + '/' + post_id;
+
+  var src = new EventSource($.url(url).attr('path'));
+
+  global_running = true;
+  var finalize = function() {
+    src.close();
+    global_running = false;
+
+    // make permlink
+    $('#permlink').remove();
+    $('<a href="permlink" id="permlink" class="btn">Permlink</a>')
+      .appendTo('#permdiv');
+    $('#permlink').click(function(event) {
+      event.preventDefault();
+      // TODO
+      post_permlink(compiler, code, options);
+    });
+  };
+
+  src.onmessage = function(msg) {
+    data = parse(decode_uri(msg.data));
+    $('<p>').html(encode_html_entity(data.message))
+            .addClass(data.type)
+            .appendTo(self.id);
+    $(self.id)[0].scrollTop = $(self.id)[0].scrollHeight;
+
+    if (data.type == 'Control' && data.message == 'Finish') {
+        finalize();
+    }
+  };
+
+  src.onopen = function() {
+    var url = BASE_COMPILE_URL + '/' + post_id;
+    $.post(url, {
+      compiler: compiler,
+      code: code,
+      options: options.join(',') }, function() { });
+  };
+
+  src.onerror = function() {
+    finalize();
+  }
+}

@@ -1,0 +1,2 @@
+<div .row-fluid>
+  <div #output .result_window>

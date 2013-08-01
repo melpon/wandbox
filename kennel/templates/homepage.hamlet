@@ -31,5 +31,4 @@
       <div #editor>
     <div .row-fluid>
       <p #compile_command>
-    <div .row-fluid>
-      <div #output>
+    ^{resultWindow}
