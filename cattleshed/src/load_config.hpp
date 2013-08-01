@@ -49,6 +49,8 @@ namespace wandbox {
 		int program_duration;
 		int compile_time_limit;
 		int kill_wait;
+		int output_limit_kill;
+		int output_limit_warn;
 		std::unordered_set<std::string> allow_file_exact;
 		std::unordered_set<std::string> allow_file_prefix;
 	};

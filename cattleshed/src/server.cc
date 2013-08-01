@@ -219,6 +219,7 @@ namespace wandbox {
 				std::bind<void>(
 					ref(*this),
 					cc_stdout,
+					cc_pid,
 					"CompilerMessageS",
 					_1,
 					_2));
@@ -231,6 +232,7 @@ namespace wandbox {
 				std::bind<void>(
 					ref(*this),
 					cc_stderr,
+					cc_pid,
 					"CompilerMessageE",
 					_1,
 					_2));
@@ -289,6 +291,7 @@ namespace wandbox {
 						std::bind<void>(
 							ref(*this),
 							aout_stdout,
+							prog_pid,
 							"StdOut",
 							_1,
 							_2));
@@ -301,6 +304,7 @@ namespace wandbox {
 						std::bind<void>(
 							ref(*this),
 							aout_stderr,
+							prog_pid,
 							"StdErr",
 							_1,
 							_2));
@@ -323,7 +327,7 @@ namespace wandbox {
 		void operator ()(asio::streambuf &, error_code, size_t) {
 		}
 
-		void operator ()(std::list<stream_descriptor_pair>::iterator p, const char *msg, error_code ec, size_t) {
+		void operator ()(std::list<stream_descriptor_pair>::iterator p, pid_t pid, const char *msg, error_code ec, size_t) {
 			auto &pipe = p->stream;
 			auto &rbuf = p->buf;
 			std::vector<char> data(BUFSIZ);
@@ -342,13 +346,15 @@ namespace wandbox {
 			if (data.empty() || ec) {
 				pipes.erase(p);
 				check_finish();
-				return;
 			} else {
-				asio::async_read_until(pipe, rbuf, end_read_condition(), std::bind<void>(ref(*this), p, msg, _1, _2));
+				asio::async_read_until(pipe, rbuf, end_read_condition(), std::bind<void>(ref(*this), p, pid, msg, _1, _2));
 			}
+			output_size += data.size();
+			if (output_size > config.jail.output_limit_kill) ::kill(pid, SIGKILL);
+			else if (output_size > config.jail.output_limit_warn) ::kill(pid, SIGXFSZ);
 		}
 
-		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio), timer(aio)
+		compiler_bridge(tcp::acceptor &acc): aio(), sock(aio), timer(aio), workdir(), pipes(), received(), cc_pid(), prog_pid(), output_size()
 		{
 			acc.accept(sock);
 			do {
@@ -369,6 +375,7 @@ namespace wandbox {
 		list<stream_descriptor_pair> pipes;
 		std::map<std::string, std::string> received;
 		int cc_pid, prog_pid;
+		std::size_t output_size;
 	};
 
 	struct listener {

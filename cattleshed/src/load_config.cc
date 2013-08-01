@@ -225,6 +225,8 @@ namespace cfg {
 		x.program_duration = get_int(o, "program-duration");
 		x.compile_time_limit = get_int(o, "compile-time-limit");
 		x.kill_wait = get_int(o, "kill-wait");
+		x.output_limit_kill = get_int(o, "output-limit-kill");
+		x.output_limit_warn = get_int(o, "output-limit-warn");
 		for (const auto &y: get_str_array(o, "allow-file-exact")) {
 			x.allow_file_exact.insert(y);
 		}
