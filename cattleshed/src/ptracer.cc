@@ -14,6 +14,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_match.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -123,6 +124,19 @@ namespace wandbox {
 		}
 		return buf.data();
 	}
+	/// realpath(3) の symlink を解決しない版 (for /proc/self)
+	std::string path_resolve_dots(const std::string &path) {
+		if (path.empty()) return "";
+		const bool is_absolute = path[0] == '/';
+		std::vector<std::string> composed;
+		for (const std::string &s: boost::tokenizer<boost::char_separator<char>>(path, boost::char_separator<char>("/"))) {
+			if (s.empty() || s == "." || (is_absolute && s == "..")) continue;
+			else if (!composed.empty() && composed.back() != ".." && s == "..") composed.pop_back();
+			else composed.emplace_back(s);
+		}
+		if (composed.empty()) return is_absolute ? "/" : ".";
+		return std::accumulate(composed.begin()+1, composed.end(), (is_absolute ? "/" : "") + composed.front(), [](const std::string &x, const std::string &y) { return x + "/" + y; });
+	}
 	bool is_file_prefixed_by(const std::string &path, const std::string &prefix) {
 		return path.length() == prefix.length() 
 			? path == prefix
@@ -134,15 +148,13 @@ namespace wandbox {
 		readwrite
 	};
 	/// path に対して許可されたアクセスモードを判定する
-	/// $PWD に対する読み書きアクセスと, config で列挙された対象または /proc/self/* に対する読み込みアクセスが可能
-	allowed_access_mode get_file_accessiblity(pid_t pid, const std::string &path) try {
-		const auto r = realpath_allowing_noent(path);
-		const auto procself = realpath("/proc/" + std::to_string(pid));
+	/// $PWD に対する読み書きアクセスと, config で列挙されたパスに対する読み込みアクセスが可能
+	allowed_access_mode get_file_accessiblity(const std::string &path) try {
+		const auto r = path_resolve_dots(path);
 		const auto is_prefixing = [&](const std::string &prefix) { return is_file_prefixed_by(r, prefix); };
-		if (is_prefixing(getcwd())) return allowed_access_mode::readwrite;
+		if (!is_prefixing("..")) return allowed_access_mode::readwrite;
 		if (config.jail.allow_file_exact.count(r) == 1) return allowed_access_mode::readonly;
 		if (rng::find_if(config.jail.allow_file_prefix, is_prefixing) != config.jail.allow_file_prefix.end()) return allowed_access_mode::readonly;
-		if (is_prefixing(realpath(procself + "/exe"))) return allowed_access_mode::readonly;
 		return allowed_access_mode::none;
 	} catch (std::system_error &) {
 		return allowed_access_mode::none;
@@ -150,9 +162,9 @@ namespace wandbox {
 
 	/// ファイルを開かせてもよいかどうか判断する
 	/// @return 開かせてよい時 @true
-	bool is_file_openable(pid_t pid, const std::string &path, int flags, mode_t) {
+	bool is_file_openable(const std::string &path, int flags, mode_t) {
 		const int openmode = flags & O_ACCMODE;
-		switch (get_file_accessiblity(pid, path)) {
+		switch (get_file_accessiblity(path)) {
 		case allowed_access_mode::readonly:
 			if (openmode != O_RDONLY) trace(LOG_DEBUG, "opening to write path '%s' is not allowed", path);
 			return openmode == O_RDONLY;
@@ -165,8 +177,8 @@ namespace wandbox {
 	}
 	/// ファイルを stat してもよいかどうか判断する
 	/// @return 開かせてよい時 @true
-	bool is_file_stattable(pid_t pid, const std::string &path) {
-		switch (get_file_accessiblity(pid, path)) {
+	bool is_file_stattable(const std::string &path) {
+		switch (get_file_accessiblity(path)) {
 		case allowed_access_mode::readonly:
 		case allowed_access_mode::readwrite:
 			return true;
@@ -187,10 +199,10 @@ namespace wandbox {
 			// Aは場合によってはblockしたい
 			// Bは場合によっては許可したい
 		case SYS_open: // B
-			return is_file_openable(pid, read_cstring_from_process(pid, reg.rdi), reg.rsi, reg.rdx);
+			return is_file_openable(read_cstring_from_process(pid, reg.rdi), reg.rsi, reg.rdx);
 
 		case SYS_stat: // B
-			return is_file_stattable(pid, read_cstring_from_process(pid, reg.rdi));
+			return is_file_stattable(read_cstring_from_process(pid, reg.rdi));
 
 		case SYS_clone: // B
 			return is_acceptable_clone_flag(read_reg(pid, rdi));
