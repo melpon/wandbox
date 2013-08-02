@@ -2,25 +2,11 @@
   height: 40px;
 }
 
-.margin {
-  height: 100px;
-}
-
-#compiler {
-}
-
 #keybinding {
 }
 
 #compile {
   margin-bottom: 10px;
-}
-
-#compile_options > div {
-  display: none;
-}
-#compile_options > .selected {
-  display: block;
 }
 
 #editor {

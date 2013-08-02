@@ -79,6 +79,11 @@ resultWindow = do
   addScript $ StaticR polyfills_EventSource_js
   $(widgetFile "result_window")
 
+compiler :: Widget
+compiler = do
+  compilerInfos <- liftIO getCompilerInfos
+  $(widgetFile "compiler")
+
 makeRootR :: Code -> Handler Html
 makeRootR code = do
     app <- getYesod
@@ -91,7 +96,6 @@ makeRootR code = do
         addScript $ StaticR ace_keybinding_vim_js
         addScript $ StaticR ace_keybinding_emacs_js
         addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
-        compilerInfos <- liftIO getCompilerInfos
         resultWindow
         $(widgetFile "homepage")
   where

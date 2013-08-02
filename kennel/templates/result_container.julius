@@ -19,7 +19,7 @@ ResultContainer.prototype._next_name = function() {
   return name;
 }
 
-ResultContainer.prototype.post_code = function(compiler, code, options) {
+ResultContainer.prototype.post_code = function(compiler, code) {
   var self = this;
 
   if (this.running) {
@@ -50,7 +50,7 @@ ResultContainer.prototype.post_code = function(compiler, code, options) {
   tab.find('a').tab('show');
 
   var result_window = new ResultWindow('#' + id_name);
-  result_window.post_code(compiler, code, options);
+  result_window.post_code(compiler, code);
 
   result_window.onfinish = function() {
     self.running = false;

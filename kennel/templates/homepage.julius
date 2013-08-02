@@ -22,26 +22,18 @@ function decode_uri(str) {
   return decodeURIComponent(str);
 }
 
-function post_code(result_container) {
-  var compiler = $('#compiler').val();
+function post_code(compiler, result_container) {
   var code = ace.edit('editor').getValue();
-  var options = $("#compile_options .selected").find(':checked').map(function(n,e) { return $(e).val(); }).get();
 
-  result_container.post_code(compiler, code, options);
+  result_container.post_code(compiler, code);
 }
 
-function to_id(id) {
-  return id.replace(/\./g, "\\.");
-}
+function update_compile_command(compiler) {
+  var command = compiler.get_selected_compiler_element().attr('command');
+  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('flags'); });
 
-function update_compile_command() {
-  var compiler = $('#compiler').val();
-  var command = $('#compiler > option:selected').attr('command');
-  var options = $('#option-' + to_id(compiler)).find(':checked').map(function(n,e) { return $(e).attr('flags'); });
-
-  var compile_command = '$ ' + command + ' ' + options.get().join(' ');
+  var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ');
   $('#compile_command').html('<code>' + compile_command + '</code>');
-
 }
 
 $(function() {
@@ -49,7 +41,7 @@ $(function() {
 
   $('#compile').click(function(event) {
     event.preventDefault();
-    post_code(result_container);
+    post_code(compiler, result_container);
   });
 
   var editor = ace.edit("editor");
@@ -65,37 +57,34 @@ $(function() {
     name: 'run',
     bindKey: { win: 'Ctrl-Enter',  mac: 'Ctrl-Enter' },
     exec: function(editor) {
-      post_code(result_container);
+      post_code(compiler, result_container);
     },
     readOnly: true
   });
   vim_handler.actions['ctrl-return'] = {
     fn: function(editor, range, count, param) {
-      post_code(result_container);
+      post_code(compiler, result_container);
     },
   };
 
-  // initialize
-  var compiler = decode_uri(#{urlEncode $ codeCompiler code});
+  // set code
   var code = decode_uri(#{urlEncode $ codeCode code});
-  var check = function(elem, v) {
-    v ? elem.attr('checked', '') : elem.removeAttr('checked');
-  }
-  $('#compiler').val(compiler);
   editor.setValue(code);
   editor.setShowPrintMargin(false);
 
-  $("#compiler").change(function() {
-    var lang = $('#compiler > option:selected').attr('language');
-    console.log(lang, get_editor_mode(lang));
+  // set compiler
+  var compiler = new Compiler('#compiler', '#compile-options');
+  compiler.compiler_changed = function() {
+    update_compile_command(compiler);
     editor.getSession().setMode(get_editor_mode(lang));
+  };
+  compiler.compile_option_changed = function() {
+    update_compile_command(compiler);
+  };
 
-    $("#compile_options").children().removeClass('selected');
-    $("#option-" + to_id($(this).val())).addClass('selected')
-    update_compile_command();
-  }).change();
-  $("#compile_options input").change(function() {
-    update_compile_command();
-  });
+  compiler.deserialize(
+    decode_uri(#{urlEncode $ codeCompiler code}),
+    ''
+  );
 });
 

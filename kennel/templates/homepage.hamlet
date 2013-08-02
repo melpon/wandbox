@@ -1,21 +1,8 @@
 <div .row-fluid>
   <div .span12 #header>
 <div .row-fluid>
-  <div .span2 .offset1 #langpanel>
-    <div .row-fluid>
-      <label>choose compiler:
-      <select .span12 size=#{length compilerInfos} #compiler>
-        $forall ver <- map ciVersion compilerInfos
-          <option value="#{verName ver}" command="#{verCompileCommand ver}" language="#{verLanguage ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
-    <div .row-fluid #compile_options>
-      $forall info <- compilerInfos
-        <div #option-#{verName $ ciVersion info}>
-          $forall sw <- ciSwitches info
-            <div .row-fluid>
-              $if swDefault sw
-                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}" checked>#{swDisplayName sw}
-              $else
-                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}">#{swDisplayName sw}
+  <div .span2 .offset1>
+    ^{compiler}
   <div .span8 #codepanel>
     <div .row-fluid>
       <div .span10>

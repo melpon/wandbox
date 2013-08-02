@@ -1,0 +1,59 @@
+
+function to_id(id) {
+  return id.replace(/\./g, "\\.");
+}
+
+function Compiler(compiler_id, compile_options_id) {
+  var self = this;
+
+  this.compiler_id = compiler_id;
+  this.compile_options_id = compile_options_id;
+
+  $(this.compiler_id).change(function() {
+    var lang = $(self.compiler_id + ' > option:selected').attr('language');
+
+    $(self.compile_options_id).children().removeClass('selected');
+
+    var compiler = $(this).val();
+    $(self.compile_options_id)
+      .find('div[compiler=' + to_id(compiler) + ']')
+      .addClass('selected');
+
+    if (self.compiler_changed)
+      self.compiler_changed();
+  });
+  $(this.compile_options_id + ' input').change(function() {
+    if (self.compile_option_changed)
+      self.compile_option_changed();
+  });
+}
+
+Compiler.prototype._compiler = function() {
+  return $(this.compiler_id);
+}
+
+Compiler.prototype.get_selected_compiler = function() {
+  return this._compiler().val();
+}
+
+Compiler.prototype.get_selected_compiler_element = function() {
+  return $(this.compiler_id + ' > option:selected');
+}
+
+Compiler.prototype._compile_options = function() {
+  var compiler = this.get_selected_compiler();
+  return $(this.compile_options_id + ' div[compiler=' + to_id(compiler) + ']');
+}
+
+Compiler.prototype.get_checked_compile_options = function() {
+  var options = this._compile_options();
+  return options.find(':checked');
+}
+
+Compiler.prototype.deserialize = function(compiler, compile_options) {
+  this._compiler().val(compiler);
+  this._compiler().change();
+  var check = function(elem, v) {
+    v ? elem.attr('checked', '') : elem.removeAttr('checked');
+  }
+}

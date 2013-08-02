@@ -51,28 +51,31 @@ ResultWindow.prototype._output_window = function() {
   return $(this.id).find('.output-window');
 }
 
-ResultWindow.prototype.permlink = function(compiler, code, options) {
+ResultWindow.prototype.permlink = function(compiler, code) {
   var self = this;
 
-  var a = $('<a href="#" class="btn">Create Permlink</a>')
+  var a = $('<a href="#" class="btn">Share This Code</a>')
     .appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();
-    self.post_permlink(compiler, code, options);
+    self.post_permlink(compiler, code);
   });
 }
 
-ResultWindow.prototype.post_permlink = function(compiler, code, options) {
+ResultWindow.prototype.post_permlink = function(compiler, code) {
   var self = this;
 
   var pm = this._permlink().find('a');
   if (pm.hasClass('disable')) return;
   pm.addClass('disable');
 
+  var selected_compiler = compiler.get_selected_compiler();
+  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
+
   $.post('@{PermlinkR}', {
-    compiler: compiler,
+    compiler: selected_compiler,
     code: code,
-    options: options.join(',') },
+    options: compile_options },
     function(json) {
       if (!json.success) {
         pm.removeClass('disable');
@@ -113,7 +116,7 @@ ResultWindow.prototype.code_window = function(compiler, code, options) {
   this._code_window().append(pre);
 }
 
-ResultWindow.prototype.post_code = function(compiler, code, options) {
+ResultWindow.prototype.post_code = function(compiler, code) {
   var self = this;
 
   var post_id = random_string(16);
@@ -121,12 +124,12 @@ ResultWindow.prototype.post_code = function(compiler, code, options) {
 
   var src = new EventSource($.url(url).attr('path'));
 
-  this.code_window(compiler, code, options);
+  this.code_window(compiler, code);
 
   var finalize = function() {
     src.close();
 
-    self.permlink(compiler, code, options);
+    self.permlink(compiler, code);
 
     if (self.onfinish)
       self.onfinish();
@@ -161,12 +164,15 @@ ResultWindow.prototype.post_code = function(compiler, code, options) {
     }
   };
 
+  var selected_compiler = compiler.get_selected_compiler();
+  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
+
   src.onopen = function() {
     var url = BASE_COMPILE_URL + '/' + post_id;
     $.post(url, {
-      compiler: compiler,
+      compiler: selected_compiler,
       code: code,
-      options: options.join(',') }, function() { });
+      options: compile_options }, function() { });
   };
 
   src.onerror = function() {
