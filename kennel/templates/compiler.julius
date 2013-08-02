@@ -10,14 +10,8 @@ function Compiler(compiler_id, compile_options_id) {
   this.compile_options_id = compile_options_id;
 
   $(this.compiler_id).change(function() {
-    var lang = $(self.compiler_id + ' > option:selected').attr('language');
-
     $(self.compile_options_id).children().removeClass('selected');
-
-    var compiler = $(this).val();
-    $(self.compile_options_id)
-      .find('div[compiler=' + to_id(compiler) + ']')
-      .addClass('selected');
+    self._compile_options().addClass('selected');
 
     if (self.compiler_changed)
       self.compiler_changed();

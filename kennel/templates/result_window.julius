@@ -89,30 +89,50 @@ ResultWindow.prototype.post_permlink = function(compiler, code) {
         approot = approot.substr(0, approot.length - 1);
       }
       var url = approot + '/permlink/' + json.link;
-      $('<a href="' + url + '" target="_blank" id="permlink">Permlink</a>')
+      $('<a href="' + url + '" target="_blank" id="permlink">URL</a>')
         .appendTo(self._permlink());
     });
 }
 
-ResultWindow.prototype.code_window = function(compiler, code, options) {
-  var show_code = $('<code><a href="#">Show Code</a></code>');
-  var hide_code = $('<code><a href="#">Hide Code</a></code>');
-  var pre = $('<pre>' + encode_html_entity(code) + '</pre>');
+ResultWindow.prototype.code_window = function(compiler, code) {
+  var show_code = $('<div><code><a href="#">Show Code</a></code></div>');
+  var hide_code = $('<div><code><a href="#">Hide Code</a></code></div>');
+  var pre = $('<div><pre>' + encode_html_entity(code) + '</pre></div>');
+
+  var compiler_data = (function(compiler) {
+    var e = compiler.get_selected_compiler_element();
+    var data = e.html();
+    return $('<div><p>' + data + '</p></div>');
+  })(compiler);
+
+  var code = (function(compiler) {
+    var command = compiler.get_selected_compiler_element().attr('command');
+    var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('flags'); });
+
+    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ');
+    return $('<code>' + compile_command + '</code>');
+  })(compiler);
 
   hide_code.toggle(false);
+  compiler_data.toggle(false);
   pre.toggle(false);
+  code.toggle(false);
 
   var toggle_func = function(event) {
     event.preventDefault();
     show_code.toggle();
     hide_code.toggle();
+    compiler_data.toggle();
     pre.toggle();
+    code.toggle();
   };
   show_code.click(toggle_func);
   hide_code.click(toggle_func);
 
   this._code_window().append(show_code);
   this._code_window().append(hide_code);
+  this._code_window().append(compiler_data);
+  this._code_window().append(code);
   this._code_window().append(pre);
 }
 

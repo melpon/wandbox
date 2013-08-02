@@ -76,6 +76,8 @@ $(function() {
   var compiler = new Compiler('#compiler', '#compile-options');
   compiler.compiler_changed = function() {
     update_compile_command(compiler);
+
+    var lang = compiler.get_selected_compiler_element().attr('language');
     editor.getSession().setMode(get_editor_mode(lang));
   };
   compiler.compile_option_changed = function() {
