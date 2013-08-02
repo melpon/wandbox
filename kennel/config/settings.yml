@@ -8,7 +8,7 @@ Default: &defaults
 
 Development:
   <<: *defaults
-  approot: "/wandbox/test"
+  approot: "http://melpon.org/wandbox/test"
 
 Testing:
   <<: *defaults

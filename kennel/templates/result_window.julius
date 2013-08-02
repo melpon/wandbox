@@ -91,6 +91,16 @@ ResultWindow.prototype.post_permlink = function(compiler, code) {
       var url = approot + '/permlink/' + json.link;
       $('<a href="' + url + '" target="_blank" id="permlink">URL</a>')
         .appendTo(self._permlink());
+
+      var div = $('<div></div>').appendTo(self._permlink());
+      twttr.widgets.createShareButton(
+        url,
+        div[0],
+        function() { },
+        {
+          count: 'none',
+          //text: 'wandbox'
+        });
     });
 }
 

@@ -75,6 +75,7 @@ resultContainer = do
 
 resultWindow :: Widget
 resultWindow = do
+  addScriptRemote "//platform.twitter.com/widgets.js"
   addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
   addScript $ StaticR polyfills_EventSource_js
   $(widgetFile "result_window")
