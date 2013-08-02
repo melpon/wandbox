@@ -48,4 +48,4 @@ getLinkedPermlinkR :: Text -> Handler Html
 getLinkedPermlinkR link = do
     permlink <- runDB (getBy404 $ UniqueLink link)
     let code = linkCode $ entityVal permlink
-    makeRootR code
+    makeRootR (Just code)

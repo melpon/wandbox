@@ -34,6 +34,11 @@ Compiler.prototype.get_selected_compiler_element = function() {
   return $(this.compiler_id + ' > option:selected');
 }
 
+Compiler.prototype.set_compiler = function(compiler) {
+  this._compiler().val(compiler);
+  this._compiler().change();
+}
+
 Compiler.prototype._compile_options = function() {
   var compiler = this.get_selected_compiler();
   return $(this.compile_options_id + ' div[compiler=' + to_id(compiler) + ']');
@@ -45,9 +50,18 @@ Compiler.prototype.get_checked_compile_options = function() {
 }
 
 Compiler.prototype.deserialize = function(compiler, compile_options) {
-  this._compiler().val(compiler);
-  this._compiler().change();
+  this.set_compiler(compiler);
+
   var check = function(elem, v) {
     v ? elem.attr('checked', '') : elem.removeAttr('checked');
+  };
+  var options = compile_options.split(',');
+  var options_map = {};
+  for (var i = 0; i < options.length; i++) {
+    options_map[options[i]] = '';
   }
+  this._compile_options().find('input').each(function() {
+    var val = $(this).val();
+    check($(this), val in options_map);
+  });
 }

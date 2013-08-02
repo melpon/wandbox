@@ -67,12 +67,7 @@ $(function() {
     },
   };
 
-  // set code
-  var code = decode_uri(#{urlEncode $ codeCode code});
-  editor.setValue(code);
-  editor.setShowPrintMargin(false);
-
-  // set compiler
+  // create compiler
   var compiler = new Compiler('#compiler', '#compile-options');
   compiler.compiler_changed = function() {
     update_compile_command(compiler);
@@ -84,9 +79,19 @@ $(function() {
     update_compile_command(compiler);
   };
 
-  compiler.deserialize(
-    decode_uri(#{urlEncode $ codeCompiler code}),
-    ''
-  );
+  // deserialize if code exists.
+  var code = #{jsonCode};
+  if (code != null) {
+    editor.setValue(decode_uri(code.code));
+    editor.setShowPrintMargin(false);
+
+    compiler.deserialize(
+      decode_uri(code.compiler),
+      decode_uri(code.options)
+    );
+  } else {
+    compiler.set_compiler(#{defaultCompiler});
+  }
+  update_compile_command(compiler);
 });
 

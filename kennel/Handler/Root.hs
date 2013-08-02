@@ -18,7 +18,8 @@ import qualified Data.Conduit.List as CL
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 import qualified Data.List (init)
-import qualified Data.Aeson as JS (Value(String))
+import qualified Data.Aeson as JS (Value(..), object, (.=))
+import Data.Aeson ((.=))
 
 data CompilerSwitch = CompilerSwitch
   { swName :: Text
@@ -85,8 +86,8 @@ compiler = do
   compilerInfos <- liftIO getCompilerInfos
   $(widgetFile "compiler")
 
-makeRootR :: Code -> Handler Html
-makeRootR code = do
+makeRootR :: Maybe Code -> Handler Html
+makeRootR mCode = do
     app <- getYesod
     defaultLayout $ do
         setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
@@ -101,7 +102,11 @@ makeRootR code = do
         $(widgetFile "homepage")
   where
     urlEncode = JS.String . T.pack . encode . B.unpack . encodeUtf8
-
+    defaultCompiler = JS.String "gcc-head"
+    jsonCode = maybe JS.Null tojson mCode
+    tojson code = JS.object ["compiler" .= urlEncode (codeCompiler code)
+                            ,"code" .= urlEncode (codeCode code)
+                            ,"options" .= urlEncode (codeOptions code)]
 
 -- This is a handler function for the GET request method on the RootR
 -- resource pattern. All of your resource patterns are defined in
@@ -112,5 +117,4 @@ makeRootR code = do
 -- inclined, or create a single monolithic file.
 getRootR :: Handler Html
 getRootR = do
-  emptyCode <- liftIO $ makeCode "gcc-head" "" ""
-  makeRootR emptyCode
+  makeRootR Nothing
