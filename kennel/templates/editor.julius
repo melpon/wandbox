@@ -1,22 +1,46 @@
-var vim_handler = require('ace/keyboard/vim').handler
-var keybindings = {
-    ace: null,
-    vim: vim_handler,
-    emacs: 'ace/keyboard/emacs',
-};
+function Editor(id, settings_id) {
+  this.id = id;
+  this.settings_id = settings_id;
 
-function Editor(id) {
+  // not initialized
+  if ($(this.id).children().size() == 0) {
+    this._initialize();
+  }
+}
+
+Editor.prototype._initialize = function() {
+  var vim_handler = require('ace/keyboard/vim').handler
+  var keybindings = {
+      ace: null,
+      vim: vim_handler,
+      emacs: 'ace/keyboard/emacs',
+  };
+
   var self = this;
 
-  this.id = id;
+  $(this.id).append('<div class="smart-editor"></div>');
+  $(this.id).append('<textarea class="span12 legacy-editor"></textarea>');
 
-  var editor = ace.edit(this.id);
+  var editor = this.smart_editor()
 
   editor.setTheme('ace/theme/textmate');
-  $("#keybinding").change(function() {
+  $(this.settings_id).find('select').change(function() {
     var value = $(this).val();
     editor.setKeyboardHandler(keybindings[value]);
   }).change();
+  $(this.settings_id).find('input').change(function() {
+    var val = self.getValue();
+    $(this.id + ' .smart-editor').toggle();
+    $(this.id + ' .legacy-editor').toggle();
+    self.setValue(val);
+    self.focus();
+    if ($(this).attr('checked')) {
+      $(self.settings_id).find('select').attr('disabled', 'disabled');
+    } else {
+      $(self.settings_id).find('select').removeAttr('disabled');
+    }
+  });
+  $(this.id + ' .legacy-editor').hide();
 
   editor.commands.addCommand({
     name: 'run',
@@ -37,8 +61,17 @@ function Editor(id) {
   editor.setShowPrintMargin(false);
 }
 
+Editor.prototype.is_legacy = function() {
+  return $(this.id + ' .smart-editor').css('display') == 'none';
+}
+Editor.prototype.smart_editor = function() {
+  return ace.edit($(this.id + ' .smart-editor')[0]);
+}
+Editor.prototype.legacy_editor = function() {
+  return $(this.id + ' .legacy-editor');
+}
 Editor.prototype.editor = function() {
-  return ace.edit(this.id);
+  return this.is_legacy() ? this.legacy_editor() : this.smart_editor();
 }
 
 Editor.prototype.focus = function() {
@@ -46,11 +79,15 @@ Editor.prototype.focus = function() {
 }
 
 Editor.prototype.getValue = function() {
-  return this.editor().getValue();
+  return this.is_legacy() ? this.legacy_editor().val() : this.smart_editor().getValue();
 }
 
 Editor.prototype.setValue = function(value) {
-  this.editor().setValue(value);
+  if (this.is_legacy()) {
+    this.legacy_editor().val(value);
+  } else {
+    this.smart_editor().setValue(value);
+  }
 }
 
 Editor.prototype.setMode = function(mode) {

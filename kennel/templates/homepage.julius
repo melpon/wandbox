@@ -16,7 +16,7 @@ function decode_uri(str) {
 }
 
 function post_code(compiler, result_container) {
-  var editor = new Editor('editor');
+  var editor = new Editor('#editor', '#editor-settings');
   var code = editor.getValue();
 
   result_container.post_code(compiler, code);
@@ -38,7 +38,7 @@ $(function() {
     post_code(compiler, result_container);
   });
 
-  var editor = new Editor('editor');
+  var editor = new Editor('#editor', '#editor-settings');
   editor.focus();
   editor.onrun = function() {
     post_code(compiler, result_container);

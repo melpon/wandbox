@@ -1,5 +1,10 @@
-#editor {
+.smart-editor {
   margin: 0px;
+  height: 300px;
+  font-family: "Courier New", monospace;
+}
+
+.legacy-editor {
   height: 300px;
   font-family: "Courier New", monospace;
 }
