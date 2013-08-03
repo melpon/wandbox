@@ -1,10 +1,3 @@
-var vim_handler = require("ace/keyboard/vim").handler
-var keybindings = {
-    ace: null,
-    vim: vim_handler,
-    emacs: "ace/keyboard/emacs",
-};
-
 var EDITOR_MODE_MAPPING = {
   'C++': 'ace/mode/c_cpp',
   'Ruby': 'ace/mode/ruby',
@@ -23,7 +16,8 @@ function decode_uri(str) {
 }
 
 function post_code(compiler, result_container) {
-  var code = ace.edit('editor').getValue();
+  var editor = new Editor('editor');
+  var code = editor.getValue();
 
   result_container.post_code(compiler, code);
 }
@@ -44,27 +38,10 @@ $(function() {
     post_code(compiler, result_container);
   });
 
-  var editor = ace.edit("editor");
-  editor.setTheme("ace/theme/textmate");
-  $("#keybinding").change(function() {
-    var value = $(this).val();
-    editor.setKeyboardHandler(keybindings[value]);
-  }).change();
-
+  var editor = new Editor('editor');
   editor.focus();
-
-  editor.commands.addCommand({
-    name: 'run',
-    bindKey: { win: 'Ctrl-Enter',  mac: 'Ctrl-Enter' },
-    exec: function(editor) {
-      post_code(compiler, result_container);
-    },
-    readOnly: true
-  });
-  vim_handler.actions['ctrl-return'] = {
-    fn: function(editor, range, count, param) {
-      post_code(compiler, result_container);
-    },
+  editor.onrun = function() {
+    post_code(compiler, result_container);
   };
 
   // create compiler
@@ -73,7 +50,7 @@ $(function() {
     update_compile_command(compiler);
 
     var lang = compiler.get_selected_compiler_element().attr('language');
-    editor.getSession().setMode(get_editor_mode(lang));
+    editor.setMode(get_editor_mode(lang));
   };
   compiler.compile_option_changed = function() {
     update_compile_command(compiler);
@@ -83,7 +60,6 @@ $(function() {
   var code = #{jsonCode};
   if (code != null) {
     editor.setValue(decode_uri(code.code));
-    editor.setShowPrintMargin(false);
 
     compiler.deserialize(
       decode_uri(code.compiler),

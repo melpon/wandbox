@@ -1,0 +1,58 @@
+var vim_handler = require('ace/keyboard/vim').handler
+var keybindings = {
+    ace: null,
+    vim: vim_handler,
+    emacs: 'ace/keyboard/emacs',
+};
+
+function Editor(id) {
+  var self = this;
+
+  this.id = id;
+
+  var editor = ace.edit(this.id);
+
+  editor.setTheme('ace/theme/textmate');
+  $("#keybinding").change(function() {
+    var value = $(this).val();
+    editor.setKeyboardHandler(keybindings[value]);
+  }).change();
+
+  editor.commands.addCommand({
+    name: 'run',
+    bindKey: { win: 'Ctrl-Enter',  mac: 'Ctrl-Enter' },
+    exec: function(editor) {
+      if (self.onrun)
+        self.onrun(editor);
+    },
+    readOnly: true
+  });
+  vim_handler.actions['ctrl-return'] = {
+    fn: function(editor, range, count, param) {
+      if (self.onrun)
+        self.onrun(editor);
+    },
+  };
+
+  editor.setShowPrintMargin(false);
+}
+
+Editor.prototype.editor = function() {
+  return ace.edit(this.id);
+}
+
+Editor.prototype.focus = function() {
+  this.editor().focus();
+}
+
+Editor.prototype.getValue = function() {
+  return this.editor().getValue();
+}
+
+Editor.prototype.setValue = function(value) {
+  this.editor().setValue(value);
+}
+
+Editor.prototype.setMode = function(mode) {
+  this.editor().getSession().setMode(mode);
+}

@@ -1,0 +1,10 @@
+<div .row-fluid>
+  <div .span10>
+    <label .row-fluid>input code:
+    <div #editor>
+  <div .span2>
+    <label .row-fluid>choose key binding:
+    <select .span12 size=3 #keybinding>
+      <option value="ace" selected>default
+      <option value="vim">Vim
+      <option value="emacs">Emacs

@@ -8,9 +8,3 @@
 #compile {
   margin-bottom: 10px;
 }
-
-#editor {
-  margin: 0px;
-  height: 300px;
-  font-family: "Courier New", monospace;
-}

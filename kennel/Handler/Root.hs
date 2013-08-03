@@ -81,6 +81,10 @@ resultWindow = do
   addScript $ StaticR polyfills_EventSource_js
   $(widgetFile "result_window")
 
+editor :: Widget
+editor = do
+  $(widgetFile "editor")
+
 compiler :: Widget
 compiler = do
   compilerInfos <- liftIO getCompilerInfos
