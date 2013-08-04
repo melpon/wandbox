@@ -311,7 +311,7 @@ namespace cfg {
 				"\"display-name\":\"" + compiler.display_name + "\","
 				"\"version\":\"" + version + "\","
 				"\"display-compile-command\":\"" + compiler.display_compile_command + "\","
-				"\"swithes\":[" + boost::algorithm::join(swlist, ",") + "]"
+				"\"switches\":[" + boost::algorithm::join(swlist, ",") + "]"
 			"}";
 	}
 }
