@@ -286,6 +286,7 @@ namespace cfg {
 					std::string def = swname;
 					for (const auto &swname: compiler.switches) {
 						const auto &sw = switches.at(swname);
+						if (set.count(swname) == 0) continue;
 						sel.emplace_back(
 							"{"
 								"\"name\":\"" + sw.name + "\","

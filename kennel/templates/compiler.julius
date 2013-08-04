@@ -53,7 +53,11 @@ Compiler.prototype.deserialize = function(compiler, compile_options) {
   this.set_compiler(compiler);
 
   var check = function(elem, v) {
-    v ? elem.attr('checked', '') : elem.removeAttr('checked');
+    if (elem.attr('type') == 'checkbox') {
+      v ? elem.attr('checked', '') : elem.removeAttr('checked');
+    } else {
+      if (v) elem.click();
+    }
   };
   var options = compile_options.split(',');
   var options_map = {};
