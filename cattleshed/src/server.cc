@@ -350,7 +350,8 @@ namespace wandbox {
 					namespace qi = boost::spirit::qi;
 					const auto &compiler = get_compiler(received);
 
-					std::vector<std::string> args = compiler.compile_command;
+					auto ccargs = compiler.compile_command;
+					auto progargs = compiler.run_command;
 
 					const auto it = received.find("CompilerOption");
 					if (it != received.end()) {
@@ -362,13 +363,14 @@ namespace wandbox {
 
 						for (const auto &sw: compiler.switches) {
 							if (selected_switches.count(sw.name) != 0) {
-								args.insert(args.end(), sw.flags.begin(), sw.flags.end());
+								ccargs.insert(ccargs.end(), sw.flags.begin(), sw.flags.end());
 							}
 						}
 					}
+					progargs.insert(progargs.begin(), { ptracer, "--config", config_file, "--" });
 					commands = {
-						{ std::move(args), "", "CompilerMessageS", "CompilerMessageE", config.jail.compile_time_limit },
-						{ compiler.run_command, "StdIn", "StdOut", "StdErr", config.jail.program_duration }
+						{ std::move(ccargs), "", "CompilerMessageS", "CompilerMessageE", config.jail.compile_time_limit },
+						{ std::move(progargs), "StdIn", "StdOut", "StdErr", config.jail.program_duration }
 					};
 				}
 
