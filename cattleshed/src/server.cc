@@ -263,8 +263,8 @@ namespace wandbox {
 						}
 
 						for (const auto &sw: compiler.switches) {
-							if (selected_switches.count(sw.name) != 0) {
-								ccargs.insert(ccargs.end(), sw.flags.begin(), sw.flags.end());
+							if (selected_switches.count(sw) != 0) {
+								ccargs.insert(ccargs.end(), config.switches[sw].flags.begin(), config.switches[sw].flags.end());
 							}
 						}
 					}
@@ -449,11 +449,14 @@ namespace wandbox {
 						// <line> ::= name,language,display_name,ver,display_compile_command<switches><LF>
 						// <switches> ::= (,name<TAB>flags<TAB>default<TAB>display_name)*
 						line += c.name + "," + c.language + "," + c.display_name + "," + ver + "," + c.display_compile_command;
-						for (const auto &sw: c.switches) {
+						for (const auto &swname: c.switches) {
+							const auto ite = config.switches.find(swname);
+							if (ite == config.switches.end()) continue;
+							const auto &sw = ite->second;
 							line +=
 								"," + sw.name +
 								"\t" + boost::algorithm::join(sw.flags, " ") +
-								"\t" + (sw.default_ ? "true" : "false") +
+								"\t" + (c.initial_checked.count(sw.name) != 0 ? "true" : "false") +
 								"\t" + sw.display_name;
 						}
 						line += "\n";
