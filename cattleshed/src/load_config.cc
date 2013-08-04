@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
@@ -228,6 +229,7 @@ namespace cfg {
 			x.name = a.first;
 			x.flags = get_str_array(s, "flags");
 			x.display_name = get_str(s, "display-name");
+			x.conflicts = get_str_array(s, "conflicts");
 			ret[a.first] = std::move(x);
 		}
 		return ret;
@@ -244,4 +246,72 @@ namespace cfg {
 		qi::phrase_parse(first, last, cfg::config_grammar<decltype(first)>(), qi::space, o);
 		return { load_network_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o) };
 	}
+
+	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches) {
+		std::vector<std::string> swlist;
+		{
+			std::unordered_set<std::string> used;
+			for (const auto &swname: compiler.switches) {
+				if (used.count(swname) != 0) continue;
+				const auto ite = switches.find(swname);
+				if (ite == switches.end()) continue;
+				const auto &sw = ite->second;
+				if (sw.conflicts.empty()) {
+					used.insert(swname);
+					swlist.emplace_back(
+						"{"
+							"\"name\":\"" + sw.name + "\","
+							"\"type\":\"single\","
+							"\"display-name\":\"" + sw.display_name + "\","
+							"\"display-flags\":\"" + boost::algorithm::join(sw.flags, " ") + "\","
+							"\"default\":" + (compiler.initial_checked.count(sw.name) != 0 ? "true" : "false") +
+						"}");
+				} else {
+					std::function<void(const std::string &)> f;
+					std::unordered_set<std::string> set;
+					f = [&](const std::string &swname) {
+						const auto ite = switches.find(swname);
+						if (ite == switches.end()) return;
+						const auto &sw = ite->second;
+						for (const auto &c: sw.conflicts) {
+							const auto ite = switches.find(c);
+							if (ite == switches.end()) continue;
+							if (set.insert(c).second) f(c);
+						}
+					};
+					f(swname);
+					std::vector<std::string> sel;
+					std::string def = swname;
+					for (const auto &swname: compiler.switches) {
+						const auto &sw = switches.at(swname);
+						sel.emplace_back(
+							"{"
+								"\"name\":\"" + sw.name + "\","
+								"\"display-name\":\"" + sw.display_name + "\","
+								"\"display-flags\":\"" + boost::algorithm::join(sw.flags, " ") + "\""
+							"}");
+						if (compiler.initial_checked.count(sw.name) != 0) def = swname;
+					}
+					swlist.emplace_back(
+						"{"
+							"\"type\":\"select\","
+							"\"default\":\"" + def + "\","
+							"\"options\":[" + boost::algorithm::join(sel, ",") + "]"
+						"}");
+					used.insert(set.begin(), set.end());
+				}
+			}
+		}
+		return
+			"{"
+				"\"name\":\"" + compiler.name + "\","
+				"\"language\":\"" + compiler.language + "\","
+				"\"display-name\":\"" + compiler.display_name + "\","
+				"\"version\":\"" + version + "\","
+				"\"display-compile-command\":\"" + compiler.display_compile_command + "\","
+				"\"swithes\":[" + boost::algorithm::join(swlist, ",") + "]"
+			"}";
+	}
 }
+
+

@@ -16,6 +16,7 @@ namespace wandbox {
 		std::string name;
 		std::vector<std::string> flags;
 		std::string display_name;
+		std::vector<std::string> conflicts;
 	};
 	struct compiler_trait {
 		std::string name;
@@ -62,4 +63,5 @@ namespace wandbox {
 	};
 
 	server_config load_config(std::istream &is);
+	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches);
 }

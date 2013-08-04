@@ -444,6 +444,7 @@ namespace wandbox {
 						std::istream is(buf.get());
 						std::string ver;
 						if (!getline(is, ver)) continue;
+						versions.emplace_back(generate_displaying_compiler_config(*current, ver, config.switches));
 						const auto &c = *current;
 						// NOTE: Each variables must not contain <LF> or <COMMA> or <TAB>.
 						// <line> ::= name,language,display_name,ver,display_compile_command<switches><LF>
@@ -463,6 +464,7 @@ namespace wandbox {
 					}
 				}
 				yield sockbuf->async_write_command("VersionResult", std::move(line), *this);
+				yield sockbuf->async_write_command("VersionResult2", "[" + boost::algorithm::join(versions, ",") + "]", *this);
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
@@ -474,6 +476,7 @@ namespace wandbox {
 		const compiler_trait *current;
 		std::shared_ptr<unique_child_pid> child;
 		std::string line;
+		std::vector<std::string> versions;
 		std::shared_ptr<asio::streambuf> buf;
 	};
 
