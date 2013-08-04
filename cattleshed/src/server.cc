@@ -1,21 +1,13 @@
-#include <map>
-#include <string>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <chrono>
-#include <sstream>
-#include <functional>
-#include <list>
-#include <fstream>
-#include <unordered_map>
 #include <deque>
-#include <boost/range/iterator_range.hpp>
-#include <boost/range/istream_range.hpp>
-#include <boost/fusion/include/std_pair.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <fstream>
+#include <functional>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include <boost/algorithm/string/join.hpp>
+#include <boost/fusion/include/std_pair.hpp>
 #include <boost/program_options.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -26,20 +18,15 @@
 #include "posixapi.hpp"
 #include "yield.hpp"
 
+#if !defined(__GNUC__) || (__GNUC__ < 4) || (__GNUC__ == 4 && __GCC_MINOR__ < 7)
 #define noexcept
 #define override
+#endif
 
 namespace wandbox {
 
-	namespace brange = boost::range;
 	namespace ptime = boost::posix_time;
 
-	using std::shared_ptr;
-	using std::unique_ptr;
-	using std::make_shared;
-	using std::string;
-	using std::vector;
-	using std::list;
 	using std::size_t;
 	using std::move;
 	using std::ref;
@@ -49,86 +36,9 @@ namespace wandbox {
 	using std::placeholders::_2;
 	using std::placeholders::_3;
 
-	struct end_read_condition {
-		explicit end_read_condition(std::size_t min = 0): min(min) { }
-		template <typename Iter>
-		std::pair<Iter, bool> operator ()(Iter first, Iter last) const {
-			const auto d = std::distance(first, last);
-			if (d < min) return { first, false };
-			if (d >= BUFSIZ) return { last, true };
-			const auto ite = std::find(first, last, '\n');
-			return { ite, ite != last };
-		}
-		std::size_t min;
-	};
-}
-
-namespace boost {
-	namespace asio {
-		template <>
-		struct is_match_condition<wandbox::end_read_condition>: boost::mpl::true_ { };
-	}
-}
-
-namespace wandbox {
-
 	string ptracer;
 	string config_file;
 	server_config config;
-
-	struct unique_child_pid {
-		explicit unique_child_pid(pid_t pid = 0): pid(pid), st(0), waited(false) { }
-		unique_child_pid(const unique_child_pid &) = delete;
-		unique_child_pid(unique_child_pid &&other): pid(0), st(0), waited(false) {
-			std::swap(pid, other.pid);
-			std::swap(st, other.st);
-			std::swap(waited, other.waited);
-		}
-		unique_child_pid &operator =(const unique_child_pid &) = delete;
-		unique_child_pid &operator =(unique_child_pid &&other) {
-			std::swap(pid, other.pid);
-			std::swap(st, other.st);
-			std::swap(waited, other.waited);
-			if (pid != other.pid) other.do_wait();
-			other.pid = 0;
-			other.st = 0;
-			other.waited = false;
-			return *this;
-		}
-		~unique_child_pid() {
-			do_wait();
-		}
-		int wait() {
-			return do_wait();
-		}
-		int wait_nonblock() {
-			return do_wait(WNOHANG);
-		}
-		pid_t get() const noexcept { return pid; }
-		bool finished() const noexcept { return waited; }
-		bool empty() const noexcept { return pid == 0; }
-	private:
-		int do_wait(int flag = 0) {
-			if (waited) return st;
-			if (pid == 0) return 0;
-			if (::waitpid(pid, &st, flag) <= 0) return 0;
-			waited = true;
-			return st;
-		}
-		pid_t pid;
-		int st;
-		bool waited;
-	};
-
-	std::shared_ptr<DIR> make_tmpdir(const std::string &seed) {
-		while (true) {
-			try {
-				return opendir(mkdtemp(seed));
-			} catch (std::system_error &e) {
-				if (e.code().value() != ENOTDIR) throw;
-			}
-		}
-	}
 
 	struct socket_write_buffer: std::enable_shared_from_this<socket_write_buffer> {
 		socket_write_buffer(std::shared_ptr<tcp::socket> sock)
@@ -179,15 +89,6 @@ namespace wandbox {
 		std::recursive_mutex mtx;
 	};
 
-	template <typename T, typename D, typename ...Args>
-	std::unique_ptr<T, D> make_unique_with_deleter(D &&d, Args &&...args) {
-		return std::unique_ptr<T, D>(new T(std::forward<Args>(args)...), std::forward<D>(d));
-	}
-	template <typename T, typename ...Args>
-	std::unique_ptr<T> make_unique(Args &&...args) {
-		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-	}
-
 	static const compiler_trait &get_compiler(const std::unordered_map<std::string, std::string> &received) {
 		return *config.compilers.get<1>().find([&]() -> string {
 			std::string ret;
@@ -221,7 +122,7 @@ namespace wandbox {
 				return pid.finished();
 			}
 			void async_forward(std::function<void ()> handler) noexcept override {
-				sigs->async_wait(std::bind<void>(&status_forwarder::wait_handler, std::ref(*this), handler));
+				sigs->async_wait(std::bind<void>(&status_forwarder::wait_handler, ref(*this), handler));
 			}
 			int get_status() noexcept {
 				return pid.wait_nonblock();
@@ -251,7 +152,7 @@ namespace wandbox {
 				return !pipe.is_open();
 			}
 			void async_forward(std::function<void ()> handler) noexcept override {
-				async_write(pipe, asio::buffer(input), std::bind<void>(&input_forwarder::on_wrote, std::ref(*this), handler));
+				async_write(pipe, asio::buffer(input), std::bind<void>(&input_forwarder::on_wrote, ref(*this), handler));
 			}
 			void on_wrote(std::function<void ()> handler) {
 				pipe.close();
@@ -262,14 +163,14 @@ namespace wandbox {
 			std::string input;
 		};
 		struct write_limit_counter {
-			explicit write_limit_counter(std::size_t soft_limit, std::size_t hard_limit)
+			explicit write_limit_counter(size_t soft_limit, size_t hard_limit)
 				 : soft_limit(soft_limit),
 				   hard_limit(hard_limit),
 				   current(0),
 				   proc(nullptr) { }
 			void set_process(std::shared_ptr<status_forwarder> proc) { this->proc = proc; }
-			void add(std::size_t len) {
-				if (std::numeric_limits<std::size_t>::max() - len < current) current = std::numeric_limits<std::size_t>::max();
+			void add(size_t len) {
+				if (std::numeric_limits<size_t>::max() - len < current) current = std::numeric_limits<size_t>::max();
 				else current += len;
 				if (hard_limit < current) {
 					if (proc) proc->kill(SIGKILL);
@@ -277,7 +178,7 @@ namespace wandbox {
 					if (proc) proc->kill(SIGXFSZ);
 				}
 			}
-			std::size_t soft_limit, hard_limit, current;
+			size_t soft_limit, hard_limit, current;
 			std::shared_ptr<status_forwarder> proc;
 		};
 		struct output_forwarder: pipe_forwarder_base, private coroutine {
@@ -299,10 +200,10 @@ namespace wandbox {
 				this->handler = handler;
 				(*this)();
 			}
-			void operator ()(error_code ec = error_code(), std::size_t len = 0) {
+			void operator ()(error_code ec = error_code(), size_t len = 0) {
 				reenter (this) while (true) {
 					buf.resize(BUFSIZ);
-					yield pipe.async_read_some(asio::buffer(buf), std::ref(*this));
+					yield pipe.async_read_some(asio::buffer(buf), ref(*this));
 					if (ec) {
 						pipe.close();
 						handler();
@@ -310,7 +211,7 @@ namespace wandbox {
 					}
 					yield {
 						std::string t(buf.begin(), buf.begin() + len);
-						sockbuf->async_write_command(command, std::move(t), std::ref(*this));
+						sockbuf->async_write_command(command, std::move(t), ref(*this));
 						limit->add(len);
 					}
 				}
@@ -343,7 +244,7 @@ namespace wandbox {
 		program_runner(program_runner &&) = default;
 		program_runner &operator =(program_runner &&) = default;
 
-		void operator ()(error_code ec = error_code(), size_t len = 0) {
+		void operator ()(error_code ec = error_code(), size_t = 0) {
 			reenter (this) {
 
 				{
@@ -444,9 +345,9 @@ namespace wandbox {
 		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received)
 			 : aio(aio),
 			   sock(sock),
-			   src_text(make_unique<std::string>(received["Source"])),
+			   src_text(std::make_shared<std::string>(received["Source"])),
 			   src_filename("prog" + get_compiler(received).source_suffix),
-			   file(make_unique<asio::posix::stream_descriptor>(*aio)),
+			   file(std::make_shared<asio::posix::stream_descriptor>(*aio)),
 			   sigs(sigs),
 			   workdir(make_tmpdir("wandboxXXXXXX")),
 			   received(std::move(received)),
@@ -457,7 +358,7 @@ namespace wandbox {
 		program_writer &operator =(const program_writer &) = default;
 		program_writer(program_writer &&) = default;
 		program_writer &operator =(program_writer &&) = default;
-		void operator ()(error_code ec = error_code(), size_t len = 0) {
+		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
 				::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
 				while (true) {
@@ -512,7 +413,7 @@ namespace wandbox {
 		version_sender &operator =(const version_sender &) = default;
 		version_sender(version_sender &&) = default;
 		version_sender &operator =(version_sender &&) = default;
-		void operator ()(error_code ec = error_code(), size_t len = 0) {
+		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
 				while (!commands.empty()) {
 					current = commands.front();
@@ -578,42 +479,44 @@ namespace wandbox {
 		compiler_bridge(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs)
 			 : aio(aio),
 			   sock(sock),
-			   buf(std::make_shared<asio::streambuf>()),
+			   buf(std::make_shared<std::vector<char>>()),
 			   sigs(sigs),
 			   received()
 		{
 		}
 		void operator ()(error_code ec = error_code(), size_t len = 0) {
 			reenter (this) while (true) {
-				yield asio::async_read_until(*sock, *buf, end_read_condition(asio::buffer_size(buf->data()) + 1), *this);
+				yield {
+					const auto offset = buf->size();
+					buf->resize(offset + BUFSIZ);
+					sock->async_read_some(asio::buffer(asio::buffer(*buf) + offset), *this);
+				}
 				if (ec) return (void)sock->close(ec);
+				buf->erase(buf->end()-(BUFSIZ-len), buf->end());
 
+				auto ite = buf->begin();
 				while (true) {
-					const auto begin = asio::buffer_cast<const char *>(buf->data());
-					auto ite = begin;
-					const auto end = ite + asio::buffer_size(buf->data());
-
 					std::string command;
 					int len = 0;
 					std::string data;
-					if (!qi::parse(ite, end, +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) break;
+					if (!qi::parse(ite, buf->end(), +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) break;
 					if (command == "Control" && data == "run") return program_writer(aio, std::move(sock), sigs, std::move(received))();
 					else if (command == "Version") return version_sender(aio, std::move(sock), sigs)();
 					else received[command] += decode_qp(data);
-					buf->consume(ite - begin);
 				}
+				buf->erase(buf->begin(), ite);
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
 		std::shared_ptr<tcp::socket> sock;
-		std::shared_ptr<asio::streambuf> buf;
+		std::shared_ptr<std::vector<char>> buf;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::unordered_map<std::string, std::string> received;
 	};
 
 	struct listener: private coroutine {
 		typedef void result_type;
-		void operator ()(error_code ec = error_code(), std::shared_ptr<tcp::socket> sock = nullptr) {
+		void operator ()(error_code = error_code(), std::shared_ptr<tcp::socket> sock = nullptr) {
 			reenter (this) while (true) {
 				sock = std::make_shared<tcp::socket>(*aio);
 				yield acc->async_accept(*sock, std::bind<void>(*this, _1, sock));
@@ -625,7 +528,7 @@ namespace wandbox {
 			 : aio(aio),
 			   ep(std::forward<Args>(args)...),
 			   acc(std::make_shared<tcp::acceptor>(*aio, ep)),
-			   sigs(make_shared<asio::signal_set>(*aio, SIGCHLD, SIGHUP))
+			   sigs(std::make_shared<asio::signal_set>(*aio, SIGCHLD, SIGHUP))
 		{
 			try {
 				mkdir(config.jail.basedir, 0700);
@@ -640,7 +543,7 @@ namespace wandbox {
 		tcp::endpoint ep;
 		std::shared_ptr<tcp::acceptor> acc;
 		std::shared_ptr<asio::signal_set> sigs;
-		shared_ptr<DIR> basedir;
+		std::shared_ptr<DIR> basedir;
 	};
 
 }

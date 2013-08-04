@@ -72,9 +72,9 @@ namespace wandbox {
 	std::string readlink(const std::string &path) {
 		std::vector<char> buf(PATH_MAX);
 		while (true) {
-			const int ret = ::readlink(path.c_str(), buf.data(), buf.size());
+			const auto ret = ::readlink(path.c_str(), buf.data(), buf.size());
 			if (ret < 0) throw_system_error(errno);
-			if (ret < buf.size()) return { buf.begin(), buf.begin()+ret };
+			if (static_cast<std::size_t>(ret) < buf.size()) return { buf.begin(), buf.begin()+ret };
 			buf.resize(buf.size()*2);
 		}
 	}
@@ -215,5 +215,56 @@ namespace wandbox {
 		}
 	}
 
+	struct unique_child_pid {
+		explicit unique_child_pid(pid_t pid = 0): pid(pid), st(0), waited(false) { }
+		unique_child_pid(const unique_child_pid &) = delete;
+		unique_child_pid(unique_child_pid &&other): pid(0), st(0), waited(false) {
+			std::swap(pid, other.pid);
+			std::swap(st, other.st);
+			std::swap(waited, other.waited);
+		}
+		unique_child_pid &operator =(const unique_child_pid &) = delete;
+		unique_child_pid &operator =(unique_child_pid &&other) {
+			std::swap(pid, other.pid);
+			std::swap(st, other.st);
+			std::swap(waited, other.waited);
+			if (pid != other.pid) other.do_wait();
+			other.pid = 0;
+			other.st = 0;
+			other.waited = false;
+			return *this;
+		}
+		~unique_child_pid() {
+			do_wait();
+		}
+		int wait() {
+			return do_wait();
+		}
+		int wait_nonblock() {
+			return do_wait(WNOHANG);
+		}
+		pid_t get() const noexcept { return pid; }
+		bool finished() const noexcept { return waited; }
+		bool empty() const noexcept { return pid == 0; }
+	private:
+		int do_wait(int flag = 0) {
+			if (waited) return st;
+			if (pid == 0) return 0;
+			if (::waitpid(pid, &st, flag) <= 0) return 0;
+			waited = true;
+			return st;
+		}
+		pid_t pid;
+		int st;
+		bool waited;
+	};
+
+	std::shared_ptr<DIR> make_tmpdir(const std::string &seed) {
+		while (true) try {
+			return opendir(mkdtemp(seed));
+		} catch (std::system_error &e) {
+			if (e.code().value() != ENOTDIR) throw;
+		}
+	}
 
 }

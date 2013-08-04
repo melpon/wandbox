@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -std=c++0x
+AM_CXXFLAGS = -std=c++0x -Wall -Wextra
 bin_PROGRAMS = server.exe ptracer.exe
 server_exe_SOURCES = server.cc load_config.cc
 ptracer_exe_SOURCES = ptracer.cc load_config.cc
