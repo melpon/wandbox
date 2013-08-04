@@ -8,4 +8,5 @@
       <option value="ace" selected>default
       <option value="vim">Vim
       <option value="emacs">Emacs
-    <input type="checkbox" value="use-legacy-editor">Use Legacy Editor
+    <label .checkbox>
+      <input type="checkbox" value="use-legacy-editor">Use Legacy Editor

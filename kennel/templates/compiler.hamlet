@@ -9,7 +9,8 @@
       <div compiler="#{verName $ ciVersion info}">
         $forall sw <- ciSwitches info
           <div .row-fluid>
-            $if swDefault sw
-              <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}" checked>#{swDisplayName sw}
-            $else
-              <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}">#{swDisplayName sw}
+            <label .checkbox>
+              $if swDefault sw
+                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}" checked>#{swDisplayName sw}
+              $else
+                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}">#{swDisplayName sw}
