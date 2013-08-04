@@ -515,6 +515,7 @@ namespace wandbox {
 				while (!commands.empty()) {
 					current = commands.front();
 					commands.pop_front();
+					if (current->version_command.empty() || not current->displayable) continue;
 					{
 						auto c = piped_spawn(_P_NOWAIT, opendir("/"), current->version_command);
 						child = std::make_shared<unique_child_pid>(c.pid);
@@ -535,7 +536,6 @@ namespace wandbox {
 						buf = std::make_shared<asio::streambuf>();
 						asio::async_read_until(*pipe_stdout, *buf, '\n', *this);
 					}
-					if (ec) continue;
 
 					{
 						std::istream is(buf.get());
