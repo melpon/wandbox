@@ -74,6 +74,12 @@
    "display-name":"C++1y(GNU)",
    "conflicts":["gnu++11", "gnu++0x", "c++1y", "c++11", "c++0x"],
   },
+  "perl5.18.0":{
+   "flags":"-M5.18.0",
+   "display-name":"-M5.18.0",
+   "runtime":true,
+   "insert-position":1,
+  },
  },
  "compilers":[
   {
@@ -365,13 +371,15 @@
    "name":"perl-5.18.0",
    "displayable":true,
    "output-file":"prog.pl",
-   "run-command":["/usr/local/perl-5.18.0/bin/perl", "-M5.18.0", "prog.pl"],
+   "run-command":["/usr/local/perl-5.18.0/bin/perl", "prog.pl"],
    "display-name":"perl",
-   "display-compile-command":"perl -M5.18.0 prog.pl",
+   "display-compile-command":"perl prog.pl",
    "language":"Perl",
    "source-suffix":".pl",
    "compile-command":"/bin/true",
    "version-command":["/usr/local/perl-5.18.0/bin/perl", "-e", "print $^V"],
+   "switches":["perl5.18.0"],
+   "initial-checked":["perl5.18.0"],
   },{
    "name":"perl-5.19.2",
    "displayable":true,

@@ -17,6 +17,8 @@ namespace wandbox {
 		std::vector<std::string> flags;
 		std::string display_name;
 		std::vector<std::string> conflicts;
+		bool runtime;
+		int insert_position;
 	};
 	struct compiler_trait {
 		std::string name;

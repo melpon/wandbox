@@ -230,6 +230,8 @@ namespace cfg {
 			x.flags = get_str_array(s, "flags");
 			x.display_name = get_str(s, "display-name");
 			x.conflicts = get_str_array(s, "conflicts");
+			x.runtime = get_bool(s, "runtime");
+			x.insert_position = get_int(s, "insert-position");
 			ret[a.first] = std::move(x);
 		}
 		return ret;

@@ -263,9 +263,17 @@ namespace wandbox {
 						}
 
 						for (const auto &sw: compiler.switches) {
-							if (selected_switches.count(sw) != 0) {
-								ccargs.insert(ccargs.end(), config.switches[sw].flags.begin(), config.switches[sw].flags.end());
-							}
+							if (selected_switches.count(sw) == 0) continue;
+							const auto ite = config.switches.find(sw);
+							if (ite == config.switches.end()) continue;
+							const auto f = [ite](std::vector<std::string> &args) {
+								if (ite->second.insert_position == 0) {
+									args.insert(args.end(), ite->second.flags.begin(), ite->second.flags.end());
+								} else {
+									args.insert(args.begin() + ite->second.insert_position, ite->second.flags.begin(), ite->second.flags.end());
+								}
+							};
+							f(ite->second.runtime ? progargs : ccargs);
 						}
 					}
 					progargs.insert(progargs.begin(), { ptracer, "--config", config_file, "--" });
