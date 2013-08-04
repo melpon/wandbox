@@ -19,6 +19,68 @@
   "allow-file-exact":["/etc/ld.so.cache", "/dev/null", "/dev/zero", "/proc/stat", "/dev/urandom"],
   "allow-file-prefix":["/lib", "/usr/lib", "/usr/local", "/proc/self", "/usr/share/perl", "/usr/include/python2.7"],
  },
+ "switches":{
+  "warning":{
+   "flags":["-Wall", "-Wextra"],
+   "display-name":"警告",
+  },
+  "oldgcc-warning":{
+   "flags":["-Wall", "-W"],
+   "display-name":"警告",
+  },
+  "haskell-warning":{
+   "flags":"-Wall",
+   "display-name":"警告",
+  },
+  "optimize":{
+   "flags":["-O2", "-march=native"],
+   "display-name":"最適化",
+  },
+  "haskell-optimize":{
+   "flags":"-O2",
+   "display-name":"最適化",
+  },
+  "mono-optimize":{
+   "flags":"-optimize",
+   "display-name":"最適化",
+  },
+  "c++0x":{
+   "flags":["-std=c++0x", "-pedantic"],
+   "display-name":"C++0x",
+   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "c++1y", "c++11"],
+  },
+  "gnu++0x":{
+   "flags":"-std=gnu++0x",
+   "display-name":"C++0x(GNU)",
+   "conflicts":["gnu++1y", "gnu++11", "c++1y", "c++11", "c++0x"],
+  },
+  "c++11":{
+   "flags":["-std=c++11", "-pedantic"],
+   "display-name":"C++11",
+   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "c++1y", "c++0x"],
+  },
+  "gnu++11":{
+   "flags":"-std=gnu++11",
+   "display-name":"C++11(GNU)",
+   "conflicts":["gnu++1y", "gnu++0x", "c++1y", "c++11", "c++0x"],
+  },
+  "c++1y":{
+   "flags":["-std=c++1y", "-pedantic"],
+   "display-name":"C++1y",
+   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "c++11", "c++0x"],
+  },
+  "gnu++1y":{
+   "flags":"-std=gnu++1y",
+   "display-name":"C++1y(GNU)",
+   "conflicts":["gnu++11", "gnu++0x", "c++1y", "c++11", "c++0x"],
+  },
+  "perl5.18.0":{
+   "flags":"-M5.18.0",
+   "display-name":"-M5.18.0",
+   "runtime":true,
+   "insert-position":1,
+  },
+ },
  "compilers":[
   {
    "name":"bin-common",
@@ -40,151 +102,6 @@
    "display-compile-command":"clang++ prog.cc -stdlib=libc++",
    "inherits":"gcc-common"
   },{
-   "name":"gcc-4.8-switches",
-   "displayable":false,
-   "switches":[
-    {
-     "name":"warning",
-     "flags":["-Wall", "-Wextra"],
-     "default":true,
-     "display-name":"警告"
-    },{
-     "name":"optimize",
-     "flags":"-O2",
-     "default":false,
-     "display-name":"最適化"
-    },{
-     "name":"verbose",
-     "flags":"-v",
-     "default":false,
-     "display-name":"詳細"
-    },{
-     "name":"C++11",
-     "flags":"-std=c++11",
-     "default":false,
-     "display-name":"C++11"
-    },{
-     "name":"C++14",
-     "flags":"-std=c++1y",
-     "default":true,
-     "display-name":"C++14"
-    }
-   ]
-  },{
-   "name":"gcc-4.3-switches",
-   "displayable":false,
-   "switches":[
-    {
-     "name":"warning",
-     "flags":["-Wall", "-Wextra"],
-     "default":true,
-     "display-name":"警告"
-    },{
-     "name":"optimize",
-     "flags":"-O2",
-     "default":false,
-     "display-name":"最適化"
-    },{
-     "name":"verbose",
-     "flags":"-v",
-     "default":false,
-     "display-name":"詳細"
-    },{
-     "name":"C++11",
-     "flags":"-std=c++0x",
-     "default":true,
-     "display-name":"C++11"
-    }
-   ]
-  },{
-   "name":"clang-3.3-switches",
-   "displayable":false,
-   "switches":[
-    {
-     "name":"warning",
-     "flags":["-Wall", "-Wextra"],
-     "default":true,
-     "display-name":"警告"
-    },{
-     "name":"optimize",
-     "flags":"-O2",
-     "default":false,
-     "display-name":"最適化"
-    },{
-     "name":"verbose",
-     "flags":"-v",
-     "default":false,
-     "display-name":"詳細"
-    },{
-     "name":"C++11",
-     "flags":"-std=c++11",
-     "default":false,
-     "display-name":"C++11"
-    },{
-     "name":"C++14",
-     "flags":"-std=c++1y",
-     "default":true,
-     "display-name":"C++14"
-    }
-   ]
-  },{
-   "name":"clang-3.2-switches",
-   "displayable":false,
-   "switches":[
-    {
-     "name":"warning",
-     "flags":["-Wall", "-Wextra"],
-     "default":true,
-     "display-name":"警告"
-    },{
-     "name":"optimize",
-     "flags":"-O2",
-     "default":false,
-     "display-name":"最適化"
-    },{
-     "name":"verbose",
-     "flags":"-v",
-     "default":false,
-     "display-name":"詳細"
-    },{
-     "name":"C++11",
-     "flags":"-std=c++0x",
-     "default":false,
-     "display-name":"C++11"
-    },{
-     "name":"C++14",
-     "flags":"-std=c++1y",
-     "default":true,
-     "display-name":"C++14"
-    }
-   ]
-  },{
-   "name":"clang-3.0-switches",
-   "displayable":false,
-   "switches":[
-    {
-     "name":"warning",
-     "flags":["-Wall", "-Wextra"],
-     "default":true,
-     "display-name":"警告"
-    },{
-     "name":"optimize",
-     "flags":"-O2",
-     "default":false,
-     "display-name":"最適化"
-    },{
-     "name":"verbose",
-     "flags":"-v",
-     "default":false,
-     "display-name":"詳細"
-    },{
-     "name":"C++11",
-     "flags":"-std=c++0x",
-     "default":true,
-     "display-name":"C++11"
-    }
-   ]
-  },{
    "name":"gcc-head",
    "displayable":true,
    "display-name":"gcc HEAD",
@@ -201,7 +118,9 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
-   "inherits":["gcc-common", "gcc-4.8-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "initial-checked":["warning", "gnu++1y"],
+   "inherits":"gcc-common",
   },{
    "name":"gcc-4.8.1",
    "displayable":true,
@@ -216,7 +135,9 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.8.1/bin/g++", "-dumpversion"],
-   "inherits":["gcc-common", "gcc-4.8-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "initial-checked":["warning", "gnu++1y"],
+   "inherits":"gcc-common",
   },{
    "name":"gcc-4.7.3",
    "displayable":true,
@@ -233,7 +154,9 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.7.3/bin/g++", "-dumpversion"],
-   "inherits":["gcc-common", "gcc-4.3-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11"],
+   "initial-checked":["warning", "gnu++11"],
+   "inherits":"gcc-common"
   },{
    "name":"gcc-4.6.4",
    "displayable":true,
@@ -249,7 +172,9 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.6.4/bin/g++", "-dumpversion"],
-   "inherits":["gcc-common", "gcc-4.3-switches"]
+   "switches":["warning", "optimize", "c++0x", "gnu++0x"],
+   "initial-checked":["warning", "gnu++0x"],
+   "inherits":"gcc-common",
   },{
    "name":"gcc-4.5.4",
    "displayable": true,
@@ -264,7 +189,9 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.5.4/bin/g++", "-dumpversion"],
-   "inherits":["gcc-common", "gcc-4.3-switches"]
+   "switches":["warning", "optimize", "c++0x", "gnu++0x"],
+   "initial-checked":["warning", "gnu++0x"],
+   "inherits":"gcc-common"
   },{
    "name":"gcc-4.4.7",
    "displayable":true,
@@ -278,8 +205,9 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.4.7/bin/g++", "-dumpversion"],
-   "warning":["-Wall", "-W"],
-   "inherits":["gcc-common", "gcc-4.3-switches"]
+   "switches":["oldgcc-warning", "optimize", "c++0x", "gnu++0x"],
+   "initial-checked":["oldgcc-warning", "gnu++0x"],
+   "inherits":"gcc-common",
   },{
    "name":"gcc-4.3.6",
    "displayable":true,
@@ -293,8 +221,9 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.3.6/bin/g++", "-dumpversion"],
-   "warning":["-Wall", "-W"],
-   "inherits":["gcc-common", "gcc-4.3-switches"]
+   "switches":["oldgcc-warning", "optimize", "c++0x", "gnu++0x"],
+   "initial-checked":["oldgcc-warning", "gnu++0x"],
+   "inherits":"gcc-common",
   },{
    "name":"clang-head",
    "displayable":true,
@@ -317,7 +246,9 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "inherits":["clang-common", "clang-3.3-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "initial-checked":["warning", "gnu++1y"],
+   "inherits":"clang-common",
   },{
    "name":"clang-3.3",
    "displayable":true,
@@ -339,7 +270,9 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "inherits":["clang-common", "clang-3.3-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "initial-checked":["warning", "gnu++1y"],
+   "inherits":"clang-common",
   },{
    "name":"clang-3.2",
    "displayable":true,
@@ -361,7 +294,9 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.2/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "inherits":["clang-common", "clang-3.2-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "initial-checked":["warning", "gnu++1y"],
+   "inherits":"clang-common",
   },{
    "name":"clang-3.1",
    "displayable":true,
@@ -382,7 +317,9 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.1/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "inherits":["clang-common", "clang-3.0-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11"],
+   "initial-checked":["warning", "gnu++11"],
+   "inherits":"clang-common",
   },{
    "name":"clang-3.0",
    "displayable":true,
@@ -403,27 +340,18 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.0/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "inherits":["clang-common", "clang-3.0-switches"]
+   "switches":["warning", "optimize", "c++11", "gnu++11"],
+   "initial-checked":["warning", "gnu++11"],
+   "inherits":"clang-common",
   },{
    "name":"ghc-7.6.3",
    "displayable":true,
    "language":"Haskell",
-   "switches":[
-    {
-     "name":"warning",
-     "flags":"-Wall",
-     "default":true,
-     "display-name":"警告"
-    },{
-     "name":"optimize",
-     "flags":"-O2",
-     "default":false,
-     "display-name":"最適化"
-    }
-   ],
    "source-suffix":".hs",
    "compile-command":["/usr/local/ghc-7.6.3/bin/ghc", "-o", "prog.exe", "prog.hs"],
    "version-command":["/usr/local/ghc-7.6.3/bin/ghc", "--numeric-version"],
+   "switches":["haskell-warning", "haskell-optimize"],
+   "initial-checked":["haskell-warning"],
    "display-name":"ghc",
    "display-compile-command":"ghc prog.hs",
    "run-command":["./prog.exe"]
@@ -431,17 +359,11 @@
    "name":"mcs-3.2.0",
    "displayable":true,
    "language":"C#",
-   "switches":[
-    {
-     "name":"optimize",
-     "flags":"-optimize",
-     "default":false,
-     "display-name":"最適化"
-    }
-   ],
    "source-suffix":".cs",
    "compile-command":["/usr/local/mono-3.2.0/bin/mcs", "-out:prog.exe", "prog.cs"],
    "version-command":["/bin/sh", "-c", "/usr/local/mono-3.2.0/bin/mcs --version | head -1 | cut -d' ' -f5"],
+   "swithes":["mono-optimize"],
+   "initial-checked":[],
    "display-name":"mcs",
    "display-compile-command":"mcs -out:prog.exe prog.cs",
    "run-command":["/usr/local/mono-3.2.0/bin/mono", "prog.exe"]
@@ -449,13 +371,15 @@
    "name":"perl-5.18.0",
    "displayable":true,
    "output-file":"prog.pl",
-   "run-command":["/usr/local/perl-5.18.0/bin/perl", "-M5.18.0", "prog.pl"],
+   "run-command":["/usr/local/perl-5.18.0/bin/perl", "prog.pl"],
    "display-name":"perl",
-   "display-compile-command":"perl -M5.18.0 prog.pl",
+   "display-compile-command":"perl prog.pl",
    "language":"Perl",
    "source-suffix":".pl",
    "compile-command":"/bin/true",
    "version-command":["/usr/local/perl-5.18.0/bin/perl", "-e", "print $^V"],
+   "switches":["perl5.18.0"],
+   "initial-checked":["perl5.18.0"],
   },{
    "name":"perl-5.19.2",
    "displayable":true,

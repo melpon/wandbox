@@ -263,9 +263,17 @@ namespace wandbox {
 						}
 
 						for (const auto &sw: compiler.switches) {
-							if (selected_switches.count(sw.name) != 0) {
-								ccargs.insert(ccargs.end(), sw.flags.begin(), sw.flags.end());
-							}
+							if (selected_switches.count(sw) == 0) continue;
+							const auto ite = config.switches.find(sw);
+							if (ite == config.switches.end()) continue;
+							const auto f = [ite](std::vector<std::string> &args) {
+								if (ite->second.insert_position == 0) {
+									args.insert(args.end(), ite->second.flags.begin(), ite->second.flags.end());
+								} else {
+									args.insert(args.begin() + ite->second.insert_position, ite->second.flags.begin(), ite->second.flags.end());
+								}
+							};
+							f(ite->second.runtime ? progargs : ccargs);
 						}
 					}
 					progargs.insert(progargs.begin(), { ptracer, "--config", config_file, "--" });
@@ -444,22 +452,27 @@ namespace wandbox {
 						std::istream is(buf.get());
 						std::string ver;
 						if (!getline(is, ver)) continue;
+						versions.emplace_back(generate_displaying_compiler_config(*current, ver, config.switches));
 						const auto &c = *current;
 						// NOTE: Each variables must not contain <LF> or <COMMA> or <TAB>.
 						// <line> ::= name,language,display_name,ver,display_compile_command<switches><LF>
 						// <switches> ::= (,name<TAB>flags<TAB>default<TAB>display_name)*
 						line += c.name + "," + c.language + "," + c.display_name + "," + ver + "," + c.display_compile_command;
-						for (const auto &sw: c.switches) {
+						for (const auto &swname: c.switches) {
+							const auto ite = config.switches.find(swname);
+							if (ite == config.switches.end()) continue;
+							const auto &sw = ite->second;
 							line +=
 								"," + sw.name +
 								"\t" + boost::algorithm::join(sw.flags, " ") +
-								"\t" + (sw.default_ ? "true" : "false") +
+								"\t" + (c.initial_checked.count(sw.name) != 0 ? "true" : "false") +
 								"\t" + sw.display_name;
 						}
 						line += "\n";
 					}
 				}
 				yield sockbuf->async_write_command("VersionResult", std::move(line), *this);
+				yield sockbuf->async_write_command("VersionResult2", "[" + boost::algorithm::join(versions, ",") + "]", *this);
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
@@ -471,6 +484,7 @@ namespace wandbox {
 		const compiler_trait *current;
 		std::shared_ptr<unique_child_pid> child;
 		std::string line;
+		std::vector<std::string> versions;
 		std::shared_ptr<asio::streambuf> buf;
 	};
 

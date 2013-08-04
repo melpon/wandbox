@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
@@ -42,8 +43,8 @@ namespace cfg {
 			top %= obj | arr;
 			val %= obj | arr | str | qi::int_ | qi::bool_;
 			pair %= str > ':' > val;
-			obj %= '{' > ((pair % ',') > -qi::lit(',')) > '}';
-			arr %= '[' > ((val % ',') > -qi::lit(',')) > ']';
+			obj %= '{' > (((pair % ',') > -qi::lit(',')) | qi::eps) > '}';
+			arr %= '[' > (((val % ',') > -qi::lit(',')) | qi::eps) > ']';
 			str %= qi::lexeme['\"' > *(('\\' > qi::char_("\\\"\'\t\r\n")) | (qi::char_-'\"')) > '\"'];
 			//debug(top);
 			//debug(val);
@@ -136,23 +137,7 @@ namespace cfg {
 				return ret;
 			}
 			return {};
-		};
-		inline switch_set get_switches(const cfg::object &x, const cfg::string &key) {
-			if (const auto &v = find(x, key)) {
-				switch_set ret;
-				for (const auto &a: boost::get<cfg::array>(*v)) {
-					const auto &s = boost::get<cfg::object>(a);
-					switch_trait x;
-					x.name = get_str(s, "name");
-					x.flags = get_str_array(s, "flags");
-					x.default_ = get_bool(s, "default");
-					x.display_name = get_str(s, "display-name");
-					ret.push_back(x);
-				}
-				return ret;
-			}
-			return {};
-		};
+		}
 	}
 
 	compiler_set load_compiler_trait(const cfg::value &o) {
@@ -163,7 +148,6 @@ namespace cfg {
 			auto &y = boost::get<cfg::object>(x);
 			compiler_trait t;
 			t.name = get_str(y, "name");
-			t.output_file = get_str(y, "output-file");
 			t.language = get_str(y, "language");
 			t.compile_command = get_str_array(y, "compile-command");
 			t.version_command = get_str_array(y, "version-command");
@@ -172,7 +156,8 @@ namespace cfg {
 			t.display_name = get_str(y, "display-name");
 			t.display_compile_command = get_str(y, "display-compile-command");
 			t.displayable = get_bool(y, "displayable");
-			t.switches = get_switches(y, "switches");
+			t.switches = get_str_array(y, "switches");
+			for (auto &x: get_str_array(y, "initial-checked")) t.initial_checked.insert(std::move(x));
 			const auto inherits = get_str_array(y, "inherits");
 			if (!inherits.empty()) inherit_map[t.name] = inherits;
 			ret.push_back(t);
@@ -188,7 +173,6 @@ namespace cfg {
 			auto sub = *pos;
 			for (const auto &target: ite->second) {
 				const auto &x = *ret.get<1>().find(target);
-				if (sub.output_file.empty()) sub.output_file = x.output_file;
 				if (sub.language.empty()) sub.language = x.language;
 				if (sub.compile_command.empty()) sub.compile_command = x.compile_command;
 				if (sub.version_command.empty()) sub.version_command = x.version_command;
@@ -236,6 +220,23 @@ namespace cfg {
 		return x;
 	}
 
+	std::unordered_map<std::string, switch_trait> load_switches(const cfg::value &values) {
+		using namespace detail;
+		std::unordered_map<std::string, switch_trait> ret;
+		for (const auto &a: boost::get<cfg::object>(boost::get<cfg::object>(values).at("switches"))) {
+			const auto &s = boost::get<cfg::object>(a.second);
+			switch_trait x;
+			x.name = a.first;
+			x.flags = get_str_array(s, "flags");
+			x.display_name = get_str(s, "display-name");
+			x.conflicts = get_str_array(s, "conflicts");
+			x.runtime = get_bool(s, "runtime");
+			x.insert_position = get_int(s, "insert-position");
+			ret[a.first] = std::move(x);
+		}
+		return ret;
+	}
+
 	server_config load_config(std::istream &is) {
 		boost::io::ios_flags_saver sv(is);
 		is.unsetf(std::ios::skipws);
@@ -245,6 +246,74 @@ namespace cfg {
 		auto first = (s::istream_iterator(is));
 		const auto last = decltype(first)();
 		qi::phrase_parse(first, last, cfg::config_grammar<decltype(first)>(), qi::space, o);
-		return { load_network_config(o), load_jail_config(o), load_compiler_trait(o) };
+		return { load_network_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o) };
+	}
+
+	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches) {
+		std::vector<std::string> swlist;
+		{
+			std::unordered_set<std::string> used;
+			for (const auto &swname: compiler.switches) {
+				if (used.count(swname) != 0) continue;
+				const auto ite = switches.find(swname);
+				if (ite == switches.end()) continue;
+				const auto &sw = ite->second;
+				if (sw.conflicts.empty()) {
+					used.insert(swname);
+					swlist.emplace_back(
+						"{"
+							"\"name\":\"" + sw.name + "\","
+							"\"type\":\"single\","
+							"\"display-name\":\"" + sw.display_name + "\","
+							"\"display-flags\":\"" + boost::algorithm::join(sw.flags, " ") + "\","
+							"\"default\":" + (compiler.initial_checked.count(sw.name) != 0 ? "true" : "false") +
+						"}");
+				} else {
+					std::function<void(const std::string &)> f;
+					std::unordered_set<std::string> set;
+					f = [&](const std::string &swname) {
+						const auto ite = switches.find(swname);
+						if (ite == switches.end()) return;
+						const auto &sw = ite->second;
+						for (const auto &c: sw.conflicts) {
+							const auto ite = switches.find(c);
+							if (ite == switches.end()) continue;
+							if (set.insert(c).second) f(c);
+						}
+					};
+					f(swname);
+					std::vector<std::string> sel;
+					std::string def = swname;
+					for (const auto &swname: compiler.switches) {
+						const auto &sw = switches.at(swname);
+						sel.emplace_back(
+							"{"
+								"\"name\":\"" + sw.name + "\","
+								"\"display-name\":\"" + sw.display_name + "\","
+								"\"display-flags\":\"" + boost::algorithm::join(sw.flags, " ") + "\""
+							"}");
+						if (compiler.initial_checked.count(sw.name) != 0) def = swname;
+					}
+					swlist.emplace_back(
+						"{"
+							"\"type\":\"select\","
+							"\"default\":\"" + def + "\","
+							"\"options\":[" + boost::algorithm::join(sel, ",") + "]"
+						"}");
+					used.insert(set.begin(), set.end());
+				}
+			}
+		}
+		return
+			"{"
+				"\"name\":\"" + compiler.name + "\","
+				"\"language\":\"" + compiler.language + "\","
+				"\"display-name\":\"" + compiler.display_name + "\","
+				"\"version\":\"" + version + "\","
+				"\"display-compile-command\":\"" + compiler.display_compile_command + "\","
+				"\"swithes\":[" + boost::algorithm::join(swlist, ",") + "]"
+			"}";
 	}
 }
+
+

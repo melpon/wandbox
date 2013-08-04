@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 #include <istream>
 
 #include <boost/multi_index_container.hpp>
@@ -14,21 +15,22 @@ namespace wandbox {
 	struct switch_trait {
 		std::string name;
 		std::vector<std::string> flags;
-		bool default_;
 		std::string display_name;
+		std::vector<std::string> conflicts;
+		bool runtime;
+		int insert_position;
 	};
-	typedef mendex::multi_index_container<switch_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<switch_trait, std::string, &switch_trait::name>>>> switch_set;
 	struct compiler_trait {
 		std::string name;
-		std::string output_file;
 		std::string language;
 		std::vector<std::string> compile_command;
 		std::vector<std::string> version_command;
 		std::vector<std::string> run_command;
-		switch_set switches;
 		std::string source_suffix;
 		std::string display_name;
 		std::string display_compile_command;
+		std::vector<std::string> switches;
+		std::unordered_set<std::string> initial_checked;
 		bool displayable;
 	};
 	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
@@ -59,7 +61,9 @@ namespace wandbox {
 		network_config network;
 		jail_config jail;
 		compiler_set compilers;
+		std::unordered_map<std::string, switch_trait> switches;
 	};
 
 	server_config load_config(std::istream &is);
+	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches);
 }
