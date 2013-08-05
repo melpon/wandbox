@@ -54,5 +54,7 @@ ResultContainer.prototype.post_code = function(compiler, code) {
 
   result_window.onfinish = function() {
     self.running = false;
+    if (self.onfinish)
+      self.onfinish();
   };
 }

@@ -16,6 +16,9 @@ function decode_uri(str) {
 }
 
 function post_code(compiler, result_container) {
+  $('#compile').hide();
+  $('#compiling').show();
+
   var editor = new Editor('#editor', '#editor-settings');
   var code = editor.getValue();
 
@@ -32,11 +35,16 @@ function update_compile_command(compiler) {
 
 $(function() {
   var result_container = new ResultContainer('#result-container')
+  result_container.onfinish = function() {
+    $('#compile').show();
+    $('#compiling').hide();
+  };
 
   $('#compile').click(function(event) {
     event.preventDefault();
     post_code(compiler, result_container);
   });
+  $('#compiling').hide();
 
   var editor = new Editor('#editor', '#editor-settings');
   editor.focus();

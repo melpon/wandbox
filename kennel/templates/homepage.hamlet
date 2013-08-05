@@ -9,4 +9,5 @@
       <p #compile_command>
     <div .row-fluid>
       <a href="compile" .btn #compile>Run (or Ctrl+Enter)
+      <img src="@{StaticR compiling_gif}" alt="Compiling" #compiling>
     ^{resultContainer}
