@@ -110,13 +110,11 @@ getCompilerInfos = do
         C.runResourceT $ CL.sourceList [Protocol Version ""] $$ sendVM handle
         hFlush handle
         C.runResourceT $ receiveVM handle $$ do
-            _ <- C.await
-            result2 <- C.await
-            case result2 of
+            result <- C.await
+            case result of
                 Nothing -> fail "failed: get version"
                 (Just (Left err)) -> fail err
                 (Just (Right (Protocol VersionResult version))) -> return version
-                (Just (Right (Protocol VersionResult2 version))) -> return version
                 (Just (Right _)) -> fail $ "pattern is not match"
 
 resultContainer :: Widget

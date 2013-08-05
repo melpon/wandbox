@@ -21,7 +21,6 @@ import VM.QuotedPrintable (qpEncode, qpDecode)
 data ProtocolSpecifier =
   Version |
   VersionResult |
-  VersionResult2 |
   Control |
   Source |
   CompilerOption |
@@ -49,8 +48,7 @@ decode = (TE.decodeUtf8 <$>) . qpDecode
 
 specParser :: AB.Parser ProtocolSpecifier
 specParser = do
-  r <- (pure VersionResult2  <* AB.try (AB.string "VersionResult2")) <|>
-       (pure VersionResult   <* AB.try (AB.string "VersionResult")) <|>
+  r <- (pure VersionResult   <* AB.try (AB.string "VersionResult")) <|>
        (pure Version         <* AB.try (AB.string "Version")) <|>
        (pure Control         <* AB.try (AB.string "Control")) <|>
        (pure Source          <* AB.try (AB.string "Source")) <|>

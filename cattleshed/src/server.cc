@@ -453,26 +453,9 @@ namespace wandbox {
 						std::string ver;
 						if (!getline(is, ver)) continue;
 						versions.emplace_back(generate_displaying_compiler_config(*current, ver, config.switches));
-						const auto &c = *current;
-						// NOTE: Each variables must not contain <LF> or <COMMA> or <TAB>.
-						// <line> ::= name,language,display_name,ver,display_compile_command<switches><LF>
-						// <switches> ::= (,name<TAB>flags<TAB>default<TAB>display_name)*
-						line += c.name + "," + c.language + "," + c.display_name + "," + ver + "," + c.display_compile_command;
-						for (const auto &swname: c.switches) {
-							const auto ite = config.switches.find(swname);
-							if (ite == config.switches.end()) continue;
-							const auto &sw = ite->second;
-							line +=
-								"," + sw.name +
-								"\t" + boost::algorithm::join(sw.flags, " ") +
-								"\t" + (c.initial_checked.count(sw.name) != 0 ? "true" : "false") +
-								"\t" + sw.display_name;
-						}
-						line += "\n";
 					}
 				}
-				yield sockbuf->async_write_command("VersionResult", std::move(line), *this);
-				yield sockbuf->async_write_command("VersionResult2", "[" + boost::algorithm::join(versions, ",") + "]", *this);
+				yield sockbuf->async_write_command("VersionResult", "[" + boost::algorithm::join(versions, ",") + "]", *this);
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
