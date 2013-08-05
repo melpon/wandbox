@@ -74,6 +74,10 @@
    "display-name":"C++1y(GNU)",
    "conflicts":["gnu++11", "gnu++0x", "c++1y", "c++11", "c++0x"],
   },
+  "cpp-verbose":{
+   "flags":["-v"],
+   "display-name":"詳細",
+  },
   "perl5.18.0":{
    "flags":"-M5.18.0",
    "display-name":"-M5.18.0",
@@ -118,7 +122,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y"],
    "inherits":"gcc-common",
   },{
@@ -135,7 +139,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.8.1/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y"],
    "inherits":"gcc-common",
   },{
@@ -154,7 +158,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.7.3/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "c++11", "gnu++11"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11"],
    "initial-checked":["warning", "gnu++11"],
    "inherits":"gcc-common"
   },{
@@ -172,7 +176,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.6.4/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "c++0x", "gnu++0x"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++0x", "gnu++0x"],
    "initial-checked":["warning", "gnu++0x"],
    "inherits":"gcc-common",
   },{
@@ -189,7 +193,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.5.4/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "c++0x", "gnu++0x"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++0x", "gnu++0x"],
    "initial-checked":["warning", "gnu++0x"],
    "inherits":"gcc-common"
   },{
@@ -205,7 +209,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.4.7/bin/g++", "-dumpversion"],
-   "switches":["oldgcc-warning", "optimize", "c++0x", "gnu++0x"],
+   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "c++0x", "gnu++0x"],
    "initial-checked":["oldgcc-warning", "gnu++0x"],
    "inherits":"gcc-common",
   },{
@@ -221,7 +225,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.3.6/bin/g++", "-dumpversion"],
-   "switches":["oldgcc-warning", "optimize", "c++0x", "gnu++0x"],
+   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "c++0x", "gnu++0x"],
    "initial-checked":["oldgcc-warning", "gnu++0x"],
    "inherits":"gcc-common",
   },{
@@ -246,7 +250,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y"],
    "inherits":"clang-common",
   },{
@@ -270,7 +274,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y"],
    "inherits":"clang-common",
   },{
@@ -294,7 +298,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.2/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y"],
    "inherits":"clang-common",
   },{
@@ -317,7 +321,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.1/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "c++11", "gnu++11"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11"],
    "initial-checked":["warning", "gnu++11"],
    "inherits":"clang-common",
   },{
@@ -340,7 +344,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.0/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "c++11", "gnu++11"],
+   "switches":["warning", "optimize", "cpp-verbose", "c++11", "gnu++11"],
    "initial-checked":["warning", "gnu++11"],
    "inherits":"clang-common",
   },{
