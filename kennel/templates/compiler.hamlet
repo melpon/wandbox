@@ -8,9 +8,4 @@
     $forall info <- compilerInfos
       <div compiler="#{verName $ ciVersion info}">
         $forall sw <- ciSwitches info
-          <div .row-fluid>
-            <label .checkbox>
-              $if swDefault sw
-                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}" checked>#{swDisplayName sw}
-              $else
-                <input type="checkbox" value="#{swName sw}" flags="#{swFlags sw}">#{swDisplayName sw}
+          ^{makeSwitch (verName (ciVersion info)) sw}
