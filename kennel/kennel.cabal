@@ -88,6 +88,8 @@ library
                  , attoparsec
                  , network
                  , blaze-builder
+                 , lifted-base
+                 , http-types
 
 executable         kennel
     if flag(library-only)

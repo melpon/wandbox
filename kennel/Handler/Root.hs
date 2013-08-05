@@ -25,6 +25,8 @@ import Data.Aeson ((.=), (.:))
 import Control.Monad (MonadPlus(mzero), join)
 import qualified Data.Attoparsec as A
 import qualified Data.Text.Encoding as TE
+import qualified Control.Exception.Lifted as I (catch, SomeException)
+import qualified Network.HTTP.Types as H
 
 data CompilerSwitchSelectOption = CompilerSwitchSelectOption
   { swmoName :: Text
@@ -193,4 +195,18 @@ makeRootR mCode = do
 -- inclined, or create a single monolithic file.
 getRootR :: Handler Html
 getRootR = do
-  makeRootR Nothing
+  makeRootR Nothing `I.catch` serviceUnavailable
+  where
+    serviceUnavailable :: I.SomeException -> Handler Html
+    serviceUnavailable _ = sendResponseStatus H.status503 [shamlet|
+      !!!
+      <html>
+        <head>
+          <title>[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ
+        <body>
+          <h1>Service is Unavailable
+          <div>
+            <p>Cattleshed is down. Please contact #
+              <a href="https://twitter.com/melponn">@melponn
+              \ by a reply or a direct message.
+    |]
