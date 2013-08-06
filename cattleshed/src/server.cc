@@ -7,13 +7,17 @@
 #include <vector>
 
 #include <boost/algorithm/string/join.hpp>
+#include <boost/asio.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/fusion/include/std_pair.hpp>
+#include <boost/spirit/home/phoenix.hpp>
+#include <boost/spirit/home/qi.hpp>
 #include <boost/program_options.hpp>
 #include <boost/system/system_error.hpp>
 
 #include <aio.h>
 
-#include "common.hpp"
+#include "quoted_printable.hpp"
 #include "load_config.hpp"
 #include "posixapi.hpp"
 #include "yield.hpp"
@@ -24,8 +28,10 @@
 #endif
 
 namespace wandbox {
-
+	namespace asio = boost::asio;
 	namespace ptime = boost::posix_time;
+	namespace phx = boost::phoenix;
+	namespace qi = boost::spirit::qi;
 
 	using std::size_t;
 	using std::move;
@@ -35,9 +41,10 @@ namespace wandbox {
 	using std::placeholders::_1;
 	using std::placeholders::_2;
 	using std::placeholders::_3;
+	using boost::asio::ip::tcp;
 
-	string ptracer;
-	string config_file;
+	std::string ptracer;
+	std::string config_file;
 	server_config config;
 
 	struct socket_write_buffer: std::enable_shared_from_this<socket_write_buffer> {
@@ -53,7 +60,7 @@ namespace wandbox {
 		template <typename Handler>
 		void async_write_command(std::string cmd, std::string data, Handler &&handler) {
 			std::unique_lock<std::recursive_mutex> l(mtx);
-			data = encode_qp(std::move(data));
+			data = quoted_printable::encode(data);
 			back_buf.emplace_back(cmd + " " + std::to_string(data.length()) + ":" + data + "\n");
 			back_handlers.emplace_back(std::forward<Handler>(handler));
 			flush();
@@ -90,7 +97,7 @@ namespace wandbox {
 	};
 
 	static const compiler_trait &get_compiler(const std::unordered_map<std::string, std::string> &received) {
-		return *config.compilers.get<1>().find([&]() -> string {
+		return *config.compilers.get<1>().find([&]() -> std::string {
 			std::string ret;
 			const auto &s = received.at("Control");
 			auto ite = s.begin();
@@ -499,7 +506,7 @@ namespace wandbox {
 					if (!qi::parse(ite, buf->end(), +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) break;
 					if (command == "Control" && data == "run") return program_writer(aio, std::move(sock), sigs, std::move(received))();
 					else if (command == "Version") return version_sender(aio, std::move(sock), sigs)();
-					else received[command] += decode_qp(data);
+					else received[command] += quoted_printable::decode(data);
 				}
 				buf->erase(buf->begin(), ite);
 			}
@@ -551,11 +558,11 @@ int main(int argc, char **argv) {
 		namespace po = boost::program_options;
 
 		{
-			string config_file_raw;
+			std::string config_file_raw;
 			po::options_description opt("options");
 			opt.add_options()
 				("help,h", "show this help")
-				("config,c", po::value<string>(&config_file_raw)->default_value(string(DATADIR) + "/config"), "specify config file")
+				("config,c", po::value<std::string>(&config_file_raw)->default_value(std::string(DATADIR) + "/config"), "specify config file")
 			;
 
 			po::variables_map vm;

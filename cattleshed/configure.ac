@@ -22,6 +22,7 @@ AC_ARG_WITH(boost-lib,
 
 boostlibnames="-lboost_system -lboost_program_options"
 if test "x$with_boost" != x; then
+  boostrpath="-Wl,-rpath,$with_boost/lib"
   boostlibs="-L$with_boost/lib"
   boostinc="-I$with_boost/include"
 fi
@@ -29,11 +30,13 @@ if test "x$with_boost_include" != x; then
   boostinc="-I$with_boost_include"
 fi
 if test "x$with_boost_lib" != x; then
+  boostrpath="-Wl,-rpath,$with_boost_lib"
   boostlibs="-L$with_boost_lib"
 fi
 
 CXXFLAGS="$CXXFLAGS $boostinc"
 LIBS="$LIBS $boostlibs $boostlibnames"
+LDFLAGS="$LDFLAGS $boostrpath"
 AC_MSG_CHECKING([for boost])
 AC_LANG([C++])
 AC_TRY_LINK(
@@ -49,7 +52,7 @@ AC_TRY_LINK(
  ],
  [AC_MSG_RESULT([yes])],
  [AC_MSG_RESULT([no]); AC_MSG_ERROR([cattleshed requires Boost >= 1.47])])
-  
+
 # Checks for libraries.
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([rt], [aio_write])

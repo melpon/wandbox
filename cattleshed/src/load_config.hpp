@@ -1,3 +1,7 @@
+#ifndef LOAD_CONFIG_HPP_
+#define LOAD_CONFIG_HPP_
+
+#include <functional>
 #include <string>
 #include <vector>
 #include <unordered_set>
@@ -67,3 +71,5 @@ namespace wandbox {
 	server_config load_config(std::istream &is);
 	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches);
 }
+
+#endif
