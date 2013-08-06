@@ -1,20 +1,26 @@
-module Model where
+module Model
+  ( Y.Unique(..)
+  , Code(..)
+  , CodeId
+  , Link(..)
+  , LinkId
+  , migrateAll
+  , makeCode
+  ) where
 
-import Prelude
-import Yesod
-import Data.Text (Text)
-import Database.Persist.Quasi
-
-import Data.Time.Clock (UTCTime, getCurrentTime)
-import Control.Applicative ((<$>))
+import Import
+import qualified Yesod                                  as Y
+import qualified Data.Text                              as T
+import qualified Database.Persist.Quasi                 as PersistQuasi
+import qualified Data.Time.Clock                        as Clock
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities
 -- at:
 -- http://www.yesodweb.com/book/persistent/
-share [mkPersist sqlOnlySettings, mkMigrate "migrateAll"]
-    $(persistFileWith lowerCaseSettings "config/models")
+Y.share [Y.mkPersist Y.sqlOnlySettings, Y.mkMigrate "migrateAll"]
+    $(Y.persistFileWith PersistQuasi.lowerCaseSettings "config/models")
 
-makeCode :: Text -> Text -> Text -> IO Code
+makeCode :: T.Text -> T.Text -> T.Text -> IO Code
 makeCode compiler code options =
-    Code compiler code False False options <$> getCurrentTime
+    Code compiler code False False options <$> Clock.getCurrentTime

@@ -5,13 +5,15 @@ module VM.QuotedPrintable (
 ) where
 
 import Import
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as BC ()
+
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as BSC ()
+
 import Data.Word (Word8)
 import Data.Bits (shiftR, shiftL, (.&.), (.|.))
 
 toHex :: Word8 -> (Word8, Word8)
-toHex w = (B.index tbl hn, B.index tbl ln)
+toHex w = (BS.index tbl hn, BS.index tbl ln)
   where
     tbl = "0123456789ABCDEF"
     hn = fromIntegral $ w `shiftR` 4
@@ -26,8 +28,8 @@ fromHex a b = dec <$> tbl a <*> tbl b
           | otherwise           = Nothing
     dec hn ln = hn `shiftL` 4 .|. ln
 
-qpEncode :: B.ByteString -> B.ByteString
-qpEncode = B.pack . reverse . fst . B.foldl' f ([],0)
+qpEncode :: BS.ByteString -> BS.ByteString
+qpEncode = BS.pack . reverse . fst . BS.foldl' f ([],0)
   where
     isEnc w = w < 33 || w == 61 || w > 126
     f :: ([Word8],Int) -> Word8 -> ([Word8],Int)
@@ -36,8 +38,8 @@ qpEncode = B.pack . reverse . fst . B.foldl' f ([],0)
                |            n >= 75 = (w:10:61:rx,1)
                | otherwise          = (w:rx,n+1)
 
-qpDecode :: B.ByteString -> Maybe B.ByteString
-qpDecode = (B.pack <$>) . decodeR . B.unpack
+qpDecode :: BS.ByteString -> Maybe BS.ByteString
+qpDecode = (BS.pack <$>) . decodeR . BS.unpack
   where
     decodeR []          = Just []
     decodeR (61:10:ys)  = decodeR ys

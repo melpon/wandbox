@@ -4,59 +4,67 @@ module Handler.Root (
 ) where
 
 import Import
-import qualified Data.Text as T
-import Codec.Binary.Url (encode)
-import Data.Text.Encoding (encodeUtf8)
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
-import Control.Exception (bracket)
-import System.IO (hClose, hFlush)
 
-import qualified Data.Conduit as C
+import qualified Data.Text                              as T
+import qualified Codec.Binary.Url                       as Url
+import qualified Data.Text.Encoding                     as TE
+import qualified Data.ByteString                        as BS
+import qualified Data.ByteString.Lazy                   as BSL
+import qualified Control.Exception                      as Exc
+import qualified Control.Exception.Lifted               as ExcL
+import qualified System.IO                              as I
+import qualified Data.Conduit                           as Conduit
+import qualified Data.Conduit.List                      as ConduitL
+import qualified Data.Aeson                             as Aeson
+import qualified Data.Aeson.Types                       as AesonTypes
+import qualified Control.Monad                          as Monad
+import qualified Network.HTTP.Types                     as HT
+import qualified Yesod                                  as Y
+
+import Data.Aeson ((.=), (.:))
 import Data.Conduit (($$))
-import qualified Data.Conduit.List as CL
+import Yesod (whamlet, shamlet)
 
+import Model (Code(..))
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
-import qualified Data.List (init)
-import qualified Data.Aeson as JS (Value(..), object, eitherDecode)
-import qualified Data.Aeson.Types as JS (Parser)
-import Data.Aeson ((.=), (.:))
-import Control.Monad (MonadPlus(mzero), join)
-import qualified Data.Attoparsec as A
-import qualified Data.Text.Encoding as TE
-import qualified Control.Exception.Lifted as I (catch, SomeException)
-import qualified Network.HTTP.Types as H
+import Settings.StaticFiles (
+    polyfills_EventSource_js, js_jquery_url_js, ace_ace_js,
+    ace_keybinding_vim_js, ace_keybinding_emacs_js,
+    compiling_gif)
+import Settings (widgetFile)
+import Foundation (Handler, Widget, Route(..))
+
 
 data CompilerSwitchSelectOption = CompilerSwitchSelectOption
-  { swmoName :: Text
-  , swmoDisplayName :: Text
-  , swmoDisplayFlags :: Text
+  { swmoName :: T.Text
+  , swmoDisplayName :: T.Text
+  , swmoDisplayFlags :: T.Text
   } deriving (Show)
-instance FromJSON CompilerSwitchSelectOption where
-  parseJSON (Object v) =
+instance Aeson.FromJSON CompilerSwitchSelectOption where
+  parseJSON (Aeson.Object v) =
     CompilerSwitchSelectOption <$>
       v .: "name" <*>
       v .: "display-name" <*>
       v .: "display-flags"
-  parseJSON _ = mzero
+  parseJSON _ = Monad.mzero
 
 data CompilerSwitch =
   CompilerSwitchSingle
-  { swsName :: Text
-  , swsFlags :: Text
+  { swsName :: T.Text
+  , swsFlags :: T.Text
   , swsDefault :: Bool
-  , swsDisplayName :: Text
+  , swsDisplayName :: T.Text
   } |
   CompilerSwitchSelect
-  { swmDefault :: Text
+  { swmDefault :: T.Text
   , swmOptions :: [CompilerSwitchSelectOption]
   }
   deriving (Show)
 
-instance FromJSON CompilerSwitch where
-  parseJSON (Object v) = do
-    typ <- v .: "type" :: JS.Parser String
+instance Aeson.FromJSON CompilerSwitch where
+  parseJSON (Aeson.Object v) = do
+    typ <- v .: "type" :: AesonTypes.Parser String
     if typ == "single"
       then
         CompilerSwitchSingle <$>
@@ -68,49 +76,49 @@ instance FromJSON CompilerSwitch where
         CompilerSwitchSelect <$>
           v .: "default" <*>
           v .: "options"
-  parseJSON _ = mzero
+  parseJSON _ = Monad.mzero
 
 data CompilerVersion = CompilerVersion
-  { verName :: Text
-  , verLanguage :: Text
-  , verDisplayName :: Text
-  , verVersion :: Text
-  , verCompileCommand :: Text
+  { verName :: T.Text
+  , verLanguage :: T.Text
+  , verDisplayName :: T.Text
+  , verVersion :: T.Text
+  , verCompileCommand :: T.Text
   } deriving (Show)
-instance FromJSON CompilerVersion where
-  parseJSON (Object v) =
+instance Aeson.FromJSON CompilerVersion where
+  parseJSON (Aeson.Object v) =
     CompilerVersion <$>
       v .: "name" <*>
       v .: "language" <*>
       v .: "display-name" <*>
       v .: "version" <*>
       v .: "display-compile-command"
-  parseJSON _ = mzero
+  parseJSON _ = Monad.mzero
 
 data CompilerInfo = CompilerInfo
   { ciVersion :: CompilerVersion
   , ciSwitches :: [CompilerSwitch]
   } deriving (Show)
 
-instance FromJSON CompilerInfo where
-  parseJSON json@(Object v) = do
-    version <- parseJSON json :: JS.Parser CompilerVersion
-    switches <- join (parseJSON <$> (v .: "switches")) :: JS.Parser [CompilerSwitch]
+instance Aeson.FromJSON CompilerInfo where
+  parseJSON json@(Aeson.Object v) = do
+    version <- Aeson.parseJSON json :: AesonTypes.Parser CompilerVersion
+    switches <- Monad.join (Aeson.parseJSON <$> (v .: "switches")) :: AesonTypes.Parser [CompilerSwitch]
     return $ CompilerInfo version switches
-  parseJSON _ = mzero
+  parseJSON _ = Monad.mzero
 
 getCompilerInfos :: IO [CompilerInfo]
 getCompilerInfos = do
     text <- fromVM
-    (Right infos) <- return $ JS.eitherDecode $ BL.pack $ B.unpack $ TE.encodeUtf8 text :: IO (Either String [CompilerInfo])
+    (Right infos) <- return $ Aeson.eitherDecode $ BSL.pack $ BS.unpack $ TE.encodeUtf8 text :: IO (Either String [CompilerInfo])
     return infos
   where
     fromVM = do
-      bracket connectVM hClose $ \handle -> do
-        C.runResourceT $ CL.sourceList [Protocol Version ""] $$ sendVM handle
-        hFlush handle
-        C.runResourceT $ receiveVM handle $$ do
-            result <- C.await
+      Exc.bracket connectVM I.hClose $ \handle -> do
+        Conduit.runResourceT $ ConduitL.sourceList [Protocol Version ""] $$ sendVM handle
+        I.hFlush handle
+        Conduit.runResourceT $ receiveVM handle $$ do
+            result <- Conduit.await
             case result of
                 Nothing -> fail "failed: get version"
                 (Just (Left err)) -> fail err
@@ -119,14 +127,14 @@ getCompilerInfos = do
 
 resultContainer :: Widget
 resultContainer = do
-  addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+  Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
   $(widgetFile "result_container")
 
 resultWindow :: Widget
 resultWindow = do
-  addScriptRemote "//platform.twitter.com/widgets.js"
-  addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
-  addScript $ StaticR polyfills_EventSource_js
+  Y.addScriptRemote "//platform.twitter.com/widgets.js"
+  Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+  Y.addScript $ StaticR polyfills_EventSource_js
   $(widgetFile "result_window")
 
 editor :: Widget
@@ -135,7 +143,7 @@ editor = do
 
 compiler :: Widget
 compiler = do
-  compilerInfos <- liftIO getCompilerInfos
+  compilerInfos <- Y.liftIO getCompilerInfos
   $(widgetFile "compiler")
   where
     makeSwitch _ (CompilerSwitchSingle name flags default_ displayName) =
@@ -148,7 +156,7 @@ compiler = do
               <input type="checkbox" value="#{name}" flags="#{flags}">#{displayName}
       |]
     makeSwitch compilerName (CompilerSwitchSelect default_ options) = do
-      let groupName = compilerName `mappend` default_
+      let groupName = compilerName `T.append` default_
       [whamlet|
         $forall option <- options
           <label .radio>
@@ -162,25 +170,25 @@ compiler = do
           <input type="radio" name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}">#{displayName}
       |]
 
-makeRootR :: Maybe Code -> Handler Html
+makeRootR :: Maybe Code -> Handler Y.Html
 makeRootR mCode = do
-    app <- getYesod
-    defaultLayout $ do
-        setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
-        addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
-        addScriptRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"
-        addScript $ StaticR js_jquery_url_js
-        addScript $ StaticR ace_ace_js
-        addScript $ StaticR ace_keybinding_vim_js
-        addScript $ StaticR ace_keybinding_emacs_js
-        addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+    app <- Y.getYesod
+    Y.defaultLayout $ do
+        Y.setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
+        Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+        Y.addScriptRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"
+        Y.addScript $ StaticR js_jquery_url_js
+        Y.addScript $ StaticR ace_ace_js
+        Y.addScript $ StaticR ace_keybinding_vim_js
+        Y.addScript $ StaticR ace_keybinding_emacs_js
+        Y.addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
         resultWindow
         $(widgetFile "homepage")
   where
-    urlEncode = JS.String . T.pack . encode . B.unpack . encodeUtf8
-    defaultCompiler = JS.String "gcc-head"
-    jsonCode = maybe JS.Null tojson mCode
-    tojson code = JS.object ["compiler" .= urlEncode (codeCompiler code)
+    urlEncode = Aeson.String . T.pack . Url.encode . BS.unpack . TE.encodeUtf8
+    defaultCompiler = Aeson.String "gcc-head"
+    jsonCode = maybe Aeson.Null tojson mCode
+    tojson code = Aeson.object ["compiler" .= urlEncode (codeCompiler code)
                             ,"code" .= urlEncode (codeCode code)
                             ,"options" .= urlEncode (codeOptions code)]
 
@@ -191,12 +199,12 @@ makeRootR mCode = do
 -- The majority of the code you will write in Yesod lives in these handler
 -- functions. You can spread them across multiple files if you are so
 -- inclined, or create a single monolithic file.
-getRootR :: Handler Html
+getRootR :: Handler Y.Html
 getRootR = do
-  makeRootR Nothing `I.catch` serviceUnavailable
+  makeRootR Nothing `ExcL.catch` serviceUnavailable
   where
-    serviceUnavailable :: I.SomeException -> Handler Html
-    serviceUnavailable _ = sendResponseStatus H.status503 [shamlet|
+    serviceUnavailable :: ExcL.SomeException -> Handler Y.Html
+    serviceUnavailable _ = Y.sendResponseStatus HT.status503 [shamlet|
       !!!
       <html>
         <head>

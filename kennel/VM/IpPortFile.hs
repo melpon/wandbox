@@ -3,12 +3,12 @@ module VM.IpPortFile (
 ) where
 
 import Import
-import System.IO (readFile)
-import Language.Haskell.TH
-import Network (PortID(PortNumber))
+import qualified Language.Haskell.TH                    as TH
+import qualified System.IO                              as I
+import qualified Network                                as N
 
-ipPortFile :: FilePath -> Q Exp              
+ipPortFile :: FilePath -> TH.Q TH.Exp              
 ipPortFile fp = do                           
-  [ip, port] <- runIO $ lines <$> readFile fp
+  [ip, port] <- TH.runIO $ lines <$> I.readFile fp
   let port' = read port :: Int
-  [| (ip, PortNumber $([|port'|])) |]
+  [| (ip, N.PortNumber $([|port'|])) |]

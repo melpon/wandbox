@@ -1,26 +1,25 @@
 {-# LANGUAGE PackageImports #-}
+import qualified Network.Wai.Handler.Warp               as Warp
+import qualified System.Directory                       as Directory
+import qualified System.Exit                            as Exit
+import qualified Control.Concurrent                     as Concurrent
+
 import "kennel" Application (getApplicationDev)
-import Network.Wai.Handler.Warp
-    (runSettings, defaultSettings, settingsPort)
-import Control.Concurrent (forkIO)
-import System.Directory (doesFileExist, removeFile)
-import System.Exit (exitSuccess)
-import Control.Concurrent (threadDelay)
 
 main :: IO ()
 main = do
     putStrLn "Starting devel application"
     (port, app) <- getApplicationDev
-    forkIO $ runSettings defaultSettings
-        { settingsPort = port
+    Concurrent.forkIO $ Warp.runSettings Warp.defaultSettings
+        { Warp.settingsPort = port
         } app
     loop
 
 loop :: IO ()
 loop = do
-  threadDelay 100000
-  e <- doesFileExist "yesod-devel/devel-terminate"
+  Concurrent.threadDelay 100000
+  e <- Directory.doesFileExist "yesod-devel/devel-terminate"
   if e then terminateDevel else loop
 
 terminateDevel :: IO ()
-terminateDevel = exitSuccess
+terminateDevel = Exit.exitSuccess

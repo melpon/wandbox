@@ -4,19 +4,23 @@ module Handler.Source (
 ) where
 
 import Import
-import Network.Wai.EventSource (eventSourceAppChan)
-import qualified ChanMap as CM
-import Data.Conduit (runResourceT)
+import qualified Network.Wai.EventSource                as EventSource
+import qualified Data.Conduit                           as Conduit
+import qualified Data.Text                              as T
+import qualified Yesod                                  as Y
 
-getSourceR :: Text -> Handler ()
+import ChanMap (insertLookup)
+import Foundation (Handler, getChanMap)
+
+getSourceR :: T.Text -> Handler ()
 getSourceR ident = do
-    cm <- getChanMap <$> getYesod
-    chan <- liftIO $ CM.insertLookup cm ident
+    cm <- getChanMap <$> Y.getYesod
+    chan <- Y.liftIO $ insertLookup cm ident
 
-    req <- waiRequest
-    res <- liftIO $ runResourceT $ eventSourceAppChan chan req
+    req <- Y.waiRequest
+    res <- Y.liftIO $ Conduit.runResourceT $ EventSource.eventSourceAppChan chan req
 
-    sendWaiResponse res
+    Y.sendWaiResponse res
 
 getEmptySourceR :: Handler ()
-getEmptySourceR = notFound
+getEmptySourceR = Y.notFound

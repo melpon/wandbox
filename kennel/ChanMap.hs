@@ -5,47 +5,46 @@ module ChanMap (
   writeChan
 ) where
 
-import Prelude
-import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef)
-import Network.Wai.EventSource (ServerEvent(..))
-import Control.Concurrent (forkIO, threadDelay, killThread, ThreadId)
-import Control.Applicative ((<$>))
-import Control.Exception (finally)
-import qualified Control.Concurrent.Chan as C
-import qualified Data.Map as M
-import qualified Data.Text as T
-import qualified System.Mem as Mem
+import Import
+import qualified Data.IORef                             as IORef
+import qualified Network.Wai.EventSource                as EventSource
+import qualified Control.Concurrent                     as Concurrent
+import qualified Control.Exception                      as Exc
+import qualified Control.Concurrent.Chan                as Chan
+import qualified Data.Map                               as Map
+import qualified Data.Text                              as T
+import qualified System.Mem                             as Mem
 
-type ChanEvent = C.Chan ServerEvent
-data ChanMap = ChanMap (IORef (M.Map T.Text (ChanEvent, [ThreadId])))
+type ChanEvent = Chan.Chan EventSource.ServerEvent
+data ChanMap = ChanMap (IORef.IORef (Map.Map T.Text (ChanEvent, [Concurrent.ThreadId])))
 
 newChanMap :: IO ChanMap
 newChanMap = do
-  cm <- ChanMap <$> newIORef M.empty
+  cm <- ChanMap <$> IORef.newIORef Map.empty
   return cm
 
 setTimeout :: ChanMap -> T.Text -> IO ()
 setTimeout cm k = do
     -- wait 2 minutes
     -- FIXME: This timeout should be elonged by timing of any data transmitted.
-    threadDelay (2*60*1000*1000)
-    `finally`
-    writeChan cm k CloseEvent
+    Concurrent.threadDelay (2*60*1000*1000)
+    `Exc.finally`
+    writeChan cm k EventSource.CloseEvent
 
 heartbeat :: ChanEvent -> IO ()
 heartbeat chan = do
     -- send an empty 2 times to force flush
-    C.writeChan chan $ ServerEvent Nothing Nothing []
-    C.writeChan chan $ ServerEvent Nothing Nothing []
-    threadDelay (2*1000*1000)
+    Chan.writeChan chan $ EventSource.ServerEvent Nothing Nothing []
+    Chan.writeChan chan $ EventSource.ServerEvent Nothing Nothing []
+    Concurrent.threadDelay (2*1000*1000)
     heartbeat chan
 
 insertLookup :: ChanMap -> T.Text -> IO ChanEvent
 insertLookup cm@(ChanMap ref) k = do
-    chan <- C.newChan
-    tidTimeout <- forkIO $ setTimeout cm k
-    tidHeartbeat <- forkIO $ heartbeat chan
-    mChan <- atomicModifyIORef ref (ins chan [tidTimeout, tidHeartbeat])
+    chan <- Chan.newChan
+    tidTimeout <- Concurrent.forkIO $ setTimeout cm k
+    tidHeartbeat <- Concurrent.forkIO $ heartbeat chan
+    mChan <- IORef.atomicModifyIORef ref (ins chan [tidTimeout, tidHeartbeat])
     case mChan of
         -- chan already exists.
         (Just chan') -> return $ fst chan'
@@ -53,30 +52,30 @@ insertLookup cm@(ChanMap ref) k = do
         Nothing -> return chan
  where
      ins chan tid map_ =
-         let (mValue, map') = M.insertLookupWithKey oldValue k (chan, tid) map_
+         let (mValue, map') = Map.insertLookupWithKey oldValue k (chan, tid) map_
          in (map', mValue)
      oldValue _ _ old = old
 
-writeChan :: ChanMap -> T.Text -> ServerEvent -> IO ()
-writeChan (ChanMap ref) k CloseEvent = do
-    maybeChan <- atomicModifyIORef ref modify
+writeChan :: ChanMap -> T.Text -> EventSource.ServerEvent -> IO ()
+writeChan (ChanMap ref) k EventSource.CloseEvent = do
+    maybeChan <- IORef.atomicModifyIORef ref modify
     case maybeChan of
         Just chan -> do
-            mapM_ killThread (snd chan)
+            mapM_ Concurrent.killThread (snd chan)
             -- send an empty 2 times to force flush
-            C.writeChan (fst chan) $ ServerEvent Nothing Nothing []
-            C.writeChan (fst chan) $ ServerEvent Nothing Nothing []
-            C.writeChan (fst chan) CloseEvent
+            Chan.writeChan (fst chan) $ EventSource.ServerEvent Nothing Nothing []
+            Chan.writeChan (fst chan) $ EventSource.ServerEvent Nothing Nothing []
+            Chan.writeChan (fst chan) EventSource.CloseEvent
             Mem.performGC
         Nothing -> return ()
  where
      modify map_ =
-         case M.updateLookupWithKey (\_ -> \_ -> Nothing) k map_ of
+         case Map.updateLookupWithKey (\_ -> \_ -> Nothing) k map_ of
              (Nothing, _) -> (map_, Nothing)
              (mValue, map') -> (map', mValue)
 
 writeChan (ChanMap ref) k event = do
-    maybeChan <- M.lookup k <$> readIORef ref
+    maybeChan <- Map.lookup k <$> IORef.readIORef ref
     case maybeChan of
-        Just chan -> C.writeChan (fst chan) event
+        Just chan -> Chan.writeChan (fst chan) event
         Nothing -> Mem.performGC

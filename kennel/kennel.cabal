@@ -15,6 +15,7 @@ library
     exposed-modules: Application
                      Foundation
                      Import
+                     ImportRule
                      Model
                      Settings
                      Settings.StaticFiles

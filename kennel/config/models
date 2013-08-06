@@ -1,14 +1,14 @@
 Code
-    compiler Text
-    code Text
+    compiler T.Text
+    code T.Text
     optimize Bool
     warning Bool
-    options Text
-    createdAt UTCTime
+    options T.Text
+    createdAt Clock.UTCTime
     UniqueCode compiler code optimize warning createdAt
     deriving Show
 Link
-    permlink Text
+    permlink T.Text
     code Code
     UniqueLink permlink
     deriving Show

@@ -1,6 +1,6 @@
 module Settings.Development where
 
-import Prelude
+import Import
 
 development :: Bool
 development =

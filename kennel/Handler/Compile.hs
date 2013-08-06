@@ -4,74 +4,78 @@ module Handler.Compile (
 ) where
 
 import Import
-import Network.Wai.EventSource (ServerEvent(..))
-import Control.Concurrent (forkIO)
-import Blaze.ByteString.Builder.ByteString (fromByteString)
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as BC
-import qualified Data.Text as T
-import qualified ChanMap as CM
-import Data.Maybe (catMaybes)
-import Control.Exception (bracket)
-import System.IO (hClose, hFlush)
-import Codec.Binary.Url (encode)
-import Data.Text.Encoding (encodeUtf8)
+import qualified Network.Wai.EventSource                as EventSource
+import qualified Control.Concurrent                     as Concurrent
+import qualified Blaze.ByteString.Builder.ByteString    as Blaze
+import qualified Data.ByteString                        as BS
+import qualified Data.ByteString.Char8                  as BSC
+import qualified Data.Text                              as T
+import qualified Data.Text.Encoding                     as TE
+import qualified Data.Maybe                             as Maybe
+import qualified Control.Exception                      as Exc
+import qualified System.IO                              as I
+import qualified Codec.Binary.Url                       as Url
+import qualified Data.Conduit                           as Conduit
+import qualified Data.Conduit.List                      as ConduitL
+import qualified Yesod                                  as Y
 
-import qualified Data.Conduit as C
 import Data.Conduit (($$))
-import qualified Data.Conduit.List as CL
 
+import Foundation (Handler, getChanMap)
+import Model (makeCode, Code, codeCompiler, codeCode, codeOptions)
+import ChanMap (writeChan)
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 
 makeProtocols :: Code -> [Protocol]
 makeProtocols code =
-  catMaybes [Just $ Protocol Control (T.append "compiler=" $ codeCompiler code),
-             Just $ Protocol Source $ codeCode code,
-             Just $ Protocol CompilerOption $ codeOptions code,
-             Just $ Protocol Control "run"]
+  Maybe.catMaybes [
+    Just $ Protocol Control (T.append "compiler=" $ codeCompiler code),
+    Just $ Protocol Source $ codeCode code,
+    Just $ Protocol CompilerOption $ codeOptions code,
+    Just $ Protocol Control "run"]
 
-vmHandle :: Code -> C.Sink (Either String Protocol) (C.ResourceT IO) () -> IO ()
+vmHandle :: Code -> Conduit.Sink (Either String Protocol) (Conduit.ResourceT IO) () -> IO ()
 vmHandle code sink =
-  bracket connectVM hClose $ \handle -> do
-    C.runResourceT $ CL.sourceList (makeProtocols code) $$ sendVM handle
-    hFlush handle
-    C.runResourceT $ receiveVM handle $$ sink
+  Exc.bracket connectVM I.hClose $ \handle -> do
+    Conduit.runResourceT $ ConduitL.sourceList (makeProtocols code) $$ sendVM handle
+    I.hFlush handle
+    Conduit.runResourceT $ receiveVM handle $$ sink
 
-urlEncode :: ProtocolSpecifier -> T.Text -> B.ByteString
-urlEncode spec contents = B.concat [BC.pack $ show spec, ":", BC.pack $ encode $ B.unpack $ encodeUtf8 contents]
+urlEncode :: ProtocolSpecifier -> T.Text -> BS.ByteString
+urlEncode spec contents = BS.concat [BSC.pack $ show spec, ":", BSC.pack $ Url.encode $ BS.unpack $ TE.encodeUtf8 contents]
 
-sinkProtocol :: C.MonadResource m => (ServerEvent -> IO ()) -> C.Sink (Either String Protocol) m ()
-sinkProtocol writeChan = do
-  mValue <- C.await
+sinkProtocol :: Conduit.MonadResource m => (EventSource.ServerEvent -> IO ()) -> Conduit.Sink (Either String Protocol) m ()
+sinkProtocol writeChan_ = do
+  mValue <- Conduit.await
   case mValue of
     Nothing -> return ()
     (Just (Left str)) -> do
-      liftIO $ putStrLn str
-      liftIO $ writeChan $ CloseEvent
+      Y.liftIO $ putStrLn str
+      Y.liftIO $ writeChan_ $ EventSource.CloseEvent
     (Just (Right ProtocolNil)) -> do
-      liftIO $ print ProtocolNil
+      Y.liftIO $ print ProtocolNil
     (Just (Right (Protocol spec@Control contents@"Finish"))) -> do
-      liftIO $ putStrLn $ T.unpack contents
-      liftIO $ writeChan $ ServerEvent Nothing Nothing [fromByteString $ urlEncode spec contents]
-      liftIO $ writeChan $ CloseEvent
+      Y.liftIO $ putStrLn $ T.unpack contents
+      Y.liftIO $ writeChan_ $ EventSource.ServerEvent Nothing Nothing [Blaze.fromByteString $ urlEncode spec contents]
+      Y.liftIO $ writeChan_ $ EventSource.CloseEvent
     (Just (Right (Protocol spec contents))) -> do
-      liftIO $ writeChan $ ServerEvent Nothing Nothing [fromByteString $ urlEncode spec contents]
-      sinkProtocol writeChan
+      Y.liftIO $ writeChan_ $ EventSource.ServerEvent Nothing Nothing [Blaze.fromByteString $ urlEncode spec contents]
+      sinkProtocol writeChan_
 
 getEmptyCompileR :: Handler ()
-getEmptyCompileR = notFound
+getEmptyCompileR = Y.notFound
 
-postCompileR :: Text -> Handler ()
+postCompileR :: T.Text -> Handler ()
 postCompileR ident = do
-  (Just compiler) <- lookupPostParam "compiler"
-  (Just code) <- lookupPostParam "code"
-  (Just options) <- lookupPostParam "options"
-  codeInstance <- liftIO $ makeCode compiler code options
+  (Just compiler) <- Y.lookupPostParam "compiler"
+  (Just code) <- Y.lookupPostParam "code"
+  (Just options) <- Y.lookupPostParam "options"
+  codeInstance <- Y.liftIO $ makeCode compiler code options
   _ <- go codeInstance
   return ()
   where
     go codeInstance = do
-      cm <- getChanMap <$> getYesod
-      _ <- liftIO $ forkIO $ vmHandle codeInstance $ sinkProtocol $ CM.writeChan cm ident
+      cm <- getChanMap <$> Y.getYesod
+      _ <- Y.liftIO $ Concurrent.forkIO $ vmHandle codeInstance $ sinkProtocol $ writeChan cm ident
       return ()

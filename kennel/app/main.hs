@@ -1,8 +1,9 @@
-import Prelude              (IO)
-import Yesod.Default.Config (fromArgs)
-import Yesod.Default.Main   (defaultMain)
+import Import
+import qualified Yesod.Default.Config                   as YDConfig
+import qualified Yesod.Default.Main                     as YDMain
+
 import Settings             (parseExtra)
 import Application          (makeApplication)
 
 main :: IO ()
-main = defaultMain (fromArgs parseExtra) makeApplication
+main = YDMain.defaultMain (YDConfig.fromArgs parseExtra) makeApplication
