@@ -72,6 +72,8 @@ namespace wandbox {
 			std::unique_lock<std::recursive_mutex> l(mtx);
 			for (const auto &x: front_handlers) x();
 			writing = false;
+			front_buf.clear();
+			front_handlers.clear();
 			if (!back_handlers.empty()) flush();
 		}
 		void flush() {
@@ -177,19 +179,18 @@ namespace wandbox {
 				 : soft_limit(soft_limit),
 				   hard_limit(hard_limit),
 				   current(0),
-				   proc(nullptr) { }
-			void set_process(std::shared_ptr<status_forwarder> proc) { this->proc = proc; }
+				   proc() { }
+			void set_process(std::shared_ptr<status_forwarder> proc) { this->proc = move(proc); }
 			void add(size_t len) {
 				if (std::numeric_limits<size_t>::max() - len < current) current = std::numeric_limits<size_t>::max();
 				else current += len;
-				if (hard_limit < current) {
-					if (proc) proc->kill(SIGKILL);
-				} else if (soft_limit < current) {
-					if (proc) proc->kill(SIGXFSZ);
+				if (auto p = proc.lock()) {
+					if (hard_limit < current) p->kill(SIGKILL);
+					else if (soft_limit < current) p->kill(SIGXFSZ);
 				}
 			}
 			size_t soft_limit, hard_limit, current;
-			std::shared_ptr<status_forwarder> proc;
+			std::weak_ptr<status_forwarder> proc;
 		};
 		struct output_forwarder: pipe_forwarder_base, private coroutine {
 			output_forwarder(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, unique_fd &&fd, std::string command, std::shared_ptr<write_limit_counter> limit)
@@ -216,13 +217,14 @@ namespace wandbox {
 					yield pipe.async_read_some(asio::buffer(buf), ref(*this));
 					if (ec) {
 						pipe.close();
-						handler();
+						if (handler) aio->post(move(handler));
+						handler = {};
 						yield break;
 					}
 					yield {
 						std::string t(buf.begin(), buf.begin() + len);
 						sockbuf->async_write_command(command, move(t), ref(*this));
-						limit->add(len);
+						if (auto l = limit.lock()) l->add(len);
 					}
 				}
 			}
@@ -232,7 +234,7 @@ namespace wandbox {
 			std::string command;
 			std::vector<char> buf;
 			std::function<void ()> handler;
-			std::shared_ptr<write_limit_counter> limit;
+			std::weak_ptr<write_limit_counter> limit;
 		};
 
 		program_runner(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::unordered_map<std::string, std::string> received, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<DIR> workdir)
