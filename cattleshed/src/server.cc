@@ -22,6 +22,9 @@
 #include "posixapi.hpp"
 #include "yield.hpp"
 
+
+#define PROTECT_FROM_MOVE(member) const auto member = this->member
+
 #if !defined(__GNUC__) || (__GNUC__ < 4) || (__GNUC__ == 4 && __GCC_MINOR__ < 7)
 #define noexcept
 #define override
@@ -49,7 +52,7 @@ namespace wandbox {
 
 	struct socket_write_buffer: std::enable_shared_from_this<socket_write_buffer> {
 		socket_write_buffer(std::shared_ptr<tcp::socket> sock)
-			 : sock(sock),
+			 : sock(move(sock)),
 			   front_handlers(),
 			   back_handlers(),
 			   front_buf(),
@@ -60,7 +63,7 @@ namespace wandbox {
 		template <typename Handler>
 		void async_write_command(std::string cmd, std::string data, Handler &&handler) {
 			std::unique_lock<std::recursive_mutex> l(mtx);
-			data = quoted_printable::encode(data);
+			data = quoted_printable::encode(move(data));
 			back_buf.emplace_back(cmd + " " + std::to_string(data.length()) + ":" + data + "\n");
 			back_handlers.emplace_back(std::forward<Handler>(handler));
 			flush();
@@ -121,9 +124,9 @@ namespace wandbox {
 		};
 		struct status_forwarder: pipe_forwarder_base {
 			status_forwarder(std::shared_ptr<asio::io_service> aio, std::shared_ptr<asio::signal_set> sigs, unique_child_pid &&pid)
-				 : aio(aio),
-				   sigs(sigs),
-				   pid(std::move(pid))
+				 : aio(move(aio)),
+				   sigs(move(sigs)),
+				   pid(move(pid))
 			{ }
 			bool closed() const noexcept override {
 				return pid.finished();
@@ -148,9 +151,9 @@ namespace wandbox {
 		};
 		struct input_forwarder: pipe_forwarder_base {
 			input_forwarder(std::shared_ptr<asio::io_service> aio, unique_fd &&fd, std::string input)
-				 : aio(aio),
-				   pipe(*aio),
-				   input(std::move(input))
+				 : aio(move(aio)),
+				   pipe(*this->aio),
+				   input(move(input))
 			{
 				pipe.assign(fd.get());
 				fd.release();
@@ -190,12 +193,12 @@ namespace wandbox {
 		};
 		struct output_forwarder: pipe_forwarder_base, private coroutine {
 			output_forwarder(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, unique_fd &&fd, std::string command, std::shared_ptr<write_limit_counter> limit)
-				 : aio(aio),
-				   sockbuf(std::make_shared<socket_write_buffer>(sock)),
-				   pipe(*aio),
-				   command(std::move(command)),
+				 : aio(move(aio)),
+				   sockbuf(std::make_shared<socket_write_buffer>(move(sock))),
+				   pipe(*this->aio),
+				   command(move(command)),
 				   buf(),
-				   limit(limit)
+				   limit(move(limit))
 			{
 				pipe.assign(fd.get());
 				fd.release();
@@ -204,7 +207,7 @@ namespace wandbox {
 				return !pipe.is_open();
 			}
 			void async_forward(std::function<void ()> handler) noexcept override {
-				this->handler = handler;
+				this->handler = move(handler);
 				(*this)();
 			}
 			void operator ()(error_code ec = error_code(), size_t len = 0) {
@@ -218,7 +221,7 @@ namespace wandbox {
 					}
 					yield {
 						std::string t(buf.begin(), buf.begin() + len);
-						sockbuf->async_write_command(command, std::move(t), ref(*this));
+						sockbuf->async_write_command(command, move(t), ref(*this));
 						limit->add(len);
 					}
 				}
@@ -233,15 +236,15 @@ namespace wandbox {
 		};
 
 		program_runner(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::unordered_map<std::string, std::string> received, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<DIR> workdir)
-			 : aio(aio),
-			   strand(std::make_shared<asio::io_service::strand>(*aio)),
-			   sock(sock),
-			   sockbuf(std::make_shared<socket_write_buffer>(sock)),
-			   received(std::move(received)),
-			   sigs(sigs),
-			   workdir(workdir),
+			 : aio(move(aio)),
+			   strand(std::make_shared<asio::io_service::strand>(*this->aio)),
+			   sock(move(sock)),
+			   sockbuf(std::make_shared<socket_write_buffer>(this->sock)),
+			   received(move(received)),
+			   sigs(move(sigs)),
+			   workdir(move(workdir)),
 			   pipes(),
-			   kill_timer(std::make_shared<asio::deadline_timer>(*aio)),
+			   kill_timer(std::make_shared<asio::deadline_timer>(*this->aio)),
 			   limitter(std::make_shared<write_limit_counter>(config.jail.output_limit_warn, config.jail.output_limit_kill)),
 			   laststatus(0)
 		{
@@ -285,25 +288,29 @@ namespace wandbox {
 					}
 					progargs.insert(progargs.begin(), { ptracer, "--config", config_file, "--" });
 					commands = {
-						{ std::move(ccargs), "", "CompilerMessageS", "CompilerMessageE", config.jail.compile_time_limit },
-						{ std::move(progargs), "StdIn", "StdOut", "StdErr", config.jail.program_duration }
+						{ move(ccargs), "", "CompilerMessageS", "CompilerMessageE", config.jail.compile_time_limit },
+						{ move(progargs), "StdIn", "StdOut", "StdErr", config.jail.program_duration }
 					};
 				}
 
-				yield sockbuf->async_write_command("Control", "Start", strand->wrap(*this));
+				yield {
+					PROTECT_FROM_MOVE(strand);
+					PROTECT_FROM_MOVE(sockbuf);
+					sockbuf->async_write_command("Control", "Start", strand->wrap(move(*this)));
+				}
 
 				while (!commands.empty()) {
-					current = std::move(commands.front());
+					current = move(commands.front());
 					commands.pop_front();
 					{
 						auto c = piped_spawn(_P_NOWAIT, workdir, current.arguments);
 						unique_child_pid pid(c.pid);
 
 						pipes = {
-							std::make_shared<input_forwarder>(aio, std::move(c.fd_stdin), received[current.stdin_command]),
-							std::make_shared<output_forwarder>(aio, sock, std::move(c.fd_stdout), current.stdout_command, limitter),
-							std::make_shared<output_forwarder>(aio, sock, std::move(c.fd_stderr), current.stderr_command, limitter),
-							std::make_shared<status_forwarder>(aio, sigs, std::move(pid)),
+							std::make_shared<input_forwarder>(aio, move(c.fd_stdin), received[current.stdin_command]),
+							std::make_shared<output_forwarder>(aio, sock, move(c.fd_stdout), current.stdout_command, limitter),
+							std::make_shared<output_forwarder>(aio, sock, move(c.fd_stderr), current.stderr_command, limitter),
+							std::make_shared<status_forwarder>(aio, sigs, move(pid)),
 						};
 						limitter->set_process(std::static_pointer_cast<status_forwarder>(pipes[3]));
 					}
@@ -317,12 +324,20 @@ namespace wandbox {
 					if (is_child()) goto wait_process_killed;
 
 					kill_timer->expires_from_now(ptime::seconds(current.soft_kill_wait));
-					yield kill_timer->async_wait(strand->wrap(*this));
+					yield {
+						PROTECT_FROM_MOVE(strand);
+						PROTECT_FROM_MOVE(kill_timer);
+						kill_timer->async_wait(strand->wrap(move(*this)));
+					}
 					if (ec) yield break;
 					std::static_pointer_cast<status_forwarder>(pipes[3])->kill(SIGXCPU);
 
 					kill_timer->expires_from_now(ptime::seconds(config.jail.kill_wait));
-					yield kill_timer->async_wait(strand->wrap(*this));
+					yield {
+						PROTECT_FROM_MOVE(strand);
+						PROTECT_FROM_MOVE(kill_timer);
+						kill_timer->async_wait(strand->wrap(move(*this)));
+					}
 					if (ec) yield break;
 					std::static_pointer_cast<status_forwarder>(pipes[3])->kill(SIGKILL);
 
@@ -334,9 +349,21 @@ namespace wandbox {
 					laststatus = std::static_pointer_cast<status_forwarder>(pipes[3])->get_status();
 					if (!WIFEXITED(laststatus) || (WEXITSTATUS(laststatus) != 0)) break;
 				}
-				if (WIFEXITED(laststatus)) yield sockbuf->async_write_command("ExitCode", std::to_string(WEXITSTATUS(laststatus)), strand->wrap(*this));
-				if (WIFSIGNALED(laststatus)) yield sockbuf->async_write_command("Signal", ::strsignal(WTERMSIG(laststatus)), strand->wrap(*this));
-				yield sockbuf->async_write_command("Control", "Finish", strand->wrap(*this));
+				if (WIFEXITED(laststatus)) yield {
+					PROTECT_FROM_MOVE(strand);
+					PROTECT_FROM_MOVE(sockbuf);
+					sockbuf->async_write_command("ExitCode", std::to_string(WEXITSTATUS(laststatus)), strand->wrap(move(*this)));
+				}
+				if (WIFSIGNALED(laststatus)) yield {
+					PROTECT_FROM_MOVE(strand);
+					PROTECT_FROM_MOVE(sockbuf);
+					sockbuf->async_write_command("Signal", ::strsignal(WTERMSIG(laststatus)), strand->wrap(move(*this)));
+				}
+				yield {
+					PROTECT_FROM_MOVE(strand);
+					PROTECT_FROM_MOVE(sockbuf);
+					sockbuf->async_write_command("Control", "Finish", strand->wrap(move(*this)));
+				}
 			}
 		}
 
@@ -358,14 +385,14 @@ namespace wandbox {
 	struct program_writer: private coroutine {
 		typedef void result_type;
 		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received)
-			 : aio(aio),
-			   sock(sock),
+			 : aio(move(aio)),
+			   sock(move(sock)),
 			   src_text(std::make_shared<std::string>(received["Source"])),
 			   src_filename("prog" + get_compiler(received).source_suffix),
-			   file(std::make_shared<asio::posix::stream_descriptor>(*aio)),
-			   sigs(sigs),
+			   file(std::make_shared<asio::posix::stream_descriptor>(*this->aio)),
+			   sigs(move(sigs)),
 			   workdir(make_tmpdir("wandboxXXXXXX")),
-			   received(std::move(received)),
+			   received(move(received)),
 			   aiocb(std::make_shared<struct aiocb>())
 		{
 		}
@@ -379,7 +406,7 @@ namespace wandbox {
 				while (true) {
 					aiocb->aio_fildes = ::openat(::dirfd(workdir.get()), src_filename.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
 					if (aiocb->aio_fildes == -1) {
-						if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(*this);
+						if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
 						else yield break;
 					} else {
 						break;
@@ -391,10 +418,10 @@ namespace wandbox {
 				aiocb->aio_sigevent.sigev_signo = SIGHUP;
 				::aio_write(aiocb.get());
 				do {
-					yield yield sigs->async_wait(*this);
+					yield sigs->async_wait(move(*this));
 				} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
 				::close(aiocb->aio_fildes);
-				return program_runner(aio, std::move(sock), std::move(received), std::move(sigs), std::move(workdir))();
+				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir))();
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
@@ -411,18 +438,17 @@ namespace wandbox {
 	struct version_sender: private coroutine {
 		typedef void result_type;
 		version_sender(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs)
-			 : aio(aio),
-			   sock(sock),
-			   sockbuf(std::make_shared<socket_write_buffer>(sock)),
+			 : aio(move(aio)),
+			   sock(move(sock)),
+			   sockbuf(std::make_shared<socket_write_buffer>(this->sock)),
 			   pipe_stdout(nullptr),
-			   sigs(sigs),
+			   sigs(move(sigs)),
 			   commands(),
-			   current(nullptr),
+			   current(),
 			   child(nullptr),
-			   line(),
 			   buf(nullptr)
 		{
-			for (const auto &c: config.compilers) commands.push_back(&c);
+			for (const auto &c: config.compilers) commands.push_back(c);
 		}
 		version_sender(const version_sender &) = default;
 		version_sender &operator =(const version_sender &) = default;
@@ -431,17 +457,17 @@ namespace wandbox {
 		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
 				while (!commands.empty()) {
-					current = commands.front();
+					current = move(commands.front());
 					commands.pop_front();
-					if (current->version_command.empty() || not current->displayable) continue;
+					if (current.version_command.empty() || not current.displayable) continue;
 					{
-						auto c = piped_spawn(_P_NOWAIT, opendir("/"), current->version_command);
+						auto c = piped_spawn(_P_NOWAIT, opendir("/"), current.version_command);
 						child = std::make_shared<unique_child_pid>(c.pid);
 						pipe_stdout = std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdout.get());
 						c.fd_stdout.release();
 					}
 					do {
-						yield sigs->async_wait(*this);
+						yield sigs->async_wait(move(*this));
 						child->wait_nonblock();
 					} while (not child->finished());
 
@@ -452,17 +478,22 @@ namespace wandbox {
 
 					yield {
 						buf = std::make_shared<asio::streambuf>();
-						asio::async_read_until(*pipe_stdout, *buf, '\n', *this);
+						PROTECT_FROM_MOVE(buf);
+						PROTECT_FROM_MOVE(pipe_stdout);
+						asio::async_read_until(*pipe_stdout, *buf, '\n', move(*this));
 					}
 
 					{
 						std::istream is(buf.get());
 						std::string ver;
 						if (!getline(is, ver)) continue;
-						versions.emplace_back(generate_displaying_compiler_config(*current, ver, config.switches));
+						versions.emplace_back(generate_displaying_compiler_config(move(current), ver, config.switches));
 					}
 				}
-				yield sockbuf->async_write_command("VersionResult", "[" + boost::algorithm::join(versions, ",") + "]", *this);
+				yield {
+					auto s = "[" + boost::algorithm::join(move(versions), ",") + "]";
+					sockbuf->async_write_command("VersionResult", move(s), move(*this));
+				}
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
@@ -470,10 +501,9 @@ namespace wandbox {
 		std::shared_ptr<socket_write_buffer> sockbuf;
 		std::shared_ptr<asio::posix::stream_descriptor> pipe_stdout;
 		std::shared_ptr<asio::signal_set> sigs;
-		std::deque<const compiler_trait *> commands;
-		const compiler_trait *current;
+		std::deque<compiler_trait> commands;
+		compiler_trait current;
 		std::shared_ptr<unique_child_pid> child;
-		std::string line;
 		std::vector<std::string> versions;
 		std::shared_ptr<asio::streambuf> buf;
 	};
@@ -481,19 +511,25 @@ namespace wandbox {
 	struct compiler_bridge: private coroutine {
 		typedef void result_type;
 		compiler_bridge(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs)
-			 : aio(aio),
-			   sock(sock),
+			 : aio(move(aio)),
+			   sock(move(sock)),
 			   buf(std::make_shared<std::vector<char>>()),
-			   sigs(sigs),
+			   sigs(move(sigs)),
 			   received()
 		{
 		}
+		compiler_bridge(const compiler_bridge &) = default;
+		compiler_bridge &operator =(const compiler_bridge &) = default;
+		compiler_bridge(compiler_bridge &&) = default;
+		compiler_bridge &operator =(compiler_bridge &&) = default;
 		void operator ()(error_code ec = error_code(), size_t len = 0) {
 			reenter (this) while (true) {
 				yield {
 					const auto offset = buf->size();
 					buf->resize(offset + BUFSIZ);
-					sock->async_read_some(asio::buffer(asio::buffer(*buf) + offset), *this);
+					PROTECT_FROM_MOVE(buf);
+					PROTECT_FROM_MOVE(sock);
+					sock->async_read_some(asio::buffer(asio::buffer(*buf) + offset), move(*this));
 				}
 				if (ec) return (void)sock->close(ec);
 				buf->erase(buf->end()-(BUFSIZ-len), buf->end());
@@ -504,9 +540,9 @@ namespace wandbox {
 					int len = 0;
 					std::string data;
 					if (!qi::parse(ite, buf->end(), +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) break;
-					if (command == "Control" && data == "run") return program_writer(aio, std::move(sock), sigs, std::move(received))();
-					else if (command == "Version") return version_sender(aio, std::move(sock), sigs)();
-					else received[command] += quoted_printable::decode(data);
+					if (command == "Control" && data == "run") return program_writer(move(aio), move(sock), move(sigs), move(received))();
+					else if (command == "Version") return version_sender(move(aio), move(sock), move(sigs))();
+					else received[command] += quoted_printable::decode(move(data));
 				}
 				buf->erase(buf->begin(), ite);
 			}
@@ -520,19 +556,24 @@ namespace wandbox {
 
 	struct listener: private coroutine {
 		typedef void result_type;
-		void operator ()(error_code = error_code(), std::shared_ptr<tcp::socket> sock = nullptr) {
+		void operator ()(error_code = error_code()) {
 			reenter (this) while (true) {
 				sock = std::make_shared<tcp::socket>(*aio);
-				yield acc->async_accept(*sock, std::bind<void>(*this, _1, sock));
-				compiler_bridge(aio, std::move(sock), sigs)();
+				yield {
+					PROTECT_FROM_MOVE(sock);
+					PROTECT_FROM_MOVE(acc);
+					acc->async_accept(*sock, move(*this));
+				}
+				compiler_bridge(aio, move(sock), sigs)();
 			}
 		}
 		template <typename ...Args>
 		listener(std::shared_ptr<asio::io_service> aio, Args &&...args)
-			 : aio(aio),
+			 : aio(move(aio)),
 			   ep(std::forward<Args>(args)...),
-			   acc(std::make_shared<tcp::acceptor>(*aio, ep)),
-			   sigs(std::make_shared<asio::signal_set>(*aio, SIGCHLD, SIGHUP))
+			   acc(std::make_shared<tcp::acceptor>(*this->aio, this->ep)),
+			   sigs(std::make_shared<asio::signal_set>(*this->aio, SIGCHLD, SIGHUP)),
+			   sock()
 		{
 			try {
 				mkdir(config.jail.basedir, 0700);
@@ -542,12 +583,17 @@ namespace wandbox {
 			basedir = opendir(config.jail.basedir);
 			chdir(basedir);
 		}
+		listener(const listener &) = default;
+		listener &operator =(const listener &) = default;
+		listener(listener &&) = default;
+		listener &operator =(listener &&) = default;
 	private:
 		std::shared_ptr<asio::io_service> aio;
 		tcp::endpoint ep;
 		std::shared_ptr<tcp::acceptor> acc;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::shared_ptr<DIR> basedir;
+		std::shared_ptr<tcp::socket> sock;
 	};
 
 }
