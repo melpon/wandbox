@@ -6,59 +6,43 @@ module VM.Conduit (
 ) where
 
 import Import
-import qualified Data.Conduit as C
+import qualified Data.Conduit                           as Conduit
+import qualified Data.Conduit.Binary                    as ConduitB
+import qualified Data.Conduit.List                      as ConduitL
+import qualified Data.Attoparsec.ByteString             as AttoBS
+import qualified Data.ByteString                        as BS
+import qualified System.IO                              as I
+import qualified Network                                as N
+
 import Data.Conduit ((=$), ($=))
-import qualified Data.Conduit.Binary as CB
-import qualified Data.Conduit.List as CL
-import qualified Data.Attoparsec.ByteString as AB
-import qualified Data.ByteString as B
-import System.IO (Handle)
-import Network (connectTo)
 
 import VM.IpPortFile (ipPortFile)
 import VM.Protocol (Protocol(..), protocolParser, toString)
 
-type ProtoParse = B.ByteString -> AB.Result Protocol
-
-parsePipe :: Monad m => C.Conduit B.ByteString m (Either String Protocol)
+parsePipe :: Monad m => Conduit.Conduit BS.ByteString m (Either String Protocol)
 parsePipe = go protoParse
   where
     go parse = do
-      mInput <- C.await
+      mInput <- Conduit.await
       case mInput of
         Nothing -> return ()
         (Just input) -> do
           let (parse',results) = parseWhile parse input
-          mapM_ C.yield results
+          mapM_ Conduit.yield results
           go parse'
-    protoParse = AB.parse protocolParser
+    protoParse = AttoBS.parse protocolParser
     parseWhile parse input = do
       case parse input of
-        (AB.Done remain result) -> let (parse',xs) = parseWhile protoParse remain
+        (AttoBS.Done remain result) -> let (parse',xs) = parseWhile protoParse remain
                                    in (parse',Right result:xs)
-        (AB.Partial f)          -> (f,[])
-        (AB.Fail a b c)         -> (protoParse,[Left $ show (a,b,c)])
+        (AttoBS.Partial f)          -> (f,[])
+        (AttoBS.Fail a b c)         -> (protoParse,[Left $ show (a,b,c)])
 
-{-
-C.conduitState protoParse push close
-  where
-    protoParse = AB.parse protocolParser
-    parseWhile parse input =
-      case parse input of
-        (AB.Done remain result) -> let (parse',xs) = parseWhile protoParse remain
-                                   in (parse',Right result:xs)
-        (AB.Partial f)          -> (f,[])
-        (AB.Fail a b c)         -> (protoParse,[Left $ show (a,b,c)])
-    push parse input = let (parse',results) = parseWhile parse input
-                       in return $ C.StateProducing parse' results
-    close _ = return []
--}
+connectVM :: IO I.Handle
+connectVM = uncurry N.connectTo $(ipPortFile "config/vmip")
 
-connectVM :: IO Handle
-connectVM = uncurry connectTo $(ipPortFile "config/vmip")
+sendVM :: Conduit.MonadResource m => I.Handle -> Conduit.Sink Protocol m ()
+sendVM handle = ConduitL.map toString =$ ConduitB.sinkHandle handle
 
-sendVM :: C.MonadResource m => Handle -> C.Sink Protocol m ()
-sendVM handle = CL.map toString =$ CB.sinkHandle handle
-
-receiveVM :: C.MonadResource m => Handle -> C.Source m (Either String Protocol)
-receiveVM handle = CB.sourceHandle handle $= parsePipe
+receiveVM :: Conduit.MonadResource m => I.Handle -> Conduit.Source m (Either String Protocol)
+receiveVM handle = ConduitB.sourceHandle handle $= parsePipe
