@@ -26,7 +26,6 @@ library
                      Handler.Permlink
                      ChanMap
                      VM.Protocol
-                     VM.IpPortFile
                      VM.Conduit
                      VM.QuotedPrintable
 

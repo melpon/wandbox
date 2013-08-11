@@ -16,7 +16,6 @@ import qualified Network                                as N
 
 import Data.Conduit ((=$), ($=))
 
-import VM.IpPortFile (ipPortFile)
 import VM.Protocol (Protocol(..), protocolParser, toString)
 
 parsePipe :: Monad m => Conduit.Conduit BS.ByteString m (Either String Protocol)
@@ -38,8 +37,8 @@ parsePipe = go protoParse
         (AttoBS.Partial f)          -> (f,[])
         (AttoBS.Fail a b c)         -> (protoParse,[Left $ show (a,b,c)])
 
-connectVM :: IO I.Handle
-connectVM = uncurry N.connectTo $(ipPortFile "config/vmip")
+connectVM :: N.HostName -> N.PortID -> IO I.Handle
+connectVM = N.connectTo
 
 sendVM :: Conduit.MonadResource m => I.Handle -> Conduit.Sink Protocol m ()
 sendVM handle = ConduitL.map toString =$ ConduitB.sinkHandle handle

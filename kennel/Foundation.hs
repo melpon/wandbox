@@ -4,6 +4,7 @@ module Foundation
   , Handler
   , Widget
   , resourcesApp
+  , getExtra
   ) where
 
 import Import

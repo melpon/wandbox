@@ -22,6 +22,7 @@ import qualified Data.Aeson                             as Aeson
 import qualified Data.Aeson.Types                       as AesonTypes
 import qualified Data.Attoparsec                        as Atto
 import qualified Data.Attoparsec.ByteString             as AttoBS
+import qualified Data.Attoparsec.Number                 as AttoNum
 import qualified Data.Bits                              as Bits
 import qualified Data.ByteString                        as BS
 import qualified Data.ByteString.Char8                  as BSC

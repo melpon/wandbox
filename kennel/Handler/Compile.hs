@@ -18,10 +18,12 @@ import qualified Codec.Binary.Url                       as Url
 import qualified Data.Conduit                           as Conduit
 import qualified Data.Conduit.List                      as ConduitL
 import qualified Yesod                                  as Y
+import qualified Network                                as N
 
 import Data.Conduit (($$))
 
-import Foundation (Handler, getChanMap)
+import Foundation (Handler, getChanMap, getExtra)
+import Settings (Extra(..))
 import Model (makeCode, Code, codeCompiler, codeCode, codeOptions)
 import ChanMap (writeChan)
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
@@ -35,9 +37,9 @@ makeProtocols code =
     Just $ Protocol CompilerOption $ codeOptions code,
     Just $ Protocol Control "run"]
 
-vmHandle :: Code -> Conduit.Sink (Either String Protocol) (Conduit.ResourceT IO) () -> IO ()
-vmHandle code sink =
-  Exc.bracket connectVM I.hClose $ \handle -> do
+vmHandle :: N.HostName -> N.PortID -> Code -> Conduit.Sink (Either String Protocol) (Conduit.ResourceT IO) () -> IO ()
+vmHandle host port code sink =
+  Exc.bracket (connectVM host port) I.hClose $ \handle -> do
     Conduit.runResourceT $ ConduitL.sourceList (makeProtocols code) $$ sendVM handle
     I.hFlush handle
     Conduit.runResourceT $ receiveVM handle $$ sink
@@ -72,10 +74,12 @@ postCompileR ident = do
   (Just code) <- Y.lookupPostParam "code"
   (Just options) <- Y.lookupPostParam "options"
   codeInstance <- Y.liftIO $ makeCode compiler code options
-  _ <- go codeInstance
+  host <- extraVMHost <$> getExtra
+  port <- extraVMPort <$> getExtra
+  _ <- go host port codeInstance
   return ()
   where
-    go codeInstance = do
+    go host port codeInstance = do
       cm <- getChanMap <$> Y.getYesod
-      _ <- Y.liftIO $ Concurrent.forkIO $ vmHandle codeInstance $ sinkProtocol $ writeChan cm ident
+      _ <- Y.liftIO $ Concurrent.forkIO $ vmHandle host port codeInstance $ sinkProtocol $ writeChan cm ident
       return ()

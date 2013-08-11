@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | Settings are centralized, as much as possible, into this file. This
 -- includes database connection settings, static file locations, etc.
 -- In addition, you can configure a number of different aspects of Yesod
@@ -10,10 +11,13 @@ import qualified Language.Haskell.TH                    as TH
 import qualified Database.Persist.Sqlite                as PersistSqlite
 import qualified Yesod.Default.Config                   as YDConfig
 import qualified Yesod.Default.Util                     as YDUtil
+import qualified Data.Attoparsec.Number                 as AttoNum
 import qualified Data.Text                              as T
 import qualified Data.Yaml                              as Yaml
 import qualified Data.Default                           as Default
 import qualified Text.Hamlet                            as Hamlet
+import qualified Network                                as N
+import qualified Control.Monad                          as Monad
 
 import Data.Yaml ((.:))
 import Text.Shakespeare.Text (st)
@@ -69,9 +73,17 @@ widgetFile = (if development then YDUtil.widgetFileReload
 data Extra = Extra
     { extraCopyright :: T.Text
     , extraAuth :: Bool
-    } deriving Show
+    , extraVMHost :: N.HostName
+    , extraVMPort :: N.PortID
+    }
+
+instance Yaml.FromJSON N.PortID where
+  parseJSON (Yaml.Number (AttoNum.I v)) = return $ N.PortNumber $ fromInteger v
+  parseJSON _ = Monad.mzero
 
 parseExtra :: YDConfig.DefaultEnv -> Yaml.Object -> Yaml.Parser Extra
 parseExtra _ o = Extra
     <$> o .:  "copyright"
     <*> o .:  "auth"
+    <*> o .:  "vm_host"
+    <*> o .:  "vm_port"

@@ -18,6 +18,7 @@ import qualified Data.Conduit.List                      as ConduitL
 import qualified Data.Aeson                             as Aeson
 import qualified Data.Aeson.Types                       as AesonTypes
 import qualified Control.Monad                          as Monad
+import qualified Network                                as N
 import qualified Network.HTTP.Types                     as HT
 import qualified Yesod                                  as Y
 
@@ -32,8 +33,8 @@ import Settings.StaticFiles (
     polyfills_EventSource_js, js_jquery_url_js, ace_ace_js,
     ace_keybinding_vim_js, ace_keybinding_emacs_js,
     compiling_gif)
-import Settings (widgetFile)
-import Foundation (Handler, Widget, Route(..))
+import Settings (widgetFile, Extra(..))
+import Foundation (Handler, Widget, Route(..), getExtra)
 
 
 data CompilerSwitchSelectOption = CompilerSwitchSelectOption
@@ -107,14 +108,14 @@ instance Aeson.FromJSON CompilerInfo where
     return $ CompilerInfo version switches
   parseJSON _ = Monad.mzero
 
-getCompilerInfos :: IO [CompilerInfo]
-getCompilerInfos = do
+getCompilerInfos :: N.HostName -> N.PortID -> IO [CompilerInfo]
+getCompilerInfos host port = do
     text <- fromVM
     (Right infos) <- return $ Aeson.eitherDecode $ BSL.pack $ BS.unpack $ TE.encodeUtf8 text :: IO (Either String [CompilerInfo])
     return infos
   where
     fromVM = do
-      Exc.bracket connectVM I.hClose $ \handle -> do
+      Exc.bracket (connectVM host port) I.hClose $ \handle -> do
         Conduit.runResourceT $ ConduitL.sourceList [Protocol Version ""] $$ sendVM handle
         I.hFlush handle
         Conduit.runResourceT $ receiveVM handle $$ do
@@ -143,7 +144,9 @@ editor = do
 
 compiler :: Widget
 compiler = do
-  compilerInfos <- Y.liftIO getCompilerInfos
+  host <- Y.handlerToWidget $ extraVMHost <$> getExtra
+  port <- Y.handlerToWidget $ extraVMPort <$> getExtra
+  compilerInfos <- Y.liftIO (getCompilerInfos host port)
   $(widgetFile "compiler")
   where
     makeSwitch _ (CompilerSwitchSingle name flags default_ displayName) =
