@@ -90,6 +90,7 @@ library
                  , blaze-builder
                  , lifted-base
                  , http-types
+                 , optparse-applicative
 
 executable         kennel
     if flag(library-only)
@@ -100,6 +101,7 @@ executable         kennel
     build-depends:     base
                      , kennel
                      , yesod
+                     , optparse-applicative
 
     ghc-options:       -threaded -O2
 

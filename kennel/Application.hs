@@ -18,6 +18,7 @@ import qualified Control.Monad.Logger                   as MonadLogger
 import qualified System.IO                              as I
 import qualified System.Log.FastLogger                  as FastLogger
 import qualified Yesod.Auth.HashDB                      as YAuthHDB
+import qualified System.Environment                     as Environment
 
 import Yesod.Auth (getAuth)
 import Yesod.Default.Handlers (getFaviconR, getRobotsR)
@@ -89,9 +90,11 @@ makeFoundation conf = do
 
 -- for yesod devel
 getApplicationDev :: IO (Int, Y.Application)
-getApplicationDev =
-    YDMain.defaultDevelApp loader makeApplication
+getApplicationDev = do
+    config <- maybe "config/settings.yml" id <$> lookup "CONFIG" <$> Environment.getEnvironment
+    YDMain.defaultDevelApp (loader config) makeApplication
   where
-    loader = YDConfig.loadConfig (YDConfig.configSettings YDConfig.Development)
+    loader config = YDConfig.loadConfig (YDConfig.configSettings YDConfig.Development)
         { YDConfig.csParseExtra = parseExtra
+        , YDConfig.csFile = \_ -> return config
         }

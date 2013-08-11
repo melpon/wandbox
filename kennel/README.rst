@@ -44,4 +44,10 @@
  $ cabal-dev install yesod-bin
  $ cabal-dev/bin/yesod --dev devel
 
-config/settings.yml の Development の設定が使われるので、適宜良い感じにしておくこと。
+デフォルトでは config/settings.yml の Development の設定が使われる。
+
+設定ファイルを指定するには、環境変数 CONFIG にパスを指定する。 ::
+
+ $ CONFIG="config/settings_test.yml" cabal-dev/bin/yesod --dev devel
+
+この場合は config/settings_test.yml の Development の設定が使われる。
