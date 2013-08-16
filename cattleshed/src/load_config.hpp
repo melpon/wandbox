@@ -12,6 +12,7 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
+#include <boost/optional.hpp>
 
 namespace wandbox {
 	namespace mendex = boost::multi_index;
@@ -20,6 +21,7 @@ namespace wandbox {
 		std::string name;
 		std::vector<std::string> flags;
 		std::string display_name;
+		boost::optional<std::string> display_flags;
 		std::vector<std::string> conflicts;
 		bool runtime;
 		int insert_position;
