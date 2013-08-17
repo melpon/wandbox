@@ -43,7 +43,10 @@ postPermlinkR = do
   where
     go (Just code) = do
       link <- Y.liftIO $ T.pack <$> (Monad.replicateM 16 $ Char.chr <$> randomRAny (0,255) isLinkCode)
-      _ <- Y.runDB (Y.insert $ Link link code)
+      _ <- Y.runDB $ do
+            codeId <- Y.insert code
+            _ <- Y.insert $ Link link codeId
+            return ()
       let json = Y.object ["success" .= True, "link" .= link]
       Y.returnJson json
     go _ = do
@@ -53,5 +56,6 @@ postPermlinkR = do
 getLinkedPermlinkR :: T.Text -> Handler Y.Html
 getLinkedPermlinkR link = do
     permlink <- Y.runDB (Y.getBy404 $ UniqueLink link)
-    let code = linkCode $ Y.entityVal permlink
-    makeRootR (Just code)
+    let codeId = linkCodeId $ Y.entityVal permlink
+    code <- Y.runDB (Y.get404 codeId)
+    makeRootR (Just $ code)

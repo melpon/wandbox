@@ -9,7 +9,7 @@ Code
     deriving Show
 Link
     permlink T.Text
-    code Code
+    codeId CodeId
     UniqueLink permlink
     deriving Show
 
