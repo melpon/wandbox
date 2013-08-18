@@ -1,5 +1,8 @@
 <div .row-fluid>
-  <div .span12 #header>
+  <div .span10 .offset1 #header>
+    <div .navbar>
+      <div .navbar-inner>
+        <a .brand href="@{RootR}">Wandbox
 <div .row-fluid>
   <div .span2 .offset1>
     ^{compiler}
