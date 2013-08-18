@@ -54,6 +54,13 @@ $(function() {
   editor.onrun = function() {
     post_code(compiler, result_container);
   };
+  editor.editor_changed = function() {
+    if (editor.is_legacy()) {
+      $('#compile').text('Run');
+    } else {
+      $('#compile').text('Run (or Ctrl+Enter)');
+    }
+  };
 
   // create compiler
   var compiler = new Compiler('#compiler', '#compile-options');

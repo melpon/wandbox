@@ -39,6 +39,8 @@ Editor.prototype._initialize = function() {
     } else {
       $(self.settings_id).find('select').removeAttr('disabled');
     }
+    if (self.editor_changed)
+      self.editor_changed();
   });
   $(this.id + ' .legacy-editor').hide();
 
