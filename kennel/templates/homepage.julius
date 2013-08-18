@@ -27,10 +27,13 @@ function post_code(compiler, result_container) {
 
 function update_compile_command(compiler) {
   var command = compiler.get_selected_compiler_element().attr('command');
+  var compiler_name = compiler.get_selected_compiler_element().text();
   var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('flags'); });
 
+  $('#compiler_name').text(compiler_name);
+
   var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ');
-  $('#compile_command').html('<code>' + compile_command + '</code>');
+  $('#compile_command').html($('<code>').text(compile_command));
 }
 
 $(function() {
