@@ -63,6 +63,6 @@ ResultContainer.prototype.post_code = function(compiler, code) {
 }
 
 ResultContainer.prototype.set_code = function(compiler, code, outputs) {
-  var result_window = this._post_init(compiler, code, 0);
+  var result_window = this._post_init(compiler, code, 'permlink');
   result_window.set_code(compiler, code, outputs);
 }
