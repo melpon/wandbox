@@ -44,6 +44,11 @@ ResultContainer.prototype._post_init = function(compiler, code, name) {
   tab.find('a').tab('show');
 
   var result_window = new ResultWindow('#' + id_name);
+  result_window.onfinish = function() {
+    self.running = false;
+    if (self.onfinish)
+      self.onfinish();
+  };
   return result_window;
 }
 
@@ -55,12 +60,6 @@ ResultContainer.prototype.post_code = function(compiler, code) {
 
   var result_window = this._post_init(compiler, code, this._next_name());
   result_window.post_code(compiler, code);
-
-  result_window.onfinish = function() {
-    self.running = false;
-    if (self.onfinish)
-      self.onfinish();
-  };
 }
 
 ResultContainer.prototype.set_code = function(compiler, code, outputs) {

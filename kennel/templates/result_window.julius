@@ -208,7 +208,6 @@ ResultWindow.prototype.post_code = function(compiler, code) {
 }
 
 ResultWindow.prototype.set_code = function(compiler, code, outputs) {
-  console.log(code, outputs);
   var self = this;
   this.code_window(compiler, code);
   $.each(outputs, function(n,e) {
