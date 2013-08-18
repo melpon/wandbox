@@ -73,6 +73,8 @@ $(function() {
       decode_uri(code.compiler),
       decode_uri(code.options)
     );
+
+    result_container.set_code(compiler, decode_uri(code.code), code.outputs);
   } else {
     compiler.set_compiler(#{defaultCompiler});
   }

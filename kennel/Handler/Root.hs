@@ -26,7 +26,7 @@ import Data.Aeson ((.=), (.:))
 import Data.Conduit (($$))
 import Yesod (whamlet, shamlet)
 
-import Model (Code(..))
+import Model (Code(..), LinkOutput(..))
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 import Settings.StaticFiles (
@@ -173,8 +173,8 @@ compiler = do
           <input type="radio" name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}">#{displayName}
       |]
 
-makeRootR :: Maybe Code -> Handler Y.Html
-makeRootR mCode = do
+makeRootR :: Maybe (Code, [LinkOutput]) -> Handler Y.Html
+makeRootR mCodeOutputs = do
     app <- Y.getYesod
     Y.defaultLayout $ do
         Y.setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
@@ -190,10 +190,16 @@ makeRootR mCode = do
   where
     urlEncode = Aeson.String . T.pack . Url.encode . BS.unpack . TE.encodeUtf8
     defaultCompiler = Aeson.String "gcc-head"
-    jsonCode = maybe Aeson.Null tojson mCode
-    tojson code = Aeson.object ["compiler" .= urlEncode (codeCompiler code)
-                            ,"code" .= urlEncode (codeCode code)
-                            ,"options" .= urlEncode (codeOptions code)]
+    jsonCode = maybe Aeson.Null tojson mCodeOutputs
+    tojson (code, outputs) =
+        Aeson.object ["compiler" .= urlEncode (codeCompiler code)
+                     ,"code" .= urlEncode (codeCode code)
+                     ,"options" .= urlEncode (codeOptions code)
+                     ,"outputs" .= map tojson' outputs]
+      where
+        tojson' output =
+            Aeson.object ["type" .= urlEncode (linkOutputType output)
+                         ,"output" .= urlEncode (linkOutputOutput output)]
 
 -- This is a handler function for the GET request method on the RootR
 -- resource pattern. All of your resource patterns are defined in

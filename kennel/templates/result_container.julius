@@ -19,17 +19,11 @@ ResultContainer.prototype._next_name = function() {
   return name;
 }
 
-ResultContainer.prototype.post_code = function(compiler, code) {
+ResultContainer.prototype._post_init = function(compiler, code, name) {
   var self = this;
-
-  if (this.running) {
-    return;
-  }
-  this.running = true;
 
   var TAB_PREFIX = 'result-container-tab-';
 
-  var name = this._next_name();
   var id_name = TAB_PREFIX + name;
   var tab = $('<li><button type="button" class="close" href="#">&times;</button><a data-toggle="tab" href="#' + id_name + '">#' + name + '</a></li>');
   var content = $('<div class="tab-pane active result-window" id="' + id_name + '">');
@@ -50,6 +44,16 @@ ResultContainer.prototype.post_code = function(compiler, code) {
   tab.find('a').tab('show');
 
   var result_window = new ResultWindow('#' + id_name);
+  return result_window;
+}
+
+ResultContainer.prototype.post_code = function(compiler, code) {
+  if (this.running) {
+    return;
+  }
+  this.running = true;
+
+  var result_window = this._post_init(compiler, code, this._next_name());
   result_window.post_code(compiler, code);
 
   result_window.onfinish = function() {
@@ -57,4 +61,9 @@ ResultContainer.prototype.post_code = function(compiler, code) {
     if (self.onfinish)
       self.onfinish();
   };
+}
+
+ResultContainer.prototype.set_code = function(compiler, code, outputs) {
+  var result_window = this._post_init(compiler, code, 0);
+  result_window.set_code(compiler, code, outputs);
 }

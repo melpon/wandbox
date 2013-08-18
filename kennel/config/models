@@ -12,5 +12,12 @@ Link
     codeId CodeId
     UniqueLink permlink
     deriving Show
+LinkOutput
+    linkId LinkId
+    order Int
+    type T.Text
+    output T.Text
+    UniqueLinkOutput linkId order
+    deriving Show
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

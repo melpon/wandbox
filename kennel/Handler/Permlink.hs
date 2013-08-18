@@ -13,7 +13,7 @@ import qualified Data.Char                              as Char
 import Yesod ((.=))
 
 import Foundation (Handler)
-import Model (makeCode, Unique(UniqueLink), Link(..))
+import Model (makeCode, Unique(UniqueLink), EntityField(LinkOutputLinkId, LinkOutputOrder), Link(..), LinkOutput(..))
 import Handler.Root (makeRootR)
 
 randomRAny :: Random.Random a => (a,a) -> (a -> Bool) -> IO a
@@ -30,27 +30,28 @@ isLinkCode _ = False
 
 postPermlinkR :: Handler Y.Value
 postPermlinkR = do
-    mCompiler <- Y.lookupPostParam "compiler"
-    mCode <- Y.lookupPostParam "code"
-    mOpts <- Y.lookupPostParam "options"
-    -- liftIO . (Just <$>) :: IO Code -> Handler (Maybe Code)
-    mCodeInstance <- maybe (return Nothing) (Y.liftIO . (Just <$>)) $
-                         -- Maybe (IO Code)
-                         makeCode <$> mCompiler
-                                  <*> mCode
-                                  <*> mOpts
-    go mCodeInstance
+    (Just compiler) <- Y.lookupPostParam "compiler"
+    (Just code) <- Y.lookupPostParam "code"
+    (Just opts) <- Y.lookupPostParam "options"
+    codeInstance <- Y.liftIO $ makeCode compiler code opts
+    linkName <- Y.liftIO $ T.pack <$> (Monad.replicateM 16 $ Char.chr <$> randomRAny (0,255) isLinkCode)
+    typeOutputs <- Y.lookupPostParams "outputs[]"
+
+    go codeInstance linkName typeOutputs
   where
-    go (Just code) = do
-      link <- Y.liftIO $ T.pack <$> (Monad.replicateM 16 $ Char.chr <$> randomRAny (0,255) isLinkCode)
-      _ <- Y.runDB $ do
-            codeId <- Y.insert code
-            _ <- Y.insert $ Link link codeId
-            return ()
-      let json = Y.object ["success" .= True, "link" .= link]
-      Y.returnJson json
-    go _ = do
-      let json = Y.object ["success" .= False]
+    toOutput linkId (order, typeOutput) =
+        let (typ, commaOutput) = T.break (','==) typeOutput
+            output = T.drop 1 commaOutput
+        in LinkOutput linkId order typ output
+    go code linkName typeOutputs = do
+      Y.runDB $ do
+          codeId <- Y.insert code
+          let link = Link linkName codeId
+          linkId <- Y.insert link
+          let outputs = map (toOutput linkId) $ zip [0..] typeOutputs
+          _ <- Y.insertMany outputs
+          return ()
+      let json = Y.object ["success" .= True, "link" .= linkName]
       Y.returnJson json
 
 getLinkedPermlinkR :: T.Text -> Handler Y.Html
@@ -58,4 +59,5 @@ getLinkedPermlinkR link = do
     permlink <- Y.runDB (Y.getBy404 $ UniqueLink link)
     let codeId = linkCodeId $ Y.entityVal permlink
     code <- Y.runDB (Y.get404 codeId)
-    makeRootR (Just $ code)
+    outputs <- Y.runDB (Y.selectList [LinkOutputLinkId Y.==. Y.entityKey permlink] [Y.Asc LinkOutputOrder])
+    makeRootR (Just (code, map Y.entityVal outputs))

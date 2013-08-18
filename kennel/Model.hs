@@ -1,9 +1,12 @@
 module Model
   ( Y.Unique(..)
+  , Y.EntityField(..)
   , Code(..)
   , CodeId
   , Link(..)
   , LinkId
+  , LinkOutput(..)
+  , LinkOutputId
   , migrateAll
   , makeCode
   ) where

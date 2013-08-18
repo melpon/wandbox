@@ -6,18 +6,6 @@ function parse(str) {
   };
 }
 
-function encode_html_entity(str) {
-  return $.map(str, function(c) {
-    if (c == ' ') return '&nbsp;';
-    if (c == '<') return '&lt;';
-    if (c == '>') return '&gt;';
-    if (c == '&') return '&amp;';
-    if (c == '"') return '&quot;';
-    if (c == "'") return '&#39;';
-    return c;
-  }).join("");
-}
-
 function random_string(n) {
     var a = 'abcdefghijklmnopqrstuvwxyz'
     var s = '';
@@ -51,18 +39,18 @@ ResultWindow.prototype._output_window = function() {
   return $(this.id).find('.output-window');
 }
 
-ResultWindow.prototype.permlink = function(compiler, code) {
+ResultWindow.prototype.permlink = function(compiler, code, outputs) {
   var self = this;
 
   var a = $('<a href="#" class="btn">Share This Code</a>')
     .appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();
-    self.post_permlink(compiler, code);
+    self.post_permlink(compiler, code, outputs);
   });
 }
 
-ResultWindow.prototype.post_permlink = function(compiler, code) {
+ResultWindow.prototype.post_permlink = function(compiler, code, outputs) {
   var self = this;
 
   var pm = this._permlink().find('a');
@@ -71,11 +59,15 @@ ResultWindow.prototype.post_permlink = function(compiler, code) {
 
   var selected_compiler = compiler.get_selected_compiler();
   var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
+  var str_outputs = $.map(outputs, function(e) {
+    return e.type + ',' + e.output;
+  });
 
   $.post('@{PermlinkR}', {
     compiler: selected_compiler,
     code: code,
-    options: compile_options },
+    options: compile_options,
+    outputs: str_outputs },
     function(json) {
       if (!json.success) {
         pm.removeClass('disable');
@@ -107,7 +99,8 @@ ResultWindow.prototype.post_permlink = function(compiler, code) {
 ResultWindow.prototype.code_window = function(compiler, code) {
   var show_code = $('<div><code><a href="#">Show Code</a></code></div>');
   var hide_code = $('<div><code><a href="#">Hide Code</a></code></div>');
-  var pre = $('<div><pre>' + encode_html_entity(code) + '</pre></div>');
+  var pre = $('<div><pre></pre></div>');
+  pre.find('pre').text(code);
 
   var compiler_data = (function(compiler) {
     var e = compiler.get_selected_compiler_element();
@@ -159,7 +152,10 @@ ResultWindow.prototype.post_code = function(compiler, code) {
   var finalize = function() {
     src.close();
 
-    self.permlink(compiler, code);
+    var outputs = self._output_window().find('p').map(function(n,e) {
+        return { 'type': $(e).attr('type'), 'output': $(e).text() };
+    });
+    self.permlink(compiler, code, outputs);
 
     if (self.onfinish)
       self.onfinish();
@@ -180,10 +176,11 @@ ResultWindow.prototype.post_code = function(compiler, code) {
         preview_paragraph &&
         preview_paragraph.hasClass(data.type)) {
       var p = preview_paragraph;
-      p.html(p.html() + encode_html_entity(data.message))
+      p.text(p.text() + data.message)
     } else {
       var p = $('<p>').addClass(data.type)
-                      .html(encode_html_entity(data.message))
+                      .attr('type', data.type)
+                      .text(data.message)
                       .appendTo(output);
       preview_paragraph = p;
     }
@@ -208,4 +205,18 @@ ResultWindow.prototype.post_code = function(compiler, code) {
   src.onerror = function() {
     finalize();
   }
+}
+
+ResultWindow.prototype.set_code = function(compiler, code, outputs) {
+  console.log(code, outputs);
+  var self = this;
+  this.code_window(compiler, code);
+  $.each(outputs, function(n,e) {
+    var type = decode_uri(e.type);
+    var output = decode_uri(e.output);
+    $('<p>').addClass(type)
+            .attr('type', type)
+            .text(output)
+            .appendTo(self._output_window());
+  });
 }
