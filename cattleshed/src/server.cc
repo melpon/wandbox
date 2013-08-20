@@ -10,8 +10,8 @@
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#include <boost/spirit/home/phoenix.hpp>
-#include <boost/spirit/home/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/program_options.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -305,14 +305,13 @@ namespace wandbox {
 					current = move(commands.front());
 					commands.pop_front();
 					{
-						auto c = piped_spawn(_P_NOWAIT, workdir, current.arguments);
-						unique_child_pid pid(c.pid);
+						auto c = piped_spawn(workdir, current.arguments);
 
 						pipes = {
 							std::make_shared<input_forwarder>(aio, move(c.fd_stdin), received[current.stdin_command]),
 							std::make_shared<output_forwarder>(aio, sock, move(c.fd_stdout), current.stdout_command, limitter),
 							std::make_shared<output_forwarder>(aio, sock, move(c.fd_stderr), current.stderr_command, limitter),
-							std::make_shared<status_forwarder>(aio, sigs, move(pid)),
+							std::make_shared<status_forwarder>(aio, sigs, move(c.pid)),
 						};
 						limitter->set_process(std::static_pointer_cast<status_forwarder>(pipes[3]));
 					}
@@ -463,8 +462,8 @@ namespace wandbox {
 					commands.pop_front();
 					if (current.version_command.empty() || not current.displayable) continue;
 					{
-						auto c = piped_spawn(_P_NOWAIT, opendir("/"), current.version_command);
-						child = std::make_shared<unique_child_pid>(c.pid);
+						auto c = piped_spawn(opendir("/"), current.version_command);
+						child = std::make_shared<unique_child_pid>(move(c.pid));
 						pipe_stdout = std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdout.get());
 						c.fd_stdout.release();
 					}

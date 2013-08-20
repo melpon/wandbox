@@ -159,62 +159,6 @@ namespace wandbox {
 		return ret;
 	}
 
-	struct child_process {
-		intptr_t pid;
-		unique_fd fd_stdin;
-		unique_fd fd_stdout;
-		unique_fd fd_stderr;
-	};
-
-#undef _P_WAIT
-#undef _P_NOWAIT
-#undef _P_OVERLAY
-#undef _P_NOWAITO
-#undef _P_DETACH
-	constexpr int _P_WAIT = 0;
-	constexpr int _P_NOWAIT = 1;
-	constexpr int _P_OVERLAY = 2;
-	constexpr int _P_NOWAITO = 3;
-	constexpr int _P_DETACH = 4;
-
-	child_process piped_spawn(int mode, const std::shared_ptr<DIR> &workdir, const std::vector<std::string> &argv) {
-		if (mode == _P_OVERLAY) {
-			chdir(workdir);
-			execv(argv);
-		}
-		auto pipe_stdin = pipe();
-		auto pipe_stdout = pipe();
-		auto pipe_stderr = pipe();
-		if (const auto pid = fork()) {
-			pipe_stdin.r.reset();
-			pipe_stdout.w.reset();
-			pipe_stderr.w.reset();
-
-			child_process child { pid, std::move(pipe_stdin.w), std::move(pipe_stdout.r), std::move(pipe_stderr.r) };
-			if (mode == _P_WAIT) {
-				int st;
-				waitpid(pid, &st, 0);
-				child.pid = st;
-				return child;
-			}
-			return child;
-		} else try {
-			chdir(workdir);
-			dup2(pipe_stdin.r, 0);
-			dup2(pipe_stdout.w, 1);
-			dup2(pipe_stderr.w, 2);
-			pipe_stdin.r.reset();
-			pipe_stdin.w.reset();
-			pipe_stdout.r.reset();
-			pipe_stdout.w.reset();
-			pipe_stderr.r.reset();
-			pipe_stderr.w.reset();
-			execv(argv);
-		} catch (...) {
-			std::terminate();
-		}
-	}
-
 	struct unique_child_pid {
 		explicit unique_child_pid(pid_t pid = 0): pid(pid), st(0), waited(false) { }
 		unique_child_pid(const unique_child_pid &) = delete;
@@ -258,6 +202,36 @@ namespace wandbox {
 		int st;
 		bool waited;
 	};
+
+	struct child_process {
+		unique_child_pid pid;
+		unique_fd fd_stdin;
+		unique_fd fd_stdout;
+		unique_fd fd_stderr;
+	};
+
+	child_process piped_spawn(const std::shared_ptr<DIR> &workdir, const std::vector<std::string> &argv) {
+		auto pipe_stdin = pipe();
+		auto pipe_stdout = pipe();
+		auto pipe_stderr = pipe();
+		if (const auto pid = fork()) {
+			return { unique_child_pid(pid), std::move(pipe_stdin.w), std::move(pipe_stdout.r), std::move(pipe_stderr.r) };
+		} else try {
+			chdir(workdir);
+			dup2(pipe_stdin.r, 0);
+			dup2(pipe_stdout.w, 1);
+			dup2(pipe_stderr.w, 2);
+			pipe_stdin.r.reset();
+			pipe_stdin.w.reset();
+			pipe_stdout.r.reset();
+			pipe_stdout.w.reset();
+			pipe_stderr.r.reset();
+			pipe_stderr.w.reset();
+			execv(argv);
+		} catch (...) {
+			std::terminate();
+		}
+	}
 
 	std::shared_ptr<DIR> make_tmpdir(const std::string &seed) {
 		while (true) try {
