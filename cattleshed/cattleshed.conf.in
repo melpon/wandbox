@@ -5,7 +5,7 @@
  "jail":{
   "jail-command":[
    "@bindir@/cattlegrid",
-   "--mount=/bin,/etc,/lib,/lib64,/usr/bin,/usr/lib,/usr/lib64,/usr/include,/usr/libexec,/usr/local",
+   "--mount=/bin,/etc,/lib,/lib64,/usr/bin,/usr/lib,/usr/lib64,/usr/include,/usr/local",
    "--devices=/dev/null,/dev/zero,/dev/full,/dev/random,/dev/urandom",
    "--fakehome=./store",
    "--",
