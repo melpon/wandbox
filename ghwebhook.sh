@@ -1,8 +1,6 @@
 #!/bin/bash
 
 su - wandbox -c '
-set -ex
-
 cd wandbox/
 git pull
 

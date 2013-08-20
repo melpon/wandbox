@@ -440,7 +440,7 @@ namespace wandbox {
 	int main(int argc, char **argv) {
 		if (not kernel_has_ptrace_o_exitkill()) return -1;
 
-		std::string config_file = std::string(DATADIR) + "/config";
+		std::string config_file = std::string(SYSCONFDIR) + "/cattleshed.conf";
 
 		{
 			const ::option opts[] = {
