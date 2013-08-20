@@ -1,6 +1,10 @@
 #!/bin/bash
 
+set -ex
+
 su - wandbox -c '
+set -ex
+
 cd wandbox/
 git pull
 
@@ -16,10 +20,10 @@ cd kennel
 rm -r dist/
 cabal-dev install
 cd ../
-' && \
-make -C wandbox/cattleshed install
-stop kennel
-stop cattleshed
+'
+make -C ~wandbox/wandbox/cattleshed install
+stop kennel || true
+stop cattleshed || true
 sleep 1
 start cattleshed
 start kennel
