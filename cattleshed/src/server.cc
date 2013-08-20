@@ -610,7 +610,7 @@ int main(int argc, char **argv) {
 			po::options_description opt("options");
 			opt.add_options()
 				("help,h", "show this help")
-				("config,c", po::value<std::string>(&config_file_raw)->default_value(std::string(DATADIR) + "/config"), "specify config file")
+				("config,c", po::value<std::string>(&config_file_raw)->default_value(std::string(SYSCONFDIR) + "/cattleshed.conf"), "specify config file")
 			;
 
 			po::variables_map vm;

@@ -3,7 +3,7 @@
   "listen-port":2012,
  },
  "jail":{
-  "jail":"ptracer.exe",
+  "jail":"ptracer",
   "basedir":"/tmp/wandbox",
   "max-address-space":1073741824,
   "max-cpu-time":30,

@@ -1,0 +1,7 @@
+description "Backend of Sandbox Compiler"
+start on runlevel [2345];
+stop on runlevel [!2345];
+respawn
+setuid wandbox
+setgid wandbox
+@bindir@/server.exe
