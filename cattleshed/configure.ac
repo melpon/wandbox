@@ -56,6 +56,7 @@ AC_TRY_LINK(
 # Checks for libraries.
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([rt], [aio_write])
+AC_CHECK_LIB([cap], [cap_set_proc])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stdlib.h sys/time.h syslog.h unistd.h])
