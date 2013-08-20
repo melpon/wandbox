@@ -1,6 +1,6 @@
-#include <boost/spirit/home/qi.hpp>
-#include <boost/spirit/home/phoenix.hpp>
-#include <boost/spirit/home/karma.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/karma.hpp>
 
 #include "quoted_printable.hpp"
 

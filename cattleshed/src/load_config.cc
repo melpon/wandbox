@@ -198,25 +198,13 @@ namespace cfg {
 		using namespace detail;
 		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("jail"));
 		jail_config x;
-		x.exe = get_str(o, "jail");
+		x.jail_command = get_str_array(o, "jail-command");
 		x.basedir = get_str(o, "basedir");
-		x.max_address_space = get_int(o, "max-address-space");
-		x.max_cpu_time = get_int(o, "max-cpu-time");
-		x.max_data_segment = get_int(o, "max-data-segment");
-		x.max_file_size = get_int(o, "max-file-size");
-		x.max_open_file = get_int(o, "max-open-file");
-		x.nice = get_int(o, "nice");
 		x.program_duration = get_int(o, "program-duration");
 		x.compile_time_limit = get_int(o, "compile-time-limit");
 		x.kill_wait = get_int(o, "kill-wait");
 		x.output_limit_kill = get_int(o, "output-limit-kill");
 		x.output_limit_warn = get_int(o, "output-limit-warn");
-		for (const auto &y: get_str_array(o, "allow-file-exact")) {
-			x.allow_file_exact.insert(y);
-		}
-		for (const auto &y: get_str_array(o, "allow-file-prefix")) {
-			x.allow_file_prefix.insert(y);
-		}
 		return x;
 	}
 

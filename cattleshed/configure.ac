@@ -56,6 +56,7 @@ AC_TRY_LINK(
 # Checks for libraries.
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([rt], [aio_write])
+AC_CHECK_LIB([cap], [cap_set_proc])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stdlib.h sys/time.h syslog.h unistd.h])
@@ -71,5 +72,4 @@ AC_FUNC_FORK
 AC_CHECK_FUNCS([dup2 fchdir getcwd mkdir realpath strerror])
 
 AC_CONFIG_FILES([Makefile src/Makefile test/Makefile scripts/Makefile])
-AC_CONFIG_FILES([cattleshed.conf])
 AC_OUTPUT

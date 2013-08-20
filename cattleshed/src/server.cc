@@ -10,8 +10,8 @@
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#include <boost/spirit/home/phoenix.hpp>
-#include <boost/spirit/home/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/program_options.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -46,8 +46,6 @@ namespace wandbox {
 	using std::placeholders::_3;
 	using boost::asio::ip::tcp;
 
-	std::string ptracer;
-	std::string config_file;
 	server_config config;
 
 	struct socket_write_buffer: std::enable_shared_from_this<socket_write_buffer> {
@@ -288,7 +286,8 @@ namespace wandbox {
 							f(ite->second.runtime ? progargs : ccargs);
 						}
 					}
-					progargs.insert(progargs.begin(), { ptracer, "--config", config_file, "--" });
+					ccargs.insert(ccargs.begin(), config.jail.jail_command.begin(), config.jail.jail_command.end());
+					progargs.insert(progargs.begin(), config.jail.jail_command.begin(), config.jail.jail_command.end());
 					commands = {
 						{ move(ccargs), "", "CompilerMessageS", "CompilerMessageE", config.jail.compile_time_limit },
 						{ move(progargs), "StdIn", "StdOut", "StdErr", config.jail.program_duration }
@@ -305,14 +304,13 @@ namespace wandbox {
 					current = move(commands.front());
 					commands.pop_front();
 					{
-						auto c = piped_spawn(_P_NOWAIT, workdir, current.arguments);
-						unique_child_pid pid(c.pid);
+						auto c = piped_spawn(workdir, current.arguments);
 
 						pipes = {
 							std::make_shared<input_forwarder>(aio, move(c.fd_stdin), received[current.stdin_command]),
 							std::make_shared<output_forwarder>(aio, sock, move(c.fd_stdout), current.stdout_command, limitter),
 							std::make_shared<output_forwarder>(aio, sock, move(c.fd_stderr), current.stderr_command, limitter),
-							std::make_shared<status_forwarder>(aio, sigs, move(pid)),
+							std::make_shared<status_forwarder>(aio, sigs, move(c.pid)),
 						};
 						limitter->set_process(std::static_pointer_cast<status_forwarder>(pipes[3]));
 					}
@@ -406,7 +404,8 @@ namespace wandbox {
 			reenter (this) {
 				::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
 				while (true) {
-					aiocb->aio_fildes = ::openat(::dirfd(workdir.get()), src_filename.c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
+					::mkdirat(::dirfd(workdir.get()), "store", 0700);
+					aiocb->aio_fildes = ::openat(::dirfd(workdir.get()), ("store/" + src_filename).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
 					if (aiocb->aio_fildes == -1) {
 						if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
 						else yield break;
@@ -463,8 +462,8 @@ namespace wandbox {
 					commands.pop_front();
 					if (current.version_command.empty() || not current.displayable) continue;
 					{
-						auto c = piped_spawn(_P_NOWAIT, opendir("/"), current.version_command);
-						child = std::make_shared<unique_child_pid>(c.pid);
+						auto c = piped_spawn(opendir("/"), current.version_command);
+						child = std::make_shared<unique_child_pid>(move(c.pid));
 						pipe_stdout = std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdout.get());
 						c.fd_stdout.release();
 					}
@@ -605,6 +604,7 @@ int main(int argc, char **argv) {
 	{
 		namespace po = boost::program_options;
 
+		std::string config_file;
 		{
 			std::string config_file_raw;
 			po::options_description opt("options");
@@ -630,8 +630,6 @@ int main(int argc, char **argv) {
 		}
 		std::ifstream f(config_file);
 		config = load_config(f);
-	} {
-		ptracer = realpath(dirname(realpath("/proc/self/exe")) + "/" + config.jail.exe);
 	}
 	auto aio = std::make_shared<asio::io_service>();
 	listener s(aio, boost::asio::ip::tcp::v4(), config.network.listen_port);
