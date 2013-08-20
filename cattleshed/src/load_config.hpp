@@ -46,21 +46,13 @@ namespace wandbox {
 	};
 
 	struct jail_config {
-		std::string exe;
+		std::vector<std::string> jail_command;
 		std::string basedir;
-		int max_address_space;
-		int max_cpu_time;
-		int max_data_segment;
-		int max_file_size;
-		int max_open_file;
-		int nice;
 		int program_duration;
 		int compile_time_limit;
 		int kill_wait;
 		int output_limit_kill;
 		int output_limit_warn;
-		std::unordered_set<std::string> allow_file_exact;
-		std::unordered_set<std::string> allow_file_prefix;
 	};
 
 	struct server_config {
