@@ -400,6 +400,17 @@
    "compile-command":"/bin/true",
    "version-command":["/usr/local/python-3.3.2/bin/python3", "-c", "import sys; print(sys.version.split()[0])"],
   },{
+   "name":"pypy-2.1",
+   "displayable":true,
+   "output-file":"prog.py",
+   "run-command":["/usr/local/pypy-2.1/bin/pypy", "prog.py"],
+   "display-name":"pypy",
+   "display-compile-command":"pypy prog.py",
+   "language":"Python",
+   "source-suffix":".py",
+   "compile-command":"/bin/true",
+   "version-command":["/usr/local/pypy-2.1/bin/pypy", "-c", "import sys; print(sys.version.split()[7])"],
+  },{
    "name":"ruby-1.9.3-p0",
    "displayable":true,
    "output-file":"prog.rb",
