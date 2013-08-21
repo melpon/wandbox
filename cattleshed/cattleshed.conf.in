@@ -401,7 +401,7 @@
    "version-command":["/usr/local/ruby-1.9.3-p0/bin/ruby", "-e", "print RUBY_VERSION"],
   },{
    "name":"erlang-maint",
-   "displayable":false,
+   "displayable":true,
    "output-file":"prog.erl",
    "run-command":["/usr/local/erlang-maint/bin/escript", "prog.erl"],
    "display-name":"erlang-maint",
