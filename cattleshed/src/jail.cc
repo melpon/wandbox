@@ -1,20 +1,23 @@
+#include <iterator>
+#include <map>
 #include <string>
 #include <functional>
-#include <iostream>
+#include <vector>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
 
 #include <boost/asio.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/optional.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 #include <dirent.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <grp.h>
+#include <libgen.h>
 #include <linux/securebits.h>
 #include <pwd.h>
 #include <sched.h>
@@ -63,10 +66,21 @@ namespace jail {
 		for (int n = 0; n < 256; ++n) sigaction(n, &actions[n], nullptr);
 		return ret;
 	}
+	struct mount_target {
+		std::string realdir;
+		std::string mountpoint;
+		bool writable;
+	};
+	struct device_file {
+		std::string filename;
+		mode_t mode;
+		dev_t dev;
+	};
 	struct proc_arg_t {
-		std::vector<std::string> mount_dirs;
-		std::vector<std::string> devices;
-		std::string fakehome;
+		std::string rootdir;
+		std::string startdir;
+		std::vector<mount_target> mounts;
+		std::vector<device_file> devices;
 		int pipefd[2];
 		char **argv;
 	};
@@ -95,41 +109,60 @@ namespace jail {
 			_exit(1);
 		}
 	}
+	int rm_rf(const char *name) {
+		if (const int pid = vfork()) {
+			if (pid == -1) return -1;
+			int st;
+			waitpid(pid, &st, 0);
+			return (WIFEXITED(st) && WEXITSTATUS(st) == 0) ? 0 : -1;
+		} else {
+			execl("/bin/rm", "/bin/rm", "-rf", name, (void *)0);
+			_exit(1);
+		}
+	}
+	std::string catpath(const std::string &dir, const std::string &file) {
+		if (file.empty()) return dir;
+		if (dir.empty()) return file;
+		if (file.front() == '/' && dir.back() == '/') return dir + file.substr(1);
+		if (file.front() == '/' || dir.back() == '/') return dir + file;
+		return dir + "/" + file;
+	}
 	int proc(void *arg_) {
 		prctl(PR_SET_PDEATHSIG, SIGKILL);
 		close(static_cast<proc_arg_t *>(arg_)->pipefd[0]);
 		const auto argv = static_cast<proc_arg_t *>(arg_)->argv;
+
+		// prepare root directory
+		const auto &rootdir = static_cast<proc_arg_t *>(arg_)->rootdir;
 		if (mount("/", "/", "none", MS_PRIVATE|MS_REC, nullptr) == -1) exit_error("mount --make-rprivate /");
-		mkdir_p("jail/tmp");
-		if (mount("jail", "jail", "none", MS_BIND, nullptr) == -1) exit_error("mount --bind /");
-		for (const std::string d: static_cast<proc_arg_t *>(arg_)->mount_dirs) {
-			const auto e = "jail" + d;
+		mkdir_p(rootdir.c_str());
+		if (mount("none", rootdir.c_str(), "tmpfs", 0, "") == -1) exit_error(("mount -t tmpfs " + rootdir).c_str());
+
+		// mount binds
+		for (const auto &m: static_cast<proc_arg_t *>(arg_)->mounts) {
+			const auto &d = m.realdir;
+			const auto e = catpath(rootdir, m.mountpoint);
 			mkdir_p(e.c_str());
-			if (mount(d.c_str(), e.c_str(), "none", MS_BIND, nullptr) == -1) exit_error(("mount --bind " + d).c_str());
-			if (mount(nullptr, e.c_str(), nullptr, MS_REMOUNT|MS_RDONLY|MS_BIND|MS_NOSUID, nullptr) == -1) exit_error(("mount -o remount,ro,bind,nosuid " + d).c_str());
+			if (mount(d.c_str(), e.c_str(), "none", MS_BIND, nullptr) == -1) exit_error(("mount --bind " + d + " " + e).c_str());
+			if (mount(nullptr, e.c_str(), nullptr, MS_REMOUNT|(m.writable?0:MS_RDONLY)|MS_BIND|MS_NOSUID, nullptr) == -1) exit_error(("mount -o remount,bind,nosuid " + e).c_str());
 		}
-		mkdir_p("jail/home/jail");
-		if (static_cast<proc_arg_t *>(arg_)->fakehome.empty()) {
-			if (mount("jail/home/jail", "jail/home/jail", "none", MS_BIND, nullptr) == -1) exit_error("mount --bind /home/jail");
-		} else {
-			if (mount(static_cast<proc_arg_t *>(arg_)->fakehome.c_str(), "jail/home/jail", "none", MS_BIND, nullptr) == -1) exit_error("mount --bind /home/jail");
+
+		// create device files
+		for (const auto &d: static_cast<proc_arg_t *>(arg_)->devices) {
+			const auto &f = catpath(rootdir, d.filename);
+			std::vector<char> x(f.begin(), f.end());
+			mkdir_p(dirname(&x[0]));
+			if (mknod(f.c_str(), d.mode, d.dev) == -1) exit_error(("mknod " + f).c_str());
 		}
-		if (mount(nullptr, "jail/home/jail", nullptr, MS_REMOUNT|MS_BIND|MS_NOSUID, nullptr) == -1) exit_error("mount -o remount,bind,nosuid /home/jail");
-		setenv("HOME", "/home/jail", 1);
-		mkdir_p("jail/proc");
-		mkdir_p("jail/dev");
-		for (const std::string d: static_cast<proc_arg_t *>(arg_)->devices) {
-			struct stat s;
-			const std::string e = "jail" + d;
-			unlink(e.c_str());
-			if (stat(d.c_str(), &s) == -1) exit_error(("stat " + d).c_str());
-			if (S_ISCHR(s.st_mode) || S_ISBLK(s.st_mode)) if (mknod(e.c_str(), s.st_mode, s.st_rdev) == -1) exit_error(("mknod " + d).c_str());
-		}
-		if (mount("jail/tmp", "jail/tmp", "none", MS_BIND, nullptr) == -1) exit_error("mount --bind /tmp");
-		if (mount(nullptr, "jail", nullptr, MS_REMOUNT|MS_RDONLY|MS_BIND|MS_NOSUID, nullptr) == -1) exit_error("mount -o remount,ro,bind,nosuid /");
-		if (chroot("jail") == -1) exit_error("chroot");
-		chdir("/home/jail");
-		if (mount("proc", "/proc", "proc", MS_RDONLY|MS_NOSUID|MS_NOEXEC|MS_NODEV, nullptr) == -1) exit_error("mount -o ro,nosuid,noexec,nodev /proc");
+
+		// mount /proc
+		mkdir_p(catpath(rootdir, "proc").c_str());
+		if (mount("proc", catpath(rootdir, "proc").c_str(), "proc", MS_RDONLY|MS_NOSUID|MS_NOEXEC|MS_NODEV, nullptr) == -1) exit_error("mount -o ro,nosuid,noexec,nodev /proc");
+
+		// finish
+		if (mount(nullptr, rootdir.c_str(), nullptr, MS_REMOUNT|MS_RDONLY|MS_BIND|MS_NOSUID, nullptr) == -1) exit_error("mount -o remount,ro,bind,nosuid /");
+		if (chroot(rootdir.c_str()) == -1) exit_error(("chroot " + rootdir).c_str());
+		if (chdir(static_cast<proc_arg_t *>(arg_)->startdir.c_str()) == -1) exit_error(("chdir " + static_cast<proc_arg_t *>(arg_)->startdir).c_str());
 		{
 			sigset_t sigs;
 			sigfillset(&sigs);
@@ -138,7 +171,9 @@ namespace jail {
 		if (const int pid = fork()) {
 			if (pid == -1) exit_error("fork");
 			const int st = wait_and_forward_signals(pid);
-			write(static_cast<proc_arg_t *>(arg_)->pipefd[1], &st, sizeof(st));
+			const int fd = static_cast<proc_arg_t *>(arg_)->pipefd[1];
+			if (write(fd, &st, sizeof(st)) == -1) exit_error("write");
+			close(fd);
 		} else {
 			prctl(
 				PR_SET_SECUREBITS,
@@ -161,41 +196,81 @@ namespace jail {
 	int exit_help(const char *) {
 		return 1;
 	}
+
 	static const int stacksize = 4096;
 	int main(int argc, char **argv) {
+		prctl(PR_SET_PDEATHSIG, SIGKILL);
+
 		char stack[stacksize];
-		proc_arg_t args = { };
+		proc_arg_t args = { ".", "/", {}, {}, { -1, -1 }, nullptr };
 
 		{
 			static const option opts[] = {
 				{ "mounts", 1, nullptr, 'm' },
+				{ "rwmounts", 1, nullptr, 'w' },
 				{ "devices", 1, nullptr, 'd' },
-				{ "fakehome", 1, nullptr, 'h' },
+				{ "rootdir", 1, nullptr, 'r' },
+				{ "chdir", 1, nullptr, 'c' },
 				{ nullptr, 0, nullptr, 0 },
 			};
 			for (int opt; (opt = getopt_long(argc, argv, "m:d:u:g:h:", opts, nullptr)) != -1; )
 			switch (opt) {
 			case 'm':
+			case 'w':
 				{
-					std::string s(optarg);
-					boost::algorithm::split(args.mount_dirs, s, boost::algorithm::is_any_of(","));
+					namespace qi = boost::spirit::qi;
+					const auto *ite = optarg;
+					const auto end = ite + strlen(optarg);
+					std::vector<std::pair<std::string, boost::optional<std::string> > > mounts;
+					qi::parse(
+						ite,
+						end, 
+						(qi::as_string[+(qi::char_-','-'=')] > -qi::as_string[('=' > +(qi::char_-','))]) % ',',
+						mounts);
+					for (auto &m: mounts) {
+						if (m.first.empty()) continue;
+						args.mounts.push_back({ m.second ? *m.second : m.first, m.first, opt == 'w' });
+					}
 				}
 				break;
 			case 'd':
 				{
-					std::string s(optarg);
-					boost::algorithm::split(args.devices, s, boost::algorithm::is_any_of(","));
+					namespace qi = boost::spirit::qi;
+					const auto *ite = optarg;
+					const auto end = ite + strlen(optarg);
+					std::vector< std::pair<std::string, boost::optional< std::pair<unsigned, unsigned> > > > devices;
+					qi::parse(
+						ite,
+						end,
+						(qi::as_string[+(qi::char_-','-'=')] > -('=' > qi::uint_ > ',' > qi::uint_)) % ',',
+						devices);
+					for (auto &d: devices) {
+						if (d.first.empty()) continue;
+						device_file x = { std::move(d.first), d.second ? (S_IFCHR | 0666) : 0, d.second ? makedev(d.second->first, d.second->second) : 0 };
+						if (!d.second) {
+							struct stat s;
+							if (stat(x.filename.c_str(), &s) == -1) exit_error(("cannot stat " + x.filename).c_str());
+							if (!S_ISCHR(s.st_mode)) exit_error((x.filename + " is not a character device").c_str());
+							x.mode = s.st_mode;
+							x.dev = s.st_dev;
+						}
+						args.devices.emplace_back(std::move(x));
+					}
 				}
 				break;
-			case 'h':
-				args.fakehome = optarg;
+			case 'r':
+				args.rootdir = optarg;
 				break;
+			case 'c':
+				args.startdir = optarg;
+				break;
+			case 'h':
 			default:
 				print_help();
 				return 1;
 			}
 		}
-		pipe2(args.pipefd, O_CLOEXEC);
+		if (pipe2(args.pipefd, O_CLOEXEC) == -1) exit_error("pipe");
 		args.argv = argv + optind;
 
 		{
