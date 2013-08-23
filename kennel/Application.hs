@@ -9,7 +9,6 @@ import Import
 
 import qualified Yesod                                  as Y
 import qualified Yesod.Default.Config                   as YDConfig
-import qualified Yesod.Default.Main                     as YDMain
 import qualified Network.Wai.Middleware.RequestLogger   as RequestLogger
 import qualified Database.Persist                       as Persist
 import qualified Database.Persist.Sql                   as PersistSql
@@ -88,11 +87,25 @@ makeFoundation conf = do
 
     return foundation
 
+------------------
 -- for yesod devel
+------------------
+
+develApp
+    :: IO (YDConfig.AppConfig YDConfig.DefaultEnv Extra)
+    -> (YDConfig.AppConfig YDConfig.DefaultEnv Extra -> IO Y.Application)
+    -> IO (Int, Y.Application)
+develApp load getApp = do
+    conf   <- load
+    let p = YDConfig.appPort conf
+    putStrLn $ "Devel application launched: http://localhost:" ++ show p
+    app <- getApp conf
+    return (p, app)
+
 getApplicationDev :: IO (Int, Y.Application)
 getApplicationDev = do
     config <- maybe "config/settings.yml" id <$> lookup "CONFIG" <$> Environment.getEnvironment
-    YDMain.defaultDevelApp (loader config) makeApplication
+    develApp (loader config) makeApplication
   where
     loader config = YDConfig.loadConfig (YDConfig.configSettings YDConfig.Development)
         { YDConfig.csParseExtra = parseExtra
