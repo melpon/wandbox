@@ -47,18 +47,18 @@ namespace jail {
 			while (true) {
 				const int r = waitpid(-1, &st_, WNOHANG|__WALL);
 				if (r == -1) return;
-				if (r == 0 && !waited) { kill(primary_child_pid, sig); break; }
+				if (r == 0 && !waited && sig != -1) { kill(primary_child_pid, sig); break; }
 				if (r == primary_child_pid) ret = st_;
 				waited = true;
 			}
 			sigs.async_wait(f);
 		};
-		sigs.async_wait(f);
 		{
 			sigset_t sigs;
 			sigfillset(&sigs);
 			sigprocmask(SIG_UNBLOCK, &sigs, nullptr);
 		}
+		aio.post(std::bind(f, boost::system::error_code{}, -1));
 		aio.run();
 		for (int n = 0; n < 256; ++n) sigaction(n, &actions[n], nullptr);
 		return ret;
