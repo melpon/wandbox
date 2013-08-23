@@ -191,7 +191,7 @@ namespace cfg {
 	network_config load_network_config(const cfg::value &values) {
 		using namespace detail;
 		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("network"));
-		return { get_int(o, "listen-port") };
+		return { get_int(o, "listen-port"), get_int(o, "max-connections") };
 	}
 
 	jail_config load_jail_config(const cfg::value &values) {

@@ -43,6 +43,7 @@ namespace wandbox {
 
 	struct network_config {
 		int listen_port;
+		int max_connections;
 	};
 
 	struct jail_config {

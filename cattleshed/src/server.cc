@@ -1,3 +1,4 @@
+#include <array>
 #include <deque>
 #include <fstream>
 #include <functional>
@@ -16,6 +17,7 @@
 #include <boost/system/system_error.hpp>
 
 #include <aio.h>
+#include <sys/eventfd.h>
 
 #include "quoted_printable.hpp"
 #include "load_config.hpp"
@@ -47,6 +49,51 @@ namespace wandbox {
 	using boost::asio::ip::tcp;
 
 	server_config config;
+
+	struct counting_semaphore {
+		counting_semaphore(asio::io_service &aio, unsigned count)
+			 : aio(aio),
+			   des(std::make_shared<asio::posix::stream_descriptor>(aio))
+		{
+			const int fd = ::eventfd(count, EFD_CLOEXEC|EFD_NONBLOCK|EFD_SEMAPHORE);
+			if (fd == -1) throw boost::system::system_error(errno, boost::system::system_category());
+			try {
+				des->assign(fd);
+			} catch (...) {
+				close(fd);
+				throw;
+			}
+		}
+		counting_semaphore(const counting_semaphore &) = delete;
+		counting_semaphore(counting_semaphore &&) = delete;
+		counting_semaphore &operator =(const counting_semaphore &) = delete;
+		counting_semaphore &operator =(counting_semaphore &&) = delete;
+		struct semaphore_object {
+			template <typename F>
+			semaphore_object(asio::io_service &aio, const std::shared_ptr<asio::posix::stream_descriptor> &des, F &&f): aio(aio), des(des) {
+				const auto b = std::make_shared< std::array<unsigned char, 8> >();
+				asio::async_read(*des, asio::buffer(*b), std::bind<void>([](F f, error_code ec, std::shared_ptr<void>) { if (!ec) f(); }, std::forward<F>(f), _1, b));
+			}
+			semaphore_object(const semaphore_object &) = delete;
+			semaphore_object(semaphore_object &&) = delete;
+			semaphore_object &operator =(const semaphore_object &) = delete;
+			semaphore_object &operator =(semaphore_object &&) = delete;
+			~semaphore_object() noexcept try {
+				const std::uint64_t b = 1;
+				asio::write(*des, asio::buffer(&b, sizeof(b)));
+			} catch (...) {
+			}
+			asio::io_service &aio;
+			std::shared_ptr<asio::posix::stream_descriptor> des;
+		};
+		template <typename F>
+		std::shared_ptr<void> async_signal(F &&f) {
+			return std::make_shared<semaphore_object>(aio, des, std::forward<F>(f));
+		}
+	private:
+		asio::io_service &aio;
+		std::shared_ptr<asio::posix::stream_descriptor> des;
+	};
 
 	struct socket_write_buffer: std::enable_shared_from_this<socket_write_buffer> {
 		socket_write_buffer(std::shared_ptr<tcp::socket> sock)
@@ -235,7 +282,7 @@ namespace wandbox {
 			std::weak_ptr<write_limit_counter> limit;
 		};
 
-		program_runner(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::unordered_map<std::string, std::string> received, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<DIR> workdir)
+		program_runner(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::unordered_map<std::string, std::string> received, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<DIR> workdir, std::shared_ptr<void> semaphore)
 			 : aio(move(aio)),
 			   strand(std::make_shared<asio::io_service::strand>(*this->aio)),
 			   sock(move(sock)),
@@ -246,7 +293,8 @@ namespace wandbox {
 			   pipes(),
 			   kill_timer(std::make_shared<asio::deadline_timer>(*this->aio)),
 			   limitter(std::make_shared<write_limit_counter>(config.jail.output_limit_warn, config.jail.output_limit_kill)),
-			   laststatus(0)
+			   laststatus(0),
+			   semaphore(move(semaphore))
 		{
 		}
 		program_runner(const program_runner &) = default;
@@ -380,11 +428,12 @@ namespace wandbox {
 		std::shared_ptr<asio::deadline_timer> kill_timer;
 		std::shared_ptr<write_limit_counter> limitter;
 		int laststatus;
+		std::shared_ptr<void> semaphore;	
 	};
 
 	struct program_writer: private coroutine {
 		typedef void result_type;
-		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received)
+		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received, std::shared_ptr<void> semaphore)
 			 : aio(move(aio)),
 			   sock(move(sock)),
 			   src_text(std::make_shared<std::string>(received["Source"])),
@@ -393,7 +442,8 @@ namespace wandbox {
 			   sigs(move(sigs)),
 			   workdir(make_tmpdir("wandboxXXXXXX")),
 			   received(move(received)),
-			   aiocb(std::make_shared<struct aiocb>())
+			   aiocb(std::make_shared<struct aiocb>()),
+			   semaphore(move(semaphore))
 		{
 		}
 		program_writer(const program_writer &) = default;
@@ -422,7 +472,7 @@ namespace wandbox {
 					yield sigs->async_wait(move(*this));
 				} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
 				::close(aiocb->aio_fildes);
-				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir))();
+				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir), move(semaphore))();
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
@@ -434,11 +484,12 @@ namespace wandbox {
 		std::shared_ptr<DIR> workdir;
 		std::unordered_map<std::string, std::string> received;
 		std::shared_ptr<struct aiocb> aiocb;
+		std::shared_ptr<void> semaphore;
 	};
 
 	struct version_sender: private coroutine {
 		typedef void result_type;
-		version_sender(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs)
+		version_sender(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<void> semaphore)
 			 : aio(move(aio)),
 			   sock(move(sock)),
 			   sockbuf(std::make_shared<socket_write_buffer>(this->sock)),
@@ -447,7 +498,8 @@ namespace wandbox {
 			   commands(),
 			   current(),
 			   child(nullptr),
-			   buf(nullptr)
+			   buf(nullptr),
+			   semaphore(move(semaphore))
 		{
 			for (const auto &c: config.compilers) commands.push_back(c);
 		}
@@ -507,16 +559,18 @@ namespace wandbox {
 		std::shared_ptr<unique_child_pid> child;
 		std::vector<std::string> versions;
 		std::shared_ptr<asio::streambuf> buf;
+		std::shared_ptr<void> semaphore;
 	};
 
 	struct compiler_bridge: private coroutine {
 		typedef void result_type;
-		compiler_bridge(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs)
+		compiler_bridge(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<void> semaphore)
 			 : aio(move(aio)),
 			   sock(move(sock)),
 			   buf(std::make_shared<std::vector<char>>()),
 			   sigs(move(sigs)),
-			   received()
+			   received(),
+			   semaphore(move(semaphore))
 		{
 		}
 		compiler_bridge(const compiler_bridge &) = default;
@@ -541,8 +595,8 @@ namespace wandbox {
 					int len = 0;
 					std::string data;
 					if (!qi::parse(ite, buf->end(), +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) break;
-					if (command == "Control" && data == "run") return program_writer(move(aio), move(sock), move(sigs), move(received))();
-					else if (command == "Version") return version_sender(move(aio), move(sock), move(sigs))();
+					if (command == "Control" && data == "run") return program_writer(move(aio), move(sock), move(sigs), move(received), move(semaphore))();
+					else if (command == "Version") return version_sender(move(aio), move(sock), move(sigs), move(semaphore))();
 					else received[command] += quoted_printable::decode(move(data));
 				}
 				buf->erase(buf->begin(), ite);
@@ -553,6 +607,7 @@ namespace wandbox {
 		std::shared_ptr<std::vector<char>> buf;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::unordered_map<std::string, std::string> received;
+		std::shared_ptr<void> semaphore;
 	};
 
 	struct listener: private coroutine {
@@ -565,7 +620,7 @@ namespace wandbox {
 					PROTECT_FROM_MOVE(acc);
 					acc->async_accept(*sock, move(*this));
 				}
-				compiler_bridge(aio, move(sock), sigs)();
+				yield compiler_bridge(aio, move(sock), sigs, sem->async_signal(*this))();
 			}
 		}
 		template <typename ...Args>
@@ -574,7 +629,8 @@ namespace wandbox {
 			   ep(std::forward<Args>(args)...),
 			   acc(std::make_shared<tcp::acceptor>(*this->aio, this->ep)),
 			   sigs(std::make_shared<asio::signal_set>(*this->aio, SIGCHLD, SIGHUP)),
-			   sock()
+			   sock(),
+			   sem(std::make_shared<counting_semaphore>(*this->aio, config.network.max_connections-1))
 		{
 			try {
 				mkdir(config.jail.basedir, 0700);
@@ -595,6 +651,7 @@ namespace wandbox {
 		std::shared_ptr<asio::signal_set> sigs;
 		std::shared_ptr<DIR> basedir;
 		std::shared_ptr<tcp::socket> sock;
+		std::shared_ptr<counting_semaphore> sem;
 	};
 
 }

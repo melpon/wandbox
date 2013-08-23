@@ -1,6 +1,7 @@
 {
  "network":{
   "listen-port":2012,
+  "max-connections":32,
  },
  "jail":{
   "jail-command":[
