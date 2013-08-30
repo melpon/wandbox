@@ -253,7 +253,7 @@ namespace jail {
 							if (stat(x.filename.c_str(), &s) == -1) exit_error(("cannot stat " + x.filename).c_str());
 							if (!S_ISCHR(s.st_mode)) exit_error((x.filename + " is not a character device").c_str());
 							x.mode = s.st_mode;
-							x.dev = s.st_dev;
+							x.dev = s.st_rdev;
 						}
 						args.devices.emplace_back(std::move(x));
 					}
