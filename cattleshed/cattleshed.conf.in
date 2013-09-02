@@ -335,6 +335,23 @@
    "initial-checked":["warning", "gnu++11", "boost-1.47"],
    "inherits":"clang-common",
   },{
+   "name":"gdc-head",
+   "displayable":true,
+   "display-name":"gdc HEAD",
+   "compile-command":[
+    "/usr/local/gcc-head/bin/gdc",
+    "-oprog.exe",
+    "-Wl,-rpath,/usr/local/gcc-head/lib64",
+    "prog.d"
+   ],
+   "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/gdc --version | head -1 | cut -d' ' -f3-"],
+   "run-command":"./prog.exe",
+   "display-name":"gdc",
+   "display-compile-command":"gdc prog.d",
+   "language":"D",
+   "source-suffix":".d",
+   "output-file":"prog.exe"
+  },{
    "name":"ghc-7.6.3",
    "displayable":true,
    "language":"Haskell",
