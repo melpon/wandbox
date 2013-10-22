@@ -20,6 +20,10 @@ function Compiler(compiler_id, compile_options_id) {
     if (self.compile_option_changed)
       self.compile_option_changed();
   });
+  $(this.compile_options_id + ' select').change(function() {
+    if (self.compile_option_changed)
+      self.compile_option_changed();
+  });
 }
 
 Compiler.prototype._compiler = function() {
@@ -52,20 +56,22 @@ Compiler.prototype.get_checked_compile_options = function() {
 Compiler.prototype.deserialize = function(compiler, compile_options) {
   this.set_compiler(compiler);
 
-  var check = function(elem, v) {
-    if (elem.attr('type') == 'checkbox') {
-      v ? elem.attr('checked', '') : elem.removeAttr('checked');
-    } else {
-      if (v) elem.click();
-    }
-  };
   var options = compile_options.split(',');
   var options_map = {};
   for (var i = 0; i < options.length; i++) {
     options_map[options[i]] = '';
   }
   this._compile_options().find('input').each(function() {
-    var val = $(this).val();
-    check($(this), val in options_map);
+    var elem = $(this);
+    var val = elem.val();
+    var v = val in options_map;
+    v ? elem.attr('checked', '') : elem.removeAttr('checked');
+  });
+  this._compile_options().find('select > option').each(function() {
+    var elem = $(this);
+    var val = elem.val();
+    var v = val in options_map;
+    if (v)
+      elem.parent().val(val);
   });
 }

@@ -161,16 +161,16 @@ compiler = do
     makeSwitch compilerName (CompilerSwitchSelect default_ options) = do
       let groupName = compilerName `T.append` default_
       [whamlet|
-        $forall option <- options
-          <label .radio>
+        <select .span12>
+          $forall option <- options
             ^{makeSwitchSelectOption groupName default_ option}
       |]
     makeSwitchSelectOption groupName default_ (CompilerSwitchSelectOption name displayName displayFlags) =
       [whamlet|
         $if default_ == name
-          <input type="radio" name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}" checked>#{displayName}
+          <option name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}" selected>#{displayName}
         $else
-          <input type="radio" name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}">#{displayName}
+          <option name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}">#{displayName}
       |]
 
 makeRootR :: Maybe (Code, [LinkOutput]) -> Handler Y.Html
