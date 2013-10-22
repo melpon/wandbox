@@ -32,7 +32,7 @@
 ::
 
  $ cd wandbox/kennel
- $ cabal-dev install yesod-platform-1.2.3 --force-reinstalls
+ $ cabal-dev install yesod-platform-1.2.4.3 --force-reinstalls
  $ cabal-dev install
 
 テスト実行
