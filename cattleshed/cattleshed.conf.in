@@ -36,12 +36,12 @@
   "boost-1.47":{
    "flags":["-I/usr/local/boost-1.47.0/include", "-L/usr/local/boost-1.47.0/lib", "-Wl,-rpath,/usr/local/boost-1.47.0/lib", "-lboost_system"],
    "display-name":"Boost 1.47.0",
-   "display-flags":"",
+   "display-flags":"-I/usr/local/boost-1.47.0/include",
   },
   "sprout":{
    "flags":["-I/usr/local/sprout"],
    "display-name":"Sprout",
-   "display-flags":"",
+   "display-flags":"-I/usr/local/sprout",
   },
   "warning":{
    "flags":["-Wall", "-Wextra"],
