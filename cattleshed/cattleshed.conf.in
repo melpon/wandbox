@@ -569,6 +569,17 @@
    "compile-command":"/bin/true",
    "version-command":["/usr/local/ruby-1.9.3-p0/bin/ruby", "-e", "print RUBY_VERSION"],
   },{
+   "name":"ruby-2.0.0-p247",
+   "displayable":true,
+   "output-file":"prog.rb",
+   "run-command":["/usr/local/ruby-2.0.0-p247/bin/ruby", "prog.rb"],
+   "display-name":"ruby",
+   "display-compile-command":"ruby prog.rb",
+   "language":"Ruby",
+   "source-suffix":".rb",
+   "compile-command":"/bin/true",
+   "version-command":["/usr/local/ruby-2.0.0-p247/bin/ruby", "-e", "print RUBY_VERSION"],
+  },{
    "name":"erlang-maint",
    "displayable":true,
    "output-file":"prog.erl",
