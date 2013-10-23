@@ -21,6 +21,7 @@ import qualified System.Environment                     as Environment
 
 import Yesod.Auth (getAuth)
 import Yesod.Default.Handlers (getFaviconR, getRobotsR)
+import Network.Wai.Middleware.Autohead (autohead)
 
 import ChanMap (newChanMap)
 import Foundation (resourcesApp, App(..), getStatic, Route(..))
@@ -60,7 +61,7 @@ makeApplication conf = do
 
     -- Create the WAI application and apply middlewares
     app <- Y.toWaiAppPlain foundation
-    return $ logWare app
+    return $ (logWare . autohead) app
 
 migrates :: PersistSql.SqlPersistT (MonadLogger.LoggingT IO) ()
 migrates = do
