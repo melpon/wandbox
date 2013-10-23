@@ -33,53 +33,59 @@
   "output-limit-warn":131072,
  },
  "switches":{
+  "boost-nothing":{
+   "flags":[],
+   "display-name":"Don't Use Boost",
+   "display-flags":"",
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+  },
   "boost-1.47":{
-   "flags":["-I/usr/local/boost-1.47.0/include", "-L/usr/local/boost-1.47.0/lib", "-Wl,-rpath,/usr/local/boost-1.47.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.47.0/include", "-L/usr/local/boost-1.47.0/lib", "-Wl,-rpath,/usr/local/boost-1.47.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor"],
    "display-name":"Boost 1.47.0",
    "display-flags":"-I/usr/local/boost-1.47.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "boost-1.48":{
-   "flags":["-I/usr/local/boost-1.48.0/include", "-L/usr/local/boost-1.48.0/lib", "-Wl,-rpath,/usr/local/boost-1.48.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.48.0/include", "-L/usr/local/boost-1.48.0/lib", "-Wl,-rpath,/usr/local/boost-1.48.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor"],
    "display-name":"Boost 1.48.0",
    "display-flags":"-I/usr/local/boost-1.48.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "boost-1.49":{
-   "flags":["-I/usr/local/boost-1.49.0/include", "-L/usr/local/boost-1.49.0/lib", "-Wl,-rpath,/usr/local/boost-1.49.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.49.0/include", "-L/usr/local/boost-1.49.0/lib", "-Wl,-rpath,/usr/local/boost-1.49.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor"],
    "display-name":"Boost 1.49.0",
    "display-flags":"-I/usr/local/boost-1.49.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "boost-1.50":{
-   "flags":["-I/usr/local/boost-1.50.0/include", "-L/usr/local/boost-1.50.0/lib", "-Wl,-rpath,/usr/local/boost-1.50.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.50.0/include", "-L/usr/local/boost-1.50.0/lib", "-Wl,-rpath,/usr/local/boost-1.50.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor"],
    "display-name":"Boost 1.50.0",
    "display-flags":"-I/usr/local/boost-1.50.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "boost-1.51":{
-   "flags":["-I/usr/local/boost-1.51.0/include", "-L/usr/local/boost-1.51.0/lib", "-Wl,-rpath,/usr/local/boost-1.51.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.51.0/include", "-L/usr/local/boost-1.51.0/lib", "-Wl,-rpath,/usr/local/boost-1.51.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor"],
    "display-name":"Boost 1.51.0",
    "display-flags":"-I/usr/local/boost-1.51.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "boost-1.52":{
-   "flags":["-I/usr/local/boost-1.52.0/include", "-L/usr/local/boost-1.52.0/lib", "-Wl,-rpath,/usr/local/boost-1.52.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.52.0/include", "-L/usr/local/boost-1.52.0/lib", "-Wl,-rpath,/usr/local/boost-1.52.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor"],
    "display-name":"Boost 1.52.0",
    "display-flags":"-I/usr/local/boost-1.52.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "boost-1.53":{
-   "flags":["-I/usr/local/boost-1.53.0/include", "-L/usr/local/boost-1.53.0/lib", "-Wl,-rpath,/usr/local/boost-1.53.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.53.0/include", "-L/usr/local/boost-1.53.0/lib", "-Wl,-rpath,/usr/local/boost-1.53.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_atomic", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor"],
    "display-name":"Boost 1.53.0",
    "display-flags":"-I/usr/local/boost-1.53.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "boost-1.54":{
-   "flags":["-I/usr/local/boost-1.54.0/include", "-L/usr/local/boost-1.54.0/lib", "-Wl,-rpath,/usr/local/boost-1.54.0/lib", "-lboost_system"],
+   "flags":["-I/usr/local/boost-1.54.0/include", "-L/usr/local/boost-1.54.0/lib", "-Wl,-rpath,/usr/local/boost-1.54.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_atomic", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_coroutine", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_log_setup", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_unit_test_framework", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_test_exec_monitor", "-lboost_log"],
    "display-name":"Boost 1.54.0",
    "display-flags":"-I/usr/local/boost-1.54.0/include",
-   "conflicts":["boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
+   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54"],
   },
   "sprout":{
    "flags":["-I/usr/local/sprout"],
@@ -210,7 +216,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y", "boost-1.54", "sprout"],
    "inherits":"gcc-common",
   },{
@@ -224,7 +230,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.8.2/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y", "boost-1.54", "sprout"],
    "inherits":"gcc-common",
   },{
@@ -238,7 +244,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.8.1/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y", "boost-1.54", "sprout"],
    "inherits":"gcc-common",
   },{
@@ -254,7 +260,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.7.3/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11"],
    "initial-checked":["warning", "gnu++11", "boost-1.54", "sprout"],
    "inherits":"gcc-common"
   },{
@@ -270,7 +276,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.6.4/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++0x", "gnu++0x"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++0x", "gnu++0x"],
    "initial-checked":["warning", "gnu++0x", "boost-1.54", "sprout"],
    "inherits":"gcc-common",
   },{
@@ -285,7 +291,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.5.4/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++0x", "gnu++0x"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++0x", "gnu++0x"],
    "initial-checked":["warning", "gnu++0x", "boost-1.54"],
    "inherits":"gcc-common"
   },{
@@ -299,7 +305,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.4.7/bin/g++", "-dumpversion"],
-   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++0x", "gnu++0x"],
+   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++0x", "gnu++0x"],
    "initial-checked":["oldgcc-warning", "gnu++0x", "boost-1.54"],
    "inherits":"gcc-common",
   },{
@@ -314,7 +320,7 @@
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.3.6/bin/g++", "-dumpversion"],
-   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++0x", "gnu++0x"],
+   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++0x", "gnu++0x"],
    "initial-checked":["oldgcc-warning", "gnu++0x", "boost-1.54"],
    "inherits":"gcc-common",
   },{
@@ -335,7 +341,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y", "boost-1.54", "sprout"],
    "inherits":"clang-common",
   },{
@@ -355,7 +361,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y", "boost-1.54", "sprout"],
    "inherits":"clang-common",
   },{
@@ -375,7 +381,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.2/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
    "initial-checked":["warning", "gnu++1y", "boost-1.54", "sprout"],
    "inherits":"clang-common",
   },{
@@ -394,7 +400,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.1/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++11", "gnu++11"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++11", "gnu++11"],
    "initial-checked":["warning", "gnu++11", "boost-1.54"],
    "inherits":"clang-common",
   },{
@@ -413,7 +419,7 @@
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.0/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++11", "gnu++11"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++11", "gnu++11"],
    "initial-checked":["warning", "gnu++11", "boost-1.54"],
    "inherits":"clang-common",
   },{
