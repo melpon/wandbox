@@ -50,7 +50,7 @@ Compiler.prototype._compile_options = function() {
 
 Compiler.prototype.get_checked_compile_options = function() {
   var options = this._compile_options();
-  return options.find(':checked');
+  return options.find(':checked,:selected');
 }
 
 Compiler.prototype.deserialize = function(compiler, compile_options) {
