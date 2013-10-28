@@ -9,24 +9,28 @@ function Editor(id, settings_id) {
 }
 
 Editor.prototype._initialize = function() {
-  var vim_handler = require('ace/keyboard/vim').handler
-  var keybindings = {
-      ace: null,
-      vim: vim_handler,
-      emacs: 'ace/keyboard/emacs',
-  };
-
   var self = this;
 
   $(this.id).append('<div class="smart-editor"></div>');
   $(this.id).append('<textarea class="span12 legacy-editor"></textarea>');
 
+  var codemirror = CodeMirror($(this.id + ' .smart-editor')[0], {
+    lineNumbers: true,
+    theme: 'user',
+    extraKeys: {
+      'Ctrl-Enter': function() {
+        if (self.onrun)
+          self.onrun(editor);
+      },
+    },
+  });
+  $(this.id).find('.smart-editor').data('editor', codemirror);
+
   var editor = this.smart_editor()
 
-  editor.setTheme('ace/theme/textmate');
   $(this.settings_id).find('select').change(function() {
     var value = $(this).val();
-    editor.setKeyboardHandler(keybindings[value]);
+    editor.setOption('keyMap', value);
   }).change();
   $(this.settings_id).find('input').change(function() {
     var val = self.getValue();
@@ -43,31 +47,13 @@ Editor.prototype._initialize = function() {
       self.editor_changed();
   });
   $(this.id + ' .legacy-editor').hide();
-
-  editor.commands.addCommand({
-    name: 'run',
-    bindKey: { win: 'Ctrl-Enter',  mac: 'Ctrl-Enter' },
-    exec: function(editor) {
-      if (self.onrun)
-        self.onrun(editor);
-    },
-    readOnly: true
-  });
-  vim_handler.actions['ctrl-return'] = {
-    fn: function(editor, range, count, param) {
-      if (self.onrun)
-        self.onrun(editor);
-    },
-  };
-
-  editor.setShowPrintMargin(false);
 }
 
 Editor.prototype.is_legacy = function() {
   return $(this.id + ' .smart-editor').css('display') == 'none';
 }
 Editor.prototype.smart_editor = function() {
-  return ace.edit($(this.id + ' .smart-editor')[0]);
+  return $(this.id).find('.smart-editor').data('editor');
 }
 Editor.prototype.legacy_editor = function() {
   return $(this.id + ' .legacy-editor');
@@ -92,6 +78,22 @@ Editor.prototype.setValue = function(value) {
   }
 }
 
-Editor.prototype.setMode = function(mode) {
-  this.editor().getSession().setMode(mode);
+var EDITOR_MODE_MAPPING = {
+  'C++': 'text/x-c++src',
+  'C': 'text/x-csrc',
+  'D': 'text/x-d',
+  'Ruby': 'text/x-ruby',
+  'Python': 'text/x-python',
+  'Perl': 'text/x-perl',
+  'Erlang': 'text/x-erlang',
+  'C#': 'text/x-csharp',
+  'Haskell': 'text/x-haskell',
+  'Bash script': 'text/x-sh',
+}
+function _get_editor_mode(lang) {
+  return EDITOR_MODE_MAPPING[lang];
+}
+
+Editor.prototype.setLanguage = function(lang) {
+  this.smart_editor().setOption('mode', _get_editor_mode(lang));
 }

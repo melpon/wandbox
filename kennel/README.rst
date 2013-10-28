@@ -23,9 +23,6 @@
  $ cd wandbox
  $ git submodule init
  $ git submodule update
- $ cd kennel/static
- $ ln -s ../../submodules/ace-builds/src-min ace
- $ ln -s ../../submodules/polyfills polyfills
 
 4. インストール
 

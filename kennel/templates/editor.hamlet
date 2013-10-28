@@ -5,7 +5,7 @@
   <div .span2 #editor-settings>
     <label .row-fluid>choose key binding:
     <select .span12 size=3>
-      <option value="ace" selected>default
+      <option value="default" selected>default
       <option value="vim">Vim
       <option value="emacs">Emacs
     <label .checkbox>

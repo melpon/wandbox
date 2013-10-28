@@ -7,6 +7,7 @@ set -ex
 
 cd wandbox/
 git pull
+git submodule update -i
 
 cd cattleshed
 git clean -xfdq .

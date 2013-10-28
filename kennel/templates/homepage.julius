@@ -1,18 +1,3 @@
-var EDITOR_MODE_MAPPING = {
-  'C++': 'ace/mode/c_cpp',
-  'D': 'ace/mode/d',
-  'Ruby': 'ace/mode/ruby',
-  'Python': 'ace/mode/python',
-  'Perl': 'ace/mode/perl',
-  'Erlang': 'ace/mode/erlang',
-  'C#': 'ace/mode/csharp',
-  'Haskell': 'ace/mode/haskell',
-  'Bash script': 'ace/mode/sh',
-}
-function get_editor_mode(lang) {
-  return EDITOR_MODE_MAPPING[lang]
-}
-
 function decode_uri(str) {
   return decodeURIComponent(str);
 }
@@ -52,7 +37,6 @@ $(function() {
   $('#compiling').hide();
 
   var editor = new Editor('#editor', '#editor-settings');
-  editor.focus();
   editor.onrun = function() {
     post_code(compiler, result_container);
   };
@@ -70,7 +54,7 @@ $(function() {
     update_compile_command(compiler);
 
     var lang = compiler.get_selected_compiler_element().attr('language');
-    editor.setMode(get_editor_mode(lang));
+    editor.setLanguage(lang);
   };
   compiler.compile_option_changed = function() {
     update_compile_command(compiler);
@@ -91,5 +75,7 @@ $(function() {
     compiler.set_compiler(#{defaultCompiler});
   }
   update_compile_command(compiler);
+
+  editor.focus();
 });
 

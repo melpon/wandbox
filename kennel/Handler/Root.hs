@@ -30,8 +30,19 @@ import Model (Code(..), LinkOutput(..))
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 import Settings.StaticFiles (
-    polyfills_EventSource_js, js_jquery_url_js, ace_ace_js,
-    ace_keybinding_vim_js, ace_keybinding_emacs_js,
+    polyfills_EventSource_js, js_jquery_url_js,
+    codemirror_lib_codemirror_js,
+    codemirror_lib_codemirror_css,
+    codemirror_mode_clike_clike_js,
+    codemirror_mode_d_d_js,
+    codemirror_mode_ruby_ruby_js,
+    codemirror_mode_python_python_js,
+    codemirror_mode_perl_perl_js,
+    codemirror_mode_erlang_erlang_js,
+    codemirror_mode_haskell_haskell_js,
+    codemirror_mode_shell_shell_js,
+    codemirror_keymap_vim_js,
+    codemirror_keymap_emacs_js,
     compiling_gif)
 import Settings (widgetFile, Extra(..))
 import Foundation (Handler, Widget, Route(..), getExtra)
@@ -181,9 +192,18 @@ makeRootR mCodeOutputs = do
         Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
         Y.addScriptRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"
         Y.addScript $ StaticR js_jquery_url_js
-        Y.addScript $ StaticR ace_ace_js
-        Y.addScript $ StaticR ace_keybinding_vim_js
-        Y.addScript $ StaticR ace_keybinding_emacs_js
+        Y.addScript $ StaticR codemirror_lib_codemirror_js
+        Y.addStylesheet $ StaticR codemirror_lib_codemirror_css
+        Y.addScript $ StaticR codemirror_mode_clike_clike_js
+        Y.addScript $ StaticR codemirror_mode_d_d_js
+        Y.addScript $ StaticR codemirror_mode_ruby_ruby_js
+        Y.addScript $ StaticR codemirror_mode_python_python_js
+        Y.addScript $ StaticR codemirror_mode_perl_perl_js
+        Y.addScript $ StaticR codemirror_mode_erlang_erlang_js
+        Y.addScript $ StaticR codemirror_mode_haskell_haskell_js
+        Y.addScript $ StaticR codemirror_mode_shell_shell_js
+        Y.addScript $ StaticR codemirror_keymap_vim_js
+        Y.addScript $ StaticR codemirror_keymap_emacs_js
         Y.addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
         resultWindow
         $(widgetFile "homepage")

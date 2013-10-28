@@ -9,5 +9,3 @@ yesod-devel/
 *.swp
 cabal-dev/
 InsertPassword
-static/ace
-static/polyfills
