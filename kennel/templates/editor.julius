@@ -17,6 +17,7 @@ Editor.prototype._initialize = function() {
   var codemirror = CodeMirror($(this.id + ' .smart-editor')[0], {
     lineNumbers: true,
     theme: 'user',
+    indentUnit: 4,
     extraKeys: {
       'Ctrl-Enter': function() {
         if (self.onrun)
