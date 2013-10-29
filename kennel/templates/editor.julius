@@ -23,6 +23,14 @@ Editor.prototype._initialize = function() {
         if (self.onrun)
           self.onrun(editor);
       },
+      Tab: function(cm) {
+        var cursor = cm.getCursor()['ch'];
+        var indentUnit = cm.getOption("indentUnit");
+        var newCursor = Math.floor((cursor + indentUnit) / indentUnit) * indentUnit
+        var indentNum = newCursor - cursor;
+        var spaces = Array(indentNum + 1).join(" ");
+        cm.replaceSelection(spaces, "end", "+input");
+      },
     },
   });
   $(this.id).find('.smart-editor').data('editor', codemirror);
