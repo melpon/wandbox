@@ -315,12 +315,11 @@
     "/usr/local/gcc-4.3.6/bin/g++",
     "-oprog.exe",
     "-Wl,-rpath,/usr/local/gcc-4.3.6/lib64",
-    "-lboost_system",
     "-lpthread",
     "prog.cc"
    ],
    "version-command":["/usr/local/gcc-4.3.6/bin/g++", "-dumpversion"],
-   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "c++98", "gnu++98", "c++0x", "gnu++0x"],
+   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "c++98", "gnu++98", "c++0x", "gnu++0x"],
    "initial-checked":["oldgcc-warning", "gnu++0x", "boost-1.54"],
    "inherits":"gcc-common",
   },{
