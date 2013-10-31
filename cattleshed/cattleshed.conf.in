@@ -94,27 +94,27 @@
   },
   "warning":{
    "flags":["-Wall", "-Wextra"],
-   "display-name":"警告",
+   "display-name":"Warnings",
   },
   "oldgcc-warning":{
    "flags":["-Wall", "-W"],
-   "display-name":"警告",
+   "display-name":"Warnings",
   },
   "haskell-warning":{
    "flags":"-Wall",
-   "display-name":"警告",
+   "display-name":"Warnings",
   },
   "optimize":{
    "flags":["-O2", "-march=native"],
-   "display-name":"最適化",
+   "display-name":"Optimization",
   },
   "haskell-optimize":{
    "flags":"-O2",
-   "display-name":"最適化",
+   "display-name":"Optimization",
   },
   "mono-optimize":{
    "flags":"-optimize",
-   "display-name":"最適化",
+   "display-name":"Optimization",
   },
   "c89":{
    "flags":["-std=c89", "-pedantic-errors"],
@@ -173,7 +173,7 @@
   },
   "cpp-verbose":{
    "flags":["-v"],
-   "display-name":"詳細",
+   "display-name":"Verbose",
   },
   "perl5.18.0":{
    "flags":"-M5.18.0",
