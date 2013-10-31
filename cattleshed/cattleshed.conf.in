@@ -600,6 +600,17 @@
    "source-suffix":".sh",
    "compile-command":"/bin/true",
    "version-command":["/bin/sh", "-c", "/bin/bash --version | head -1"],
+  },{
+   "name":"sqlite3",
+   "displayable":true,
+   "output-file":"prog.sql",
+   "run-command":["/bin/sh", "-c", "cat prog.sql | /usr/bin/sqlite3"],
+   "display-name":"sqlite3",
+   "display-compile-command":"cat prog.sql | sqlite3",
+   "language":"SQL",
+   "source-suffix":".sql",
+   "compile-command":"/bin/true",
+   "version-command":["/bin/sh", "-c", "/usr/bin/sqlite3 -version | cut -d' ' -f1"],
   }
  ]
 }
