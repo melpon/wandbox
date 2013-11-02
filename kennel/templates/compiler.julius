@@ -53,10 +53,17 @@ Compiler.prototype.get_checked_compile_options = function() {
   return options.find(':checked,:selected');
 }
 
-Compiler.prototype.deserialize = function(compiler, compile_options) {
-  this.set_compiler(compiler);
+Compiler.prototype.serialize_current = function() {
+  return {
+    compiler: this.get_selected_compiler(),
+    compile_options: this.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(','),
+  };
+}
 
-  var options = compile_options.split(',');
+Compiler.prototype.deserialize = function(settings) {
+  this.set_compiler(settings.compiler);
+
+  var options = settings.compile_options.split(',');
   var options_map = {};
   for (var i = 0; i < options.length; i++) {
     options_map[options[i]] = '';

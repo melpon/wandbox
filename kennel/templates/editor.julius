@@ -40,14 +40,22 @@ Editor.prototype._initialize = function() {
   $(this.settings_id).find('select').change(function() {
     var value = $(this).val();
     editor.setOption('keyMap', value);
+    if (self.editor_changed)
+      self.editor_changed();
   }).change();
   $(this.settings_id).find('input').change(function() {
     var val = self.getValue();
-    $(this.id + ' .smart-editor').toggle();
-    $(this.id + ' .legacy-editor').toggle();
+    var checked = $(this).attr('checked');
+    if (checked) {
+      $(this.id + ' .smart-editor').hide();
+      $(this.id + ' .legacy-editor').show();
+    } else {
+      $(this.id + ' .smart-editor').show();
+      $(this.id + ' .legacy-editor').hide();
+    }
     self.setValue(val);
     self.focus();
-    if ($(this).attr('checked')) {
+    if (checked) {
       $(self.settings_id).find('select').attr('disabled', 'disabled');
     } else {
       $(self.settings_id).find('select').removeAttr('disabled');
@@ -105,4 +113,26 @@ function _get_editor_mode(lang) {
 
 Editor.prototype.setLanguage = function(lang) {
   this.smart_editor().setOption('mode', _get_editor_mode(lang));
+}
+
+Editor.prototype.serialize = function() {
+  return {
+    keybinding: $(this.settings_id).find('select').val(),
+    use_smart_editor: $(this.settings_id).find('input').prop('checked'),
+  };
+}
+
+Editor.prototype.deserialize = function(settings) {
+  var ekey = $(this.settings_id).find('select');
+  ekey.val(settings.keybinding);
+
+  var esmart = $(this.settings_id).find('input');
+  if (settings.use_smart_editor) {
+    esmart.attr('checked', '');
+  } else {
+    esmart.removeAttr('checked');
+  }
+
+  ekey.change();
+  esmart.change();
 }

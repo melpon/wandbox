@@ -30,7 +30,9 @@ import Model (Code(..), LinkOutput(..))
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 import Settings.StaticFiles (
-    polyfills_EventSource_js, js_jquery_url_js,
+    polyfills_EventSource_js,
+    js_jquery_url_js,
+    js_jquery_cookie_js,
     codemirror_lib_codemirror_js,
     codemirror_lib_codemirror_css,
     codemirror_mode_clike_clike_js,
@@ -192,6 +194,7 @@ makeRootR mCodeOutputs = do
         Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
         Y.addScriptRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"
         Y.addScript $ StaticR js_jquery_url_js
+        Y.addScript $ StaticR js_jquery_cookie_js
         Y.addScript $ StaticR codemirror_lib_codemirror_js
         Y.addStylesheet $ StaticR codemirror_lib_codemirror_css
         Y.addScript $ StaticR codemirror_mode_clike_clike_js
@@ -210,6 +213,7 @@ makeRootR mCodeOutputs = do
   where
     urlEncode = Aeson.String . T.pack . Url.encode . BS.unpack . TE.encodeUtf8
     defaultCompiler = Aeson.String "gcc-head"
+    usingPermlink = maybe False (const True) mCodeOutputs
     jsonCode = maybe Aeson.Null tojson mCodeOutputs
     tojson (code, outputs) =
         Aeson.object ["compiler" .= urlEncode (codeCompiler code)

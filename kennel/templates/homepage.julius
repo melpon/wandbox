@@ -1,3 +1,5 @@
+USING_PERMLINK = #{usingPermlink}
+
 function decode_uri(str) {
   return decodeURIComponent(str);
 }
@@ -23,7 +25,13 @@ function update_compile_command(compiler) {
   $('#compile_command').html($('<code>').text(compile_command));
 }
 
+function save(key, value) {
+  $.cookie(key, value, { expires: 365 });
+}
+
 $(function() {
+  $.cookie.json = true;
+
   var result_container = new ResultContainer('#result-container')
   result_container.onfinish = function() {
     $('#compile').show();
@@ -41,6 +49,7 @@ $(function() {
     post_code(compiler, result_container);
   };
   editor.editor_changed = function() {
+    save('wandbox.editor', editor.serialize());
     if (editor.is_legacy()) {
       $('#compile').text('Run');
     } else {
@@ -51,29 +60,46 @@ $(function() {
   // create compiler
   var compiler = new Compiler('#compiler', '#compile-options');
   compiler.compiler_changed = function() {
+    if (!USING_PERMLINK)
+      save('wandbox.compiler.current', compiler.serialize_current());
+
     update_compile_command(compiler);
 
     var lang = compiler.get_selected_compiler_element().attr('language');
     editor.setLanguage(lang);
   };
   compiler.compile_option_changed = function() {
+    if (!USING_PERMLINK)
+      save('wandbox.compiler.current', compiler.serialize_current());
+
     update_compile_command(compiler);
   };
+
+  // deserialize if settings is stored in the cookie.
+  var compiler_settings = $.cookie('wandbox.compiler.current');
+  if (compiler_settings) {
+    compiler.deserialize(compiler_settings);
+    var editor_settings = $.cookie('wandbox.editor');
+    editor.deserialize(editor_settings);
+  } else {
+    // select default compiler
+    compiler.set_compiler(#{defaultCompiler});
+  }
+
 
   // deserialize if code exists.
   var code = #{jsonCode};
   if (code != null) {
     editor.setValue(decode_uri(code.code));
 
-    compiler.deserialize(
-      decode_uri(code.compiler),
-      decode_uri(code.options)
-    );
+    compiler.deserialize({
+      compiler: decode_uri(code.compiler),
+      compile_options: decode_uri(code.options),
+    });
 
     result_container.set_code(compiler, decode_uri(code.code), code.outputs);
-  } else {
-    compiler.set_compiler(#{defaultCompiler});
   }
+
   update_compile_command(compiler);
 
   editor.focus();

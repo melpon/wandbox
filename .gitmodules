@@ -4,3 +4,6 @@
 [submodule "submodules/CodeMirror"]
 	path = submodules/CodeMirror
 	url = https://github.com/marijnh/CodeMirror.git
+[submodule "submodules/jquery-cookie"]
+	path = submodules/jquery-cookie
+	url = https://github.com/carhartl/jquery-cookie.git
