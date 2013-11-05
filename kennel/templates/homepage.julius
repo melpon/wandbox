@@ -80,7 +80,8 @@ $(function() {
   if (compiler_settings) {
     compiler.deserialize(compiler_settings);
     var editor_settings = $.cookie('wandbox.editor');
-    editor.deserialize(editor_settings);
+    if (editor_settings)
+      editor.deserialize(editor_settings);
   } else {
     // select default compiler
     compiler.set_compiler(#{defaultCompiler});
