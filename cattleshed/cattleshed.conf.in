@@ -611,6 +611,17 @@
    "source-suffix":".sql",
    "compile-command":"/bin/true",
    "version-command":["/bin/sh", "-c", "/usr/local/sqlite-3.8.1/bin/sqlite3 -version | cut -d' ' -f1"],
+  },{
+   "name":"lua-5.2.2",
+   "displayable":true,
+   "output-file":"prog.lua",
+   "display-name":"lua",
+   "display-compile-command":"lua prog.lua",
+   "language":"Lua",
+   "source-suffix":".lua",
+   "compile-command":"/bin/true",
+   "run-command":["/usr/local/lua-5.2.2/bin/lua", "prog.lua"],
+   "version-command":["/bin/sh", "-c", "/usr/local/lua-5.2.2/bin/lua -v | cut -d' ' -f2"],
   }
  ]
 }
