@@ -13,7 +13,7 @@
   font-family: "Courier New", monospace;
 }
 
-.cm-s-user span.cm-comment { color: #3e3; }
+.cm-s-user span.cm-comment { color: #3a3; }
 .cm-s-user span.cm-keyword { color: #11f; }
 .cm-s-user span.cm-string { color: #f33; }
 .cm-s-user span.cm-builtin { color: #077; }
