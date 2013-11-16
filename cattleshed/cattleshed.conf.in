@@ -93,6 +93,20 @@
    "display-flags":"-I/usr/local/boost-1.55.0/include",
    "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
   },
+  "boost-nothing-header":{
+   "flags":[],
+   "display-name":"Don't Use Boost",
+   "display-flags":"",
+   "runtime":true,
+   "conflicts":["boost-nothing-header", "boost-1.55-header"],
+  },
+  "boost-1.55-header":{
+   "flags":["-I/usr/local/boost-1.55.0/include"],
+   "display-name":"Boost 1.55.0",
+   "display-flags":"-I/usr/local/boost-1.55.0/include",
+   "runtime":true,
+   "conflicts":["boost-nothing-header", "boost-1.55-header"],
+  },
   "sprout":{
    "flags":["-I/usr/local/sprout"],
    "display-name":"Sprout",
@@ -180,6 +194,11 @@
   "cpp-verbose":{
    "flags":["-v"],
    "display-name":"Verbose",
+  },
+  "cpp-p":{
+   "flags":["-P"],
+   "display-name":"-P",
+   "runtime":true,
   },
   "perl5.18.0":{
    "flags":"-M5.18.0",
@@ -464,6 +483,19 @@
    "switches":["warning", "optimize", "cpp-verbose", "c89", "c99", "c11"],
    "initial-checked":["warning", "c11"],
    "inherits":"clang-common",
+  },{
+   "name":"gcc-4.8.2-pp",
+   "displayable":true,
+   "display-name":"gcc",
+   "display-compile-command":"gcc prog.cpp -E",
+   "language":"CPP",
+   "source-suffix":".cpp",
+   "output-file":"prog.cpp",
+   "compile-command":"/bin/true",
+   "run-command":["/usr/local/gcc-4.8.2/bin/gcc", "-E", "prog.cpp"],
+   "version-command":["/usr/local/gcc-4.8.2/bin/gcc", "-dumpversion"],
+   "switches":["cpp-p", "boost-nothing-header", "boost-1.55-header"],
+   "initial-checked":["cpp-p", "boost-1.55-header"],
   },{
    "name":"gdc-head",
    "displayable":true,

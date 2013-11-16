@@ -98,6 +98,7 @@ Editor.prototype.setValue = function(value) {
 var EDITOR_MODE_MAPPING = {
   'C++': 'text/x-c++src',
   'C': 'text/x-csrc',
+  'CPP': 'text/x-csrc',
   'D': 'text/x-d',
   'Ruby': 'text/x-ruby',
   'Python': 'text/x-python',
