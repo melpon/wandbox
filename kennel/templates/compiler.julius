@@ -45,7 +45,7 @@ Compiler.prototype.set_compiler = function(compiler) {
 
 Compiler.prototype._compile_options = function() {
   var compiler = this.get_selected_compiler();
-  return $(this.compile_options_id + ' div[compiler=' + to_id(compiler) + ']');
+  return $(this.compile_options_id + ' div[data-compiler=' + to_id(compiler) + ']');
 }
 
 Compiler.prototype.get_checked_compile_options = function() {

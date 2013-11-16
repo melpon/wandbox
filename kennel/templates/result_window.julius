@@ -109,8 +109,8 @@ ResultWindow.prototype.code_window = function(compiler, code) {
   })(compiler);
 
   var code = (function(compiler) {
-    var command = compiler.get_selected_compiler_element().attr('command');
-    var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('flags'); });
+    var command = compiler.get_selected_compiler_element().attr('data-command');
+    var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
 
     var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ');
     return $('<code>' + compile_command + '</code>');
@@ -153,7 +153,7 @@ ResultWindow.prototype.post_code = function(compiler, code) {
     src.close();
 
     var outputs = self._output_window().find('p').map(function(n,e) {
-        return { 'type': $(e).attr('type'), 'output': $(e).text() };
+        return { 'type': $(e).attr('data-type'), 'output': $(e).text() };
     });
     self.permlink(compiler, code, outputs);
 
@@ -179,7 +179,7 @@ ResultWindow.prototype.post_code = function(compiler, code) {
       p.text(p.text() + data.message)
     } else {
       var p = $('<p>').addClass(data.type)
-                      .attr('type', data.type)
+                      .attr('data-type', data.type)
                       .text(data.message)
                       .appendTo(output);
       preview_paragraph = p;
@@ -214,7 +214,7 @@ ResultWindow.prototype.set_code = function(compiler, code, outputs) {
     var type = decode_uri(e.type);
     var output = decode_uri(e.output);
     $('<p>').addClass(type)
-            .attr('type', type)
+            .attr('data-type', type)
             .text(output)
             .appendTo(self._output_window());
   });

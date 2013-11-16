@@ -15,9 +15,9 @@ function post_code(compiler, result_container) {
 }
 
 function update_compile_command(compiler) {
-  var command = compiler.get_selected_compiler_element().attr('command');
+  var command = compiler.get_selected_compiler_element().attr('data-command');
   var compiler_name = compiler.get_selected_compiler_element().text();
-  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('flags'); });
+  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
 
   $('#compiler_name').text(compiler_name);
 
@@ -65,7 +65,7 @@ $(function() {
 
     update_compile_command(compiler);
 
-    var lang = compiler.get_selected_compiler_element().attr('language');
+    var lang = compiler.get_selected_compiler_element().attr('data-language');
     editor.setLanguage(lang);
   };
   compiler.compile_option_changed = function() {

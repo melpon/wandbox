@@ -169,9 +169,9 @@ compiler = do
         <div .row-fluid>
           <label .checkbox>
             $if default_
-              <input type="checkbox" value="#{name}" flags="#{flags}" checked>#{displayName}
+              <input type="checkbox" value="#{name}" data-flags="#{flags}" checked>#{displayName}
             $else
-              <input type="checkbox" value="#{name}" flags="#{flags}">#{displayName}
+              <input type="checkbox" value="#{name}" data-flags="#{flags}">#{displayName}
       |]
     makeSwitch compilerName (CompilerSwitchSelect default_ options) = do
       let groupName = compilerName `T.append` default_
@@ -183,9 +183,9 @@ compiler = do
     makeSwitchSelectOption groupName default_ (CompilerSwitchSelectOption name displayName displayFlags) =
       [whamlet|
         $if default_ == name
-          <option name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}" selected>#{displayName}
+          <option name="compile-option-groups-#{groupName}" value="#{name}" data-flags="#{displayFlags}" selected>#{displayName}
         $else
-          <option name="compile-option-groups-#{groupName}" value="#{name}" flags="#{displayFlags}">#{displayName}
+          <option name="compile-option-groups-#{groupName}" value="#{name}" data-flags="#{displayFlags}">#{displayName}
       |]
 
 makeRootR :: Maybe (Code, [LinkOutput]) -> Handler Y.Html

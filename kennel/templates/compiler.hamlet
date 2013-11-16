@@ -2,10 +2,10 @@
   <label>choose compiler:
   <select .span12 size=#{length compilerInfos} #compiler>
     $forall ver <- map ciVersion compilerInfos
-      <option value="#{verName ver}" command="#{verCompileCommand ver}" language="#{verLanguage ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
+      <option value="#{verName ver}" data-command="#{verCompileCommand ver}" data-language="#{verLanguage ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
 <div .row-fluid>
   <div #compile-options>
     $forall info <- compilerInfos
-      <div compiler="#{verName $ ciVersion info}">
+      <div data-compiler="#{verName $ ciVersion info}">
         $forall sw <- ciSwitches info
           ^{makeSwitch (verName (ciVersion info)) sw}
