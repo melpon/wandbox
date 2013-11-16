@@ -628,6 +628,17 @@
    "compile-command":"/bin/true",
    "run-command":["/usr/local/lua-5.2.2/bin/lua", "prog.lua"],
    "version-command":["/bin/sh", "-c", "/usr/local/lua-5.2.2/bin/lua -v | cut -d' ' -f2"],
+  },{
+   "name":"php-5.5.6",
+   "displayable":true,
+   "output-file":"prog.php",
+   "display-name":"php",
+   "display-compile-command":"php prog.php",
+   "language":"PHP",
+   "source-suffix":".php",
+   "compile-command":"/bin/true",
+   "run-command":["/usr/local/php-5.5.6/bin/php", "prog.php"],
+   "version-command":["/bin/sh", "-c", "/usr/local/php-5.5.6/bin/php -v | head -1 | cut -d' ' -f2"],
   }
  ]
 }

@@ -106,6 +106,7 @@ var EDITOR_MODE_MAPPING = {
   'C#': 'text/x-csharp',
   'Haskell': 'text/x-haskell',
   'Bash script': 'text/x-sh',
+  'PHP': 'text/x-php',
 }
 function _get_editor_mode(lang) {
   return EDITOR_MODE_MAPPING[lang];
