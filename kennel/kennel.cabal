@@ -25,6 +25,7 @@ library
                      Handler.Source
                      Handler.Permlink
                      ChanMap
+                     Api
                      VM.Protocol
                      VM.Conduit
                      VM.QuotedPrintable
