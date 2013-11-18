@@ -24,6 +24,7 @@ library
                      Handler.Compile
                      Handler.Source
                      Handler.Permlink
+                     Handler.Api
                      ChanMap
                      Api
                      VM.Protocol
@@ -92,6 +93,7 @@ library
                  , lifted-base
                  , http-types
                  , optparse-applicative
+                 , unordered-containers
 
 executable         kennel
     if flag(library-only)

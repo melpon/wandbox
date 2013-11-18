@@ -12,7 +12,7 @@ import Foundation (Handler, getChanMap, getExtra)
 import Settings (Extra(..))
 import Model (makeCode)
 import ChanMap (writeChan)
-import Api (vmHandle, sinkProtocol)
+import Api (runCode, sinkEventSource)
 
 getEmptyCompileR :: Handler ()
 getEmptyCompileR = Y.notFound
@@ -30,5 +30,5 @@ postCompileR ident = do
   where
     go host port codeInstance = do
       cm <- getChanMap <$> Y.getYesod
-      _ <- Y.liftIO $ Concurrent.forkIO $ vmHandle host port codeInstance $ sinkProtocol $ writeChan cm ident
+      _ <- Y.liftIO $ Concurrent.forkIO $ runCode host port codeInstance $ sinkEventSource $ writeChan cm ident
       return ()

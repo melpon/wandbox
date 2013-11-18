@@ -36,6 +36,7 @@ import Handler.Root (getRootR)
 import Handler.Compile (postCompileR, getEmptyCompileR)
 import Handler.Source (getSourceR, getEmptySourceR)
 import Handler.Permlink (postPermlinkR, getLinkedPermlinkR)
+import Handler.Api (getApiListR, postApiCompileR)
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the

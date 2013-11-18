@@ -4,8 +4,9 @@ module Api (
 , CompilerVersion(..)
 , CompilerInfo(..)
 , getCompilerInfos
-, vmHandle
-, sinkProtocol
+, runCode
+, sinkEventSource
+, sinkJson
 ) where
 
 import Import
@@ -21,6 +22,7 @@ import qualified Data.ByteString.Char8                  as BSC
 import qualified Data.ByteString.Lazy                   as BSL
 import qualified Data.Conduit                           as Conduit
 import qualified Data.Conduit.List                      as ConduitL
+import qualified Data.HashMap.Strict                    as HMS
 import qualified Data.Maybe                             as Maybe
 import qualified Data.Text                              as T
 import qualified Data.Text.Encoding                     as TE
@@ -30,7 +32,7 @@ import qualified System.IO                              as I
 import qualified Yesod                                  as Y
 
 import Data.Conduit (($$))
-import Data.Aeson ((.:))
+import Data.Aeson ((.:), (.=))
 
 import Model (Code, codeCompiler, codeCode, codeOptions)
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
@@ -48,6 +50,13 @@ instance Aeson.FromJSON CompilerSwitchSelectOption where
       v .: "display-name" <*>
       v .: "display-flags"
   parseJSON _ = Monad.mzero
+instance Aeson.ToJSON CompilerSwitchSelectOption where
+  toJSON (CompilerSwitchSelectOption name displayName displayFlags) =
+    Aeson.object
+      [ "name" .= name
+      , "display-name" .= displayName
+      , "display-flags" .= displayFlags
+      ]
 
 data CompilerSwitch =
   CompilerSwitchSingle
@@ -77,6 +86,19 @@ instance Aeson.FromJSON CompilerSwitch where
           v .: "default" <*>
           v .: "options"
   parseJSON _ = Monad.mzero
+instance Aeson.ToJSON CompilerSwitch where
+  toJSON (CompilerSwitchSingle name flags def displayName) =
+    Aeson.object
+      [ "name" .= name
+      , "display-flags" .= flags
+      , "default" .= def
+      , "display-name" .= displayName
+      ]
+  toJSON (CompilerSwitchSelect def options) =
+    Aeson.object
+      [ "default" .= def
+      , "options" .= options
+      ]
 
 data CompilerVersion = CompilerVersion
   { verName :: T.Text
@@ -106,6 +128,17 @@ instance Aeson.FromJSON CompilerInfo where
     switches <- Monad.join (Aeson.parseJSON <$> (v .: "switches")) :: AesonTypes.Parser [CompilerSwitch]
     return $ CompilerInfo version switches
   parseJSON _ = Monad.mzero
+instance Aeson.ToJSON CompilerInfo where
+  toJSON (CompilerInfo version switch) =
+    Aeson.object
+      [ "name" .= verName version
+      , "language" .= verLanguage version
+      , "display-name" .= verDisplayName version
+      , "version" .= verVersion version
+      , "display-compile-command" .= verCompileCommand version
+      , "switches" .= switch
+      ]
+    
 
 getCompilerInfos :: N.HostName -> N.PortID -> IO [CompilerInfo]
 getCompilerInfos host port = do
@@ -135,8 +168,8 @@ makeProtocols code =
     Just $ Protocol CompilerOption $ codeOptions code,
     Just $ Protocol Control "run"]
 
-vmHandle :: N.HostName -> N.PortID -> Code -> Conduit.Sink (Either String Protocol) (Conduit.ResourceT IO) () -> IO ()
-vmHandle host port code sink =
+runCode :: N.HostName -> N.PortID -> Code -> Conduit.Sink (Either String Protocol) (Conduit.ResourceT IO) a -> IO a
+runCode host port code sink =
   Exc.bracket (connectVM host port) I.hClose $ \handle -> do
     Conduit.runResourceT $ ConduitL.sourceList (makeProtocols code) $$ sendVM handle
     I.hFlush handle
@@ -145,8 +178,8 @@ vmHandle host port code sink =
 urlEncode :: ProtocolSpecifier -> T.Text -> BS.ByteString
 urlEncode spec contents = BS.concat [BSC.pack $ show spec, ":", BSC.pack $ Url.encode $ BS.unpack $ TE.encodeUtf8 contents]
 
-sinkProtocol :: Conduit.MonadResource m => (EventSource.ServerEvent -> IO ()) -> Conduit.Sink (Either String Protocol) m ()
-sinkProtocol writeChan_ = do
+sinkEventSource :: Conduit.MonadResource m => (EventSource.ServerEvent -> IO ()) -> Conduit.Sink (Either String Protocol) m ()
+sinkEventSource writeChan_ = do
   mValue <- Conduit.await
   case mValue of
     Nothing -> return ()
@@ -161,5 +194,40 @@ sinkProtocol writeChan_ = do
       Y.liftIO $ writeChan_ $ EventSource.CloseEvent
     (Just (Right (Protocol spec contents))) -> do
       Y.liftIO $ writeChan_ $ EventSource.ServerEvent Nothing Nothing [Blaze.fromByteString $ urlEncode spec contents]
-      sinkProtocol writeChan_
+      sinkEventSource writeChan_
 
+sinkJson :: Conduit.MonadResource m => Conduit.Sink (Either String Protocol) m Aeson.Value
+sinkJson = do
+    xs <- sinkJson' []
+    let xs' = reverse xs
+    let m = HMS.fromListWith T.append xs'
+    let m' = HMS.map Y.String m
+    return $ Y.Object m'
+  where
+    sinkJson' :: Conduit.MonadResource m => [(T.Text, T.Text)] -> Conduit.Sink (Either String Protocol) m [(T.Text, T.Text)]
+    sinkJson' xs = do
+      mValue <- Conduit.await
+      case mValue of
+        Nothing ->
+          return $ ("error", "data is nothing"):xs
+        (Just (Left str)) ->
+          return $ ("error", T.pack str):xs
+        (Just (Right ProtocolNil)) ->
+          return xs
+        (Just (Right (Protocol Control "Start"))) ->
+          sinkJson' xs
+        (Just (Right (Protocol Control "Finish"))) ->
+          return xs
+        (Just (Right (Protocol spec contents))) -> do
+          let keys = specToKeys spec
+          sinkJson' $ appendR (map (\key -> (key,contents)) keys) xs
+
+    appendR (x:xs) ys = appendR xs (x:ys)
+    appendR []     ys = ys
+    specToKeys CompilerMessageE = ["compiler_error", "compiler_message"]
+    specToKeys CompilerMessageS = ["compiler_output", "compiler_message"]
+    specToKeys StdOut           = ["program_output", "program_message"]
+    specToKeys StdErr           = ["program_error", "program_message"]
+    specToKeys ExitCode         = ["status"]
+    specToKeys Signal           = ["signal"]
+    specToKeys _                = ["error"]
