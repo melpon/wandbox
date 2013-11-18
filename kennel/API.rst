@@ -131,7 +131,6 @@ POST /compile.json
 Plugin
 ------------
 
-VIM Plugin for Wandbox is here_. thanks for @rhysd_ !
+VIM Plugin for Wandbox is here_. thanks for @rhysd !
 
 .. _here: https://github.com/rhysd/wandbox-vim
-.. _@rhysd: https://github.com/rhysd
