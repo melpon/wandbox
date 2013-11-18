@@ -110,19 +110,19 @@ POST /compile.json
 
   Result:
 
-    status
-      Exit code
-    signal
-      Signal message
-    compiler_output
-      stdout at compiling
-    compiler_error
-      stderr at compiling
-    compiler_message
-      merged message compiler_output and compiler_error
-    program_output
-      stdout at runtime
-    program_error
-      stderr at runtime
-    program_message
-      merged message program_output and program_error
+  status
+    Exit code
+  signal
+    Signal message
+  compiler_output
+    stdout at compiling
+  compiler_error
+    stderr at compiling
+  compiler_message
+    merged message compiler_output and compiler_error
+  program_output
+    stdout at runtime
+  program_error
+    stderr at runtime
+  program_message
+    merged message program_output and program_error
