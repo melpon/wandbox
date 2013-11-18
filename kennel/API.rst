@@ -1,10 +1,10 @@
 API
-========
+============
 
 API home is ``melpon.org/wandbox/api``
 
 GET /list.json
-  List compiler infos.
+  List compiler informations.
 
   Parameter is nothing.
 
@@ -119,10 +119,10 @@ POST /compile.json
   compiler_error
     stderr at compiling
   compiler_message
-    merged message compiler_output and compiler_error
+    merged messages compiler_output and compiler_error
   program_output
     stdout at runtime
   program_error
     stderr at runtime
   program_message
-    merged message program_output and program_error
+    merged messages program_output and program_error
