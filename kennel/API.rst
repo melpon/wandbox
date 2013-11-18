@@ -126,3 +126,12 @@ POST /compile.json
     stderr at runtime
   program_message
     merged messages program_output and program_error
+
+
+Plugin
+------------
+
+VIM Plugin for Wandbox is here_. thanks for @rhysd_ !
+
+.. _here: https://github.com/rhysd/wandbox-vim
+.. _@rhysd: https://github.com/rhysd
