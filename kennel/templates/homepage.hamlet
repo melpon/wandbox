@@ -3,6 +3,14 @@
     <div .navbar>
       <div .navbar-inner>
         <a .brand href="@{RootR}">Wandbox
+        <ul .nav .pull-right>
+          <li>
+            <a  target="_blank" href="https://github.com/melpon/wandbox">Source
+          <li .dropdown>
+            <a .dropdown-toggle href="#" data-toggle="dropdown">Plugin <b class="caret"></b>
+            <ul .dropdown-menu>
+              <li>
+                <a href="https://github.com/rhysd/wandbox-vim" target="_blank">for Vimmer
 <div .row-fluid>
   <div .span2 .offset1>
     ^{compiler}
