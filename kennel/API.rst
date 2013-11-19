@@ -80,7 +80,7 @@ POST /compile.json
   Compile posted code.
 
   This API accepts "application/json" or
-  "application/x-www-form-urlencoded" in the Content-Type header.
+  "application/x-www-form-urlencoded" in a "Content-Type" header.
 
   Parameter:
 
@@ -131,6 +131,6 @@ POST /compile.json
 Plugin
 ------------
 
-VIM Plugin for Wandbox is here_. thanks for @rhysd !
+VIM Plugin for Wandbox is here_. thanks @rhysd for your contributiong!
 
 .. _here: https://github.com/rhysd/wandbox-vim
