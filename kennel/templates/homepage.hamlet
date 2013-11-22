@@ -11,6 +11,12 @@
             <ul .dropdown-menu>
               <li>
                 <a href="https://github.com/rhysd/wandbox-vim" target="_blank">for Vimmer
+            <ul .dropdown-menu>
+              <li>
+                <a href="https://gist.github.com/kosh04/7599007" target="_blank">for Emacser
+            <ul .dropdown-menu>
+              <li>
+                <a href="https://gist.github.com/kikairoya/7544234" target="_blank">for xyzzy-er
 <div .row-fluid>
   <div .span2 .offset1>
     ^{compiler}
