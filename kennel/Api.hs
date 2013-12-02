@@ -199,8 +199,7 @@ sinkEventSource writeChan_ = do
 sinkJson :: Conduit.MonadResource m => Conduit.Sink (Either String Protocol) m Aeson.Value
 sinkJson = do
     xs <- sinkJson' []
-    let xs' = reverse xs
-    let m = HMS.fromListWith T.append xs'
+    let m = HMS.fromListWith T.append xs
     let m' = HMS.map Y.String m
     return $ Y.Object m'
   where
