@@ -671,6 +671,17 @@
    "compile-command":"/bin/true",
    "run-command":["/usr/local/php-5.5.6/bin/php", "prog.php"],
    "version-command":["/bin/sh", "-c", "/usr/local/php-5.5.6/bin/php -v | head -1 | cut -d' ' -f2"],
+  },{
+   "name":"lazyk",
+   "displayable":true,
+   "output-file":"prog.lazy",
+   "display-name":"lazyk",
+   "display-compile-command":"lazyk prog.lazy",
+   "language":"Lazy K",
+   "source-suffix":".lazy",
+   "compile-command":"/bin/true",
+   "run-command":["/usr/local/lazyk/bin/lazyk", "prog.lazy"],
+   "version-command":["/bin/echo", "-e", "\\n"],
   }
  ]
 }
