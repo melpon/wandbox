@@ -59,46 +59,18 @@ namespace wandbox {
 		return std::unique_ptr<T, D>(p, d);
 	}
 
-	std::string dirname(const std::string &path) {
-		std::vector<char> buf(path.begin(), path.end());
-		buf.push_back(0);
-		return ::dirname(buf.data());
-	}
-	std::string basename(const std::string &path) {
-		std::vector<char> buf(path.begin(), path.end());
-		buf.push_back(0);
-		return ::basename(buf.data());
-	}
-	std::string readlink(const std::string &path) {
-		std::vector<char> buf(PATH_MAX);
-		while (true) {
-			const auto ret = ::readlink(path.c_str(), buf.data(), buf.size());
-			if (ret < 0) throw_system_error(errno);
-			if (static_cast<std::size_t>(ret) < buf.size()) return { buf.begin(), buf.begin()+ret };
-			buf.resize(buf.size()*2);
-		}
-	}
 	std::string realpath(const std::string &path) {
 		const auto p = make_unique(::realpath(path.c_str(), nullptr), &::free);
 		if (!p) throw_system_error(errno);
 		return p.get();
 	}
-	std::string realpath_allowing_noent(const std::string &path) {
-		const auto p = make_unique(::realpath(path.c_str(), nullptr), &::free);
-		if (p) return p.get();
-		const auto d = dirname(path) + "/";
-		const auto q = make_unique(::realpath(d.c_str(), nullptr), &::free);
-		if (!q) throw_system_error(errno);
-		return d + q.get();
-	}
-
-	std::string getcwd() {
-		const auto p = make_unique(::getcwd(nullptr, 0), &::free);
-		return p.get();
-	}
 
 	void mkdir(const std::string &path, ::mode_t mode) {
 		if (::mkdir(path.c_str(), mode) < 0) throw_system_error(errno);
+	}
+
+	void mkdirat(const std::shared_ptr<DIR> &at, const std::string &path, ::mode_t mode) {
+		if (::mkdirat(::dirfd(at.get()), path.c_str(), mode) < 0) throw_system_error(errno);
 	}
 
 	std::shared_ptr<DIR> opendir(const std::string &path) {
@@ -148,15 +120,6 @@ namespace wandbox {
 		int pid = ::fork();
 		if (pid == -1) throw_system_error(errno);
 		return pid;
-	}
-
-	pid_t waitpid(pid_t pid, int *status, int options) {
-		pid_t ret = -1;
-		do {
-			ret = ::waitpid(pid, status, options);
-			if (ret == -1 && errno != EINTR) throw_system_error(errno);
-		} while (ret == -1);
-		return ret;
 	}
 
 	struct unique_child_pid {

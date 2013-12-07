@@ -454,7 +454,7 @@ namespace wandbox {
 			reenter (this) {
 				::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
 				while (true) {
-					::mkdirat(::dirfd(workdir.get()), "store", 0700);
+					mkdirat(workdir, "store", 0700);
 					aiocb->aio_fildes = ::openat(::dirfd(workdir.get()), ("store/" + src_filename).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
 					if (aiocb->aio_fildes == -1) {
 						if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
