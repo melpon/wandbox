@@ -1,6 +1,7 @@
 #include "load_config.hpp"
 
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -42,7 +43,7 @@ namespace cfg {
 	struct config_grammar: qi::grammar<Iter, value(), qi::space_type> {
 		config_grammar(): qi::grammar<Iter, value(), qi::space_type>(top) {
 			namespace phx = boost::phoenix;
-			top %= obj | arr;
+			top %= (obj | arr) > qi::eoi;
 			val %= obj | arr | str | qi::int_ | qi::bool_;
 			pair %= str > ':' > val;
 			obj %= '{' > (((pair % ',') > -qi::lit(',')) | qi::eps) > '}';
@@ -280,6 +281,22 @@ namespace cfg {
 		int fd;
 	};
 
+	template <typename Iter>
+	struct parse_config_error: std::runtime_error {
+		parse_config_error(const std::string &file, const boost::spirit::qi::expectation_failure<Iter> &e): std::runtime_error(make_what(file, e)) { }
+		static std::string make_what(const std::string &file, const boost::spirit::qi::expectation_failure<Iter> &e) {
+			const auto advance_for = [](Iter first, std::ptrdiff_t maxlen, Iter last) -> Iter {
+				for (std::ptrdiff_t n = 0; n < maxlen && first != last; ++first, ++n) ;
+				return first;
+			};
+			std::stringstream ss;
+			ss << "parse error in file " << file << ":" << get_line(e.first)
+				<< "\nwhile expecting " << e.what_
+				<< "\nbut got " << std::string(e.first, advance_for(e.first, 128, e.last));
+			return ss.str();
+		}
+	};
+
 	cfg::value read_single_config_file(const std::shared_ptr<DIR> &at, const std::string &cfg) {
 		namespace s = boost::spirit;
 		namespace qi = boost::spirit::qi;
@@ -291,11 +308,15 @@ namespace cfg {
 				s::iterator_policies::split_std_deque>>
 					functor_multi_pass_type;
 		auto fd = unique_fd(::openat(dirfd_or_cwd(at), cfg.c_str(), O_RDONLY));
-		functor_multi_pass_type first(read_fd_iterator(fd.get()));
-		functor_multi_pass_type last;
 		if (fd.get() == -1) throw_system_error(errno);
+		s::line_pos_iterator<functor_multi_pass_type> first(functor_multi_pass_type(read_fd_iterator(fd.get())));
+		s::line_pos_iterator<functor_multi_pass_type> last;
 		cfg::value o;
-		qi::phrase_parse(first, last, cfg::config_grammar<decltype(first)>(), qi::space, o);
+		try {
+			qi::phrase_parse(first, last, cfg::config_grammar<decltype(first)>(), qi::space, o);
+		} catch (qi::expectation_failure<decltype(first)> &e) {
+			throw parse_config_error<decltype(first)>(cfg, e);
+		}
 		return o;
 	}
 
