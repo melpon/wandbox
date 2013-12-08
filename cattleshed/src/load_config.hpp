@@ -6,7 +6,6 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
-#include <istream>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -63,7 +62,7 @@ namespace wandbox {
 		std::unordered_map<std::string, switch_trait> switches;
 	};
 
-	server_config load_config(std::istream &is);
+	server_config load_config(const std::vector<std::string> &cfgs);
 	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches);
 }
 

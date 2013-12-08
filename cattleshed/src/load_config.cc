@@ -15,9 +15,11 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
+#include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/fusion/include/io.hpp>
-#include <boost/io/ios_state.hpp>
+
+#include "posixapi.hpp"
 
 namespace wandbox {
 namespace cfg {
@@ -227,15 +229,141 @@ namespace cfg {
 		return ret;
 	}
 
-	server_config load_config(std::istream &is) {
-		boost::io::ios_flags_saver sv(is);
-		is.unsetf(std::ios::skipws);
-		cfg::value o;
+	struct read_fd_iterator {
+		typedef std::input_iterator_tag iterator_category;
+		typedef char value_type;
+		typedef std::ptrdiff_t difference_type;
+		typedef const char *pointer;
+		typedef const char &reference;
+		explicit read_fd_iterator(int fd = -1): buf(), off(), gone(), fd(fd) {
+			fetch();
+		}
+		read_fd_iterator operator ++(int) {
+			auto tmp = *this;
+			++*this;
+			return tmp;
+		}
+		read_fd_iterator &operator ++() {
+			++off;
+			++gone;
+			fetch();
+			return *this;
+		}
+		const char &operator *() const {
+			return buf[off];
+		}
+		bool operator ==(const read_fd_iterator &o) const {
+			return (fd == -1 && o.fd == -1) || (fd == o.fd && gone == o.gone);
+		}
+		bool operator !=(const read_fd_iterator &o) const {
+			return !(*this == o);
+		}
+	private:
+		void fetch() {
+			if (fd == -1) return;
+			if (off == buf.size()) {
+				buf.resize(BUFSIZ);
+				const auto r = ::read(fd, buf.data(), buf.size());
+				if (r == 0) {
+					fd = -1;
+					off = 0;
+					return;
+				}
+				if (r < 0) throw_system_error(errno);
+				buf.resize(r);
+				off = 0;
+			}
+		}
+		std::vector<char> buf;
+		std::size_t off;
+		std::size_t gone;
+		int fd;
+	};
+
+	cfg::value read_single_config_file(const std::shared_ptr<DIR> &at, const std::string &cfg) {
 		namespace s = boost::spirit;
 		namespace qi = boost::spirit::qi;
-		auto first = (s::istream_iterator(is));
-		const auto last = decltype(first)();
+		typedef s::multi_pass<read_fd_iterator,
+			s::iterator_policies::default_policy<
+				s::iterator_policies::ref_counted,
+				s::iterator_policies::no_check,
+				s::iterator_policies::input_iterator,
+				s::iterator_policies::split_std_deque>>
+					functor_multi_pass_type;
+		auto fd = unique_fd(::openat(dirfd_or_cwd(at), cfg.c_str(), O_RDONLY));
+		functor_multi_pass_type first(read_fd_iterator(fd.get()));
+		functor_multi_pass_type last;
+		if (fd.get() == -1) throw_system_error(errno);
+		cfg::value o;
 		qi::phrase_parse(first, last, cfg::config_grammar<decltype(first)>(), qi::space, o);
+		return o;
+	}
+
+	std::vector<cfg::value> read_config_file(const std::shared_ptr<DIR> &at, const std::string &name) {
+		try {
+			std::vector<cfg::value> ret;
+			const auto dir = opendirat(at, name);
+			std::vector<std::string> files;
+			for (auto ent = readdir(dir.get()); ent; ent = readdir(dir.get())) {
+				if (::strcmp(ent->d_name, ".") == 0 || ::strcmp(ent->d_name, "..") == 0) continue;
+				files.emplace_back(ent->d_name);
+			}
+			std::sort(files.begin(), files.end());
+			for (const auto &f: files) {
+				const auto x = read_config_file(dir, f.c_str());
+				ret.insert(ret.end(), x.begin(), x.end());
+			}
+			return ret;
+		} catch (std::system_error &e) {
+			if (e.code().value() != ENOTDIR) throw;
+			return { read_single_config_file(at, name) };
+		}
+	}
+
+	struct merge_cfgs_visitor {
+		typedef cfg::value result_type;
+		cfg::value operator ()(std::vector<cfg::value> a, const std::vector<cfg::value> &b) const {
+			a.insert(a.end(), b.begin(), b.end());
+			return a;
+		}
+		cfg::value operator ()(std::unordered_map<std::string, cfg::value> a, const std::unordered_map<std::string, cfg::value> &b) const {
+			for (const auto &kv: b) {
+				a[kv.first] = boost::apply_visitor(*this, a[kv.first], kv.second);
+			}
+			return a;
+		}
+		template <typename T, typename U>
+		cfg::value operator ()(const T &, const U &b) const {
+			return b;
+		}
+		template <typename T>
+		cfg::value operator ()(const T &a, cfg::wandbox_cfg_tag) const {
+			return a;
+		}
+		template <typename T>
+		cfg::value operator ()(cfg::wandbox_cfg_tag, const T &b) const {
+			return b;
+		}
+		cfg::value operator ()(cfg::wandbox_cfg_tag, cfg::wandbox_cfg_tag) const {
+			return {};
+		}
+	};
+
+	cfg::value merge_cfgs(const std::vector<cfg::value> &cfgs) {
+		cfg::value ret;
+		for (const auto &c: cfgs) {
+			ret = boost::apply_visitor(merge_cfgs_visitor(), ret, c);
+		}
+		return ret;
+	}
+
+	server_config load_config(const std::vector<std::string> &cfgs) {
+		std::vector<cfg::value> os;
+		for (const auto &c: cfgs) {
+			const auto x = read_config_file(nullptr, c);
+			os.insert(os.end(), x.begin(), x.end());
+		}
+		const auto o = merge_cfgs(os);
 		return { load_network_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o) };
 	}
 

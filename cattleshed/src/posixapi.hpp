@@ -1,3 +1,6 @@
+#ifndef POSIXAPI_HPP_
+#define POSIXAPI_HPP_
+
 #include <memory>
 #include <system_error>
 #include <vector>
@@ -50,63 +53,74 @@ namespace wandbox {
 		unique_fd r, w;
 	};
 
-	__attribute__((noreturn)) void throw_system_error(int err) {
+	__attribute__((noreturn)) inline void throw_system_error(int err) {
 		throw std::system_error(err, std::system_category());
 	}
 
 	template <typename T, typename D>
-	std::unique_ptr<T, D> make_unique(T *p, const D &d) {
+	inline std::unique_ptr<T, D> make_unique(T *p, const D &d) {
 		return std::unique_ptr<T, D>(p, d);
 	}
 
-	std::string realpath(const std::string &path) {
+	inline std::string realpath(const std::string &path) {
 		const auto p = make_unique(::realpath(path.c_str(), nullptr), &::free);
 		if (!p) throw_system_error(errno);
 		return p.get();
 	}
 
-	void mkdir(const std::string &path, ::mode_t mode) {
+	inline int dirfd_or_cwd(const std::shared_ptr<DIR> &dir) {
+		if (dir) return ::dirfd(dir.get());
+		return AT_FDCWD;
+	}
+
+	inline void mkdir(const std::string &path, ::mode_t mode) {
 		if (::mkdir(path.c_str(), mode) < 0) throw_system_error(errno);
 	}
 
-	void mkdirat(const std::shared_ptr<DIR> &at, const std::string &path, ::mode_t mode) {
-		if (::mkdirat(::dirfd(at.get()), path.c_str(), mode) < 0) throw_system_error(errno);
+	inline void mkdirat(const std::shared_ptr<DIR> &at, const std::string &path, ::mode_t mode) {
+		if (::mkdirat(dirfd_or_cwd(at), path.c_str(), mode) < 0) throw_system_error(errno);
 	}
 
-	std::shared_ptr<DIR> opendir(const std::string &path) {
+	inline std::shared_ptr<DIR> opendir(const std::string &path) {
 		DIR *dir = ::opendir(path.c_str());
 		if (!dir) throw_system_error(errno);
 		return std::shared_ptr<DIR>(dir, &::closedir);
 	}
 
-	std::string mkdtemp(const std::string &base) {
+	inline std::shared_ptr<DIR> opendirat(const std::shared_ptr<DIR> &at, const std::string &path) {
+		int fd = ::openat(dirfd_or_cwd(at), path.c_str(), O_RDONLY|O_DIRECTORY);
+		if (fd == -1) throw_system_error(errno);
+		return std::shared_ptr<DIR>(fdopendir(fd), &::closedir);
+	}
+
+	inline std::string mkdtemp(const std::string &base) {
 		std::vector<char> buf(base.begin(), base.end());
 		buf.push_back(0);
 		if (!::mkdtemp(buf.data())) throw_system_error(errno);
 		return buf.data();
 	}
 
-	void chdir(const std::shared_ptr<DIR> &workdir) {
+	inline void chdir(const std::shared_ptr<DIR> &workdir) {
 		const int fd = ::dirfd(workdir.get());
 		if (fd == -1) throw_system_error(errno);
 		if (::fchdir(fd) == -1) throw_system_error(errno);
 	}
 
-	unique_pipe pipe() {
+	inline unique_pipe pipe() {
 		int p[2];
 		if (::pipe(p) < 0) throw_system_error(errno);
 		return { unique_fd(p[0]), unique_fd(p[1]) };
 	}
 
-	void dup2(const unique_fd &src, int dst) {
+	inline void dup2(const unique_fd &src, int dst) {
 		if (::dup2(src.get(), dst) < 0) throw_system_error(errno);
 	}
 
-	void dup2(const unique_fd &src, const unique_fd &dst) {
+	inline void dup2(const unique_fd &src, const unique_fd &dst) {
 		if (::dup2(src.get(), dst.get()) < 0) throw_system_error(errno);
 	}
 
-	__attribute__((noreturn)) void execv(const std::vector<std::string> &argv) {
+	__attribute__((noreturn)) inline void execv(const std::vector<std::string> &argv) {
 		std::vector<std::vector<char>> x;
 		for (const auto &s: argv) x.emplace_back(s.c_str(), s.c_str()+s.length()+1);
 		std::vector<char *> a;
@@ -116,7 +130,7 @@ namespace wandbox {
 		throw_system_error(errno);
 	}
 
-	__attribute__((returns_twice)) pid_t fork() {
+	__attribute__((returns_twice)) inline pid_t fork() {
 		int pid = ::fork();
 		if (pid == -1) throw_system_error(errno);
 		return pid;
@@ -173,7 +187,7 @@ namespace wandbox {
 		unique_fd fd_stderr;
 	};
 
-	child_process piped_spawn(const std::shared_ptr<DIR> &workdir, const std::vector<std::string> &argv) {
+	inline child_process piped_spawn(const std::shared_ptr<DIR> &workdir, const std::vector<std::string> &argv) {
 		auto pipe_stdin = pipe();
 		auto pipe_stdout = pipe();
 		auto pipe_stderr = pipe();
@@ -196,7 +210,7 @@ namespace wandbox {
 		}
 	}
 
-	std::shared_ptr<DIR> make_tmpdir(const std::string &seed) {
+	inline std::shared_ptr<DIR> make_tmpdir(const std::string &seed) {
 		while (true) try {
 			return opendir(mkdtemp(seed));
 		} catch (std::system_error &e) {
@@ -205,3 +219,4 @@ namespace wandbox {
 	}
 
 }
+#endif

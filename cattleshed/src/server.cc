@@ -1,6 +1,5 @@
 #include <array>
 #include <deque>
-#include <fstream>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -661,13 +660,12 @@ int main(int argc, char **argv) {
 	{
 		namespace po = boost::program_options;
 
-		std::string config_file;
+		std::vector<std::string> config_files{std::string(SYSCONFDIR) + "/cattleshed.conf"};
 		{
-			std::string config_file_raw;
 			po::options_description opt("options");
 			opt.add_options()
 				("help,h", "show this help")
-				("config,c", po::value<std::string>(&config_file_raw)->default_value(std::string(SYSCONFDIR) + "/cattleshed.conf"), "specify config file")
+				("config,c", po::value<std::vector<std::string>>(&config_files), "specify config file")
 			;
 
 			po::variables_map vm;
@@ -678,15 +676,8 @@ int main(int argc, char **argv) {
 				std::cout << opt << std::endl;
 				return 0;
 			}
-
-			config_file = realpath(config_file_raw);
-			if (config_file.empty()) {
-				std::cerr << "config file '" << config_file_raw << "'not found" << std::endl;
-				return 1;
-			}
 		}
-		std::ifstream f(config_file);
-		config = load_config(f);
+		config = load_config(config_files);
 	}
 	auto aio = std::make_shared<asio::io_service>();
 	listener s(aio, boost::asio::ip::tcp::v4(), config.network.listen_port);
