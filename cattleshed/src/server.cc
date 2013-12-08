@@ -18,13 +18,14 @@
 #include <boost/system/system_error.hpp>
 
 #include <aio.h>
+#include <syslog.h>
 #include <sys/eventfd.h>
 
 #include "quoted_printable.hpp"
 #include "load_config.hpp"
 #include "posixapi.hpp"
+#include "syslogstream.hpp"
 #include "yield.hpp"
-
 
 #define PROTECT_FROM_MOVE(member) const auto member = this->member
 
@@ -50,6 +51,7 @@ namespace wandbox {
 	using boost::asio::ip::tcp;
 
 	server_config config;
+	bool be_verbose;
 
 	struct counting_semaphore {
 		counting_semaphore(asio::io_service &aio, unsigned count)
@@ -146,16 +148,6 @@ namespace wandbox {
 		bool writing;
 		std::recursive_mutex mtx;
 	};
-
-	static const compiler_trait &get_compiler(const std::unordered_map<std::string, std::string> &received) {
-		return *config.compilers.get<1>().find([&]() -> std::string {
-			std::string ret;
-			const auto &s = received.at("Control");
-			auto ite = s.begin();
-			qi::parse(ite, s.end(), "compiler=" >> *qi::char_, ret);
-			return ret;
-		}());
-	}
 
 	struct program_runner: private coroutine {
 		typedef void result_type;
@@ -283,7 +275,7 @@ namespace wandbox {
 			std::weak_ptr<write_limit_counter> limit;
 		};
 
-		program_runner(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::unordered_map<std::string, std::string> received, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<DIR> workdir, std::shared_ptr<void> semaphore)
+		program_runner(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::unordered_map<std::string, std::string> received, std::shared_ptr<asio::signal_set> sigs, std::shared_ptr<DIR> workdir, compiler_trait target_compiler,std::shared_ptr<void> semaphore)
 			 : aio(move(aio)),
 			   strand(std::make_shared<asio::io_service::strand>(*this->aio)),
 			   sock(move(sock)),
@@ -294,6 +286,7 @@ namespace wandbox {
 			   pipes(),
 			   kill_timer(std::make_shared<asio::deadline_timer>(*this->aio)),
 			   limitter(std::make_shared<write_limit_counter>(config.jail.output_limit_warn, config.jail.output_limit_kill)),
+			   target_compiler(target_compiler),
 			   laststatus(0),
 			   semaphore(move(semaphore))
 		{
@@ -305,13 +298,12 @@ namespace wandbox {
 
 		void operator ()(error_code ec = error_code(), size_t = 0) {
 			reenter (this) {
-
+				std::clog << "[" << sock.get() << "]" << "running program with '" << target_compiler.name << "' [" << this << "]" << std::endl;
 				{
 					namespace qi = boost::spirit::qi;
-					const auto &compiler = get_compiler(received);
 
-					auto ccargs = compiler.compile_command;
-					auto progargs = compiler.run_command;
+					auto ccargs = target_compiler.compile_command;
+					auto progargs = target_compiler.run_command;
 
 					const auto it = received.find("CompilerOption");
 					if (it != received.end()) {
@@ -321,7 +313,7 @@ namespace wandbox {
 							qi::parse(ite, it->second.end(), qi::as_string[+(qi::char_-','-'\n')] % ',', selected_switches);
 						}
 
-						for (const auto &sw: compiler.switches) {
+						for (const auto &sw: target_compiler.switches) {
 							if (selected_switches.count(sw) == 0) continue;
 							const auto ite = config.switches.find(sw);
 							if (ite == config.switches.end()) continue;
@@ -418,6 +410,7 @@ namespace wandbox {
 					PROTECT_FROM_MOVE(sockbuf);
 					sockbuf->async_write_command("Signal", ::strsignal(WTERMSIG(laststatus)), strand->wrap(move(*this)));
 				}
+				std::clog << "[" << sock.get() << "]" << "finished [" << this << "]" << std::endl;
 				yield {
 					PROTECT_FROM_MOVE(strand);
 					PROTECT_FROM_MOVE(sockbuf);
@@ -438,22 +431,24 @@ namespace wandbox {
 		std::vector<std::shared_ptr<pipe_forwarder_base>> pipes;
 		std::shared_ptr<asio::deadline_timer> kill_timer;
 		std::shared_ptr<write_limit_counter> limitter;
+		compiler_trait target_compiler;
 		int laststatus;
 		std::shared_ptr<void> semaphore;
 	};
 
 	struct program_writer: private coroutine {
 		typedef void result_type;
-		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received, std::shared_ptr<void> semaphore)
+		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received, compiler_trait target_compiler, std::shared_ptr<void> semaphore)
 			 : aio(move(aio)),
 			   sock(move(sock)),
 			   src_text(std::make_shared<std::string>(received["Source"])),
-			   src_filename("prog" + get_compiler(received).source_suffix),
+			   src_filename("prog" + target_compiler.source_suffix),
 			   file(std::make_shared<asio::posix::stream_descriptor>(*this->aio)),
 			   sigs(move(sigs)),
 			   workdir(make_tmpdir("wandboxXXXXXX")),
 			   received(move(received)),
 			   aiocb(std::make_shared<struct aiocb>()),
+			   target_compiler(target_compiler),
 			   semaphore(move(semaphore))
 		{
 		}
@@ -483,7 +478,7 @@ namespace wandbox {
 					yield sigs->async_wait(move(*this));
 				} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
 				::close(aiocb->aio_fildes);
-				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir), move(semaphore))();
+				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir), move(target_compiler), move(semaphore))();
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;
@@ -495,6 +490,7 @@ namespace wandbox {
 		std::shared_ptr<DIR> workdir;
 		std::unordered_map<std::string, std::string> received;
 		std::shared_ptr<struct aiocb> aiocb;
+		compiler_trait target_compiler;
 		std::shared_ptr<void> semaphore;
 	};
 
@@ -520,6 +516,7 @@ namespace wandbox {
 		version_sender &operator =(version_sender &&) = default;
 		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
+				std::clog << "[" << sock.get() << "]" << "building compiler list" << std::endl;
 				while (!commands.empty()) {
 					current = move(commands.front());
 					commands.pop_front();
@@ -606,9 +603,24 @@ namespace wandbox {
 					int len = 0;
 					std::string data;
 					if (!qi::parse(ite, buf->end(), +(qi::char_ - qi::space) >> qi::omit[*qi::space] >> qi::omit[qi::int_[phx::ref(len) = qi::_1]] >> qi::omit[':'] >> qi::repeat(phx::ref(len))[qi::char_] >> qi::omit[qi::eol], command, data)) break;
-					if (command == "Control" && data == "run") return program_writer(move(aio), move(sock), move(sigs), move(received), move(semaphore))();
-					else if (command == "Version") return version_sender(move(aio), move(sock), move(sigs), move(semaphore))();
-					else received[command] += quoted_printable::decode(move(data));
+					if (command == "Control" && data == "run") {
+						std::string ccname;
+						const auto &s = received["Control"];
+						{
+							auto ite = s.begin();
+							qi::parse(ite, s.end(), "compiler=" >> *qi::char_, ccname);
+						}
+						const auto c = config.compilers.get<1>().find(ccname);
+						if (c == config.compilers.get<1>().end()) {
+							std::clog << "[" << sock.get() << "]" << "selected compiler '" << ccname << "' is not configured" << std::endl;
+							return (void)sock->close(ec);
+						}
+						return program_writer(move(aio), move(sock), move(sigs), move(received), *c, move(semaphore))();
+					} else if (command == "Version") {
+						return version_sender(move(aio), move(sock), move(sigs), move(semaphore))();
+					} else {
+						received[command] += quoted_printable::decode(move(data));
+					}
 				}
 				buf->erase(buf->begin(), ite);
 			}
@@ -631,6 +643,7 @@ namespace wandbox {
 					PROTECT_FROM_MOVE(acc);
 					acc->async_accept(*sock, move(*this));
 				}
+				std::clog << "[" << sock.get() << "]" << "connection established from " << sock->remote_endpoint() << std::endl;
 				yield compiler_bridge(aio, move(sock), sigs, sem->async_signal(*this))();
 			}
 		}
@@ -643,6 +656,7 @@ namespace wandbox {
 			   sock(),
 			   sem(std::make_shared<counting_semaphore>(*this->aio, config.network.max_connections-1))
 		{
+			std::clog << "start listening at " << this->ep << std::endl;
 			try {
 				mkdir(config.jail.basedir, 0700);
 			} catch (std::system_error &e) {
@@ -669,6 +683,8 @@ namespace wandbox {
 int main(int argc, char **argv) {
 	using namespace wandbox;
 
+	std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*){});
+
 	{
 		namespace po = boost::program_options;
 
@@ -678,6 +694,8 @@ int main(int argc, char **argv) {
 			opt.add_options()
 				("help,h", "show this help")
 				("config,c", po::value<std::vector<std::string>>(&config_files), "specify config file")
+				("syslog", "use syslog for trace")
+				("verbose", "be verbose")
 			;
 
 			po::variables_map vm;
@@ -687,6 +705,11 @@ int main(int argc, char **argv) {
 			if (vm.count("help")) {
 				std::cout << opt << std::endl;
 				return 0;
+			}
+
+			if (vm.count("syslog")) {
+				logbuf.reset(new syslogstreambuf("cattleshed", LOG_PID, LOG_DAEMON, LOG_DEBUG));
+				std::clog.rdbuf(logbuf.get());
 			}
 		}
 		config = load_config(config_files);
