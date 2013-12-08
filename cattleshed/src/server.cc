@@ -6,7 +6,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/fusion/include/std_pair.hpp>
@@ -333,6 +335,16 @@ namespace wandbox {
 							f(ite->second.runtime ? progargs : ccargs);
 						}
 					}
+
+					for (auto &x: { std::make_pair("CompilerOptionRaw", &ccargs), std::make_pair("RuntimeOptionRaw", &progargs) }) {
+						const auto it = received.find(x.first);
+						if (it != received.end()) {
+							std::vector<std::string> s;
+							boost::algorithm::split(s, it->second, boost::is_any_of("\r\n"), boost::algorithm::token_compress_on);
+							x.second->insert(x.second->end(), s.begin(), s.end());
+						}
+					}
+
 					ccargs.insert(ccargs.begin(), config.jail.jail_command.begin(), config.jail.jail_command.end());
 					progargs.insert(progargs.begin(), config.jail.jail_command.begin(), config.jail.jail_command.end());
 					commands = {
@@ -427,7 +439,7 @@ namespace wandbox {
 		std::shared_ptr<asio::deadline_timer> kill_timer;
 		std::shared_ptr<write_limit_counter> limitter;
 		int laststatus;
-		std::shared_ptr<void> semaphore;	
+		std::shared_ptr<void> semaphore;
 	};
 
 	struct program_writer: private coroutine {
