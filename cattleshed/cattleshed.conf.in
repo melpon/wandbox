@@ -236,8 +236,6 @@
     "/usr/local/gcc-head/bin/g++",
     "-oprog.exe",
     "-Wl,-rpath,/usr/local/gcc-head/lib64",
-    "-ftemplate-depth=8192",
-    "-fconstexpr-depth=4096",
     "-lpthread",
     "prog.cc"
    ],
@@ -283,8 +281,6 @@
     "/usr/local/gcc-4.7.3/bin/g++",
     "-oprog.exe",
     "-Wl,-rpath,/usr/local/gcc-4.7.3/lib64",
-    "-ftemplate-depth=8192",
-    "-fconstexpr-depth=4096",
     "-lpthread",
     "prog.cc"
    ],
@@ -300,8 +296,6 @@
     "/usr/local/gcc-4.6.4/bin/g++",
     "-oprog.exe",
     "-Wl,-rpath,/usr/local/gcc-4.6.4/lib64",
-    "-ftemplate-depth=8192",
-    "-fconstexpr-depth=4096",
     "-lpthread",
     "prog.cc"
    ],
@@ -317,7 +311,6 @@
     "/usr/local/gcc-4.5.4/bin/g++",
     "-oprog.exe",
     "-Wl,-rpath,/usr/local/gcc-4.5.4/lib64",
-    "-ftemplate-depth=8192",
     "-lpthread",
     "prog.cc"
    ],
@@ -367,8 +360,6 @@
     "-I/usr/local/libcxx-head/include/c++/v1",
     "-L/usr/local/libcxx-head/lib",
     "-Wl,-rpath,/usr/local/libcxx-head/lib",
-    "-ftemplate-depth=8192",
-    "-fconstexpr-depth=4096",
     "-nostdinc++",
     "-lpthread",
     "prog.cc"
@@ -388,8 +379,6 @@
     "-I/usr/local/libcxx-3.3/include/c++/v1",
     "-L/usr/local/libcxx-3.3/lib",
     "-Wl,-rpath,/usr/local/libcxx-3.3/lib",
-    "-ftemplate-depth=8192",
-    "-fconstexpr-depth=4096",
     "-nostdinc++",
     "-lpthread",
     "prog.cc"
@@ -409,8 +398,6 @@
     "-I/usr/local/libcxx-3.0/include/c++/v1",
     "-L/usr/local/libcxx-3.0/lib",
     "-Wl,-rpath,/usr/local/libcxx-3.0/lib",
-    "-ftemplate-depth=8192",
-    "-fconstexpr-depth=4096",
     "-nostdinc++",
     "-lpthread",
     "prog.cc"
@@ -430,7 +417,6 @@
     "-I/usr/local/libcxx-3.0/include/c++/v1",
     "-L/usr/local/libcxx-3.0/lib",
     "-Wl,-rpath,/usr/local/libcxx-3.0/lib",
-    "-ftemplate-depth=8192",
     "-nostdinc++",
     "-lpthread",
     "prog.cc"
@@ -450,7 +436,6 @@
     "-I/usr/local/libcxx-3.0/include/c++/v1",
     "-L/usr/local/libcxx-3.0/lib",
     "-Wl,-rpath,/usr/local/libcxx-3.0/lib",
-    "-ftemplate-depth=8192",
     "-nostdinc++",
     "-lpthread",
     "prog.cc"
