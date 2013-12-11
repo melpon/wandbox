@@ -59,6 +59,8 @@ ResultWindow.prototype.post_permlink = function(compiler, code, outputs) {
 
   var selected_compiler = compiler.get_selected_compiler();
   var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
+  var compiler_option_raw = compiler.get_selected_compiler_option_raw();
+  var runtime_option_raw = compiler.get_selected_runtime_option_raw();
   var str_outputs = $.map(outputs, function(e) {
     return e.type + ',' + e.output;
   });
@@ -67,6 +69,8 @@ ResultWindow.prototype.post_permlink = function(compiler, code, outputs) {
     compiler: selected_compiler,
     code: code,
     options: compile_options,
+    'compiler-option-raw': compiler_option_raw,
+    'runtime-option-raw': runtime_option_raw,
     outputs: str_outputs },
     function(json) {
       if (!json.success) {
