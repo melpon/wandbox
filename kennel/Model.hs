@@ -24,6 +24,6 @@ import qualified Data.Time.Clock                        as Clock
 Y.share [Y.mkPersist Y.sqlOnlySettings, Y.mkMigrate "migrateAll"]
     $(Y.persistFileWith PersistQuasi.lowerCaseSettings "config/models")
 
-makeCode :: T.Text -> T.Text -> T.Text -> IO Code
-makeCode compiler code options =
-    Code compiler code False False options <$> Clock.getCurrentTime
+makeCode :: T.Text -> T.Text -> T.Text -> T.Text -> T.Text -> IO Code
+makeCode compiler code options compilerOptionRaw runtimeOptionRaw =
+    Code compiler code False False options compilerOptionRaw runtimeOptionRaw <$> Clock.getCurrentTime

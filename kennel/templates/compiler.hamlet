@@ -9,3 +9,9 @@
       <div data-compiler="#{verName $ ciVersion info}">
         $forall sw <- ciSwitches info
           ^{makeSwitch (verName (ciVersion info)) sw}
+        $if verCompilerOptionRaw $ ciVersion info
+          <label>extra options:
+          <div .span12 .option-raw .compiler-option-raw>
+        $if verRuntimeOptionRaw $ ciVersion info
+          <label>extra options:
+          <div .span12 .option-raw .runtime-option-raw>

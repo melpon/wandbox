@@ -130,6 +130,8 @@ makeRootR mCodeOutputs = do
         Aeson.object ["compiler" .= urlEncode (codeCompiler code)
                      ,"code" .= urlEncode (codeCode code)
                      ,"options" .= urlEncode (codeOptions code)
+                     ,"compiler-option-raw" .= urlEncode (codeCompilerOptionRaw code)
+                     ,"runtime-option-raw" .= urlEncode (codeRuntimeOptionRaw code)
                      ,"outputs" .= map tojson' outputs]
       where
         tojson' output =

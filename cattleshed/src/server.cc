@@ -9,6 +9,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/fusion/include/std_pair.hpp>
@@ -332,7 +333,12 @@ namespace wandbox {
 						const auto it = received.find(x.first);
 						if (it != received.end()) {
 							std::vector<std::string> s;
-							boost::algorithm::split(s, it->second, boost::is_any_of("\r\n"), boost::algorithm::token_compress_on);
+							auto input = it->second;
+							boost::algorithm::replace_all(input, "\r\n", "\n");
+							boost::algorithm::split(s, it->second, boost::is_any_of("\r\n"));
+							if (not s.empty() && s.back().empty()) {
+								s.pop_back();
+							}
 							x.second->insert(x.second->end(), s.begin(), s.end());
 						}
 					}

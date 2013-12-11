@@ -159,6 +159,8 @@ namespace cfg {
 			t.display_name = get_str(y, "display-name");
 			t.display_compile_command = get_str(y, "display-compile-command");
 			t.displayable = get_bool(y, "displayable");
+			t.compiler_option_raw = get_bool(y, "compiler-option-raw");
+			t.runtime_option_raw = get_bool(y, "runtime-option-raw");
 			t.switches = get_str_array(y, "switches");
 			for (auto &x: get_str_array(y, "initial-checked")) t.initial_checked.insert(std::move(x));
 			const auto inherits = get_str_array(y, "inherits");
@@ -451,6 +453,8 @@ namespace cfg {
 				"\"display-name\":\"" + compiler.display_name + "\","
 				"\"version\":\"" + version + "\","
 				"\"display-compile-command\":\"" + compiler.display_compile_command + "\","
+				"\"compiler-option-raw\":" + (compiler.compiler_option_raw ? "true" : "false") + ","
+				"\"runtime-option-raw\":" + (compiler.runtime_option_raw ? "true" : "false") + ","
 				"\"switches\":[" + boost::algorithm::join(swlist, ",") + "]"
 			"}";
 	}

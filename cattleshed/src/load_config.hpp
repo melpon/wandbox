@@ -37,6 +37,8 @@ namespace wandbox {
 		std::vector<std::string> switches;
 		std::unordered_set<std::string> initial_checked;
 		bool displayable;
+		bool compiler_option_raw;
+		bool runtime_option_raw;
 	};
 	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
 

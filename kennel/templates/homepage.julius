@@ -18,10 +18,12 @@ function update_compile_command(compiler) {
   var command = compiler.get_selected_compiler_element().attr('data-command');
   var compiler_name = compiler.get_selected_compiler_element().text();
   var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
+  var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
+  var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
 
   $('#compiler_name').text(compiler_name);
 
-  var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ');
+  var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + compiler_options_arguments.join(' ') + runtime_options_arguments.join(' ');
   $('#compile_command').html($('<code>').text(compile_command));
 }
 
@@ -74,6 +76,15 @@ $(function() {
 
     update_compile_command(compiler);
   };
+  compiler.raw_keyup = function() {
+    update_compile_command(compiler);
+  };
+  compiler.raw_changed = function() {
+    if (!USING_PERMLINK)
+      save('wandbox.compiler.current', compiler.serialize_current());
+
+    update_compile_command(compiler);
+  };
 
   // deserialize if settings is stored in the cookie.
   var compiler_settings = $.cookie('wandbox.compiler.current');
@@ -96,6 +107,8 @@ $(function() {
     compiler.deserialize({
       compiler: decode_uri(code.compiler),
       compile_options: decode_uri(code.options),
+      compiler_option_raw: decode_uri(code['compiler-option-raw']),
+      runtime_option_raw: decode_uri(code['runtime-option-raw']),
     });
 
     result_container.set_code(compiler, decode_uri(code.code), code.outputs);

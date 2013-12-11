@@ -4,6 +4,8 @@ Code
     optimize Bool
     warning Bool
     options T.Text
+    compilerOptionRaw T.Text
+    runtimeOptionRaw T.Text
     createdAt Clock.UTCTime
     UniqueCode compiler code optimize warning createdAt
     deriving Show

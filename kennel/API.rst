@@ -12,6 +12,8 @@ GET /list.json
 
     $ curl http://melpon.org/wandbox/api/list.json
     [{
+      "compiler-option-raw":true,
+      "runtime-option-raw":false,
       "display-compile-command":"g++ prog.cc",
       "switches":[{
         "default":true,
@@ -90,6 +92,10 @@ POST /compile.json
     Used options for a compiler joined by comma.
   code [String]
     Compiled code.
+  compiler-option-raw [String] (optional, default is a empty string)
+    Compile-time any additional options joined by line-break.
+  runtime-option-raw [String] (optional, default is a empty string)
+    Run-time any additional options joined by line-break.
 
   Sample::
 
@@ -97,14 +103,15 @@ POST /compile.json
     {
       "code":"#include <iostream>\nint main() { int x = 0; std::cout << \"hoge\" << std::endl; }",
       "options": "warning,gnu++1y",
-      "compiler": "gcc-head"
+      "compiler": "gcc-head",
+      "compiler-option-raw": "-Dx=hogefuga\n-O3"
     }
     $ curl -H "Content-type: application/json" -d "`cat test.json`"  http://melpon.org/wandbox/api/compile.json
     {
       "status":"0",
-      "compiler_message":"prog.cc: In function 'int main()':\nprog.cc:2:18: warning: unused variable 'x' [-Wunused-variable]\n int main() { int x = 0; std::cout \u003c\u003c \"hoge\" \u003c\u003c std::endl; }\n                  ^\n",
+      "compiler_message":"prog.cc: In function 'int main()':\n\u003ccommand-line\u003e:0:3: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout \u003c\u003c \"hoge\" \u003c\u003c std::endl; }\n                  ^\n",
       "program_message":"hoge\n",
-      "compiler_error":"prog.cc: In function 'int main()':\nprog.cc:2:18: warning: unused variable 'x' [-Wunused-variable]\n int main() { int x = 0; std::cout \u003c\u003c \"hoge\" \u003c\u003c std::endl; }\n                  ^\n",
+      "compiler_error":"prog.cc: In function 'int main()':\n\u003ccommand-line\u003e:0:3: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout \u003c\u003c \"hoge\" \u003c\u003c std::endl; }\n                  ^\n",
       "program_output":"hoge\n"
     }
 

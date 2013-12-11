@@ -6,3 +6,12 @@
 #compile-options > .selected {
   display: block;
 }
+.option-raw .CodeMirror {
+  border: 1px solid #eee;
+  min-height: 50px;
+  height: auto;
+}
+.option-raw .CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
+}

@@ -24,6 +24,31 @@ function Compiler(compiler_id, compile_options_id) {
     if (self.compile_option_changed)
       self.compile_option_changed();
   });
+
+  var init_editor = function(es) {
+    es.map(function(n,e) {
+      if ($(e).children().size() != 0)
+        return;
+
+       var editor = CodeMirror(e, {
+         viewportMargin: Infinity,
+         smartIndent: false,
+       });
+       $(e).data('editor', editor);
+    });
+  };
+  init_editor($(this.compile_options_id).find('.compiler-option-raw'));
+  init_editor($(this.compile_options_id).find('.runtime-option-raw'));
+
+  $(this.compile_options_id).find('.option-raw').keyup(function() {
+    if (self.raw_keyup)
+      self.raw_keyup();
+  });
+  $(this.compile_options_id).find('.option-raw').change(function() {
+    if (self.raw_changed)
+      self.raw_changed();
+  });
+
 }
 
 Compiler.prototype._compiler = function() {
@@ -53,10 +78,51 @@ Compiler.prototype.get_checked_compile_options = function() {
   return options.find(':checked,:selected');
 }
 
+Compiler.prototype._selected_option_raw = function(cls, value) {
+  var options = this._compile_options();
+  var e = options.find(cls);
+  if (e.size() == 0)
+    return undefined;
+  return value ? e.data('editor').setValue(value) : e.data('editor').getValue();
+}
+
+Compiler.prototype.get_selected_compiler_option_raw = function() {
+  return this._selected_option_raw('.compiler-option-raw');
+}
+Compiler.prototype.set_selected_compiler_option_raw = function(value) {
+  this._selected_option_raw('.compiler-option-raw', value);
+}
+
+Compiler.prototype.get_selected_runtime_option_raw = function() {
+  return this._selected_option_raw('.runtime-option-raw');
+}
+Compiler.prototype.set_selected_runtime_option_raw = function(value) {
+  this._selected_option_raw('.runtime-option-raw', value);
+}
+
+Compiler.prototype.raw_to_arguments = function(raw) {
+  if (!raw)
+    return [];
+
+  // split by line-break
+  var xs = raw.split(/\r\n|\r|\n/);
+  // remove last line-break
+  if (xs.length != 0 && xs[xs.length - 1].length == 0)
+    xs.pop();
+  // escape double-quotes and backslash
+  xs = $.map(xs, function(x) { return x.replace(/\\|"/g, '\\$&'); });
+  // enclose double-quotes
+  xs = $.map(xs, function(x) { return '"' + x + '"'; });
+
+  return xs;
+}
+
 Compiler.prototype.serialize_current = function() {
   return {
     compiler: this.get_selected_compiler(),
     compile_options: this.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(','),
+    compiler_option_raw: this.get_selected_compiler_option_raw(),
+    runtime_option_raw: this.get_selected_runtime_option_raw(),
   };
 }
 
@@ -81,4 +147,6 @@ Compiler.prototype.deserialize = function(settings) {
     if (v)
       elem.parent().val(val);
   });
+  this.set_selected_compiler_option_raw(settings.compiler_option_raw);
+  this.set_selected_runtime_option_raw(settings.runtime_option_raw);
 }

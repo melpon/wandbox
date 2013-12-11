@@ -27,6 +27,8 @@ data ProtocolSpecifier =
   CompilerOption |
   CompilerMessageE |
   CompilerMessageS |
+  CompilerOptionRaw |
+  RuntimeOptionRaw |
   StdIn |
   StdOut |
   StdErr |
@@ -53,9 +55,11 @@ specParser = do
        (pure Version         <* AttoBS.try (AttoBS.string "Version")) <|>
        (pure Control         <* AttoBS.try (AttoBS.string "Control")) <|>
        (pure Source          <* AttoBS.try (AttoBS.string "Source")) <|>
+       (pure CompilerOptionRaw <* AttoBS.try (AttoBS.string "CompilerOptionRaw")) <|>
        (pure CompilerOption  <* AttoBS.try (AttoBS.string "CompilerOption")) <|>
        (pure CompilerMessageE <* AttoBS.try (AttoBS.string "CompilerMessageE")) <|>
        (pure CompilerMessageS <* AttoBS.try (AttoBS.string "CompilerMessageS")) <|>
+       (pure RuntimeOptionRaw <* AttoBS.try (AttoBS.string "RuntimeOptionRaw")) <|>
        (pure StdIn           <* AttoBS.try (AttoBS.string "StdIn")) <|>
        (pure StdOut          <* AttoBS.try (AttoBS.string "StdOut")) <|>
        (pure StdErr          <* AttoBS.try (AttoBS.string "StdErr")) <|>

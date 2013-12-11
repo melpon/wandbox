@@ -111,8 +111,10 @@ ResultWindow.prototype.code_window = function(compiler, code) {
   var code = (function(compiler) {
     var command = compiler.get_selected_compiler_element().attr('data-command');
     var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
+    var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
+    var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
 
-    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ');
+    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + compiler_options_arguments.join(' ') + runtime_options_arguments.join(' ');
     return $('<code>' + compile_command + '</code>');
   })(compiler);
 
@@ -193,13 +195,17 @@ ResultWindow.prototype.post_code = function(compiler, code) {
 
   var selected_compiler = compiler.get_selected_compiler();
   var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
+  var compiler_option_raw = compiler.get_selected_compiler_option_raw();
+  var runtime_option_raw = compiler.get_selected_runtime_option_raw();
 
   src.onopen = function() {
     var url = BASE_COMPILE_URL + '/' + post_id;
     $.post(url, {
       compiler: selected_compiler,
       code: code,
-      options: compile_options }, function() { });
+      options: compile_options,
+      'compiler-option-raw': compiler_option_raw,
+      'runtime-option-raw': runtime_option_raw }, function() { });
   };
 
   src.onerror = function() {

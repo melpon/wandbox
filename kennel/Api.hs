@@ -34,7 +34,14 @@ import qualified Yesod                                  as Y
 import Data.Conduit (($$))
 import Data.Aeson ((.:), (.=))
 
-import Model (Code, codeCompiler, codeCode, codeOptions)
+import Model
+  ( Code
+  , codeCompiler
+  , codeCode
+  , codeOptions
+  , codeCompilerOptionRaw
+  , codeRuntimeOptionRaw
+  )
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 
@@ -106,6 +113,8 @@ data CompilerVersion = CompilerVersion
   , verDisplayName :: T.Text
   , verVersion :: T.Text
   , verCompileCommand :: T.Text
+  , verCompilerOptionRaw :: Bool
+  , verRuntimeOptionRaw :: Bool
   } deriving (Show)
 instance Aeson.FromJSON CompilerVersion where
   parseJSON (Aeson.Object v) =
@@ -114,7 +123,9 @@ instance Aeson.FromJSON CompilerVersion where
       v .: "language" <*>
       v .: "display-name" <*>
       v .: "version" <*>
-      v .: "display-compile-command"
+      v .: "display-compile-command" <*>
+      v .: "compiler-option-raw" <*>
+      v .: "runtime-option-raw"
   parseJSON _ = Monad.mzero
 
 data CompilerInfo = CompilerInfo
@@ -136,6 +147,8 @@ instance Aeson.ToJSON CompilerInfo where
       , "display-name" .= verDisplayName version
       , "version" .= verVersion version
       , "display-compile-command" .= verCompileCommand version
+      , "compiler-option-raw" .= verCompilerOptionRaw version
+      , "runtime-option-raw" .= verRuntimeOptionRaw version
       , "switches" .= switch
       ]
     
@@ -164,6 +177,8 @@ makeProtocols :: Code -> [Protocol]
 makeProtocols code =
   Maybe.catMaybes [
     Just $ Protocol Control (T.append "compiler=" $ codeCompiler code),
+    Just $ Protocol CompilerOptionRaw $ codeCompilerOptionRaw code,
+    Just $ Protocol RuntimeOptionRaw $ codeRuntimeOptionRaw code,
     Just $ Protocol Source $ codeCode code,
     Just $ Protocol CompilerOption $ codeOptions code,
     Just $ Protocol Control "run"]
