@@ -362,6 +362,7 @@
     "-Wl,-rpath,/usr/local/libcxx-head/lib",
     "-nostdinc++",
     "-lpthread",
+    "-lsupc++",
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
@@ -381,6 +382,7 @@
     "-Wl,-rpath,/usr/local/libcxx-3.3/lib",
     "-nostdinc++",
     "-lpthread",
+    "-lsupc++",
     "prog.cc"
    ],
    "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
