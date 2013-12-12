@@ -335,7 +335,7 @@ namespace wandbox {
 							std::vector<std::string> s;
 							auto input = it->second;
 							boost::algorithm::replace_all(input, "\r\n", "\n");
-							boost::algorithm::split(s, it->second, boost::is_any_of("\r\n"));
+							boost::algorithm::split(s, input, boost::is_any_of("\r\n"));
 							if (not s.empty() && s.back().empty()) {
 								s.pop_back();
 							}
