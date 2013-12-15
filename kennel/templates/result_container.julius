@@ -52,17 +52,17 @@ ResultContainer.prototype._post_init = function(compiler, code, name) {
   return result_window;
 }
 
-ResultContainer.prototype.post_code = function(compiler, code) {
+ResultContainer.prototype.post_code = function(compiler, code, stdin) {
   if (this.running) {
     return;
   }
   this.running = true;
 
   var result_window = this._post_init(compiler, code, this._next_name());
-  result_window.post_code(compiler, code);
+  result_window.post_code(compiler, code, stdin);
 }
 
-ResultContainer.prototype.set_code = function(compiler, code, outputs) {
+ResultContainer.prototype.set_code = function(compiler, code, stdin, outputs) {
   var result_window = this._post_init(compiler, code, 'permlink');
-  result_window.set_code(compiler, code, outputs);
+  result_window.set_code(compiler, code, stdin, outputs);
 }

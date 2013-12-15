@@ -39,18 +39,18 @@ ResultWindow.prototype._output_window = function() {
   return $(this.id).find('.output-window');
 }
 
-ResultWindow.prototype.permlink = function(compiler, code, outputs) {
+ResultWindow.prototype.permlink = function(compiler, code, stdin, outputs) {
   var self = this;
 
   var a = $('<a href="#" class="btn">Share This Code</a>')
     .appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();
-    self.post_permlink(compiler, code, outputs);
+    self.post_permlink(compiler, code, stdin, outputs);
   });
 }
 
-ResultWindow.prototype.post_permlink = function(compiler, code, outputs) {
+ResultWindow.prototype.post_permlink = function(compiler, code, stdin, outputs) {
   var self = this;
 
   var pm = this._permlink().find('a');
@@ -68,6 +68,7 @@ ResultWindow.prototype.post_permlink = function(compiler, code, outputs) {
   $.post('@{PermlinkR}', {
     compiler: selected_compiler,
     code: code,
+    stdin: stdin,
     options: compile_options,
     'compiler-option-raw': compiler_option_raw,
     'runtime-option-raw': runtime_option_raw,
@@ -100,11 +101,12 @@ ResultWindow.prototype.post_permlink = function(compiler, code, outputs) {
     });
 }
 
-ResultWindow.prototype.code_window = function(compiler, code) {
+ResultWindow.prototype.code_window = function(compiler, code, stdin) {
   var show_code = $('<div><code><a href="#">Show Code</a></code></div>');
   var hide_code = $('<div><code><a href="#">Hide Code</a></code></div>');
-  var pre = $('<div><pre></pre></div>');
-  pre.find('pre').text(code);
+  var pre = $('<div><pre></pre><pre></pre></div>');
+  pre.find('pre').eq(0).text(code);
+  pre.find('pre').eq(1).text(stdin);
 
   var compiler_data = (function(compiler) {
     var e = compiler.get_selected_compiler_element();
@@ -145,7 +147,7 @@ ResultWindow.prototype.code_window = function(compiler, code) {
   this._code_window().append(pre);
 }
 
-ResultWindow.prototype.post_code = function(compiler, code) {
+ResultWindow.prototype.post_code = function(compiler, code, stdin) {
   var self = this;
 
   var post_id = random_string(16);
@@ -153,7 +155,7 @@ ResultWindow.prototype.post_code = function(compiler, code) {
 
   var src = new EventSource($.url(url).attr('path'));
 
-  this.code_window(compiler, code);
+  this.code_window(compiler, code, stdin);
 
   var finalize = function() {
     src.close();
@@ -161,7 +163,7 @@ ResultWindow.prototype.post_code = function(compiler, code) {
     var outputs = self._output_window().find('p').map(function(n,e) {
         return { 'type': $(e).attr('data-type'), 'output': $(e).text() };
     });
-    self.permlink(compiler, code, outputs);
+    self.permlink(compiler, code, stdin, outputs);
 
     if (self.onfinish)
       self.onfinish();
@@ -207,6 +209,7 @@ ResultWindow.prototype.post_code = function(compiler, code) {
     $.post(url, {
       compiler: selected_compiler,
       code: code,
+      stdin: stdin,
       options: compile_options,
       'compiler-option-raw': compiler_option_raw,
       'runtime-option-raw': runtime_option_raw }, function() { });
@@ -217,9 +220,9 @@ ResultWindow.prototype.post_code = function(compiler, code) {
   }
 }
 
-ResultWindow.prototype.set_code = function(compiler, code, outputs) {
+ResultWindow.prototype.set_code = function(compiler, code, stdin, outputs) {
   var self = this;
-  this.code_window(compiler, code);
+  this.code_window(compiler, code, stdin);
   $.each(outputs, function(n,e) {
     var type = decode_uri(e.type);
     var output = decode_uri(e.output);

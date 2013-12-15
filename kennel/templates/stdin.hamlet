@@ -1,0 +1,4 @@
+<div .row-fluid>
+  <div .span10>
+    <label .row-fluid>input stdin:
+    <div #stdin .stdin>

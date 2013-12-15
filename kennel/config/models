@@ -6,6 +6,7 @@ Code
     options T.Text
     compilerOptionRaw T.Text default=""
     runtimeOptionRaw T.Text default=""
+    stdin T.Text default=""
     createdAt Clock.UTCTime
     UniqueCode compiler code optimize warning createdAt
     deriving Show

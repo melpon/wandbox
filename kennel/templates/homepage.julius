@@ -10,8 +10,9 @@ function post_code(compiler, result_container) {
 
   var editor = new Editor('#editor', '#editor-settings');
   var code = editor.getValue();
+  var stdin = new Stdin('#stdin');
 
-  result_container.post_code(compiler, code);
+  result_container.post_code(compiler, code, stdin.get_stdin());
 }
 
 function update_compile_command(compiler) {
@@ -86,6 +87,8 @@ $(function() {
     update_compile_command(compiler);
   };
 
+  var stdin = new Stdin('#stdin');
+
   // deserialize if settings is stored in the cookie.
   var compiler_settings = $.cookie('wandbox.compiler.current');
   if (compiler_settings) {
@@ -103,6 +106,7 @@ $(function() {
   var code = #{jsonCode};
   if (code != null) {
     editor.setValue(decode_uri(code.code));
+    stdin.set_stdin(decode_uri(code.stdin));
 
     compiler.deserialize({
       compiler: decode_uri(code.compiler),
@@ -111,7 +115,7 @@ $(function() {
       runtime_option_raw: decode_uri(code['runtime-option-raw']),
     });
 
-    result_container.set_code(compiler, decode_uri(code.code), code.outputs);
+    result_container.set_code(compiler, decode_uri(code.code), decode_uri(code.stdin), code.outputs);
   }
 
   update_compile_command(compiler);

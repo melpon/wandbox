@@ -92,6 +92,8 @@ POST /compile.json
     Used options for a compiler joined by comma.
   code [String]
     Compiled code.
+  stdin [String] (optional, default is a empty string)
+    Stdin
   compiler-option-raw [String] (optional, default is a empty string)
     Compile-time any additional options joined by line-break.
   runtime-option-raw [String] (optional, default is a empty string)

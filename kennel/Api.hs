@@ -34,14 +34,7 @@ import qualified Yesod                                  as Y
 import Data.Conduit (($$))
 import Data.Aeson ((.:), (.=))
 
-import Model
-  ( Code
-  , codeCompiler
-  , codeCode
-  , codeOptions
-  , codeCompilerOptionRaw
-  , codeRuntimeOptionRaw
-  )
+import Model (Code(..))
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 
@@ -177,6 +170,7 @@ makeProtocols :: Code -> [Protocol]
 makeProtocols code =
   Maybe.catMaybes [
     Just $ Protocol Control (T.append "compiler=" $ codeCompiler code),
+    Just $ Protocol StdIn $ codeStdin code,
     Just $ Protocol CompilerOptionRaw $ codeCompilerOptionRaw code,
     Just $ Protocol RuntimeOptionRaw $ codeRuntimeOptionRaw code,
     Just $ Protocol Source $ codeCode code,

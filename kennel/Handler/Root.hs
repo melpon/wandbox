@@ -64,6 +64,10 @@ editor :: Widget
 editor = do
   $(widgetFile "editor")
 
+stdin :: Widget
+stdin = do
+  $(widgetFile "stdin")
+
 compiler :: Widget
 compiler = do
   host <- Y.handlerToWidget $ extraVMHost <$> getExtra
@@ -132,6 +136,7 @@ makeRootR mCodeOutputs = do
                      ,"options" .= urlEncode (codeOptions code)
                      ,"compiler-option-raw" .= urlEncode (codeCompilerOptionRaw code)
                      ,"runtime-option-raw" .= urlEncode (codeRuntimeOptionRaw code)
+                     ,"stdin" .= urlEncode (codeStdin code)
                      ,"outputs" .= map tojson' outputs]
       where
         tojson' output =

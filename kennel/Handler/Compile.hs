@@ -24,7 +24,8 @@ postCompileR ident = do
   (Just options) <- Y.lookupPostParam "options"
   compilerOptionRaw <- maybe "" id <$> Y.lookupPostParam "compiler-option-raw"
   runtimeOptionRaw <- maybe "" id <$> Y.lookupPostParam "runtime-option-raw"
-  codeInstance <- Y.liftIO $ makeCode compiler code options compilerOptionRaw runtimeOptionRaw
+  stdin <- maybe "" id <$> Y.lookupPostParam "stdin"
+  codeInstance <- Y.liftIO $ makeCode compiler code options compilerOptionRaw runtimeOptionRaw stdin
   host <- extraVMHost <$> getExtra
   port <- extraVMPort <$> getExtra
   _ <- go host port codeInstance

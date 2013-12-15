@@ -7,7 +7,7 @@
   display: block;
 }
 .option-raw .CodeMirror {
-  border: 1px solid #eee;
+  border: 1px solid #888;
   min-height: 50px;
   height: auto;
 }

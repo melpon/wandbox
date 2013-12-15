@@ -35,7 +35,8 @@ postPermlinkR = do
     (Just opts) <- Y.lookupPostParam "options"
     compilerOptionRaw <- maybe "" id <$> Y.lookupPostParam "compiler-option-raw"
     runtimeOptionRaw <- maybe "" id <$> Y.lookupPostParam "runtime-option-raw"
-    codeInstance <- Y.liftIO $ makeCode compiler code opts compilerOptionRaw runtimeOptionRaw
+    stdin <- maybe "" id <$> Y.lookupPostParam "stdin"
+    codeInstance <- Y.liftIO $ makeCode compiler code opts compilerOptionRaw runtimeOptionRaw stdin
     linkName <- Y.liftIO $ T.pack <$> (Monad.replicateM 16 $ Char.chr <$> randomRAny (0,255) isLinkCode)
     typeOutputs <- Y.lookupPostParams "outputs[]"
 

@@ -35,7 +35,8 @@ postApiCompileR = do
     let (Just (Y.String options)) = HMS.lookup "options" obj
     let (Y.String compilerOptionRaw) = maybe "" id $ HMS.lookup "compiler-option-raw" obj
     let (Y.String runtimeOptionRaw) = maybe "" id $ HMS.lookup "runtime-option-raw" obj
-    codeInstance <- Y.liftIO $ makeCode compiler code options compilerOptionRaw runtimeOptionRaw
+    let (Just (Y.String stdin)) = HMS.lookup "stdin" obj
+    codeInstance <- Y.liftIO $ makeCode compiler code options compilerOptionRaw runtimeOptionRaw stdin
     host <- extraVMHost <$> getExtra
     port <- extraVMPort <$> getExtra
     json <- Y.liftIO $ runCode host port codeInstance $ sinkJson
