@@ -630,6 +630,18 @@
    "compile-command":"/bin/true",
    "version-command":["/usr/local/ruby-2.0.0-p247/bin/ruby", "-e", "print RUBY_VERSION"],
   },{
+   "name":"mruby-head",
+   "displayable":true,
+   "output-file":"prog.rb",
+   "run-command":["/usr/local/mruby-head/bin/mruby", "prog.rb"],
+   "display-name":"mruby HEAD",
+   "display-compile-command":"mruby prog.rb",
+   "language":"Ruby",
+   "source-suffix":".rb",
+   "runtime-option-raw":true,
+   "compile-command":"/bin/true",
+   "version-command":["/bin/sh", "-c", "cd /usr/local/mruby-head && git rev-parse HEAD | cut -c 1-8"],
+  },{
    "name":"erlang-maint",
    "displayable":true,
    "output-file":"prog.erl",
