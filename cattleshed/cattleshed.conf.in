@@ -206,6 +206,10 @@
    "runtime":true,
    "insert-position":1,
   },
+  "delphi-mode":{
+   "flags":["-Mdelphi"],
+   "display-name":"Delphi 7 mode",
+  },
  },
  "compilers":[
   {
@@ -737,6 +741,7 @@
    "compile-command":["/usr/local/fpc-2.6.2/bin/fpc", "-Fu/usr/local/fpc-2.6.2/lib/fpc/2.6.2/units/x86_64-linux/*", "prog.pas"],
    "run-command":["./prog"],
    "version-command":["/bin/sh", "-c", "/usr/local/fpc-2.6.2/bin/fpc | head -1 | cut -d' ' -f5"],
+   "switches":["delphi-mode"],
   }
  ]
 }
