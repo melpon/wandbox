@@ -34,6 +34,7 @@ import Settings.StaticFiles (
     codemirror_mode_shell_shell_js,
     codemirror_mode_lua_lua_js,
     codemirror_mode_php_php_js,
+    codemirror_mode_commonlisp_commonlisp_js,
     codemirror_keymap_vim_js,
     codemirror_keymap_emacs_js,
     compiling_gif)
@@ -120,6 +121,7 @@ makeRootR mCodeOutputs = do
         Y.addScript $ StaticR codemirror_mode_shell_shell_js
         Y.addScript $ StaticR codemirror_mode_lua_lua_js
         Y.addScript $ StaticR codemirror_mode_php_php_js
+        Y.addScript $ StaticR codemirror_mode_commonlisp_commonlisp_js
         Y.addScript $ StaticR codemirror_keymap_vim_js
         Y.addScript $ StaticR codemirror_keymap_emacs_js
         Y.addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"

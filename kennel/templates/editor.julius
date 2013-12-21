@@ -109,6 +109,7 @@ var EDITOR_MODE_MAPPING = {
   'Bash script': 'text/x-sh',
   'Lua': 'text/x-lua',
   'PHP': 'text/x-php',
+  'Lisp': 'text/x-common-lisp',
 }
 function _get_editor_mode(lang) {
   return EDITOR_MODE_MAPPING[lang];

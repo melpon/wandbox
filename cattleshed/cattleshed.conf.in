@@ -19,7 +19,7 @@
    "--",
    "@bindir@/cattlegrid",
    "--rootdir=./jail",
-   "--mount=/bin,/etc,/lib,/lib64,/usr/bin,/usr/lib,/usr/lib64,/usr/include,/usr/local",
+   "--mount=/bin,/etc,/lib,/lib32,/lib64,/usr/bin,/usr/lib,/usr/lib64,/usr/include,/usr/local",
    "--rwmount=/tmp=./jail/tmp,/home/jail=./store",
    "--devices=/dev/null,/dev/zero,/dev/full,/dev/random,/dev/urandom",
    "--chdir=/home/jail",
@@ -713,6 +713,18 @@
    "compile-command":"/bin/true",
    "run-command":["/usr/local/lazyk/bin/lazyk", "prog.lazy"],
    "version-command":["/bin/echo", "-e", "\\n"],
+  },{
+   "name":"clisp",
+   "displayable":true,
+   "output-file":"prog.lisp",
+   "display-name":"CLISP",
+   "display-compile-command":"clisp prog.lisp",
+   "language":"Lisp",
+   "source-suffix":".lisp",
+   "runtime-option-raw":true,
+   "compile-command":"/bin/true",
+   "run-command":["/usr/local/clisp-2.49.0/bin/clisp", "prog.lisp"],
+   "version-command":["/bin/sh", "-c", "/usr/local/clisp-2.49.0/bin/clisp --version | head -1 | cut -d' ' -f3"],
   }
  ]
 }
