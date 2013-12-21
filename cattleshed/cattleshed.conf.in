@@ -714,7 +714,7 @@
    "run-command":["/usr/local/lazyk/bin/lazyk", "prog.lazy"],
    "version-command":["/bin/echo", "-e", "\\n"],
   },{
-   "name":"clisp",
+   "name":"clisp-2.49.0",
    "displayable":true,
    "output-file":"prog.lisp",
    "display-name":"CLISP",
