@@ -11,6 +11,7 @@ import Import
 import qualified Yesod                                  as Y
 import qualified Yesod.Static                           as YStatic
 import qualified Yesod.Auth                             as YAuth
+import qualified Yesod.Core.Types                       as YCoreTypes
 import qualified Yesod.Default.Config                   as YDConfig
 import qualified Yesod.Default.Util                     as YDUtil
 import qualified Yesod.Auth.HashDB                      as YAuthHDB
@@ -18,7 +19,6 @@ import qualified Database.Persist                       as Persist
 import qualified Database.Persist.Sql                   as PersistSql
 import qualified Text.Jasmine                           as Jasmine
 import qualified Text.Hamlet                            as Hamlet
-import qualified System.Log.FastLogger                  as FastLogger
 import qualified Data.Maybe                             as Maybe
 
 import Data.Text (Text)
@@ -38,7 +38,7 @@ data App = App
     , getStatic :: YStatic.Static -- ^ Settings for static file serving.
     , connPool :: Persist.PersistConfigPool Settings.PersistConf -- ^ Database connection pool.
     , persistConfig :: Settings.PersistConf
-    , appLogger :: FastLogger.Logger
+    , appLogger :: YCoreTypes.Logger
     , getChanMap :: ChanMap
     }
 

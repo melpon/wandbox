@@ -192,13 +192,11 @@ sinkEventSource writeChan_ = do
   mValue <- Conduit.await
   case mValue of
     Nothing -> return ()
-    (Just (Left str)) -> do
-      Y.liftIO $ putStrLn str
+    (Just (Left _)) -> do
       Y.liftIO $ writeChan_ $ EventSource.CloseEvent
     (Just (Right ProtocolNil)) -> do
       Y.liftIO $ print ProtocolNil
     (Just (Right (Protocol spec@Control contents@"Finish"))) -> do
-      Y.liftIO $ putStrLn $ T.unpack contents
       Y.liftIO $ writeChan_ $ EventSource.ServerEvent Nothing Nothing [Blaze.fromByteString $ urlEncode spec contents]
       Y.liftIO $ writeChan_ $ EventSource.CloseEvent
     (Just (Right (Protocol spec contents))) -> do

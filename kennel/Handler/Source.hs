@@ -5,7 +5,6 @@ module Handler.Source (
 
 import Import
 import qualified Network.Wai.EventSource                as EventSource
-import qualified Data.Conduit                           as Conduit
 import qualified Data.Text                              as T
 import qualified Yesod                                  as Y
 
@@ -18,7 +17,7 @@ getSourceR ident = do
     chan <- Y.liftIO $ insertLookup cm ident
 
     req <- Y.waiRequest
-    res <- Y.liftIO $ Conduit.runResourceT $ EventSource.eventSourceAppChan chan req
+    res <- Y.liftIO $ EventSource.eventSourceAppChan chan req
 
     Y.sendWaiResponse res
 
