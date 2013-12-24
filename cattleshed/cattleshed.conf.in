@@ -374,6 +374,26 @@
    "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
    "inherits":"clang-common",
   },{
+   "name":"clang-3.4",
+   "displayable":true,
+   "compiler-option-raw":true,
+   "compile-command":[
+    "/usr/local/llvm-3.4/bin/clang++",
+    "-oprog.exe",
+    "-stdlib=libc++",
+    "-I/usr/local/libcxx-3.4/include/c++/v1",
+    "-L/usr/local/libcxx-3.4/lib",
+    "-Wl,-rpath,/usr/local/libcxx-3.4/lib",
+    "-nostdinc++",
+    "-lpthread",
+    "prog.cc",
+    "-lsupc++"
+   ],
+   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.4/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
+   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
+   "inherits":"clang-common",
+  },{
    "name":"clang-3.3",
    "displayable":true,
    "compiler-option-raw":true,
