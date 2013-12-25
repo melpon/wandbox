@@ -18,7 +18,7 @@ echo "exec /usr/local/cattleshed/bin/cattleshed" > runserver.sh
 cd ../
 
 cd kennel
-rm -r dist/ | /bin/true
+rm -r dist/ || /bin/true
 cabal-dev install
 cd ../
 '
