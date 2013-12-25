@@ -47,7 +47,8 @@ toWord8 = fromIntegral . Char.ord
 encode :: T.Text -> BS.ByteString
 encode = qpEncode . TE.encodeUtf8
 decode :: BS.ByteString -> Maybe T.Text
-decode = (TE.decodeUtf8 <$>) . qpDecode
+decode = (TE.decodeUtf8With onDecodeError <$>) . qpDecode
+  where onDecodeError _ _ = Just '?'
 
 specParser :: AttoBS.Parser ProtocolSpecifier
 specParser = do
