@@ -111,6 +111,7 @@ var EDITOR_MODE_MAPPING = {
   'PHP': 'text/x-php',
   'Lisp': 'text/x-common-lisp',
   'Pascal': 'text/x-pascal',
+  'Rust': 'text/x-rustsrc',
 }
 function _get_editor_mode(lang) {
   return EDITOR_MODE_MAPPING[lang];
