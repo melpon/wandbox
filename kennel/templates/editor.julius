@@ -43,7 +43,7 @@ Editor.prototype._initialize = function() {
     if (self.editor_changed)
       self.editor_changed();
   }).change();
-  $(this.settings_id).find('input').change(function() {
+  $(this.settings_id).find('input.use-legacy-editor').change(function() {
     var val = self.getValue();
     var checked = $(this).attr('checked');
     if (checked) {
@@ -64,6 +64,16 @@ Editor.prototype._initialize = function() {
       self.editor_changed();
   });
   $(this.id + ' .legacy-editor').hide();
+
+  $(this.settings_id).find('input.expand-editor').change(function(e) {
+    if ($(e.target).attr('checked')) {
+      $(this.id + ' .smart-editor').addClass('expand');
+    } else {
+      $(this.id + ' .smart-editor').removeClass('expand');
+    }
+    if (self.editor_changed)
+      self.editor_changed();
+  });
 }
 
 Editor.prototype.is_legacy = function() {
@@ -121,10 +131,21 @@ Editor.prototype.setLanguage = function(lang) {
   this.smart_editor().setOption('mode', _get_editor_mode(lang));
 }
 
+Editor.prototype.expand = function(value) {
+  var eexpand = $(this.settings_id).find('input.expand-editor');
+  if (value) {
+    eexpand.attr('checked', '');
+  } else {
+    eexpand.removeAttr('checked');
+  }
+  return eexpand;
+}
+
 Editor.prototype.serialize = function() {
   return {
     keybinding: $(this.settings_id).find('select').val(),
-    use_smart_editor: $(this.settings_id).find('input').prop('checked'),
+    use_smart_editor: $(this.settings_id).find('input.use-legacy-editor').prop('checked'),
+    expand_editor: $(this.settings_id).find('input.expand-editor').prop('checked'),
   };
 }
 
@@ -132,13 +153,16 @@ Editor.prototype.deserialize = function(settings) {
   var ekey = $(this.settings_id).find('select');
   ekey.val(settings.keybinding);
 
-  var esmart = $(this.settings_id).find('input');
+  var esmart = $(this.settings_id).find('input.use-legacy-editor');
   if (settings.use_smart_editor) {
     esmart.attr('checked', '');
   } else {
     esmart.removeAttr('checked');
   }
 
+  var eexpand = this.expand(settings.expand_editor);
+
   ekey.change();
   esmart.change();
+  eexpand.change();
 }

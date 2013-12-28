@@ -1,8 +1,25 @@
 
-function ResultContainer(id) {
+function ResultContainer(id, settings_id) {
+  var self = this;
+
   this.id = id;
+  this.settings_id = settings_id;
   this.name = 1;
   this.running = false;
+
+  $(this.settings_id).find('input.nowrap-output-window').change(function(e) {
+    var content = $(self.id + ' .tab-content');
+    $(e.target).attr('checked') ? content.addClass('nowrap') : content.removeClass('nowrap')
+    if (self.result_changed)
+        self.result_changed();
+  });
+  $(this.settings_id).find('input.expand-output-window').change(function(e) {
+    console.log($(e.target).attr('checked'));
+    var content = $(self.id + ' .tab-content');
+    $(e.target).attr('checked') ? content.addClass('expand') : content.removeClass('expand')
+    if (self.result_changed)
+        self.result_changed();
+  });
 }
 
 ResultContainer.prototype._nav_tabs = function() {
@@ -65,4 +82,35 @@ ResultContainer.prototype.post_code = function(compiler, code, stdin) {
 ResultContainer.prototype.set_code = function(compiler, code, stdin, outputs) {
   var result_window = this._post_init(compiler, code, 'permlink');
   result_window.set_code(compiler, code, stdin, outputs);
+}
+
+ResultContainer.prototype.expand = function(value) {
+  var eexpand = $(this.settings_id).find('input.expand-output-window');
+  if (value) {
+    eexpand.attr('checked', '');
+  } else {
+    eexpand.removeAttr('checked');
+  }
+  return eexpand;
+}
+
+ResultContainer.prototype.serialize = function() {
+  return {
+    nowrap: $(this.settings_id).find('input.nowrap-output-window').prop('checked'),
+    expand: $(this.settings_id).find('input.expand-output-window').prop('checked'),
+  };
+}
+
+ResultContainer.prototype.deserialize = function(settings) {
+  var enowrap = $(this.settings_id).find('input.nowrap-output-window');
+  if (settings.nowrap) {
+    enowrap.attr('checked', '');
+  } else {
+    enowrap.removeAttr('checked');
+  }
+
+  var eexpand = this.expand(settings.expand);
+
+  enowrap.change();
+  eexpand.change();
 }

@@ -1,6 +1,6 @@
 .smart-editor {
   margin: 0px;
-  height: 300px;
+  min-height: 300px;
 }
 .smart-editor .CodeMirror pre {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', 'Courier New', monospace;
@@ -11,6 +11,16 @@
 .legacy-editor {
   height: 300px;
   font-family: "Courier New", monospace;
+}
+
+.expand.smart-editor .CodeMirror {
+  min-height: 300px;
+  height: auto;
+}
+.expand.smart-editor .CodeMirror-scroll {
+  min-height: 300px;
+  overflow-y: hidden;
+  overflow-x: auto;
 }
 
 .cm-s-user span.cm-comment { color: #3a3; }

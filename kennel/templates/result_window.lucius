@@ -26,3 +26,12 @@
     color: #ff00ff;
   }
 }
+
+.expand .output-window {
+  min-height: 300px;
+  height: auto;
+}
+
+.nowrap .output-window {
+  white-space: pre;
+}

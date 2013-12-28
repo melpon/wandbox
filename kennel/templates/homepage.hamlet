@@ -1,5 +1,5 @@
 <div .row-fluid>
-  <div .span10 .offset1 #header>
+  <div .span12 #header>
     <div .navbar>
       <div .navbar-inner>
         <a .brand href="@{RootR}">Wandbox
@@ -16,9 +16,9 @@
               <li>
                 <a href="https://gist.github.com/kikairoya/7544234" target="_blank">for xyzzy-er
 <div .row-fluid>
-  <div .span2 .offset1>
+  <div .span2>
     ^{compiler}
-  <div .span8 #codepanel>
+  <div .span10 #codepanel>
     ^{editor}
     <div .row-fluid>
       <div .row-fluid>

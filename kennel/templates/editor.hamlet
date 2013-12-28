@@ -9,4 +9,6 @@
       <option value="vim">Vim
       <option value="emacs">Emacs
     <label .checkbox>
-      <input type="checkbox" value="use-legacy-editor">Use Legacy Editor
+      <input .use-legacy-editor type="checkbox" value="use-legacy-editor">Use Legacy Editor
+    <label .checkbox>
+      <input .expand-editor type="checkbox" value="expand-editor">Expand

@@ -35,11 +35,15 @@ function save(key, value) {
 $(function() {
   $.cookie.json = true;
 
-  var result_container = new ResultContainer('#result-container')
+  var result_container = new ResultContainer('#result-container', '#result-container-settings')
   result_container.onfinish = function() {
     $('#compile').show();
     $('#compiling').hide();
   };
+  result_container.result_changed = function() {
+    if (!USING_PERMLINK)
+      save('wandbox.result_container', result_container.serialize());
+  }
 
   $('#compile').click(function(event) {
     event.preventDefault();
@@ -52,7 +56,8 @@ $(function() {
     post_code(compiler, result_container);
   };
   editor.editor_changed = function() {
-    save('wandbox.editor', editor.serialize());
+    if (!USING_PERMLINK)
+      save('wandbox.editor', editor.serialize());
     if (editor.is_legacy()) {
       $('#compile').text('Run');
     } else {
@@ -96,11 +101,19 @@ $(function() {
     var editor_settings = $.cookie('wandbox.editor');
     if (editor_settings)
       editor.deserialize(editor_settings);
+    var result_container_settings = $.cookie('wandbox.result_container');
+    if (result_container_settings)
+      result_container.deserialize(result_container_settings);
   } else {
     // select default compiler
     compiler.set_compiler(#{defaultCompiler});
   }
 
+  // expand window if using permlink
+  if (USING_PERMLINK) {
+    editor.expand(true).change();
+    result_container.expand(true).change();
+  }
 
   // deserialize if code exists.
   var code = #{jsonCode};
