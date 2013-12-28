@@ -14,7 +14,6 @@ function ResultContainer(id, settings_id) {
         self.result_changed();
   });
   $(this.settings_id).find('input.expand-output-window').change(function(e) {
-    console.log($(e.target).attr('checked'));
     var content = $(self.id + ' .tab-content');
     $(e.target).attr('checked') ? content.addClass('expand') : content.removeClass('expand')
     if (self.result_changed)

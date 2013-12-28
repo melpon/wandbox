@@ -74,6 +74,12 @@ Editor.prototype._initialize = function() {
     if (self.editor_changed)
       self.editor_changed();
   });
+
+  $(this.settings_id).find('input.no-auto-indent').change(function(e) {
+    self.smart_editor().setOption('smartIndent', !($(e.target).prop('checked')));
+    if (self.editor_changed)
+      self.editor_changed();
+  });
 }
 
 Editor.prototype.is_legacy = function() {
@@ -145,6 +151,7 @@ Editor.prototype.serialize = function() {
   return {
     keybinding: $(this.settings_id).find('select').val(),
     use_smart_editor: $(this.settings_id).find('input.use-legacy-editor').prop('checked'),
+    no_auto_indent: $(this.settings_id).find('input.no-auto-indent').prop('checked'),
     expand_editor: $(this.settings_id).find('input.expand-editor').prop('checked'),
   };
 }
@@ -160,9 +167,17 @@ Editor.prototype.deserialize = function(settings) {
     esmart.removeAttr('checked');
   }
 
+  var eauto = $(this.settings_id).find('input.no-auto-indent');
+  if (settings.no_auto_indent) {
+    eauto.attr('checked', '');
+  } else {
+    eauto.removeAttr('checked');
+  }
+
   var eexpand = this.expand(settings.expand_editor);
 
   ekey.change();
   esmart.change();
+  eauto.change();
   eexpand.change();
 }

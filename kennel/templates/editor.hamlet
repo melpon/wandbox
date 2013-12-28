@@ -11,4 +11,6 @@
     <label .checkbox>
       <input .use-legacy-editor type="checkbox" value="use-legacy-editor">Use Legacy Editor
     <label .checkbox>
+      <input .no-auto-indent type="checkbox" value="no-auto-indent">OFF Auto Indent
+    <label .checkbox>
       <input .expand-editor type="checkbox" value="expand-editor">Expand
