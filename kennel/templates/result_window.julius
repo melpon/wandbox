@@ -98,6 +98,8 @@ ResultWindow.prototype.post_permlink = function(compiler, code, stdin, outputs) 
           count: 'none',
           //text: 'wandbox'
         });
+
+      window.history.pushState(null, null, url);
     });
 }
 
