@@ -694,7 +694,7 @@ int main(int argc, char **argv) {
 	{
 		namespace po = boost::program_options;
 
-		std::vector<std::string> config_files{std::string(SYSCONFDIR) + "/cattleshed.conf"};
+		std::vector<std::string> config_files{std::string(SYSCONFDIR) + "/cattleshed.conf", std::string(SYSCONFDIR) + "/cattleshed.conf.d"};
 		{
 			po::options_description opt("options");
 			opt.add_options()
