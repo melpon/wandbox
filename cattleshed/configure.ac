@@ -53,6 +53,12 @@ AC_TRY_LINK(
  [AC_MSG_RESULT([yes])],
  [AC_MSG_RESULT([no]); AC_MSG_ERROR([cattleshed requires Boost >= 1.47])])
 
+setcap_cmd=setcap
+AC_ARG_ENABLE([install-setcap],
+              [perform setcap(1) by 'make install'],
+              [if test "x$enableval" = xno; then setcap_cmd=true; fi])
+AC_SUBST([setcap_cmd])
+
 # Checks for libraries.
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([rt], [aio_write])

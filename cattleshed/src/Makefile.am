@@ -6,4 +6,4 @@ prlimit_SOURCES = prlimit.cc
 AM_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DSYSCONFDIR=\"$(sysconfdir)\" -DBOOST_SPIRIT_USE_PHOENIX_V3=1 @CPPFLAGS@
 
 install-exec-hook:
-	setcap cap_sys_admin,cap_sys_chroot,cap_mknod=p  $(DESTDIR)$(bindir)/cattlegrid
+	@setcap_cmd@ cap_sys_admin,cap_sys_chroot,cap_mknod=p  $(DESTDIR)$(bindir)/cattlegrid
