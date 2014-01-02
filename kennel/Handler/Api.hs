@@ -32,7 +32,7 @@ postApiCompileR = do
     Y.liftIO $ print obj
     let (Just (Y.String compiler)) = HMS.lookup "compiler" obj
     let (Just (Y.String code)) = HMS.lookup "code" obj
-    let (Just (Y.String options)) = HMS.lookup "options" obj
+    let (Y.String options) = maybe "" id $ HMS.lookup "options" obj
     let (Y.String compilerOptionRaw) = maybe "" id $ HMS.lookup "compiler-option-raw" obj
     let (Y.String runtimeOptionRaw) = maybe "" id $ HMS.lookup "runtime-option-raw" obj
     let (Y.String stdin) = maybe "" id $ HMS.lookup "stdin" obj

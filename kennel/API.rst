@@ -88,10 +88,10 @@ POST /compile.json
 
   compiler [String]
     Used compiler name.
-  options [String]
-    Used options for a compiler joined by comma.
   code [String]
     Compiled code.
+  options [String] (optional, default it a empty string)
+    Used options for a compiler joined by comma.
   stdin [String] (optional, default is a empty string)
     Stdin
   compiler-option-raw [String] (optional, default is a empty string)

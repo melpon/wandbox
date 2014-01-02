@@ -21,7 +21,7 @@ postCompileR :: T.Text -> Handler ()
 postCompileR ident = do
   (Just compiler) <- Y.lookupPostParam "compiler"
   (Just code) <- Y.lookupPostParam "code"
-  (Just options) <- Y.lookupPostParam "options"
+  options <- maybe "" id <$> Y.lookupPostParam "options"
   compilerOptionRaw <- maybe "" id <$> Y.lookupPostParam "compiler-option-raw"
   runtimeOptionRaw <- maybe "" id <$> Y.lookupPostParam "runtime-option-raw"
   stdin <- maybe "" id <$> Y.lookupPostParam "stdin"
