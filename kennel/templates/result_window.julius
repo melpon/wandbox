@@ -39,39 +39,35 @@ ResultWindow.prototype._output_window = function() {
   return $(this.id).find('.output-window');
 }
 
-ResultWindow.prototype.permlink = function(compiler, code, stdin, outputs) {
+ResultWindow.prototype.permlink = function(compiler_info, code, stdin, outputs) {
   var self = this;
 
   var a = $('<a href="#" class="btn">Share This Code</a>')
     .appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();
-    self.post_permlink(compiler, code, stdin, outputs);
+    self.post_permlink(compiler_info, code, stdin, outputs);
   });
 }
 
-ResultWindow.prototype.post_permlink = function(compiler, code, stdin, outputs) {
+ResultWindow.prototype.post_permlink = function(compiler_info, code, stdin, outputs) {
   var self = this;
 
   var pm = this._permlink().find('a');
   if (pm.hasClass('disable')) return;
   pm.addClass('disable');
 
-  var selected_compiler = compiler.get_selected_compiler();
-  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
-  var compiler_option_raw = compiler.get_selected_compiler_option_raw();
-  var runtime_option_raw = compiler.get_selected_runtime_option_raw();
   var str_outputs = $.map(outputs, function(e) {
     return e.type + ',' + e.output;
   });
 
   $.post('@{PermlinkR}', {
-    compiler: selected_compiler,
+    compiler: compiler_info.selected_compiler,
     code: code,
     stdin: stdin,
-    options: compile_options,
-    'compiler-option-raw': compiler_option_raw,
-    'runtime-option-raw': runtime_option_raw,
+    options: compiler_info.compile_options,
+    'compiler-option-raw': compiler_info.compiler_option_raw,
+    'runtime-option-raw': compiler_info.runtime_option_raw,
     outputs: str_outputs },
     function(json) {
       if (!json.success) {
@@ -103,28 +99,15 @@ ResultWindow.prototype.post_permlink = function(compiler, code, stdin, outputs) 
     });
 }
 
-ResultWindow.prototype.code_window = function(compiler, code, stdin) {
+ResultWindow.prototype.code_window = function(compiler_info, code, stdin) {
   var show_code = $('<div><code><a href="#">Show Code</a></code></div>');
   var hide_code = $('<div><code><a href="#">Hide Code</a></code></div>');
   var pre = $('<div><pre></pre><pre></pre></div>');
   pre.find('pre').eq(0).text(code);
   pre.find('pre').eq(1).text(stdin);
 
-  var compiler_data = (function(compiler) {
-    var e = compiler.get_selected_compiler_element();
-    var data = e.html();
-    return $('<div><p>' + data + '</p></div>');
-  })(compiler);
-
-  var code = (function(compiler) {
-    var command = compiler.get_selected_compiler_element().attr('data-command');
-    var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
-    var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
-    var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
-
-    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + compiler_options_arguments.join(' ') + runtime_options_arguments.join(' ');
-    return $('<code>' + compile_command + '</code>');
-  })(compiler);
+  var compiler_data = compiler_info.compiler_data;
+  var code = compiler_info.compile_command_code;
 
   hide_code.toggle(false);
   compiler_data.toggle(false);
@@ -149,6 +132,39 @@ ResultWindow.prototype.code_window = function(compiler, code, stdin) {
   this._code_window().append(pre);
 }
 
+ResultWindow.prototype.to_compiler_info = function(compiler) {
+  var selected_compiler = compiler.get_selected_compiler();
+  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
+  var compiler_option_raw = compiler.get_selected_compiler_option_raw();
+  var runtime_option_raw = compiler.get_selected_runtime_option_raw();
+
+  var compiler_data = (function(compiler) {
+    var data = compiler.get_selected_compiler_element().html();
+    return $('<div><p>' + data + '</p></div>');
+  })(compiler);
+
+  var compile_command_code = (function(compiler) {
+    var command = compiler.get_selected_compiler_element().html();
+    var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
+    var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
+    var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
+
+    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + compiler_options_arguments.join(' ') + runtime_options_arguments.join(' ');
+    return $('<code>' + compile_command + '</code>');
+  })(compiler);
+
+  var compiler_info = {
+    selected_compiler: selected_compiler,
+    compile_options: compile_options,
+    compiler_option_raw: compiler_option_raw,
+    runtime_option_raw: runtime_option_raw,
+    compiler_data: compiler_data,
+    compile_command_code: compile_command_code,
+  };
+
+  return compiler_info;
+}
+
 ResultWindow.prototype.post_code = function(compiler, code, stdin) {
   var self = this;
 
@@ -157,7 +173,9 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
 
   var src = new EventSource($.url(url).attr('path'));
 
-  this.code_window(compiler, code, stdin);
+  var compiler_info = this.to_compiler_info(compiler);
+
+  this.code_window(compiler_info, code, stdin);
 
   var finalize = function() {
     src.close();
@@ -165,7 +183,7 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
     var outputs = self._output_window().find('p').map(function(n,e) {
         return { 'type': $(e).attr('data-type'), 'output': $(e).text() };
     });
-    self.permlink(compiler, code, stdin, outputs);
+    self.permlink(compiler_info, code, stdin, outputs);
 
     if (self.onfinish)
       self.onfinish();
@@ -201,20 +219,15 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
     }
   };
 
-  var selected_compiler = compiler.get_selected_compiler();
-  var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).val(); }).get().join(',');
-  var compiler_option_raw = compiler.get_selected_compiler_option_raw();
-  var runtime_option_raw = compiler.get_selected_runtime_option_raw();
-
   src.onopen = function() {
     var url = BASE_COMPILE_URL + '/' + post_id;
     $.post(url, {
-      compiler: selected_compiler,
+      compiler: compiler_info.selected_compiler,
       code: code,
       stdin: stdin,
-      options: compile_options,
-      'compiler-option-raw': compiler_option_raw,
-      'runtime-option-raw': runtime_option_raw }, function() { });
+      options: compiler_info.compile_options,
+      'compiler-option-raw': compiler_info.compiler_option_raw,
+      'runtime-option-raw': compiler_info.runtime_option_raw }, function() { });
   };
 
   src.onerror = function() {
@@ -224,7 +237,8 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
 
 ResultWindow.prototype.set_code = function(compiler, code, stdin, outputs) {
   var self = this;
-  this.code_window(compiler, code, stdin);
+  var compiler_info = self.to_compiler_info(compiler);
+  this.code_window(compiler_info, code, stdin);
   $.each(outputs, function(n,e) {
     var type = decode_uri(e.type);
     var output = decode_uri(e.output);
