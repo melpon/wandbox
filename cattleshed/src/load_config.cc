@@ -158,6 +158,7 @@ namespace cfg {
 			t.source_suffix = get_str(y, "source-suffix");
 			t.display_name = get_str(y, "display-name");
 			t.display_compile_command = get_str(y, "display-compile-command");
+			t.jail_name = get_str(y, "jail-name");
 			t.displayable = get_bool(y, "displayable");
 			t.compiler_option_raw = get_bool(y, "compiler-option-raw");
 			t.runtime_option_raw = get_bool(y, "runtime-option-raw");
@@ -185,6 +186,7 @@ namespace cfg {
 				if (sub.source_suffix.empty()) sub.source_suffix = x.source_suffix;
 				if (sub.display_name.empty()) sub.display_name = x.display_name;
 				if (sub.display_compile_command.empty()) sub.display_compile_command = x.display_compile_command;
+				if (sub.jail_name.empty()) sub.jail_name = x.jail_name;
 				if (sub.switches.empty()) sub.switches = x.switches;
 				ret.get<1>().replace(pos, sub);
 			}
@@ -193,24 +195,27 @@ namespace cfg {
 		return ret;
 	}
 
-	network_config load_network_config(const cfg::value &values) {
+	system_config load_system_config(const cfg::value &values) {
 		using namespace detail;
-		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("network"));
-		return { get_int(o, "listen-port"), get_int(o, "max-connections") };
+		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("system"));
+		return { get_int(o, "listen-port"), get_int(o, "max-connections"), get_str(o, "basedir") };
 	}
 
-	jail_config load_jail_config(const cfg::value &values) {
+	 std::unordered_map<std::string, jail_config> load_jail_config(const cfg::value &values) {
 		using namespace detail;
-		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("jail"));
-		jail_config x;
-		x.jail_command = get_str_array(o, "jail-command");
-		x.basedir = get_str(o, "basedir");
-		x.program_duration = get_int(o, "program-duration");
-		x.compile_time_limit = get_int(o, "compile-time-limit");
-		x.kill_wait = get_int(o, "kill-wait");
-		x.output_limit_kill = get_int(o, "output-limit-kill");
-		x.output_limit_warn = get_int(o, "output-limit-warn");
-		return x;
+		std::unordered_map<std::string, jail_config> ret;
+		for (const auto &p: boost::get<cfg::object>(boost::get<cfg::object>(values).at("jail"))) {
+			 const auto &o = boost::get<cfg::object>(p.second);
+			 jail_config x;
+			 x.jail_command = get_str_array(o, "jail-command");
+			 x.program_duration = get_int(o, "program-duration");
+			 x.compile_time_limit = get_int(o, "compile-time-limit");
+			 x.kill_wait = get_int(o, "kill-wait");
+			 x.output_limit_kill = get_int(o, "output-limit-kill");
+			 x.output_limit_warn = get_int(o, "output-limit-warn");
+			 ret[p.first] = std::move(x);
+		}
+		return ret;
 	}
 
 	std::unordered_map<std::string, switch_trait> load_switches(const cfg::value &values) {
@@ -387,7 +392,7 @@ namespace cfg {
 			os.insert(os.end(), x.begin(), x.end());
 		}
 		const auto o = merge_cfgs(os);
-		return { load_network_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o) };
+		return { load_system_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o) };
 	}
 
 	template <typename Iter>

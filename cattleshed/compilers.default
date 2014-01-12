@@ -741,6 +741,20 @@
    "run-command":["./prog"],
    "version-command":["/bin/sh", "-c", "/usr/local/fpc-2.6.2/bin/fpc | head -1 | cut -d' ' -f5"],
    "switches":["delphi-mode"],
+  },{
+   "name":"java7-openjdk",
+   "displayable":true,
+   "output-file":"prog.java",
+   "display-name":"Java7 OpenJDK",
+   "display-compile-command":"javac prog.java",
+   "jail-name":"jvm",
+   "language":"Java",
+   "source-suffix":".java",
+   "runtime-option-raw":true,
+   "compile-command":["/usr/bin/javac", "prog.java"],
+   "run-command":["/bin/bash", "/usr/local/java-run/bin/java-run.sh"],
+   "version-command":["/bin/sh", "-c", "/usr/bin/java -version 2>&1 | head -n1'"],
+   "switches":[],
   }
  ]
 }

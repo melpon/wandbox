@@ -286,7 +286,8 @@ namespace wandbox {
 			   workdir(move(workdir)),
 			   pipes(),
 			   kill_timer(std::make_shared<asio::deadline_timer>(*this->aio)),
-			   limitter(std::make_shared<write_limit_counter>(config.jail.output_limit_warn, config.jail.output_limit_kill)),
+			   jail(config.jails.at(target_compiler.jail_name)),
+			   limitter(std::make_shared<write_limit_counter>(jail.output_limit_warn, jail.output_limit_kill)),
 			   target_compiler(target_compiler),
 			   laststatus(0),
 			   semaphore(move(semaphore))
@@ -343,11 +344,11 @@ namespace wandbox {
 						}
 					}
 
-					ccargs.insert(ccargs.begin(), config.jail.jail_command.begin(), config.jail.jail_command.end());
-					progargs.insert(progargs.begin(), config.jail.jail_command.begin(), config.jail.jail_command.end());
+					ccargs.insert(ccargs.begin(), jail.jail_command.begin(), jail.jail_command.end());
+					progargs.insert(progargs.begin(), jail.jail_command.begin(), jail.jail_command.end());
 					commands = {
-						{ move(ccargs), "", "CompilerMessageS", "CompilerMessageE", config.jail.compile_time_limit },
-						{ move(progargs), "StdIn", "StdOut", "StdErr", config.jail.program_duration }
+						{ move(ccargs), "", "CompilerMessageS", "CompilerMessageE", jail.compile_time_limit },
+						{ move(progargs), "StdIn", "StdOut", "StdErr", jail.program_duration }
 					};
 				}
 
@@ -389,7 +390,7 @@ namespace wandbox {
 					if (ec) yield break;
 					std::static_pointer_cast<status_forwarder>(pipes[3])->kill(SIGXCPU);
 
-					kill_timer->expires_from_now(ptime::seconds(config.jail.kill_wait));
+					kill_timer->expires_from_now(ptime::seconds(jail.kill_wait));
 					yield {
 						PROTECT_FROM_MOVE(strand);
 						PROTECT_FROM_MOVE(kill_timer);
@@ -436,6 +437,7 @@ namespace wandbox {
 		command_type current;
 		std::vector<std::shared_ptr<pipe_forwarder_base>> pipes;
 		std::shared_ptr<asio::deadline_timer> kill_timer;
+		jail_config jail;
 		std::shared_ptr<write_limit_counter> limitter;
 		compiler_trait target_compiler;
 		int laststatus;
@@ -660,15 +662,15 @@ namespace wandbox {
 			   acc(std::make_shared<tcp::acceptor>(*this->aio, this->ep)),
 			   sigs(std::make_shared<asio::signal_set>(*this->aio, SIGCHLD, SIGHUP)),
 			   sock(),
-			   sem(std::make_shared<counting_semaphore>(*this->aio, config.network.max_connections-1))
+			   sem(std::make_shared<counting_semaphore>(*this->aio, config.system.max_connections-1))
 		{
 			std::clog << "start listening at " << this->ep << std::endl;
 			try {
-				mkdir(config.jail.basedir, 0700);
+				mkdir(config.system.basedir, 0700);
 			} catch (std::system_error &e) {
 				if (e.code().value() != EEXIST) throw;
 			}
-			basedir = opendir(config.jail.basedir);
+			basedir = opendir(config.system.basedir);
 			chdir(basedir);
 		}
 		listener(const listener &) = default;
@@ -721,7 +723,7 @@ int main(int argc, char **argv) {
 		config = load_config(config_files);
 	}
 	auto aio = std::make_shared<asio::io_service>();
-	listener s(aio, boost::asio::ip::tcp::v4(), config.network.listen_port);
+	listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);
 	s();
 	aio->run();
 }

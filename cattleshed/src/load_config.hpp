@@ -34,6 +34,7 @@ namespace wandbox {
 		std::string source_suffix;
 		std::string display_name;
 		std::string display_compile_command;
+		std::string jail_name;
 		std::vector<std::string> switches;
 		std::unordered_set<std::string> initial_checked;
 		bool displayable;
@@ -42,14 +43,14 @@ namespace wandbox {
 	};
 	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
 
-	struct network_config {
+	struct system_config {
 		int listen_port;
 		int max_connections;
+		std::string basedir;
 	};
 
 	struct jail_config {
 		std::vector<std::string> jail_command;
-		std::string basedir;
 		int program_duration;
 		int compile_time_limit;
 		int kill_wait;
@@ -58,8 +59,8 @@ namespace wandbox {
 	};
 
 	struct server_config {
-		network_config network;
-		jail_config jail;
+		system_config system;
+		std::unordered_map<std::string, jail_config> jails;
 		compiler_set compilers;
 		std::unordered_map<std::string, switch_trait> switches;
 	};
