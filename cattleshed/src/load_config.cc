@@ -409,7 +409,6 @@ namespace cfg {
 				switch (*base_) {
 				case '\\': return escape_backslash;
 				case '\"': return escape_dquot;
-				case '\'': return escape_squot;
 				case '\t': return escape_tab;
 				case '\r': return escape_cr;
 				case '\n': return escape_nl;
@@ -418,7 +417,6 @@ namespace cfg {
 				switch (*base_) {
 				case '\\':
 				case '\"':
-				case '\'':
 				case '\t':
 				case '\r':
 				case '\n':
@@ -435,7 +433,6 @@ namespace cfg {
 				switch (*base_) {
 				case '\\':
 				case '\"':
-				case '\'':
 				case '\t':
 				case '\r':
 				case '\n':
@@ -475,7 +472,6 @@ namespace cfg {
 		bool escaping;
 		static const char escape_backslash;
 		static const char escape_dquot;
-		static const char escape_squot;
 		static const char escape_tab;
 		static const char escape_cr;
 		static const char escape_nl;
@@ -484,8 +480,6 @@ namespace cfg {
 	const char char_escaping_iterator<Iter>::escape_backslash = '\\';
 	template <typename Iter>
 	const char char_escaping_iterator<Iter>::escape_dquot = '\"';
-	template <typename Iter>
-	const char char_escaping_iterator<Iter>::escape_squot = '\'';
 	template <typename Iter>
 	const char char_escaping_iterator<Iter>::escape_tab = 't';
 	template <typename Iter>
