@@ -755,6 +755,19 @@
    "run-command":["/bin/bash", "/usr/local/java-run/bin/run.sh"],
    "version-command":["/bin/sh", "-c", "/usr/bin/java -version 2>&1 | head -n1"],
    "switches":[],
+  },{
+   "name":"groovy-2.2.1",
+   "displayable":true,
+   "output-file":"prog.groovy",
+   "display-name":"Groovy",
+   "display-compile-command":"groovy prog.groovy",
+   "jail-name":"jvm",
+   "language":"Groovy",
+   "source-suffix":".groovy",
+   "runtime-option-raw":true,
+   "compile-command":"/bin/true",
+   "run-command":["/usr/local/groovy-2.2.1/bin/groovy", "prog.groovy"],
+   "version-command":["/bin/sh", "-c", "/usr/local/groovy-2.2.1/bin/groovy --version | cut -d' ' -f3"],
   }
  ]
 }
