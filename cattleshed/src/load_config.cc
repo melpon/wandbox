@@ -390,6 +390,111 @@ namespace cfg {
 		return { load_network_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o) };
 	}
 
+	template <typename Iter>
+	struct char_escaping_iterator: std::iterator<std::input_iterator_tag, typename std::iterator_traits<Iter>::value_type> {
+		typedef std::input_iterator_tag iterator_category;
+		typedef typename std::iterator_traits<Iter>::value_type value_type;
+		typedef typename std::iterator_traits<Iter>::difference_type difference_type;
+		typedef const value_type &reference;
+		typedef const value_type *pointer;
+		char_escaping_iterator(Iter base): base_(base), escaping(false) { }
+		Iter base() const { return base_; }
+		reference operator *() const {
+			if (escaping) {
+				switch (*base_) {
+				case '\\': return escape_backslash;
+				case '\"': return escape_dquot;
+				case '\'': return escape_squot;
+				case '\t': return escape_tab;
+				case '\r': return escape_cr;
+				case '\n': return escape_nl;
+				}
+			} else {
+				switch (*base_) {
+				case '\\':
+				case '\"':
+				case '\'':
+				case '\t':
+				case '\r':
+				case '\n':
+					return escape_backslash;
+				}
+			}
+			return *base_;
+		}
+		char_escaping_iterator &operator ++() {
+			if (escaping) {
+				++base_;
+				escaping = false;
+			} else {
+				switch (*base_) {
+				case '\\':
+				case '\"':
+				case '\'':
+				case '\t':
+				case '\r':
+				case '\n':
+					escaping = true;
+					break;
+				default:
+					++base_;
+				}
+			}
+			return *this;
+		}
+		char_escaping_iterator operator ++(int) {
+			auto tmp(*this);
+			++*this;
+			return tmp;
+		}
+		bool operator ==(const char_escaping_iterator &rhs) const {
+			return base_ == rhs.base_ && escaping == rhs.escaping;
+		}
+		bool operator !=(const char_escaping_iterator &rhs) const {
+			return !(*this == rhs);
+		}
+		typename std::enable_if<std::is_convertible<decltype(std::declval<Iter>() < std::declval<Iter>()), bool>::value, bool>::type operator < (const char_escaping_iterator &rhs) const {
+			return (base_ < rhs.base_) || (base_ == rhs.base_ && !escaping && rhs.escaping);
+		}
+		typename std::enable_if<std::is_convertible<decltype(std::declval<Iter>() < std::declval<Iter>()), bool>::value, bool>::type operator > (const char_escaping_iterator &rhs) const {
+			return rhs < *this;
+		}
+		typename std::enable_if<std::is_convertible<decltype(std::declval<Iter>() < std::declval<Iter>()), bool>::value, bool>::type operator <=(const char_escaping_iterator &rhs) const {
+			return *this < rhs || *this == rhs;
+		}
+		typename std::enable_if<std::is_convertible<decltype(std::declval<Iter>() < std::declval<Iter>()), bool>::value, bool>::type operator >=(const char_escaping_iterator &rhs) const {
+			return rhs < *this || rhs == *this;
+		}
+	private:
+		Iter base_;
+		bool escaping;
+		static const char escape_backslash;
+		static const char escape_dquot;
+		static const char escape_squot;
+		static const char escape_tab;
+		static const char escape_cr;
+		static const char escape_nl;
+	};
+	template <typename Iter>
+	const char char_escaping_iterator<Iter>::escape_backslash = '\\';
+	template <typename Iter>
+	const char char_escaping_iterator<Iter>::escape_dquot = '\"';
+	template <typename Iter>
+	const char char_escaping_iterator<Iter>::escape_squot = '\'';
+	template <typename Iter>
+	const char char_escaping_iterator<Iter>::escape_tab = 't';
+	template <typename Iter>
+	const char char_escaping_iterator<Iter>::escape_cr = 'r';
+	template <typename Iter>
+	const char char_escaping_iterator<Iter>::escape_nl = 'n';
+	template <typename Iter>
+	char_escaping_iterator<Iter> char_escaper(Iter ite) {
+		return { ite };
+	}
+	std::string json_stringize(const std::string &in) {
+		return std::string(char_escaper(in.begin()), char_escaper(in.end()));
+	}
+
 	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches) {
 		std::vector<std::string> swlist;
 		{
@@ -403,10 +508,10 @@ namespace cfg {
 					used.insert(swname);
 					swlist.emplace_back(
 						"{"
-							"\"name\":\"" + sw.name + "\","
+							"\"name\":\"" + json_stringize(sw.name) + "\","
 							"\"type\":\"single\","
-							"\"display-name\":\"" + sw.display_name + "\","
-							"\"display-flags\":\"" + (sw.display_flags ? *sw.display_flags : boost::algorithm::join(sw.flags, " ")) + "\","
+							"\"display-name\":\"" + json_stringize(sw.display_name) + "\","
+							"\"display-flags\":\"" + json_stringize((sw.display_flags ? *sw.display_flags : boost::algorithm::join(sw.flags, " "))) + "\","
 							"\"default\":" + (compiler.initial_checked.count(sw.name) != 0 ? "true" : "false") +
 						"}");
 				} else {
@@ -430,16 +535,16 @@ namespace cfg {
 						if (set.count(swname) == 0) continue;
 						sel.emplace_back(
 							"{"
-								"\"name\":\"" + sw.name + "\","
-								"\"display-name\":\"" + sw.display_name + "\","
-								"\"display-flags\":\"" + (sw.display_flags ? *sw.display_flags : boost::algorithm::join(sw.flags, " ")) + "\""
+								"\"name\":\"" + json_stringize(sw.name) + "\","
+								"\"display-name\":\"" + json_stringize(sw.display_name) + "\","
+								"\"display-flags\":\"" + json_stringize((sw.display_flags ? *sw.display_flags : boost::algorithm::join(sw.flags, " "))) + "\""
 							"}");
 						if (compiler.initial_checked.count(sw.name) != 0) def = swname;
 					}
 					swlist.emplace_back(
 						"{"
 							"\"type\":\"select\","
-							"\"default\":\"" + def + "\","
+							"\"default\":\"" + json_stringize(def) + "\","
 							"\"options\":[" + boost::algorithm::join(sel, ",") + "]"
 						"}");
 					used.insert(set.begin(), set.end());
@@ -448,11 +553,11 @@ namespace cfg {
 		}
 		return
 			"{"
-				"\"name\":\"" + compiler.name + "\","
-				"\"language\":\"" + compiler.language + "\","
-				"\"display-name\":\"" + compiler.display_name + "\","
-				"\"version\":\"" + version + "\","
-				"\"display-compile-command\":\"" + compiler.display_compile_command + "\","
+				"\"name\":\"" + json_stringize(compiler.name) + "\","
+				"\"language\":\"" + json_stringize(compiler.language) + "\","
+				"\"display-name\":\"" + json_stringize(compiler.display_name) + "\","
+				"\"version\":\"" + json_stringize(version) + "\","
+				"\"display-compile-command\":\"" + json_stringize(compiler.display_compile_command) + "\","
 				"\"compiler-option-raw\":" + (compiler.compiler_option_raw ? "true" : "false") + ","
 				"\"runtime-option-raw\":" + (compiler.runtime_option_raw ? "true" : "false") + ","
 				"\"switches\":[" + boost::algorithm::join(swlist, ",") + "]"
