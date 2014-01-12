@@ -750,7 +750,7 @@
    "jail-name":"jvm",
    "language":"Java",
    "source-suffix":".java",
-   "runtime-option-raw":true,
+   "compiler-option-raw":true,
    "compile-command":["/usr/bin/javac", "prog.java"],
    "run-command":["/bin/bash", "/usr/local/java-run/bin/run.sh"],
    "version-command":["/bin/sh", "-c", "/usr/bin/java -version 2>&1 | head -n1"],
