@@ -1,773 +1,1976 @@
 {
- "switches":{
-  "boost-nothing":{
-   "flags":[],
-   "display-name":"Don't Use Boost",
-   "display-flags":"",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.47":{
-   "flags":["-I/usr/local/boost-1.47.0/include", "-L/usr/local/boost-1.47.0/lib", "-Wl,-rpath,/usr/local/boost-1.47.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph"],
-   "display-name":"Boost 1.47.0",
-   "display-flags":"-I/usr/local/boost-1.47.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.48":{
-   "flags":["-I/usr/local/boost-1.48.0/include", "-L/usr/local/boost-1.48.0/lib", "-Wl,-rpath,/usr/local/boost-1.48.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph"],
-   "display-name":"Boost 1.48.0",
-   "display-flags":"-I/usr/local/boost-1.48.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.49":{
-   "flags":["-I/usr/local/boost-1.49.0/include", "-L/usr/local/boost-1.49.0/lib", "-Wl,-rpath,/usr/local/boost-1.49.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph"],
-   "display-name":"Boost 1.49.0",
-   "display-flags":"-I/usr/local/boost-1.49.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.50":{
-   "flags":["-I/usr/local/boost-1.50.0/include", "-L/usr/local/boost-1.50.0/lib", "-Wl,-rpath,/usr/local/boost-1.50.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_systemv", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph"],
-   "display-name":"Boost 1.50.0",
-   "display-flags":"-I/usr/local/boost-1.50.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.51":{
-   "flags":["-I/usr/local/boost-1.51.0/include", "-L/usr/local/boost-1.51.0/lib", "-Wl,-rpath,/usr/local/boost-1.51.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph"],
-   "display-name":"Boost 1.51.0",
-   "display-flags":"-I/usr/local/boost-1.51.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.52":{
-   "flags":["-I/usr/local/boost-1.52.0/include", "-L/usr/local/boost-1.52.0/lib", "-Wl,-rpath,/usr/local/boost-1.52.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph"],
-   "display-name":"Boost 1.52.0",
-   "display-flags":"-I/usr/local/boost-1.52.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.53":{
-   "flags":["-I/usr/local/boost-1.53.0/include", "-L/usr/local/boost-1.53.0/lib", "-Wl,-rpath,/usr/local/boost-1.53.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_atomic", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph"],
-   "display-name":"Boost 1.53.0",
-   "display-flags":"-I/usr/local/boost-1.53.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.54":{
-   "flags":["-I/usr/local/boost-1.54.0/include", "-L/usr/local/boost-1.54.0/lib", "-Wl,-rpath,/usr/local/boost-1.54.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_atomic", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_coroutine", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_log_setup", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_log"],
-   "display-name":"Boost 1.54.0",
-   "display-flags":"-I/usr/local/boost-1.54.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-1.55":{
-   "flags":["-I/usr/local/boost-1.55.0/include", "-L/usr/local/boost-1.55.0/lib", "-Wl,-rpath,/usr/local/boost-1.55.0/lib", "-lboost_wserialization", "-lboost_math_tr1f", "-lboost_math_c99l", "-lboost_math_tr1", "-lboost_locale", "-lboost_wave", "-lboost_regex", "-lboost_prg_exec_monitor", "-lboost_atomic", "-lboost_signals", "-lboost_math_c99f", "-lboost_context", "-lboost_program_options", "-lboost_coroutine", "-lboost_serialization", "-lboost_filesystem", "-lboost_system", "-lboost_timer", "-lboost_log_setup", "-lboost_random", "-lboost_chrono", "-lboost_exception", "-lboost_iostreams", "-lboost_thread", "-lboost_date_time", "-lboost_math_c99", "-lboost_math_tr1l", "-lboost_graph", "-lboost_log"],
-   "display-name":"Boost 1.55.0",
-   "display-flags":"-I/usr/local/boost-1.55.0/include",
-   "conflicts":["boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55"],
-  },
-  "boost-nothing-header":{
-   "flags":[],
-   "display-name":"Don't Use Boost",
-   "display-flags":"",
-   "runtime":true,
-   "conflicts":["boost-nothing-header", "boost-1.55-header"],
-  },
-  "boost-1.55-header":{
-   "flags":["-I/usr/local/boost-1.55.0/include"],
-   "display-name":"Boost 1.55.0",
-   "display-flags":"-I/usr/local/boost-1.55.0/include",
-   "runtime":true,
-   "conflicts":["boost-nothing-header", "boost-1.55-header"],
-  },
-  "sprout":{
-   "flags":["-I/usr/local/sprout"],
-   "display-name":"Sprout",
-   "display-flags":"-I/usr/local/sprout",
-  },
-  "warning":{
-   "flags":["-Wall", "-Wextra"],
-   "display-name":"Warnings",
-  },
-  "oldgcc-warning":{
-   "flags":["-Wall", "-W"],
-   "display-name":"Warnings",
-  },
-  "haskell-warning":{
-   "flags":"-Wall",
-   "display-name":"Warnings",
-  },
-  "optimize":{
-   "flags":["-O2", "-march=native"],
-   "display-name":"Optimization",
-  },
-  "haskell-optimize":{
-   "flags":"-O2",
-   "display-name":"Optimization",
-  },
-  "mono-optimize":{
-   "flags":"-optimize",
-   "display-name":"Optimization",
-  },
-  "c89":{
-   "flags":["-std=c89", "-pedantic-errors"],
-   "display-name":"C89",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "gnu++98", "c++1y", "c++11", "c++0x", "c++98", "c11", "c99"],
-  },
-  "c99":{
-   "flags":["-std=c99", "-pedantic-errors"],
-   "display-name":"C99",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "gnu++98", "c++1y", "c++11", "c++0x", "c++98", "c11", "c89"],
-  },
-  "c11":{
-   "flags":["-std=c11", "-pedantic-errors"],
-   "display-name":"C11",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "gnu++98", "c++1y", "c++11", "c++0x", "c++98", "c99", "c89"],
-  },
-  "c++98":{
-   "flags":["-std=c++98", "-pedantic"],
-   "display-name":"C++03",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "gnu++98", "c++1y", "c++11", "c++0x", "c11", "c99", "c89"],
-  },
-  "gnu++98":{
-   "flags":"-std=gnu++98",
-   "display-name":"C++03(GNU)",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "c++1y", "c++11", "c++0x", "c++98", "c11", "c99", "c89"],
-  },
-  "c++0x":{
-   "flags":["-std=c++0x", "-pedantic"],
-   "display-name":"C++0x",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "gnu++98", "c++1y", "c++11", "c++98", "c11", "c99", "c89"],
-  },
-  "gnu++0x":{
-   "flags":"-std=gnu++0x",
-   "display-name":"C++0x(GNU)",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++98", "c++1y", "c++11", "c++0x", "c++98", "c11", "c99", "c89"],
-  },
-  "c++11":{
-   "flags":["-std=c++11", "-pedantic"],
-   "display-name":"C++11",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "gnu++98", "c++1y", "c++0x", "c++98", "c11", "c99", "c89"],
-  },
-  "gnu++11":{
-   "flags":"-std=gnu++11",
-   "display-name":"C++11(GNU)",
-   "conflicts":["gnu++1y", "gnu++0x", "gnu++98", "c++1y", "c++11", "c++0x", "c++98", "c11", "c99", "c89"],
-  },
-  "c++1y":{
-   "flags":["-std=c++1y", "-pedantic"],
-   "display-name":"C++1y",
-   "conflicts":["gnu++1y", "gnu++11", "gnu++0x", "gnu++98", "c++11", "c++0x", "c++98", "c11", "c99", "c89"],
-  },
-  "gnu++1y":{
-   "flags":"-std=gnu++1y",
-   "display-name":"C++1y(GNU)",
-   "conflicts":["gnu++11", "gnu++0x", "gnu++98", "c++1y", "c++11", "c++0x", "c++98", "c11", "c99", "c89"],
-  },
-  "cpp-verbose":{
-   "flags":["-v"],
-   "display-name":"Verbose",
-  },
-  "cpp-p":{
-   "flags":["-P"],
-   "display-name":"-P",
-   "runtime":true,
-  },
-  "perl5.18.0":{
-   "flags":"-M5.18.0",
-   "display-name":"-M5.18.0",
-   "runtime":true,
-   "insert-position":1,
-  },
-  "delphi-mode":{
-   "flags":["-Mdelphi"],
-   "display-name":"Delphi 7 mode",
-  },
- },
- "compilers":[
-  {
-   "name":"bin-common",
-   "displayable":false,
-   "output-file":"prog.exe",
-   "run-command":"./prog.exe"
-  },{
-   "name":"gcc-common",
-   "displayable":false,
-   "display-name":"gcc",
-   "display-compile-command":"g++ prog.cc",
-   "language":"C++",
-   "source-suffix":".cc",
-   "inherits":"bin-common"
-  },{
-   "name":"clang-common",
-   "displayable":false,
-   "display-name":"clang",
-   "display-compile-command":"clang++ prog.cc -stdlib=libc++",
-   "inherits":"gcc-common"
-  },{
-   "name":"gcc-head",
-   "displayable":true,
-   "display-name":"gcc HEAD",
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-head/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-head/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
-   "inherits":"gcc-common",
-  },{
-   "name":"gcc-4.8.2",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.8.2/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.8.2/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/usr/local/gcc-4.8.2/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
-   "inherits":"gcc-common",
-  },{
-   "name":"gcc-4.8.1",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.8.1/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.8.1/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/usr/local/gcc-4.8.1/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
-   "inherits":"gcc-common",
-  },{
-   "name":"gcc-4.7.3",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.7.3/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.7.3/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/usr/local/gcc-4.7.3/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11"],
-   "initial-checked":["warning", "gnu++11", "boost-1.55", "sprout"],
-   "inherits":"gcc-common"
-  },{
-   "name":"gcc-4.6.4",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.6.4/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.6.4/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/usr/local/gcc-4.6.4/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++0x", "gnu++0x"],
-   "initial-checked":["warning", "gnu++0x", "boost-1.55", "sprout"],
-   "inherits":"gcc-common",
-  },{
-   "name":"gcc-4.5.4",
-   "displayable": true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.5.4/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.5.4/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/usr/local/gcc-4.5.4/bin/g++", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "c++98", "gnu++98", "c++0x", "gnu++0x"],
-   "initial-checked":["warning", "gnu++0x", "boost-1.55"],
-   "inherits":"gcc-common"
-  },{
-   "name":"gcc-4.4.7",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.4.7/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.4.7/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/usr/local/gcc-4.4.7/bin/g++", "-dumpversion"],
-   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "c++98", "gnu++98", "c++0x", "gnu++0x"],
-   "initial-checked":["oldgcc-warning", "gnu++0x", "boost-1.55"],
-   "inherits":"gcc-common",
-  },{
-   "name":"gcc-4.3.6",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.3.6/bin/g++",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.3.6/lib64",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/usr/local/gcc-4.3.6/bin/g++", "-dumpversion"],
-   "switches":["oldgcc-warning", "optimize", "cpp-verbose", "c++98", "gnu++98", "c++0x", "gnu++0x"],
-   "initial-checked":["oldgcc-warning", "gnu++0x"],
-   "inherits":"gcc-common",
-  },{
-   "name":"clang-head",
-   "displayable":true,
-   "display-name":"clang HEAD",
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/llvm-head/bin/clang++",
-    "-oprog.exe",
-    "-stdlib=libc++",
-    "-I/usr/local/libcxx-head/include/c++/v1",
-    "-L/usr/local/libcxx-head/lib",
-    "-Wl,-rpath,/usr/local/libcxx-head/lib",
-    "-nostdinc++",
-    "-lpthread",
-    "prog.cc",
-    "-lsupc++"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
-   "inherits":"clang-common",
-  },{
-   "name":"clang-3.4",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/llvm-3.4/bin/clang++",
-    "-oprog.exe",
-    "-stdlib=libc++",
-    "-I/usr/local/libcxx-3.4/include/c++/v1",
-    "-L/usr/local/libcxx-3.4/lib",
-    "-Wl,-rpath,/usr/local/libcxx-3.4/lib",
-    "-nostdinc++",
-    "-lpthread",
-    "prog.cc",
-    "-lsupc++"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.4/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
-   "inherits":"clang-common",
-  },{
-   "name":"clang-3.3",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/llvm-3.3/bin/clang++",
-    "-oprog.exe",
-    "-stdlib=libc++",
-    "-I/usr/local/libcxx-3.3/include/c++/v1",
-    "-L/usr/local/libcxx-3.3/lib",
-    "-Wl,-rpath,/usr/local/libcxx-3.3/lib",
-    "-nostdinc++",
-    "-lpthread",
-    "prog.cc",
-    "-lsupc++"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
-   "inherits":"clang-common",
-  },{
-   "name":"clang-3.2",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/llvm-3.2/bin/clang++",
-    "-oprog.exe",
-    "-stdlib=libc++",
-    "-I/usr/local/libcxx-3.0/include/c++/v1",
-    "-L/usr/local/libcxx-3.0/lib",
-    "-Wl,-rpath,/usr/local/libcxx-3.0/lib",
-    "-nostdinc++",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.2/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-   "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
-   "inherits":"clang-common",
-  },{
-   "name":"clang-3.1",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/llvm-3.1/bin/clang++",
-    "-oprog.exe",
-    "-stdlib=libc++",
-    "-I/usr/local/libcxx-3.0/include/c++/v1",
-    "-L/usr/local/libcxx-3.0/lib",
-    "-Wl,-rpath,/usr/local/libcxx-3.0/lib",
-    "-nostdinc++",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.1/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "c++98", "gnu++98", "c++11", "gnu++11"],
-   "initial-checked":["warning", "gnu++11", "boost-1.55"],
-   "inherits":"clang-common",
-  },{
-   "name":"clang-3.0",
-   "displayable":true,
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/llvm-3.0/bin/clang++",
-    "-oprog.exe",
-    "-stdlib=libc++",
-    "-I/usr/local/libcxx-3.0/include/c++/v1",
-    "-L/usr/local/libcxx-3.0/lib",
-    "-Wl,-rpath,/usr/local/libcxx-3.0/lib",
-    "-nostdinc++",
-    "-lpthread",
-    "prog.cc"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.0/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "boost-nothing", "boost-1.47", "boost-1.48", "boost-1.49", "boost-1.50", "boost-1.51", "boost-1.52", "boost-1.53", "boost-1.54", "boost-1.55", "c++98", "gnu++98", "c++11", "gnu++11"],
-   "initial-checked":["warning", "gnu++11", "boost-1.55"],
-   "inherits":"clang-common",
-  },{
-   "name":"gcc-4.8.2-c",
-   "displayable":true,
-   "display-name":"gcc",
-   "display-compile-command":"gcc prog.c",
-   "language":"C",
-   "source-suffix":".c",
-   "inherits":"bin-common",
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/gcc-4.8.2/bin/gcc",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-4.8.2/lib64",
-    "-lpthread",
-    "prog.c"
-   ],
-   "version-command":["/usr/local/gcc-4.8.2/bin/gcc", "-dumpversion"],
-   "switches":["warning", "optimize", "cpp-verbose", "c89", "c99", "c11"],
-   "initial-checked":["warning", "c11"],
-   "inherits":"gcc-common",
-  },{
-   "name":"clang-3.3-c",
-   "displayable":true,
-   "display-name":"clang",
-   "display-compile-command":"clang prog.c",
-   "language":"C",
-   "source-suffix":".c",
-   "inherits":"bin-common",
-   "compiler-option-raw":true,
-   "compile-command":[
-    "/usr/local/llvm-3.3/bin/clang",
-    "-oprog.exe",
-    "-lpthread",
-    "prog.c"
-   ],
-   "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang --version | head -1 | cut -d' ' -f3-"],
-   "switches":["warning", "optimize", "cpp-verbose", "c89", "c99", "c11"],
-   "initial-checked":["warning", "c11"],
-   "inherits":"clang-common",
-  },{
-   "name":"gcc-4.8.2-pp",
-   "displayable":true,
-   "display-name":"gcc",
-   "display-compile-command":"gcc prog.cpp -E",
-   "language":"CPP",
-   "source-suffix":".cpp",
-   "output-file":"prog.cpp",
-   "compile-command":"/bin/true",
-   "runtime-option-raw":true,
-   "run-command":["/usr/local/gcc-4.8.2/bin/gcc", "-E", "prog.cpp"],
-   "version-command":["/usr/local/gcc-4.8.2/bin/gcc", "-dumpversion"],
-   "switches":["cpp-p", "boost-nothing-header", "boost-1.55-header"],
-   "initial-checked":["cpp-p", "boost-1.55-header"],
-  },{
-   "name":"gdc-head",
-   "displayable":true,
-   "display-name":"gdc HEAD",
-   "compile-command":[
-    "/usr/local/gcc-head/bin/gdc",
-    "-oprog.exe",
-    "-Wl,-rpath,/usr/local/gcc-head/lib64",
-    "prog.d"
-   ],
-   "compiler-option-raw":true,
-   "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/gdc --version | head -1 | cut -d' ' -f3-"],
-   "run-command":"./prog.exe",
-   "display-name":"gdc",
-   "display-compile-command":"gdc prog.d",
-   "language":"D",
-   "source-suffix":".d",
-   "output-file":"prog.exe"
-  },{
-   "name":"ghc-7.6.3",
-   "displayable":true,
-   "language":"Haskell",
-   "source-suffix":".hs",
-   "compiler-option-raw":true,
-   "compile-command":["/usr/local/ghc-7.6.3/bin/ghc", "-o", "prog.exe", "prog.hs"],
-   "version-command":["/usr/local/ghc-7.6.3/bin/ghc", "--numeric-version"],
-   "switches":["haskell-warning", "haskell-optimize"],
-   "initial-checked":["haskell-warning"],
-   "display-name":"ghc",
-   "display-compile-command":"ghc prog.hs",
-   "run-command":["./prog.exe"]
-  },{
-   "name":"mcs-3.2.0",
-   "displayable":true,
-   "language":"C#",
-   "source-suffix":".cs",
-   "compiler-option-raw":true,
-   "compile-command":["/usr/local/mono-3.2.0/bin/mcs", "-out:prog.exe", "prog.cs"],
-   "version-command":["/bin/sh", "-c", "/usr/local/mono-3.2.0/bin/mcs --version | head -1 | cut -d' ' -f5"],
-   "swithes":["mono-optimize"],
-   "initial-checked":[],
-   "display-name":"mcs",
-   "display-compile-command":"mcs -out:prog.exe prog.cs",
-   "run-command":["/usr/local/mono-3.2.0/bin/mono", "prog.exe"]
-  },{
-   "name":"perl-5.18.0",
-   "displayable":true,
-   "output-file":"prog.pl",
-   "run-command":["/usr/local/perl-5.18.0/bin/perl", "prog.pl"],
-   "display-name":"perl",
-   "display-compile-command":"perl prog.pl",
-   "language":"Perl",
-   "source-suffix":".pl",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/perl-5.18.0/bin/perl", "-e", "print $^V"],
-   "switches":["perl5.18.0"],
-   "initial-checked":["perl5.18.0"],
-  },{
-   "name":"perl-5.19.2",
-   "displayable":true,
-   "output-file":"prog.pl",
-   "run-command":["/usr/local/perl-5.19.2/bin/perl5.19.2", "prog.pl"],
-   "display-name":"perl-devel",
-   "display-compile-command":"perl5.19.2 prog.pl",
-   "language":"Perl",
-   "source-suffix":".pl",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/perl-5.19.2/bin/perl5.19.2", "-e", "print $^V"],
-  },{
-   "name":"python-2.7.3",
-   "displayable":true,
-   "output-file":"prog.py",
-   "run-command":["/usr/local/python-2.7.3/bin/python", "prog.py"],
-   "display-name":"python",
-   "display-compile-command":"python prog.py",
-   "language":"Python",
-   "source-suffix":".py",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/python-2.7.3/bin/python", "-c", "import sys; print(sys.version.split()[0])"],
-  },{
-   "name":"python-3.3.2",
-   "displayable":true,
-   "output-file":"prog.py",
-   "run-command":["/usr/local/python-3.3.2/bin/python3", "prog.py"],
-   "display-name":"python",
-   "display-compile-command":"python prog.py",
-   "language":"Python",
-   "source-suffix":".py",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/python-3.3.2/bin/python3", "-c", "import sys; print(sys.version.split()[0])"],
-  },{
-   "name":"pypy-2.1",
-   "displayable":true,
-   "output-file":"prog.py",
-   "run-command":["/usr/local/pypy-2.1/bin/pypy", "prog.py"],
-   "display-name":"pypy",
-   "display-compile-command":"pypy prog.py",
-   "language":"Python",
-   "source-suffix":".py",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/pypy-2.1/bin/pypy", "-c", "import sys; print(sys.version.split()[7])"],
-  },{
-   "name":"ruby-1.9.3-p0",
-   "displayable":true,
-   "output-file":"prog.rb",
-   "run-command":["/usr/local/ruby-1.9.3-p0/bin/ruby", "prog.rb"],
-   "display-name":"ruby",
-   "display-compile-command":"ruby prog.rb",
-   "language":"Ruby",
-   "source-suffix":".rb",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/ruby-1.9.3-p0/bin/ruby", "-e", "print RUBY_VERSION"],
-  },{
-   "name":"ruby-2.0.0-p247",
-   "displayable":true,
-   "output-file":"prog.rb",
-   "run-command":["/usr/local/ruby-2.0.0-p247/bin/ruby", "prog.rb"],
-   "display-name":"ruby",
-   "display-compile-command":"ruby prog.rb",
-   "language":"Ruby",
-   "source-suffix":".rb",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/ruby-2.0.0-p247/bin/ruby", "-e", "print RUBY_VERSION"],
-  },{
-   "name":"mruby-head",
-   "displayable":true,
-   "output-file":"prog.rb",
-   "run-command":["/usr/local/mruby-head/bin/mruby", "prog.rb"],
-   "display-name":"mruby HEAD",
-   "display-compile-command":"mruby prog.rb",
-   "language":"Ruby",
-   "source-suffix":".rb",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/bin/sh", "-c", "cd /usr/local/mruby-head && git rev-parse HEAD | cut -c 1-8"],
-  },{
-   "name":"erlang-maint",
-   "displayable":true,
-   "output-file":"prog.erl",
-   "run-command":["/usr/local/erlang-maint/bin/escript", "prog.erl"],
-   "display-name":"erlang-maint",
-   "display-compile-command":"escript prog.erl",
-   "language":"Erlang",
-   "source-suffix":".erl",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/usr/local/erlang-maint/bin/erl", "-eval", "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", "-noshell"],
-  },{
-   "name":"rust-head",
-   "displayable":true,
-   "output-file":"prog.rs",
-   "run-command":["./prog"],
-   "display-name":"Rust HEAD",
-   "display-compile-command":"rustc prog.rs",
-   "language":"Rust",
-   "source-suffix":".rs",
-   "runtime-option-raw":true,
-   "compile-command":["/usr/local/rust-head/bin/rustc", "-L", "/usr/local/rust-head/lib/rustlib/x86_64-unknown-linux-gnu/lib", "prog.rs"],
-   "version-command":["/bin/sh", "-c", "/usr/local/rust-head/bin/rustc --version | head -1 | cut -d' ' -f2-"],
-  },{
-   "name":"bash",
-   "displayable":true,
-   "output-file":"prog.sh",
-   "run-command":["/bin/bash", "prog.sh"],
-   "display-name":"bash",
-   "display-compile-command":"bash prog.sh",
-   "language":"Bash script",
-   "source-suffix":".sh",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/bin/sh", "-c", "/bin/bash --version | head -1"],
-  },{
-   "name":"sqlite-3.8.1",
-   "displayable":true,
-   "output-file":"prog.sql",
-   "run-command":["/bin/sh", "-c", "cat prog.sql | /usr/local/sqlite-3.8.1/bin/sqlite3"],
-   "display-name":"sqlite",
-   "display-compile-command":"cat prog.sql | sqlite3",
-   "language":"SQL",
-   "source-suffix":".sql",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "version-command":["/bin/sh", "-c", "/usr/local/sqlite-3.8.1/bin/sqlite3 -version | cut -d' ' -f1"],
-  },{
-   "name":"lua-5.2.2",
-   "displayable":true,
-   "output-file":"prog.lua",
-   "display-name":"lua",
-   "display-compile-command":"lua prog.lua",
-   "language":"Lua",
-   "source-suffix":".lua",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "run-command":["/usr/local/lua-5.2.2/bin/lua", "prog.lua"],
-   "version-command":["/bin/sh", "-c", "/usr/local/lua-5.2.2/bin/lua -v | cut -d' ' -f2"],
-  },{
-   "name":"php-5.5.6",
-   "displayable":true,
-   "output-file":"prog.php",
-   "display-name":"php",
-   "display-compile-command":"php prog.php",
-   "language":"PHP",
-   "source-suffix":".php",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "run-command":["/usr/local/php-5.5.6/bin/php", "prog.php"],
-   "version-command":["/bin/sh", "-c", "/usr/local/php-5.5.6/bin/php -v | head -1 | cut -d' ' -f2"],
-  },{
-   "name":"lazyk",
-   "displayable":true,
-   "output-file":"prog.lazy",
-   "display-name":"lazyk",
-   "display-compile-command":"lazyk prog.lazy",
-   "language":"Lazy K",
-   "source-suffix":".lazy",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "run-command":["/usr/local/lazyk/bin/lazyk", "prog.lazy"],
-   "version-command":["/bin/echo", "-e", "\\n"],
-  },{
-   "name":"clisp-2.49.0",
-   "displayable":true,
-   "output-file":"prog.lisp",
-   "display-name":"CLISP",
-   "display-compile-command":"clisp prog.lisp",
-   "language":"Lisp",
-   "source-suffix":".lisp",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "run-command":["/usr/local/clisp-2.49.0/bin/clisp", "prog.lisp"],
-   "version-command":["/bin/sh", "-c", "/usr/local/clisp-2.49.0/bin/clisp --version | head -1 | cut -d' ' -f3"],
-  },{
-   "name":"fpc-2.6.2",
-   "displayable":true,
-   "output-file":"prog.pas",
-   "display-name":"Free Pascal",
-   "display-compile-command":"fpc prog.pas",
-   "language":"Pascal",
-   "source-suffix":".pas",
-   "runtime-option-raw":true,
-   "compile-command":["/usr/local/fpc-2.6.2/bin/fpc", "-Fu/usr/local/fpc-2.6.2/lib/fpc/2.6.2/units/x86_64-linux/*", "prog.pas"],
-   "run-command":["./prog"],
-   "version-command":["/bin/sh", "-c", "/usr/local/fpc-2.6.2/bin/fpc | head -1 | cut -d' ' -f5"],
-   "switches":["delphi-mode"],
-  },{
-   "name":"java7-openjdk",
-   "displayable":true,
-   "output-file":"prog.java",
-   "display-name":"Java7 OpenJDK",
-   "display-compile-command":"javac prog.java",
-   "jail-name":"jvm",
-   "language":"Java",
-   "source-suffix":".java",
-   "compiler-option-raw":true,
-   "compile-command":["/usr/bin/javac", "prog.java"],
-   "run-command":["/bin/bash", "/usr/local/java-run/bin/run.sh"],
-   "version-command":["/bin/sh", "-c", "/usr/bin/java -version 2>&1 | head -n1"],
-   "switches":[],
-  },{
-   "name":"groovy-2.2.1",
-   "displayable":true,
-   "output-file":"prog.groovy",
-   "display-name":"Groovy",
-   "display-compile-command":"groovy prog.groovy",
-   "jail-name":"jvm",
-   "language":"Groovy",
-   "source-suffix":".groovy",
-   "runtime-option-raw":true,
-   "compile-command":"/bin/true",
-   "run-command":["/usr/local/groovy-2.2.1/bin/groovy", "prog.groovy"],
-   "version-command":["/bin/sh", "-c", "/usr/local/groovy-2.2.1/bin/groovy --version | cut -d' ' -f3"],
-  }
- ]
+    "switches": {
+        "delphi-mode": {
+            "display-name": "Delphi 7 mode", 
+            "flags": [
+                "-Mdelphi"
+            ]
+        }, 
+        "sprout": {
+            "display-name": "Sprout", 
+            "flags": [
+                "-I/usr/local/sprout"
+            ], 
+            "display-flags": "-I/usr/local/sprout"
+        }, 
+        "boost-1.49": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.49.0", 
+            "flags": [
+                "-I/usr/local/boost-1.49.0/include", 
+                "-L/usr/local/boost-1.49.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.49.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_program_options", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.49.0/include"
+        }, 
+        "boost-1.48": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.48.0", 
+            "flags": [
+                "-I/usr/local/boost-1.48.0/include", 
+                "-L/usr/local/boost-1.48.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.48.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_program_options", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.48.0/include"
+        }, 
+        "warning": {
+            "display-name": "Warnings", 
+            "flags": [
+                "-Wall", 
+                "-Wextra"
+            ]
+        }, 
+        "c++11": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++11", 
+            "flags": [
+                "-std=c++11", 
+                "-pedantic"
+            ]
+        }, 
+        "gnu++11": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++11(GNU)", 
+            "flags": "-std=gnu++11"
+        }, 
+        "c++0x": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++0x", 
+            "flags": [
+                "-std=c++0x", 
+                "-pedantic"
+            ]
+        }, 
+        "boost-1.47": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.47.0", 
+            "flags": [
+                "-I/usr/local/boost-1.47.0/include", 
+                "-L/usr/local/boost-1.47.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.47.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_program_options", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.47.0/include"
+        }, 
+        "cpp-p": {
+            "display-name": "-P", 
+            "runtime": true, 
+            "flags": [
+                "-P"
+            ]
+        }, 
+        "boost-nothing": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Don't Use Boost", 
+            "flags": [], 
+            "display-flags": ""
+        }, 
+        "c++98": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++03", 
+            "flags": [
+                "-std=c++98", 
+                "-pedantic"
+            ]
+        }, 
+        "haskell-optimize": {
+            "display-name": "Optimization", 
+            "flags": "-O2"
+        }, 
+        "c++1y": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++1y", 
+            "flags": [
+                "-std=c++1y", 
+                "-pedantic"
+            ]
+        }, 
+        "gnu++98": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++03(GNU)", 
+            "flags": "-std=gnu++98"
+        }, 
+        "c89": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C89", 
+            "flags": [
+                "-std=c89", 
+                "-pedantic-errors"
+            ]
+        }, 
+        "c11": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C11", 
+            "flags": [
+                "-std=c11", 
+                "-pedantic-errors"
+            ]
+        }, 
+        "gnu++1y": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++1y(GNU)", 
+            "flags": "-std=gnu++1y"
+        }, 
+        "boost-1.55-header": {
+            "conflicts": [
+                "boost-nothing-header", 
+                "boost-1.55-header"
+            ], 
+            "display-name": "Boost 1.55.0", 
+            "runtime": true, 
+            "flags": [
+                "-I/usr/local/boost-1.55.0/include"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.55.0/include"
+        }, 
+        "cpp-verbose": {
+            "display-name": "Verbose", 
+            "flags": [
+                "-v"
+            ]
+        }, 
+        "oldgcc-warning": {
+            "display-name": "Warnings", 
+            "flags": [
+                "-Wall", 
+                "-W"
+            ]
+        }, 
+        "gnu++0x": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C++0x(GNU)", 
+            "flags": "-std=gnu++0x"
+        }, 
+        "c99": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "display-name": "C99", 
+            "flags": [
+                "-std=c99", 
+                "-pedantic-errors"
+            ]
+        }, 
+        "boost-nothing-header": {
+            "conflicts": [
+                "boost-nothing-header", 
+                "boost-1.55-header"
+            ], 
+            "display-name": "Don't Use Boost", 
+            "runtime": true, 
+            "flags": [], 
+            "display-flags": ""
+        }, 
+        "boost-1.52": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.52.0", 
+            "flags": [
+                "-I/usr/local/boost-1.52.0/include", 
+                "-L/usr/local/boost-1.52.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.52.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_context", 
+                "-lboost_program_options", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.52.0/include"
+        }, 
+        "boost-1.53": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.53.0", 
+            "flags": [
+                "-I/usr/local/boost-1.53.0/include", 
+                "-L/usr/local/boost-1.53.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.53.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_atomic", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_context", 
+                "-lboost_program_options", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.53.0/include"
+        }, 
+        "boost-1.50": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.50.0", 
+            "flags": [
+                "-I/usr/local/boost-1.50.0/include", 
+                "-L/usr/local/boost-1.50.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.50.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_program_options", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_systemv", 
+                "-lboost_timer", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.50.0/include"
+        }, 
+        "boost-1.51": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.51.0", 
+            "flags": [
+                "-I/usr/local/boost-1.51.0/include", 
+                "-L/usr/local/boost-1.51.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.51.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_context", 
+                "-lboost_program_options", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.51.0/include"
+        }, 
+        "optimize": {
+            "display-name": "Optimization", 
+            "flags": [
+                "-O2", 
+                "-march=native"
+            ]
+        }, 
+        "boost-1.54": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.54.0", 
+            "flags": [
+                "-I/usr/local/boost-1.54.0/include", 
+                "-L/usr/local/boost-1.54.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.54.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_atomic", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_context", 
+                "-lboost_program_options", 
+                "-lboost_coroutine", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_log_setup", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph", 
+                "-lboost_log"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.54.0/include"
+        }, 
+        "boost-1.55": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55"
+            ], 
+            "display-name": "Boost 1.55.0", 
+            "flags": [
+                "-I/usr/local/boost-1.55.0/include", 
+                "-L/usr/local/boost-1.55.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.55.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_atomic", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_context", 
+                "-lboost_program_options", 
+                "-lboost_coroutine", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_log_setup", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph", 
+                "-lboost_log"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.55.0/include"
+        }, 
+        "perl5.18.0": {
+            "display-name": "-M5.18.0", 
+            "runtime": true, 
+            "flags": "-M5.18.0", 
+            "insert-position": 1
+        }, 
+        "haskell-warning": {
+            "display-name": "Warnings", 
+            "flags": "-Wall"
+        }, 
+        "mono-optimize": {
+            "display-name": "Optimization", 
+            "flags": "-optimize"
+        }
+    }, 
+    "compilers": [
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-head/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-head/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-head", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "gcc HEAD", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.8.2/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.8.2/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.8.2", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.8.2/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.8.1/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.8.1/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.8.1", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.8.1/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.7.3/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.7.3/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.7.3", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++11", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.7.3/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.6.4/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.6.4/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.6.4", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++0x", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.6.4/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.5.4/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.5.4/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.5.4", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++0x", 
+                "boost-1.55"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.5.4/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "oldgcc-warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.4.7/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.4.7/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.4.7", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "oldgcc-warning", 
+                "gnu++0x", 
+                "boost-1.55"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.4.7/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "oldgcc-warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.3.6/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.3.6/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.3.6", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "oldgcc-warning", 
+                "gnu++0x"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.3.6/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "compile-command": [
+                "/usr/local/llvm-head/bin/clang++", 
+                "-oprog.exe", 
+                "-stdlib=libc++", 
+                "-I/usr/local/libcxx-head/include/c++/v1", 
+                "-L/usr/local/libcxx-head/lib", 
+                "-Wl,-rpath,/usr/local/libcxx-head/lib", 
+                "-nostdinc++", 
+                "-lpthread", 
+                "prog.cc", 
+                "-lsupc++"
+            ], 
+            "name": "clang-head", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "clang HEAD", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "compile-command": [
+                "/usr/local/llvm-3.4/bin/clang++", 
+                "-oprog.exe", 
+                "-stdlib=libc++", 
+                "-I/usr/local/libcxx-3.4/include/c++/v1", 
+                "-L/usr/local/libcxx-3.4/lib", 
+                "-Wl,-rpath,/usr/local/libcxx-3.4/lib", 
+                "-nostdinc++", 
+                "-lpthread", 
+                "prog.cc", 
+                "-lsupc++"
+            ], 
+            "name": "clang-3.4", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "clang", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/llvm-3.4/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "compile-command": [
+                "/usr/local/llvm-3.3/bin/clang++", 
+                "-oprog.exe", 
+                "-stdlib=libc++", 
+                "-I/usr/local/libcxx-3.3/include/c++/v1", 
+                "-L/usr/local/libcxx-3.3/lib", 
+                "-Wl,-rpath,/usr/local/libcxx-3.3/lib", 
+                "-nostdinc++", 
+                "-lpthread", 
+                "prog.cc", 
+                "-lsupc++"
+            ], 
+            "name": "clang-3.3", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "clang", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/llvm-3.3/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y"
+            ], 
+            "compile-command": [
+                "/usr/local/llvm-3.2/bin/clang++", 
+                "-oprog.exe", 
+                "-stdlib=libc++", 
+                "-I/usr/local/libcxx-3.0/include/c++/v1", 
+                "-L/usr/local/libcxx-3.0/lib", 
+                "-Wl,-rpath,/usr/local/libcxx-3.0/lib", 
+                "-nostdinc++", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "clang-3.2", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.55", 
+                "sprout"
+            ], 
+            "display-name": "clang", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/llvm-3.2/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11"
+            ], 
+            "compile-command": [
+                "/usr/local/llvm-3.1/bin/clang++", 
+                "-oprog.exe", 
+                "-stdlib=libc++", 
+                "-I/usr/local/libcxx-3.0/include/c++/v1", 
+                "-L/usr/local/libcxx-3.0/lib", 
+                "-Wl,-rpath,/usr/local/libcxx-3.0/lib", 
+                "-nostdinc++", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "clang-3.1", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
+            "initial-checked": [
+                "warning", 
+                "gnu++11", 
+                "boost-1.55"
+            ], 
+            "display-name": "clang", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/llvm-3.1/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11"
+            ], 
+            "compile-command": [
+                "/usr/local/llvm-3.0/bin/clang++", 
+                "-oprog.exe", 
+                "-stdlib=libc++", 
+                "-I/usr/local/libcxx-3.0/include/c++/v1", 
+                "-L/usr/local/libcxx-3.0/lib", 
+                "-Wl,-rpath,/usr/local/libcxx-3.0/lib", 
+                "-nostdinc++", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "clang-3.0", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
+            "initial-checked": [
+                "warning", 
+                "gnu++11", 
+                "boost-1.55"
+            ], 
+            "display-name": "clang", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/llvm-3.0/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/usr/local/gcc-4.8.2/bin/gcc", 
+                "-dumpversion"
+            ], 
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "c89", 
+                "c99", 
+                "c11"
+            ], 
+            "display-compile-command": "gcc prog.c", 
+            "initial-checked": [
+                "warning", 
+                "c11"
+            ], 
+            "display-name": "gcc", 
+            "compile-command": [
+                "/usr/local/gcc-4.8.2/bin/gcc", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.8.2/lib64", 
+                "-lpthread", 
+                "prog.c"
+            ], 
+            "name": "gcc-4.8.2-c", 
+            "language": "C", 
+            "output-file": "prog.c", 
+            "displayable": true, 
+            "run-command": "./prog.exe"
+        }, 
+        {
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/llvm-3.3/bin/clang --version | head -1 | cut -d' ' -f3-"
+            ], 
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "c89", 
+                "c99", 
+                "c11"
+            ], 
+            "display-compile-command": "clang prog.c", 
+            "initial-checked": [
+                "warning", 
+                "c11"
+            ], 
+            "display-name": "clang", 
+            "compile-command": [
+                "/usr/local/llvm-3.3/bin/clang", 
+                "-oprog.exe", 
+                "-lpthread", 
+                "prog.c"
+            ], 
+            "name": "clang-3.3-c", 
+            "language": "C", 
+            "output-file": "prog.c", 
+            "displayable": true, 
+            "run-command": "./prog.exe"
+        }, 
+        {
+            "version-command": [
+                "/usr/local/gcc-4.8.2/bin/gcc", 
+                "-dumpversion"
+            ], 
+            "switches": [
+                "cpp-p", 
+                "boost-nothing-header", 
+                "boost-1.55-header"
+            ], 
+            "display-compile-command": "gcc prog.cpp -E", 
+            "initial-checked": [
+                "cpp-p", 
+                "boost-1.55-header"
+            ], 
+            "display-name": "gcc", 
+            "runtime-option-raw": true, 
+            "compile-command": "/bin/true", 
+            "name": "gcc-4.8.2-pp", 
+            "language": "CPP", 
+            "output-file": "prog.cpp", 
+            "displayable": true, 
+            "run-command": [
+                "/usr/local/gcc-4.8.2/bin/gcc", 
+                "-E", 
+                "prog.cpp"
+            ]
+        }, 
+        {
+            "run-command": "./prog.exe", 
+            "display-compile-command": "gdc prog.d", 
+            "compile-command": [
+                "/usr/local/gcc-head/bin/gdc", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-head/lib64", 
+                "prog.d"
+            ], 
+            "name": "gdc-head", 
+            "language": "D", 
+            "output-file": "prog.d", 
+            "display-name": "gdc", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/gcc-head/bin/gdc --version | head -1 | cut -d' ' -f3-"
+            ], 
+            "displayable": true, 
+            "compiler-option-raw": true
+        }, 
+        {
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/usr/local/ghc-7.6.3/bin/ghc", 
+                "--numeric-version"
+            ], 
+            "switches": [
+                "haskell-warning", 
+                "haskell-optimize"
+            ], 
+            "display-compile-command": "ghc prog.hs", 
+            "initial-checked": [
+                "haskell-warning"
+            ], 
+            "display-name": "ghc", 
+            "compile-command": [
+                "/usr/local/ghc-7.6.3/bin/ghc", 
+                "-o", 
+                "prog.exe", 
+                "prog.hs"
+            ], 
+            "name": "ghc-7.6.3", 
+            "language": "Haskell", 
+            "output-file": "prog.hs", 
+            "displayable": true, 
+            "run-command": [
+                "./prog.exe"
+            ]
+        }, 
+        {
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/mono-3.2.0/bin/mcs --version | head -1 | cut -d' ' -f5"
+            ], 
+            "display-compile-command": "mcs -out:prog.exe prog.cs", 
+            "initial-checked": [], 
+            "display-name": "mcs", 
+            "compile-command": [
+                "/usr/local/mono-3.2.0/bin/mcs", 
+                "-out:prog.exe", 
+                "prog.cs"
+            ], 
+            "name": "mcs-3.2.0", 
+            "language": "C#", 
+            "output-file": "prog.cs", 
+            "displayable": true, 
+            "run-command": [
+                "/usr/local/mono-3.2.0/bin/mono", 
+                "prog.exe"
+            ], 
+            "swithes": [
+                "mono-optimize"
+            ]
+        }, 
+        {
+            "switches": [
+                "perl5.18.0"
+            ], 
+            "compile-command": "/bin/true", 
+            "name": "perl-5.18.0", 
+            "language": "Perl", 
+            "output-file": "prog.pl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/perl-5.18.0/bin/perl", 
+                "-e", 
+                "print $^V"
+            ], 
+            "run-command": [
+                "/usr/local/perl-5.18.0/bin/perl", 
+                "prog.pl"
+            ], 
+            "display-compile-command": "perl prog.pl", 
+            "initial-checked": [
+                "perl5.18.0"
+            ], 
+            "display-name": "perl", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "perl-5.19.2", 
+            "language": "Perl", 
+            "output-file": "prog.pl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
+                "-e", 
+                "print $^V"
+            ], 
+            "run-command": [
+                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
+                "prog.pl"
+            ], 
+            "display-compile-command": "perl5.19.2 prog.pl", 
+            "display-name": "perl-devel", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "python-2.7.3", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-2.7.3/bin/python", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-2.7.3/bin/python", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "python-3.3.2", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-3.3.2/bin/python3", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-3.3.2/bin/python3", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "pypy-2.1", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/pypy-2.1/bin/pypy", 
+                "-c", 
+                "import sys; print(sys.version.split()[7])"
+            ], 
+            "run-command": [
+                "/usr/local/pypy-2.1/bin/pypy", 
+                "prog.py"
+            ], 
+            "display-compile-command": "pypy prog.py", 
+            "display-name": "pypy", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "ruby-1.9.3-p0", 
+            "language": "Ruby", 
+            "output-file": "prog.rb", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/ruby-1.9.3-p0/bin/ruby", 
+                "-e", 
+                "print RUBY_VERSION"
+            ], 
+            "run-command": [
+                "/usr/local/ruby-1.9.3-p0/bin/ruby", 
+                "prog.rb"
+            ], 
+            "display-compile-command": "ruby prog.rb", 
+            "display-name": "ruby", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "ruby-2.0.0-p247", 
+            "language": "Ruby", 
+            "output-file": "prog.rb", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/ruby-2.0.0-p247/bin/ruby", 
+                "-e", 
+                "print RUBY_VERSION"
+            ], 
+            "run-command": [
+                "/usr/local/ruby-2.0.0-p247/bin/ruby", 
+                "prog.rb"
+            ], 
+            "display-compile-command": "ruby prog.rb", 
+            "display-name": "ruby", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "mruby-head", 
+            "language": "Ruby", 
+            "output-file": "prog.rb", 
+            "displayable": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "cd /usr/local/mruby-head && git rev-parse HEAD | cut -c 1-8"
+            ], 
+            "run-command": [
+                "/usr/local/mruby-head/bin/mruby", 
+                "prog.rb"
+            ], 
+            "display-compile-command": "mruby prog.rb", 
+            "display-name": "mruby HEAD", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/usr/local/erlang-maint/bin/escript", 
+                "prog.erl"
+            ], 
+            "display-compile-command": "escript prog.erl", 
+            "compile-command": "/bin/true", 
+            "name": "erlang-maint", 
+            "language": "Erlang", 
+            "output-file": "prog.erl", 
+            "display-name": "erlang-maint", 
+            "version-command": [
+                "/usr/local/erlang-maint/bin/erl", 
+                "-eval", 
+                "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", 
+                "-noshell"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "./prog"
+            ], 
+            "display-compile-command": "rustc prog.rs", 
+            "compile-command": [
+                "/usr/local/rust-head/bin/rustc", 
+                "-L", 
+                "/usr/local/rust-head/lib/rustlib/x86_64-unknown-linux-gnu/lib", 
+                "prog.rs"
+            ], 
+            "name": "rust-head", 
+            "language": "Rust", 
+            "output-file": "prog.rs", 
+            "display-name": "Rust HEAD", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/rust-head/bin/rustc --version | head -1 | cut -d' ' -f2-"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/bin/bash", 
+                "prog.sh"
+            ], 
+            "display-compile-command": "bash prog.sh", 
+            "compile-command": "/bin/true", 
+            "name": "bash", 
+            "language": "Bash script", 
+            "output-file": "prog.sh", 
+            "display-name": "bash", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/bin/bash --version | head -1"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/bin/sh", 
+                "-c", 
+                "cat prog.sql | /usr/local/sqlite-3.8.1/bin/sqlite3"
+            ], 
+            "display-compile-command": "cat prog.sql | sqlite3", 
+            "compile-command": "/bin/true", 
+            "name": "sqlite-3.8.1", 
+            "language": "SQL", 
+            "output-file": "prog.sql", 
+            "display-name": "sqlite", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/sqlite-3.8.1/bin/sqlite3 -version | cut -d' ' -f1"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/usr/local/lua-5.2.2/bin/lua", 
+                "prog.lua"
+            ], 
+            "display-compile-command": "lua prog.lua", 
+            "compile-command": "/bin/true", 
+            "name": "lua-5.2.2", 
+            "language": "Lua", 
+            "output-file": "prog.lua", 
+            "display-name": "lua", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/lua-5.2.2/bin/lua -v | cut -d' ' -f2"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/usr/local/php-5.5.6/bin/php", 
+                "prog.php"
+            ], 
+            "display-compile-command": "php prog.php", 
+            "compile-command": "/bin/true", 
+            "name": "php-5.5.6", 
+            "language": "PHP", 
+            "output-file": "prog.php", 
+            "display-name": "php", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/php-5.5.6/bin/php -v | head -1 | cut -d' ' -f2"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/usr/local/lazyk/bin/lazyk", 
+                "prog.lazy"
+            ], 
+            "display-compile-command": "lazyk prog.lazy", 
+            "compile-command": "/bin/true", 
+            "name": "lazyk", 
+            "language": "Lazy K", 
+            "output-file": "prog.lazy", 
+            "display-name": "lazyk", 
+            "version-command": [
+                "/bin/echo", 
+                "-e", 
+                "\\n"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/usr/local/clisp-2.49.0/bin/clisp", 
+                "prog.lisp"
+            ], 
+            "display-compile-command": "clisp prog.lisp", 
+            "compile-command": "/bin/true", 
+            "name": "clisp-2.49.0", 
+            "language": "Lisp", 
+            "output-file": "prog.lisp", 
+            "display-name": "CLISP", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/clisp-2.49.0/bin/clisp --version | head -1 | cut -d' ' -f3"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/fpc-2.6.2/bin/fpc | head -1 | cut -d' ' -f5"
+            ], 
+            "switches": [
+                "delphi-mode"
+            ], 
+            "display-compile-command": "fpc prog.pas", 
+            "display-name": "Free Pascal", 
+            "runtime-option-raw": true, 
+            "compile-command": [
+                "/usr/local/fpc-2.6.2/bin/fpc", 
+                "-Fu/usr/local/fpc-2.6.2/lib/fpc/2.6.2/units/x86_64-linux/*", 
+                "prog.pas"
+            ], 
+            "name": "fpc-2.6.2", 
+            "language": "Pascal", 
+            "output-file": "prog.pas", 
+            "displayable": true, 
+            "run-command": [
+                "./prog"
+            ]
+        }, 
+        {
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/bin/java -version 2>&1 | head -n1"
+            ], 
+            "switches": [], 
+            "display-compile-command": "javac prog.java", 
+            "jail-name": "jvm", 
+            "display-name": "Java7 OpenJDK", 
+            "compile-command": [
+                "/usr/bin/javac", 
+                "prog.java"
+            ], 
+            "name": "java7-openjdk", 
+            "language": "Java", 
+            "output-file": "prog.java", 
+            "displayable": true, 
+            "run-command": [
+                "/bin/bash", 
+                "/usr/local/java-run/bin/run.sh"
+            ]
+        }, 
+        {
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/groovy-2.2.1/bin/groovy --version | cut -d' ' -f3"
+            ], 
+            "display-compile-command": "groovy prog.groovy", 
+            "jail-name": "jvm", 
+            "display-name": "Groovy", 
+            "runtime-option-raw": true, 
+            "compile-command": "/bin/true", 
+            "name": "groovy-2.2.1", 
+            "language": "Groovy", 
+            "output-file": "prog.groovy", 
+            "displayable": true, 
+            "run-command": [
+                "/usr/local/groovy-2.2.1/bin/groovy", 
+                "prog.groovy"
+            ]
+        }
+    ]
 }

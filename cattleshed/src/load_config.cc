@@ -155,7 +155,7 @@ namespace cfg {
 			t.compile_command = get_str_array(y, "compile-command");
 			t.version_command = get_str_array(y, "version-command");
 			t.run_command = get_str_array(y, "run-command");
-			t.source_suffix = get_str(y, "source-suffix");
+			t.output_file = get_str(y, "output-file");
 			t.display_name = get_str(y, "display-name");
 			t.display_compile_command = get_str(y, "display-compile-command");
 			t.jail_name = get_str(y, "jail-name");
@@ -183,7 +183,7 @@ namespace cfg {
 				if (sub.compile_command.empty()) sub.compile_command = x.compile_command;
 				if (sub.version_command.empty()) sub.version_command = x.version_command;
 				if (sub.run_command.empty()) sub.run_command = x.run_command;
-				if (sub.source_suffix.empty()) sub.source_suffix = x.source_suffix;
+				if (sub.output_file.empty()) sub.output_file = x.output_file;
 				if (sub.display_name.empty()) sub.display_name = x.display_name;
 				if (sub.display_compile_command.empty()) sub.display_compile_command = x.display_compile_command;
 				if (sub.jail_name.empty()) sub.jail_name = x.jail_name;

@@ -450,7 +450,7 @@ namespace wandbox {
 			 : aio(move(aio)),
 			   sock(move(sock)),
 			   src_text(std::make_shared<std::string>(received["Source"])),
-			   src_filename("prog" + target_compiler.source_suffix),
+			   src_filename(target_compiler.output_file),
 			   file(std::make_shared<asio::posix::stream_descriptor>(*this->aio)),
 			   sigs(move(sigs)),
 			   workdir(make_tmpdir("wandboxXXXXXX")),

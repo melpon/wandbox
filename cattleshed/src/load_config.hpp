@@ -31,7 +31,7 @@ namespace wandbox {
 		std::vector<std::string> compile_command;
 		std::vector<std::string> version_command;
 		std::vector<std::string> run_command;
-		std::string source_suffix;
+		std::string output_file;
 		std::string display_name;
 		std::string display_compile_command;
 		std::string jail_name;
