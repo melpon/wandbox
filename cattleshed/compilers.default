@@ -654,7 +654,7 @@
    "language":"Rust",
    "source-suffix":".rs",
    "runtime-option-raw":true,
-   "compile-command":["/usr/local/rust-head/bin/rustc", "-L", "/usr/local/rust-head/lib/rustc/x86_64-unknown-linux-gnu/lib", "prog.rs"],
+   "compile-command":["/usr/local/rust-head/bin/rustc", "-L", "/usr/local/rust-head/lib/rustlib/x86_64-unknown-linux-gnu/lib", "prog.rs"],
    "version-command":["/bin/sh", "-c", "/usr/local/rust-head/bin/rustc --version | head -1 | cut -d' ' -f2-"],
   },{
    "name":"bash",
