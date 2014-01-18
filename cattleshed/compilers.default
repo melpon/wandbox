@@ -1974,6 +1974,25 @@
         }, 
         {
             "run-command": [
+                "/usr/local/node-0.10.24/bin/node", 
+                "prog.js"
+            ], 
+            "display-compile-command": "node prog.js", 
+            "compile-command": "/bin/true", 
+            "name": "node-0.10.24", 
+            "language": "JavaScript", 
+            "output-file": "prog.js", 
+            "display-name": "node", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/node-0.10.24/bin/node --version | cut -c2-"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
                 "/usr/local/mozjs-24.2.0/bin/js24", 
                 "prog.js"
             ], 

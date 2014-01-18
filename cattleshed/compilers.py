@@ -751,6 +751,17 @@ class Compilers(object):
             "run-command":["/usr/local/groovy-2.2.1/bin/groovy", "prog.groovy"],
             "version-command":["/bin/sh", "-c", "/usr/local/groovy-2.2.1/bin/groovy --version | cut -d' ' -f3"],
         },{
+            "name":"node-0.10.24",
+            "displayable":True,
+            "language":"JavaScript",
+            "output-file":"prog.js",
+            "display-name":"node",
+            "display-compile-command":"node prog.js",
+            "compile-command":"/bin/true",
+            "run-command":["/usr/local/node-0.10.24/bin/node", "prog.js"],
+            "runtime-option-raw":True,
+            "version-command":["/bin/sh", "-c", "/usr/local/node-0.10.24/bin/node --version | cut -c2-"],
+        },{
             "name":"mozjs-24.2.0",
             "displayable":True,
             "language":"JavaScript",
