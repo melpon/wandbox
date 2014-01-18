@@ -38,6 +38,7 @@ import Settings.StaticFiles (
     codemirror_mode_pascal_pascal_js,
     codemirror_mode_rust_rust_js,
     codemirror_mode_groovy_groovy_js,
+    codemirror_mode_javascript_javascript_js,
     codemirror_keymap_vim_js,
     codemirror_keymap_emacs_js,
     compiling_gif)
@@ -128,6 +129,7 @@ makeRootR mCodeOutputs = do
         Y.addScript $ StaticR codemirror_mode_pascal_pascal_js
         Y.addScript $ StaticR codemirror_mode_rust_rust_js
         Y.addScript $ StaticR codemirror_mode_groovy_groovy_js
+        Y.addScript $ StaticR codemirror_mode_javascript_javascript_js
         Y.addScript $ StaticR codemirror_keymap_vim_js
         Y.addScript $ StaticR codemirror_keymap_emacs_js
         Y.addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"

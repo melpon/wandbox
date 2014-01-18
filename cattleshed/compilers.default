@@ -1971,6 +1971,25 @@
                 "/usr/local/groovy-2.2.1/bin/groovy", 
                 "prog.groovy"
             ]
+        }, 
+        {
+            "run-command": [
+                "/usr/local/mozjs-24.2.0/bin/js24", 
+                "prog.js"
+            ], 
+            "display-compile-command": "js24 prog.js", 
+            "compile-command": "/bin/true", 
+            "name": "mozjs-24.2.0", 
+            "language": "JavaScript", 
+            "output-file": "prog.js", 
+            "display-name": "SpiderMonkey", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/mozjs-24.2.0/bin/js24 --help | grep Version | cut -d'-' -f2 | cut -c2-"
+            ], 
+            "displayable": true, 
+            "runtime-option-raw": true
         }
     ]
 }

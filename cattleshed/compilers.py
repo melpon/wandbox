@@ -750,6 +750,17 @@ class Compilers(object):
             "compile-command":"/bin/true",
             "run-command":["/usr/local/groovy-2.2.1/bin/groovy", "prog.groovy"],
             "version-command":["/bin/sh", "-c", "/usr/local/groovy-2.2.1/bin/groovy --version | cut -d' ' -f3"],
+        },{
+            "name":"mozjs-24.2.0",
+            "displayable":True,
+            "language":"JavaScript",
+            "output-file":"prog.js",
+            "display-name":"SpiderMonkey",
+            "display-compile-command":"js24 prog.js",
+            "compile-command":"/bin/true",
+            "run-command":["/usr/local/mozjs-24.2.0/bin/js24", "prog.js"],
+            "runtime-option-raw":True,
+            "version-command":["/bin/sh", "-c", "/usr/local/mozjs-24.2.0/bin/js24 --help | grep Version | cut -d'-' -f2 | cut -c2-"],
         }]
         return COMPILERS
 
@@ -772,4 +783,3 @@ def make_config():
 
 if __name__ == '__main__':
     print json.dumps(make_config(), indent=4)
-    assert make_config() == expect

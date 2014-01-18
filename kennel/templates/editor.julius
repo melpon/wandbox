@@ -130,6 +130,7 @@ var EDITOR_MODE_MAPPING = {
   'Rust': 'text/x-rustsrc',
   'Java': 'text/x-java',
   'Groovy': 'text/x-groovy',
+  'JavaScript': 'text/javascript',
 }
 function _get_editor_mode(lang) {
   return EDITOR_MODE_MAPPING[lang];
