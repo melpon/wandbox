@@ -163,6 +163,8 @@ $(function() {
     }
   };
 
+  $.cookie.json = true;
+
   var matchedOption = function(option, searchText) {
     var matched = function(str) {
       return str.toLowerCase().indexOf(searchText.toLowerCase()) >= 0;
@@ -185,11 +187,24 @@ $(function() {
     });
     $('#compiler').attr('size', count > 5 ? count : 5);
     $('#compiler').change();
+
+    $.cookie('wandbox.compiler.search', { text: searchText }, { expires: 365 });
   };
   $('#typeahead-search').keyup(function() {
     changeCandidateList($(this).val());
   });
   $('#typeahead-search').change(function() {
     changeCandidateList($(this).val());
+  });
+
+  var search = $.cookie('wandbox.compiler.search');
+  if (search) {
+    $('#typeahead-search').val(search.text);
+    $('#typeahead-search').change();
+  }
+
+  $('#typeahead-clear').click(function() {
+    $('#typeahead-search').val('');
+    $('#typeahead-search').change();
   });
 });

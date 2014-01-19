@@ -1,6 +1,8 @@
 <div .row-fluid>
   <label>choose compiler:
-  <input .span12 #typeahead-search type="text" placeholder="Search">
+  <div .span12 .input-append>
+    <input .span9 #typeahead-search type="text" placeholder="Search">
+    <button .btn #typeahead-clear type="button">×
   <select .span12 size=#{length compilerInfos} #compiler>
     $forall ver <- map ciVersion compilerInfos
       <option value="#{verName ver}" data-command="#{verCompileCommand ver}" data-language="#{verLanguage ver}" data-display-name="#{verDisplayName ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
