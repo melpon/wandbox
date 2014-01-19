@@ -197,10 +197,12 @@ $(function() {
     changeCandidateList($(this).val());
   });
 
-  var search = $.cookie('wandbox.compiler.search');
-  if (search) {
-    $('#typeahead-search').val(search.text);
-    $('#typeahead-search').change();
+  if (!USING_PERMLINK) {
+    var search = $.cookie('wandbox.compiler.search');
+    if (search) {
+      $('#typeahead-search').val(search.text);
+      $('#typeahead-search').change();
+    }
   }
 
   $('#typeahead-clear').click(function() {
