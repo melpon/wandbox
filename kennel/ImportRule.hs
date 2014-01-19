@@ -52,6 +52,8 @@ import qualified Network                                as N
 import qualified Network.HTTP.Conduit                   as HConduit
 import qualified Network.HTTP.Types                     as HT
 import qualified Network.Wai.EventSource                as EventSource
+import qualified Network.Wai.Middleware.Autohead        as Autohead
+import qualified Network.Wai.Middleware.Gzip            as Gzip
 import qualified Network.Wai.Middleware.RequestLogger   as RequestLogger
 import qualified Network.Wai.Handler.Warp               as Warp
 import qualified Network.Wai.Logger                     as WaiLogger

@@ -11,6 +11,8 @@ import qualified Yesod                                  as Y
 import qualified Yesod.Default.Config                   as YDConfig
 import qualified Yesod.Core.Types                       as YCoreTypes
 import qualified Network.Wai.Middleware.RequestLogger   as RequestLogger
+import qualified Network.Wai.Middleware.Autohead        as Autohead
+import qualified Network.Wai.Middleware.Gzip            as Gzip
 import qualified Network.Wai.Logger                     as WaiLogger
 import qualified Database.Persist                       as Persist
 import qualified Database.Persist.Sql                   as PersistSql
@@ -23,7 +25,6 @@ import qualified GHC.IO.FD
 
 import Yesod.Auth (getAuth)
 import Yesod.Default.Handlers (getFaviconR, getRobotsR)
-import Network.Wai.Middleware.Autohead (autohead)
 
 import ChanMap (newChanMap)
 import Foundation (resourcesApp, App(..), getStatic, Route(..))
@@ -64,7 +65,11 @@ makeApplication conf = do
 
     -- Create the WAI application and apply middlewares
     app <- Y.toWaiAppPlain foundation
-    return $ (logWare . autohead) app
+    return $ (logWare . (Gzip.gzip gzipSettings) . Autohead.autohead) app
+  where
+    gzipSettings = Default.def
+        { Gzip.gzipFiles = Gzip.GzipCacheFolder "static/gzip"
+        }
 
 migrates :: PersistSql.SqlPersistT (MonadLogger.LoggingT IO) ()
 migrates = do
