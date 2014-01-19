@@ -22,6 +22,7 @@
 #include <pwd.h>
 #include <sched.h>
 #include <sys/capability.h>
+#include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/prctl.h>
 #include <sys/stat.h>
@@ -132,6 +133,17 @@ namespace jail {
 		prctl(PR_SET_PDEATHSIG, SIGKILL);
 		close(static_cast<proc_arg_t *>(arg_)->pipefd[0]);
 		const auto argv = static_cast<proc_arg_t *>(arg_)->argv;
+
+		// activet loopback interface
+		{
+			ifreq ifr;
+			strncpy(ifr.ifr_name, "lo", IFNAMSIZ);
+			const int fd = socket(PF_INET, SOCK_DGRAM, 0);
+			if (fd == -1) exit_error("socket(PF_INET, SOCK_DGRAM, 0)");
+			if (ioctl(fd, SIOCGIFFLAGS, &ifr)) close(fd), exit_error("SIOCGIFFLAGS");
+			ifr.ifr_flags |= IFF_UP;
+			if (ioctl(fd, SIOCSIFFLAGS, &ifr)) close(fd), exit_error("SIOCSIFFLAGS");
+		}
 
 		// prepare root directory
 		const auto &rootdir = static_cast<proc_arg_t *>(arg_)->rootdir;
@@ -276,7 +288,7 @@ namespace jail {
 
 		{
 			cap_t caps = cap_get_proc();
-			cap_value_t cap_list[] = { CAP_SYS_ADMIN, CAP_SYS_CHROOT, CAP_MKNOD };
+			cap_value_t cap_list[] = { CAP_SYS_ADMIN, CAP_SYS_CHROOT, CAP_MKNOD, CAP_NET_ADMIN };
 			if (cap_set_flag(caps, CAP_EFFECTIVE, sizeof(cap_list)/sizeof(cap_list[0]), cap_list, CAP_SET) == -1) exit_error("cap_set_flag");
 			if (cap_set_proc(caps) == -1) exit_error("cap_set_proc");
 			cap_free(caps);
