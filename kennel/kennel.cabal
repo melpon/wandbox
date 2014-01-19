@@ -94,6 +94,7 @@ library
                  , http-types
                  , optparse-applicative
                  , unordered-containers
+                 , process
 
 executable         kennel
     if flag(library-only)

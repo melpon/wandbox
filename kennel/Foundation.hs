@@ -15,11 +15,13 @@ import qualified Yesod.Core.Types                       as YCoreTypes
 import qualified Yesod.Default.Config                   as YDConfig
 import qualified Yesod.Default.Util                     as YDUtil
 import qualified Yesod.Auth.HashDB                      as YAuthHDB
+import qualified Data.Text                              as T
 import qualified Database.Persist                       as Persist
 import qualified Database.Persist.Sql                   as PersistSql
 import qualified Text.Jasmine                           as Jasmine
 import qualified Text.Hamlet                            as Hamlet
 import qualified Data.Maybe                             as Maybe
+import qualified System.Process                         as Process
 
 import Data.Text (Text)
 import Yesod.Auth (Auth)
@@ -90,9 +92,14 @@ instance Y.Yesod App where
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
 
+        revisionText <- getRevisionText
+
         pc <- Y.widgetToPageContent $ do
             $(widgetFile "default-layout")
         Y.giveUrlRenderer $(Hamlet.hamletFile "templates/default-layout-wrapper.hamlet")
+      where
+        getRevisionText :: Handler Text
+        getRevisionText = Y.liftIO $ T.pack <$> take 10 <$> Process.readProcess "git" ["rev-parse", "HEAD"] []
 
     -- This is done to provide an optimization for serving static files from
     -- a separate domain. Please see the staticRoot setting in Settings.hs

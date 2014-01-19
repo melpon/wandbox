@@ -65,6 +65,7 @@ import qualified System.Exit                            as Exit
 import qualified System.IO                              as I
 import qualified System.Log.FastLogger                  as FastLogger
 import qualified System.Mem                             as Mem
+import qualified System.Process                         as Process
 import qualified System.Random                          as Random
 import qualified System.Environment                     as Environment
 
