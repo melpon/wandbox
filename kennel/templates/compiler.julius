@@ -150,3 +150,46 @@ Compiler.prototype.deserialize = function(settings) {
   this.set_selected_compiler_option_raw(settings.compiler_option_raw);
   this.set_selected_runtime_option_raw(settings.runtime_option_raw);
 }
+
+$(function() {
+  jQuery.fn.toggleOption = function(show) {
+    jQuery(this).toggle(show);
+    if (show) {
+      if (jQuery(this).parent('span.toggleOption').length != 0)
+        jQuery(this).unwrap();
+    } else {
+      if (jQuery(this).parent('span.toggleOption').length == 0)
+        jQuery(this).wrap('<span class="toggleOption" style="display: none;" />');
+    }
+  };
+
+  var matchedOption = function(option, searchText) {
+    var matched = function(str) {
+      return str.toLowerCase().indexOf(searchText.toLowerCase()) >= 0;
+    };
+    if (matched(option.attr('value'))) return true;
+    if (matched(option.attr('data-language'))) return true;
+    if (matched(option.attr('data-display-name'))) return true;
+    return false;
+  };
+  var changeCandidateList = function(searchText) {
+    var count = 0;
+    $('#compiler option').each(function() {
+      var option = $(this);
+      if (matchedOption(option, searchText)) {
+        option.toggleOption(true);
+        count += 1;
+      } else {
+        option.toggleOption(false);
+      }
+    });
+    $('#compiler').attr('size', count > 5 ? count : 5);
+    $('#compiler').change();
+  };
+  $('#typeahead-search').keyup(function() {
+    changeCandidateList($(this).val());
+  });
+  $('#typeahead-search').change(function() {
+    changeCandidateList($(this).val());
+  });
+});

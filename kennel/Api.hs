@@ -120,6 +120,17 @@ instance Aeson.FromJSON CompilerVersion where
       v .: "compiler-option-raw" <*>
       v .: "runtime-option-raw"
   parseJSON _ = Monad.mzero
+instance Aeson.ToJSON CompilerVersion where
+  toJSON (CompilerVersion name language displayName version compileCommand compilerOptionRaw runtimeOptionRaw) =
+    Aeson.object
+      [ "name" .= name
+      , "language" .= language
+      , "display-name" .= displayName
+      , "version" .= version
+      , "display-compile-command" .= compileCommand
+      , "compiler-option-raw" .= compilerOptionRaw
+      , "runtime-option-raw" .= runtimeOptionRaw
+      ]
 
 data CompilerInfo = CompilerInfo
   { ciVersion :: CompilerVersion
