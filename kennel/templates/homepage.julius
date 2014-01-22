@@ -1,4 +1,5 @@
 USING_PERMLINK = #{usingPermlink}
+JSON_CODE = #{jsonCode};
 
 function decode_uri(str) {
   return decodeURIComponent(str);
@@ -29,7 +30,7 @@ function update_compile_command(compiler) {
 }
 
 function save(key, value) {
-  $.cookie(key, value, { expires: 365 });
+  $.cookie(key, value, { expires: 365, path: '/wandbox' });
 }
 
 $(function() {
@@ -116,7 +117,7 @@ $(function() {
   }
 
   // deserialize if code exists.
-  var code = #{jsonCode};
+  var code = JSON_CODE;
   if (code != null) {
     editor.setValue(decode_uri(code.code));
     stdin.set_stdin(decode_uri(code.stdin));
