@@ -28,8 +28,10 @@ import Yesod.Auth (Auth)
 import Yesod.Static (Static)
 
 import ChanMap (ChanMap)
+import Cache (Cache)
 import Settings (PersistConf, widgetFile, Extra(..), staticDir, staticRoot)
 import Settings.Development (development)
+import Api (CompilerInfo)
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -42,6 +44,7 @@ data App = App
     , persistConfig :: Settings.PersistConf
     , appLogger :: YCoreTypes.Logger
     , getChanMap :: ChanMap
+    , getWidgetCache :: Cache T.Text [CompilerInfo]
     }
 
 -- Set up i18n messages. See the message folder.

@@ -27,6 +27,7 @@ import Yesod.Auth (getAuth)
 import Yesod.Default.Handlers (getFaviconR, getRobotsR)
 
 import ChanMap (newChanMap)
+import Cache (newCache)
 import Foundation (resourcesApp, App(..), getStatic, Route(..))
 import Model (migrateAll)
 import Settings (Extra, parseExtra, PersistConf)
@@ -92,7 +93,8 @@ makeFoundation conf = do
     let logger = YCoreTypes.Logger loggerSet' getter
 
     cm <- Y.liftIO $ newChanMap
-    let foundation = App conf s p dbconf logger cm
+    widgetCache <- Y.liftIO $ newCache
+    let foundation = App conf s p dbconf logger cm widgetCache
 
     -- Perform database migration using our application's logging settings.
     MonadLogger.runLoggingT

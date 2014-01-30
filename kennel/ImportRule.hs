@@ -6,6 +6,7 @@ import qualified Blaze.ByteString.Builder.ByteString    as Blaze
 import qualified Codec.Binary.Url                       as Url
 
 import qualified Control.Monad                          as Monad
+import qualified Control.Monad.IO.Class                 as MonadIO
 import qualified Control.Monad.Logger                   as MonadLogger
 import qualified Control.Applicative                    as Applicative
 import qualified Control.Exception                      as Exc

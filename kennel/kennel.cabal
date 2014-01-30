@@ -26,6 +26,7 @@ library
                      Handler.Permlink
                      Handler.Api
                      ChanMap
+                     Cache
                      Api
                      VM.Protocol
                      VM.Conduit
@@ -95,6 +96,7 @@ library
                  , optparse-applicative
                  , unordered-containers
                  , process
+                 , transformers
 
 executable         kennel
     if flag(library-only)

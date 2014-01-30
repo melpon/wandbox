@@ -44,7 +44,7 @@ import Settings.StaticFiles (
     codemirror_keymap_emacs_js,
     compiling_gif)
 import Settings (widgetFile, Extra(..))
-import Foundation (Handler, Widget, Route(..), getExtra)
+import Foundation (Handler, Widget, Route(..), getExtra, App(getWidgetCache))
 import Api
     ( getCompilerInfos
     , CompilerSwitchSelectOption(..)
@@ -52,6 +52,7 @@ import Api
     , CompilerVersion(..)
     , CompilerInfo(..)
     )
+import Cache (cacheWith)
 
 
 resultContainer :: Widget
@@ -78,7 +79,8 @@ compiler :: Widget
 compiler = do
   host <- Y.handlerToWidget $ extraVMHost <$> getExtra
   port <- Y.handlerToWidget $ extraVMPort <$> getExtra
-  compilerInfos <- Y.liftIO (getCompilerInfos host port)
+  cm <- getWidgetCache <$> Y.getYesod
+  compilerInfos <- Y.liftIO $ cacheWith (Just 3600) "compilerInfos" (getCompilerInfos host port) cm
   $(widgetFile "compiler")
   where
     makeSwitch _ (CompilerSwitchSingle name flags default_ displayName) =
