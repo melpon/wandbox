@@ -23,7 +23,6 @@ cacheWith mSeconds key value c@(Cache ref) = do
     case Map.lookup key cm of
         (Just value') -> return $ value'
         Nothing  -> do
-            MonadIO.liftIO $ putStrLn "calling value"
             value' <- value
             _ <- MonadIO.liftIO $ IORef.atomicModifyIORef ref (\m -> (Map.insert key value' m, ()))
             case mSeconds of

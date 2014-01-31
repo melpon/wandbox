@@ -199,7 +199,6 @@ $(function() {
   });
 
   var search = $.cookie('wandbox.compiler.search');
-  console.log(search);
   if (search) {
     $('#typeahead-search').val(search.text);
     changeCandidateList($('#typeahead-search').val(), JSON_CODE && JSON_CODE.compiler);
