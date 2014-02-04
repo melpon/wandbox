@@ -2042,6 +2042,29 @@
         {
             "run-command": [
                 "/usr/local/node-0.10.24/bin/node", 
+                "/usr/local/coffee-script-1.7.1/bin/coffee", 
+                "prog.coffee"
+            ], 
+            "compile-command": "/bin/true", 
+            "name": "coffee-script-1.7.1", 
+            "language": "CoffeeScript", 
+            "output-file": "prog.coffee", 
+            "displayable": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/node-0.10.24/bin/node /usr/local/coffee-script-1.7.1/bin/coffee --version | cut -d' ' -f3"
+            ], 
+            "switches": [
+                "coffee-compile-only"
+            ], 
+            "display-compile-command": "coffee prog.coffee", 
+            "display-name": "coffee", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "run-command": [
+                "/usr/local/node-0.10.24/bin/node", 
                 "/usr/local/coffee-script-1.6.3/bin/coffee", 
                 "prog.coffee"
             ], 

@@ -543,6 +543,12 @@ class Compilers(object):
                     "version-command":["/bin/sh", "-c", "cd /usr/local/coffee-script-head && git rev-parse HEAD | cut -c 1-10"],
                 },
            }),
+           ("coffee-script-1.7.1", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
            ("coffee-script-1.6.3", {
                 "params": {
                 },
