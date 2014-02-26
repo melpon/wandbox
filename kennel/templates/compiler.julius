@@ -56,7 +56,7 @@ Compiler.prototype._compiler = function() {
 }
 
 Compiler.prototype.get_selected_compiler = function() {
-  return this._compiler().val();
+  return this.get_selected_compiler_element().val();
 }
 
 Compiler.prototype.get_selected_compiler_element = function() {
