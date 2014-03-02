@@ -418,6 +418,15 @@ class Compilers(object):
 
     def make_perl(self):
         NAMES = [
+            ("perl-head", {
+                "params": {
+                    "bin": "perl",
+                },
+                "after": {
+                    "display-name":"perl-devel HEAD",
+                    "display-compile-command":"perl prog.pl",
+                },
+            }),
             ("perl-5.18.0", {
                 "params": {
                     "bin": "perl",

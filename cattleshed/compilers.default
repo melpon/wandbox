@@ -1596,6 +1596,25 @@
             ]
         }, 
         {
+            "compile-command": "/bin/true", 
+            "name": "perl-head", 
+            "language": "Perl", 
+            "output-file": "prog.pl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/perl-head/bin/perl", 
+                "-e", 
+                "print $^V"
+            ], 
+            "run-command": [
+                "/usr/local/perl-head/bin/perl", 
+                "prog.pl"
+            ], 
+            "display-compile-command": "perl prog.pl", 
+            "display-name": "perl-devel HEAD", 
+            "runtime-option-raw": true
+        }, 
+        {
             "switches": [
                 "perl5.18.0"
             ], 
