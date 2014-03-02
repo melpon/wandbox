@@ -427,6 +427,15 @@ class Compilers(object):
                     "display-compile-command":"perl prog.pl",
                 },
             }),
+            ("perl-5.19.2", {
+                "params": {
+                    "bin": "perl5.19.2",
+                },
+                "after": {
+                    "display-name":"perl-devel",
+                    "display-compile-command":"perl5.19.2 prog.pl",
+                },
+            }),
             ("perl-5.18.0", {
                 "params": {
                     "bin": "perl",
@@ -436,15 +445,6 @@ class Compilers(object):
                     "display-compile-command":"perl prog.pl",
                     "switches":["perl5.18.0"],
                     "initial-checked":["perl5.18.0"],
-                },
-            }),
-            ("perl-5.19.2", {
-                "params": {
-                    "bin": "perl5.19.2",
-                },
-                "after": {
-                    "display-name":"perl-devel",
-                    "display-compile-command":"perl5.19.2 prog.pl",
                 },
             }),
         ]
@@ -478,16 +478,16 @@ class Compilers(object):
                     "display-name":"python2.7 HEAD",
                 },
            }),
-           ("python-2.7.3", {
+           ("python-3.3.2", {
                 "params": {
-                    "bin": "python",
+                    "bin": "python3",
                 },
                 "after": {
                 },
            }),
-           ("python-3.3.2", {
+           ("python-2.7.3", {
                 "params": {
-                    "bin": "python3",
+                    "bin": "python",
                 },
                 "after": {
                 },
@@ -527,14 +527,14 @@ class Compilers(object):
                     "display-name": "ruby HEAD",
                 },
            }),
-           ("ruby-1.9.3-p0", {
+           ("ruby-2.0.0-p247", {
                 "params": {
                     "bin": "ruby",
                 },
                 "after": {
                 },
            }),
-           ("ruby-2.0.0-p247", {
+           ("ruby-1.9.3-p0", {
                 "params": {
                     "bin": "ruby",
                 },

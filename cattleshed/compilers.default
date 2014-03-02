@@ -1615,6 +1615,25 @@
             "runtime-option-raw": true
         }, 
         {
+            "compile-command": "/bin/true", 
+            "name": "perl-5.19.2", 
+            "language": "Perl", 
+            "output-file": "prog.pl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
+                "-e", 
+                "print $^V"
+            ], 
+            "run-command": [
+                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
+                "prog.pl"
+            ], 
+            "display-compile-command": "perl5.19.2 prog.pl", 
+            "display-name": "perl-devel", 
+            "runtime-option-raw": true
+        }, 
+        {
             "switches": [
                 "perl5.18.0"
             ], 
@@ -1637,25 +1656,6 @@
                 "perl5.18.0"
             ], 
             "display-name": "perl", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
-            "name": "perl-5.19.2", 
-            "language": "Perl", 
-            "output-file": "prog.pl", 
-            "displayable": true, 
-            "version-command": [
-                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
-                "-e", 
-                "print $^V"
-            ], 
-            "run-command": [
-                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
-                "prog.pl"
-            ], 
-            "display-compile-command": "perl5.19.2 prog.pl", 
-            "display-name": "perl-devel", 
             "runtime-option-raw": true
         }, 
         {
@@ -1698,25 +1698,6 @@
         }, 
         {
             "compile-command": "/bin/true", 
-            "name": "python-2.7.3", 
-            "language": "Python", 
-            "output-file": "prog.py", 
-            "displayable": true, 
-            "version-command": [
-                "/usr/local/python-2.7.3/bin/python", 
-                "-c", 
-                "import sys; print(sys.version.split()[0])"
-            ], 
-            "run-command": [
-                "/usr/local/python-2.7.3/bin/python", 
-                "prog.py"
-            ], 
-            "display-compile-command": "python prog.py", 
-            "display-name": "python", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
             "name": "python-3.3.2", 
             "language": "Python", 
             "output-file": "prog.py", 
@@ -1728,6 +1709,25 @@
             ], 
             "run-command": [
                 "/usr/local/python-3.3.2/bin/python3", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "python-2.7.3", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-2.7.3/bin/python", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-2.7.3/bin/python", 
                 "prog.py"
             ], 
             "display-compile-command": "python prog.py", 
@@ -1774,25 +1774,6 @@
         }, 
         {
             "compile-command": "/bin/true", 
-            "name": "ruby-1.9.3-p0", 
-            "language": "Ruby", 
-            "output-file": "prog.rb", 
-            "displayable": true, 
-            "version-command": [
-                "/usr/local/ruby-1.9.3-p0/bin/ruby", 
-                "-e", 
-                "print RUBY_VERSION"
-            ], 
-            "run-command": [
-                "/usr/local/ruby-1.9.3-p0/bin/ruby", 
-                "prog.rb"
-            ], 
-            "display-compile-command": "ruby prog.rb", 
-            "display-name": "ruby", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
             "name": "ruby-2.0.0-p247", 
             "language": "Ruby", 
             "output-file": "prog.rb", 
@@ -1804,6 +1785,25 @@
             ], 
             "run-command": [
                 "/usr/local/ruby-2.0.0-p247/bin/ruby", 
+                "prog.rb"
+            ], 
+            "display-compile-command": "ruby prog.rb", 
+            "display-name": "ruby", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "ruby-1.9.3-p0", 
+            "language": "Ruby", 
+            "output-file": "prog.rb", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/ruby-1.9.3-p0/bin/ruby", 
+                "-e", 
+                "print RUBY_VERSION"
+            ], 
+            "run-command": [
+                "/usr/local/ruby-1.9.3-p0/bin/ruby", 
                 "prog.rb"
             ], 
             "display-compile-command": "ruby prog.rb", 
