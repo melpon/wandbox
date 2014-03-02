@@ -1660,6 +1660,44 @@
         }, 
         {
             "compile-command": "/bin/true", 
+            "name": "python-head", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-head/bin/python3", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-head/bin/python3", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "python-2.7-head", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-2.7-head/bin/python", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-2.7-head/bin/python", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
             "name": "python-2.7.3", 
             "language": "Python", 
             "output-file": "prog.py", 

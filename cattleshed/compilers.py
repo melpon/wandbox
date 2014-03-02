@@ -462,6 +462,20 @@ class Compilers(object):
 
     def make_python(self):
         NAMES = [
+           ("python-head", {
+                "params": {
+                    "bin": "python3",
+                },
+                "after": {
+                },
+           }),
+           ("python-2.7-head", {
+                "params": {
+                    "bin": "python",
+                },
+                "after": {
+                },
+           }),
            ("python-2.7.3", {
                 "params": {
                     "bin": "python",
