@@ -1674,7 +1674,7 @@
                 "prog.py"
             ], 
             "display-compile-command": "python prog.py", 
-            "display-name": "python", 
+            "display-name": "python HEAD", 
             "runtime-option-raw": true
         }, 
         {
@@ -1693,7 +1693,7 @@
                 "prog.py"
             ], 
             "display-compile-command": "python prog.py", 
-            "display-name": "python", 
+            "display-name": "python2.7 HEAD", 
             "runtime-option-raw": true
         }, 
         {

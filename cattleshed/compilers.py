@@ -467,6 +467,7 @@ class Compilers(object):
                     "bin": "python3",
                 },
                 "after": {
+                    "display-name":"python HEAD",
                 },
            }),
            ("python-2.7-head", {
@@ -474,6 +475,7 @@ class Compilers(object):
                     "bin": "python",
                 },
                 "after": {
+                    "display-name":"python2.7 HEAD",
                 },
            }),
            ("python-2.7.3", {
