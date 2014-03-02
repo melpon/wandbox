@@ -519,6 +519,14 @@ class Compilers(object):
 
     def make_ruby(self):
         NAMES = [
+           ("ruby-head", {
+                "params": {
+                    "bin": "ruby",
+                },
+                "after": {
+                    "display-name": "ruby HEAD",
+                },
+           }),
            ("ruby-1.9.3-p0", {
                 "params": {
                     "bin": "ruby",

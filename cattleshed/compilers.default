@@ -1755,6 +1755,25 @@
         }, 
         {
             "compile-command": "/bin/true", 
+            "name": "ruby-head", 
+            "language": "Ruby", 
+            "output-file": "prog.rb", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/ruby-head/bin/ruby", 
+                "-e", 
+                "print RUBY_VERSION"
+            ], 
+            "run-command": [
+                "/usr/local/ruby-head/bin/ruby", 
+                "prog.rb"
+            ], 
+            "display-compile-command": "ruby prog.rb", 
+            "display-name": "ruby HEAD", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
             "name": "ruby-1.9.3-p0", 
             "language": "Ruby", 
             "output-file": "prog.rb", 
