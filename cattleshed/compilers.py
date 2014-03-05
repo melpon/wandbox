@@ -566,6 +566,36 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_php(self):
+        NAMES = [
+           ("php-head", {
+                "params": {
+                },
+                "after": {
+                    "display-name": "php HEAD",
+                },
+           }),
+           ("php-5.5.6", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.php",
+            "display-name":"php",
+            "display-compile-command":"php prog.php",
+            "language":"PHP",
+            "runtime-option-raw":True,
+            "compile-command":"/bin/true",
+            "run-command":["/usr/local/{name}/bin/php", "prog.php"],
+            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/php -v | head -1 | cut -d' ' -f2"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_coffee_script(self):
         NAMES = [
            ("coffee-script-head", {
@@ -758,17 +788,6 @@ class Compilers(object):
             "run-command":["/usr/local/lua-5.2.2/bin/lua", "prog.lua"],
             "version-command":["/bin/sh", "-c", "/usr/local/lua-5.2.2/bin/lua -v | cut -d' ' -f2"],
         },{
-            "name":"php-5.5.6",
-            "displayable":True,
-            "output-file":"prog.php",
-            "display-name":"php",
-            "display-compile-command":"php prog.php",
-            "language":"PHP",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/php-5.5.6/bin/php", "prog.php"],
-            "version-command":["/bin/sh", "-c", "/usr/local/php-5.5.6/bin/php -v | head -1 | cut -d' ' -f2"],
-        },{
             "name":"lazyk",
             "displayable":True,
             "output-file":"prog.lazy",
@@ -860,6 +879,7 @@ class Compilers(object):
             self.make_perl() +
             self.make_python() +
             self.make_ruby() +
+            self.make_php() +
             self.make_default2() +
             self.make_coffee_script()
         )
