@@ -733,6 +733,14 @@
             "display-name": "Warnings", 
             "flags": "-Wall"
         }, 
+        "node-harmony": {
+            "display-name": "--harmony", 
+            "runtime": true, 
+            "flags": [
+                "--harmony"
+            ], 
+            "insert-position": 1
+        }, 
         "mono-optimize": {
             "display-name": "Optimization", 
             "flags": "-optimize"
@@ -1868,6 +1876,9 @@
             "runtime-option-raw": true
         }, 
         {
+            "switches": [
+                "node-harmony"
+            ], 
             "compile-command": "/bin/true", 
             "name": "node-head", 
             "language": "JavaScript", 
@@ -1883,6 +1894,9 @@
                 "prog.js"
             ], 
             "display-compile-command": "node prog.js", 
+            "initial-checked": [
+                "node-harmony"
+            ], 
             "display-name": "node HEAD", 
             "runtime-option-raw": true
         }, 

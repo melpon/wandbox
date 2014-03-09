@@ -182,6 +182,12 @@ class Switches(object):
                 "flags":["-Mdelphi"],
                 "display-name":"Delphi 7 mode",
             },
+            "node-harmony":{
+                "flags":["--harmony"],
+                "display-name":"--harmony",
+                "insert-position":1,
+                "runtime":True,
+            },
             "coffee-compile-only":{
                 "flags":["-p"],
                 "display-name":"Compile Only",
@@ -603,6 +609,8 @@ class Compilers(object):
                 },
                 "after": {
                     "display-name": "node HEAD",
+                    "switches":["node-harmony"],
+                    "initial-checked":["node-harmony"],
                 },
            }),
            ("node-0.10.24", {
