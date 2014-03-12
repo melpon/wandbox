@@ -422,6 +422,40 @@ class Compilers(object):
 
         return compilers
 
+    def make_mono(self):
+        NAMES = [
+            ("mcs-head", {
+                "params": {
+                    "mono": "mono-head",
+                },
+                "after": {
+                    "display-name":"mcs HEAD",
+                },
+            }),
+            ("mcs-3.2.0", {
+                "params": {
+                    "mono": "mono-3.2.0",
+                },
+                "after": {
+                },
+            }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "language":"C#",
+            "output-file":"prog.cs",
+            "compiler-option-raw":True,
+            "compile-command":["/usr/local/{mono}/bin/mcs", "-out:prog.exe", "prog.cs"],
+            "version-command":["/bin/sh", "-c", "/usr/local/{mono}/bin/mcs --version | head -1 | cut -d' ' -f5"],
+            "swithes":["mono-optimize"],
+            "initial-checked":[],
+            "display-name":"mcs",
+            "display-compile-command":"mcs -out:prog.exe prog.cs",
+            "run-command":["/usr/local/{mono}/bin/mono", "prog.exe"]
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_perl(self):
         NAMES = [
             ("perl-head", {
@@ -783,19 +817,6 @@ class Compilers(object):
             "display-name":"ghc",
             "display-compile-command":"ghc prog.hs",
             "run-command":["./prog.exe"]
-        },{
-            "name":"mcs-3.2.0",
-            "displayable":True,
-            "language":"C#",
-            "output-file":"prog.cs",
-            "compiler-option-raw":True,
-            "compile-command":["/usr/local/mono-3.2.0/bin/mcs", "-out:prog.exe", "prog.cs"],
-            "version-command":["/bin/sh", "-c", "/usr/local/mono-3.2.0/bin/mcs --version | head -1 | cut -d' ' -f5"],
-            "swithes":["mono-optimize"],
-            "initial-checked":[],
-            "display-name":"mcs",
-            "display-compile-command":"mcs -out:prog.exe prog.cs",
-            "run-command":["/usr/local/mono-3.2.0/bin/mono", "prog.exe"]
         }]
         return COMPILERS
 
@@ -922,6 +943,7 @@ class Compilers(object):
             self.make_gcc() +
             self.make_clang() +
             self.make_default1() +
+            self.make_mono() +
             self.make_perl() +
             self.make_python() +
             self.make_ruby() +

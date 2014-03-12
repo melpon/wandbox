@@ -1577,15 +1577,33 @@
             ]
         }, 
         {
+            "compile-command": [
+                "/usr/local/mono-head/bin/mcs", 
+                "-out:prog.exe", 
+                "prog.cs"
+            ], 
+            "name": "mcs-head", 
+            "language": "C#", 
+            "output-file": "prog.cs", 
             "compiler-option-raw": true, 
             "version-command": [
                 "/bin/sh", 
                 "-c", 
-                "/usr/local/mono-3.2.0/bin/mcs --version | head -1 | cut -d' ' -f5"
+                "/usr/local/mono-head/bin/mcs --version | head -1 | cut -d' ' -f5"
+            ], 
+            "run-command": [
+                "/usr/local/mono-head/bin/mono", 
+                "prog.exe"
             ], 
             "display-compile-command": "mcs -out:prog.exe prog.cs", 
             "initial-checked": [], 
-            "display-name": "mcs", 
+            "displayable": true, 
+            "display-name": "mcs HEAD", 
+            "swithes": [
+                "mono-optimize"
+            ]
+        }, 
+        {
             "compile-command": [
                 "/usr/local/mono-3.2.0/bin/mcs", 
                 "-out:prog.exe", 
@@ -1594,11 +1612,20 @@
             "name": "mcs-3.2.0", 
             "language": "C#", 
             "output-file": "prog.cs", 
-            "displayable": true, 
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/mono-3.2.0/bin/mcs --version | head -1 | cut -d' ' -f5"
+            ], 
             "run-command": [
                 "/usr/local/mono-3.2.0/bin/mono", 
                 "prog.exe"
             ], 
+            "display-compile-command": "mcs -out:prog.exe prog.cs", 
+            "initial-checked": [], 
+            "displayable": true, 
+            "display-name": "mcs", 
             "swithes": [
                 "mono-optimize"
             ]
