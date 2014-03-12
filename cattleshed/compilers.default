@@ -1876,6 +1876,46 @@
             "runtime-option-raw": true
         }, 
         {
+            "compile-command": "/bin/true", 
+            "name": "erlang-head", 
+            "language": "Erlang", 
+            "output-file": "prog.erl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/erlang-head/bin/erl", 
+                "-eval", 
+                "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", 
+                "-noshell"
+            ], 
+            "run-command": [
+                "/usr/local/erlang-head/bin/escript", 
+                "prog.erl"
+            ], 
+            "display-compile-command": "escript prog.erl", 
+            "display-name": "erlang HEAD", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "erlang-maint", 
+            "language": "Erlang", 
+            "output-file": "prog.erl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/erlang-maint/bin/erl", 
+                "-eval", 
+                "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", 
+                "-noshell"
+            ], 
+            "run-command": [
+                "/usr/local/erlang-maint/bin/escript", 
+                "prog.erl"
+            ], 
+            "display-compile-command": "escript prog.erl", 
+            "display-name": "erlang maint", 
+            "runtime-option-raw": true
+        }, 
+        {
             "switches": [
                 "node-harmony"
             ], 
@@ -1986,26 +2026,6 @@
             ], 
             "display-compile-command": "coffee prog.coffee", 
             "display-name": "coffee", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "run-command": [
-                "/usr/local/erlang-maint/bin/escript", 
-                "prog.erl"
-            ], 
-            "display-compile-command": "escript prog.erl", 
-            "compile-command": "/bin/true", 
-            "name": "erlang-maint", 
-            "language": "Erlang", 
-            "output-file": "prog.erl", 
-            "display-name": "erlang-maint", 
-            "version-command": [
-                "/usr/local/erlang-maint/bin/erl", 
-                "-eval", 
-                "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", 
-                "-noshell"
-            ], 
-            "displayable": true, 
             "runtime-option-raw": true
         }, 
         {

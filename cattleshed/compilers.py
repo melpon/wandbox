@@ -602,6 +602,36 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_erlang(self):
+        NAMES = [
+           ("erlang-head", {
+                "params": {
+                },
+                "after": {
+                    "display-name": "erlang HEAD",
+                },
+           }),
+           ("erlang-maint", {
+                "params": {
+                },
+                "after": {
+                    "display-name": "erlang maint",
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.erl",
+            "run-command":["/usr/local/{name}/bin/escript", "prog.erl"],
+            "display-compile-command":"escript prog.erl",
+            "language":"Erlang",
+            "runtime-option-raw":True,
+            "compile-command":"/bin/true",
+            "version-command":["/usr/local/{name}/bin/erl", "-eval", "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", "-noshell"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_node(self):
         NAMES = [
            ("node-head", {
@@ -771,17 +801,6 @@ class Compilers(object):
 
     def make_default2(self):
         COMPILERS = [{
-            "name":"erlang-maint",
-            "displayable":True,
-            "output-file":"prog.erl",
-            "run-command":["/usr/local/erlang-maint/bin/escript", "prog.erl"],
-            "display-name":"erlang-maint",
-            "display-compile-command":"escript prog.erl",
-            "language":"Erlang",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/usr/local/erlang-maint/bin/erl", "-eval", "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", "-noshell"],
-        },{
             "name":"rust-head",
             "displayable":True,
             "output-file":"prog.rs",
@@ -907,6 +926,7 @@ class Compilers(object):
             self.make_python() +
             self.make_ruby() +
             self.make_php() +
+            self.make_erlang() +
             self.make_node() +
             self.make_coffee_script() +
             self.make_default2()
