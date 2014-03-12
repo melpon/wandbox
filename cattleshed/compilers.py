@@ -736,6 +736,36 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_sqlite(self):
+        NAMES = [
+           ("sqlite-head", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"sqlite HEAD",
+                },
+           }),
+           ("sqlite-3.8.1", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.sql",
+            "run-command":["/bin/sh", "-c", "cat prog.sql | /usr/local/{name}/bin/sqlite3"],
+            "display-name":"sqlite",
+            "display-compile-command":"cat prog.sql | sqlite3",
+            "language":"SQL",
+            "runtime-option-raw":True,
+            "compile-command":"/bin/true",
+            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/sqlite3 -version | cut -d' ' -f1"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-c",
@@ -844,17 +874,6 @@ class Compilers(object):
             "compile-command":"/bin/true",
             "version-command":["/bin/sh", "-c", "/bin/bash --version | head -1"],
         },{
-            "name":"sqlite-3.8.1",
-            "displayable":True,
-            "output-file":"prog.sql",
-            "run-command":["/bin/sh", "-c", "cat prog.sql | /usr/local/sqlite-3.8.1/bin/sqlite3"],
-            "display-name":"sqlite",
-            "display-compile-command":"cat prog.sql | sqlite3",
-            "language":"SQL",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/bin/sh", "-c", "/usr/local/sqlite-3.8.1/bin/sqlite3 -version | cut -d' ' -f1"],
-        },{
             "name":"lua-5.2.2",
             "displayable":True,
             "output-file":"prog.lua",
@@ -951,6 +970,7 @@ class Compilers(object):
             self.make_erlang() +
             self.make_node() +
             self.make_coffee_script() +
+            self.make_sqlite() +
             self.make_default2()
         )
 
