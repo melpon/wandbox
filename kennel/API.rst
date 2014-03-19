@@ -136,6 +136,12 @@ POST /compile.json
   program_message
     merged messages program_output and program_error
 
+GET /permlink/:link
+  Get a result specified a permanent link ``link``
+
+  Parameter is nothing.
+
+  Result is same as ``POST /compile.json``
 
 Plugin
 ------------
