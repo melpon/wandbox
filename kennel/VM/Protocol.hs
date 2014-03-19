@@ -34,7 +34,7 @@ data ProtocolSpecifier =
   StdErr |
   ExitCode |
   Signal
-  deriving (Show)
+  deriving (Show, Read)
 
 data Protocol = ProtocolNil | Protocol {
   protoSpec :: ProtocolSpecifier,

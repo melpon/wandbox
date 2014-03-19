@@ -13,3 +13,4 @@
 /permlink/#Text LinkedPermlinkR GET
 /api/list.json ApiListR GET
 /api/compile.json ApiCompileR POST
+/api/permlink/#Text ApiPermlinkR GET

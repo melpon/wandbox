@@ -7,6 +7,7 @@ module Api (
 , runCode
 , sinkEventSource
 , sinkJson
+, getPermlink
 ) where
 
 import Import
@@ -31,10 +32,10 @@ import qualified Network.Wai.EventSource                as EventSource
 import qualified System.IO                              as I
 import qualified Yesod                                  as Y
 
-import Data.Conduit (($$))
+import Data.Conduit (($$), ($=))
 import Data.Aeson ((.:), (.=))
 
-import Model (Code(..))
+import Model (Code(..), LinkOutput(..))
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
 
@@ -248,3 +249,9 @@ sinkJson = do
     specToKeys ExitCode         = ["status"]
     specToKeys Signal           = ["signal"]
     specToKeys _                = ["error"]
+
+outputToProtocol :: LinkOutput -> Either String Protocol
+outputToProtocol (LinkOutput _ _ typ output) = Right $ Protocol (read (T.unpack typ) :: ProtocolSpecifier) output
+
+getPermlink :: Conduit.MonadResource m => [LinkOutput] -> m Aeson.Value
+getPermlink outputs = ConduitL.sourceList outputs $= ConduitL.map outputToProtocol $$ sinkJson

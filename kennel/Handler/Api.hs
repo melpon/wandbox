@@ -1,6 +1,7 @@
 module Handler.Api (
   getApiListR
 , postApiCompileR
+, getApiPermlinkR
 ) where
 
 import Import
@@ -8,11 +9,19 @@ import Import
 import qualified Yesod                                  as Y
 import qualified Data.HashMap.Strict                    as HMS
 import qualified Data.Aeson                             as Aeson
+import qualified Data.Text                              as T
 
 import Settings (Extra(..))
 import Foundation (Handler, getExtra)
-import Model (makeCode)
-import Api (getCompilerInfos, runCode, sinkJson)
+import Model
+    ( makeCode
+    , Unique(UniqueLink)
+    , EntityField
+        ( LinkOutputLinkId
+        , LinkOutputOrder
+        )
+    )
+import Api (getCompilerInfos, runCode, sinkJson, getPermlink)
 
 getApiListR :: Handler Y.Value
 getApiListR = do
@@ -47,3 +56,10 @@ postApiCompileR = do
       let (Y.Object obj) = Y.object $ map (uncurry (Y..=)) pp
       return obj
     fromJson = Y.parseJsonBody_ :: Handler Aeson.Object
+
+getApiPermlinkR :: T.Text -> Handler Y.Value
+getApiPermlinkR link = do
+    permlink <- Y.runDB (Y.getBy404 $ UniqueLink link)
+    outputs <- Y.runDB (Y.selectList [LinkOutputLinkId Y.==. Y.entityKey permlink] [Y.Asc LinkOutputOrder])
+    json <- getPermlink $ map Y.entityVal outputs
+    Y.returnJson json
