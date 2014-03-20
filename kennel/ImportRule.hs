@@ -40,6 +40,7 @@ import qualified Data.Map                               as Map
 import qualified Data.Maybe                             as Maybe
 import qualified Data.Text                              as T
 import qualified Data.Text.Encoding                     as TE
+import qualified Data.Time                              as Time
 import qualified Data.Time.Clock                        as Clock
 import qualified Data.Word                              as Word
 import qualified Data.Yaml                              as Yaml
@@ -64,6 +65,7 @@ import qualified Options.Applicative                    as Options
 import qualified System.Directory                       as Directory
 import qualified System.Exit                            as Exit
 import qualified System.IO                              as I
+import qualified System.Locale                          as Locale
 import qualified System.Log.FastLogger                  as FastLogger
 import qualified System.Mem                             as Mem
 import qualified System.Process                         as Process

@@ -20,6 +20,7 @@ import Model
         ( LinkOutputLinkId
         , LinkOutputOrder
         )
+    , Link(..)
     )
 import Api (getCompilerInfos, runCode, sinkJson, getPermlink)
 
@@ -60,6 +61,8 @@ postApiCompileR = do
 getApiPermlinkR :: T.Text -> Handler Y.Value
 getApiPermlinkR link = do
     permlink <- Y.runDB (Y.getBy404 $ UniqueLink link)
+    let codeId = linkCodeId $ Y.entityVal permlink
+    code <- Y.runDB (Y.get404 codeId)
     outputs <- Y.runDB (Y.selectList [LinkOutputLinkId Y.==. Y.entityKey permlink] [Y.Asc LinkOutputOrder])
-    json <- getPermlink $ map Y.entityVal outputs
+    json <- getPermlink code (map Y.entityVal outputs)
     Y.returnJson json

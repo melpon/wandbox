@@ -27,9 +27,12 @@ import qualified Data.HashMap.Strict                    as HMS
 import qualified Data.Maybe                             as Maybe
 import qualified Data.Text                              as T
 import qualified Data.Text.Encoding                     as TE
+import qualified Data.Time                              as Time
+import qualified Data.Time.Clock                        as Clock
 import qualified Network                                as N
 import qualified Network.Wai.EventSource                as EventSource
 import qualified System.IO                              as I
+import qualified System.Locale                          as Locale
 import qualified Yesod                                  as Y
 
 import Data.Conduit (($$), ($=))
@@ -156,7 +159,6 @@ instance Aeson.ToJSON CompilerInfo where
       , "runtime-option-raw" .= verRuntimeOptionRaw version
       , "switches" .= switch
       ]
-    
 
 getCompilerInfos :: N.HostName -> N.PortID -> IO [CompilerInfo]
 getCompilerInfos host port = do
@@ -253,5 +255,26 @@ sinkJson = do
 outputToProtocol :: LinkOutput -> Either String Protocol
 outputToProtocol (LinkOutput _ _ typ output) = Right $ Protocol (read (T.unpack typ) :: ProtocolSpecifier) output
 
-getPermlink :: Conduit.MonadResource m => [LinkOutput] -> m Aeson.Value
-getPermlink outputs = ConduitL.sourceList outputs $= ConduitL.map outputToProtocol $$ sinkJson
+codeToJson :: Code -> Aeson.Value
+codeToJson code =
+    Aeson.object
+      [ "compiler" .= codeCompiler code
+      , "code" .= codeCode code
+      , "options" .= codeOptions code
+      , "compiler-option-raw" .= codeCompilerOptionRaw code
+      , "runtime-option-raw" .= codeRuntimeOptionRaw code
+      , "stdin" .= codeStdin code
+      , "created-at" .= formatISO8601 (codeCreatedAt code)
+      ]
+
+formatISO8601 :: Clock.UTCTime -> String
+formatISO8601 t = Time.formatTime Locale.defaultTimeLocale "%FT%T%QZ" t
+
+getPermlink :: Conduit.MonadResource m => Code -> [LinkOutput] -> m Aeson.Value
+getPermlink code outputs = do
+    let codeJson = codeToJson code
+    outputsJson <- ConduitL.sourceList outputs $= ConduitL.map outputToProtocol $$ sinkJson
+    return $ Aeson.object
+      [ "parameter" .= codeJson
+      , "result" .= outputsJson
+      ]

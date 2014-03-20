@@ -141,7 +141,12 @@ GET /permlink/:link
 
   Parameter is nothing.
 
-  Result is same as ``POST /compile.json``
+  Result:
+
+  parameter
+    Same as ``POST /compile.json`` Parameter with ``created-at`` is a compiled time formatted by ISO 8601.
+  result
+    Same as ``POST /compile.json`` Result.
 
 Plugin
 ------------

@@ -97,6 +97,7 @@ library
                  , unordered-containers
                  , process
                  , transformers
+                 , old-locale
 
 executable         kennel
     if flag(library-only)
