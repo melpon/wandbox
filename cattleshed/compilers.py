@@ -422,6 +422,38 @@ class Compilers(object):
 
         return compilers
 
+    def make_ghc(self):
+        NAMES = [
+            ("ghc-head", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"ghc HEAD",
+                },
+            }),
+            ("ghc-7.6.3", {
+                "params": {
+                },
+                "after": {
+                },
+            }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "language":"Haskell",
+            "output-file":"prog.hs",
+            "compiler-option-raw":True,
+            "compile-command":["/usr/local/{name}/bin/ghc", "-o", "prog.exe", "prog.hs"],
+            "version-command":["/usr/local/{name}/bin/ghc", "--numeric-version"],
+            "switches":["haskell-warning", "haskell-optimize"],
+            "initial-checked":["haskell-warning"],
+            "display-name":"ghc",
+            "display-compile-command":"ghc prog.hs",
+            "run-command":["./prog.exe"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_mono(self):
         NAMES = [
             ("mcs-head", {
@@ -834,19 +866,6 @@ class Compilers(object):
             "display-compile-command":"gdc prog.d",
             "language":"D",
             "output-file":"prog.d"
-        },{
-            "name":"ghc-7.6.3",
-            "displayable":True,
-            "language":"Haskell",
-            "output-file":"prog.hs",
-            "compiler-option-raw":True,
-            "compile-command":["/usr/local/ghc-7.6.3/bin/ghc", "-o", "prog.exe", "prog.hs"],
-            "version-command":["/usr/local/ghc-7.6.3/bin/ghc", "--numeric-version"],
-            "switches":["haskell-warning", "haskell-optimize"],
-            "initial-checked":["haskell-warning"],
-            "display-name":"ghc",
-            "display-compile-command":"ghc prog.hs",
-            "run-command":["./prog.exe"]
         }]
         return COMPILERS
 
@@ -962,6 +981,7 @@ class Compilers(object):
             self.make_gcc() +
             self.make_clang() +
             self.make_default1() +
+            self.make_ghc() +
             self.make_mono() +
             self.make_perl() +
             self.make_python() +

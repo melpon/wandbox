@@ -1548,20 +1548,39 @@
             "compiler-option-raw": true
         }, 
         {
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/usr/local/ghc-7.6.3/bin/ghc", 
-                "--numeric-version"
-            ], 
             "switches": [
                 "haskell-warning", 
                 "haskell-optimize"
+            ], 
+            "compile-command": [
+                "/usr/local/ghc-head/bin/ghc", 
+                "-o", 
+                "prog.exe", 
+                "prog.hs"
+            ], 
+            "name": "ghc-head", 
+            "language": "Haskell", 
+            "output-file": "prog.hs", 
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/usr/local/ghc-head/bin/ghc", 
+                "--numeric-version"
+            ], 
+            "run-command": [
+                "./prog.exe"
             ], 
             "display-compile-command": "ghc prog.hs", 
             "initial-checked": [
                 "haskell-warning"
             ], 
-            "display-name": "ghc", 
+            "displayable": true, 
+            "display-name": "ghc HEAD"
+        }, 
+        {
+            "switches": [
+                "haskell-warning", 
+                "haskell-optimize"
+            ], 
             "compile-command": [
                 "/usr/local/ghc-7.6.3/bin/ghc", 
                 "-o", 
@@ -1571,10 +1590,20 @@
             "name": "ghc-7.6.3", 
             "language": "Haskell", 
             "output-file": "prog.hs", 
-            "displayable": true, 
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/usr/local/ghc-7.6.3/bin/ghc", 
+                "--numeric-version"
+            ], 
             "run-command": [
                 "./prog.exe"
-            ]
+            ], 
+            "display-compile-command": "ghc prog.hs", 
+            "initial-checked": [
+                "haskell-warning"
+            ], 
+            "displayable": true, 
+            "display-name": "ghc"
         }, 
         {
             "compile-command": [
