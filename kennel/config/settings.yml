@@ -5,7 +5,7 @@ Default: &defaults
   copyright: Insert copyright statement here
   auth: false
   vm_host: "127.0.0.1"
-  vm_port: 2013
+  vm_port: 2012
   #analytics: UA-YOURCODE
 
 Development:
