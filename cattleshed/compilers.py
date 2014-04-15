@@ -698,6 +698,29 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_elixir(self):
+        NAMES = [
+           ("elixir-head", {
+                "params": {
+                },
+                "after": {
+                    "display-name": "Elixir HEAD",
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.ex",
+            "run-command":["/usr/local/{name}/bin/run.sh", "prog.ex"],
+            "display-compile-command":"elixir prog.ex",
+            "language":"Elixir",
+            "runtime-option-raw":True,
+            "compile-command":"/bin/true",
+            "version-command":["/bin/bash", "-c", "PATH=/usr/local/erlang-head/bin:$PATH /usr/local/{name}/bin/elixir --version | cut -d' ' -f2"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_node(self):
         NAMES = [
            ("node-head", {
@@ -854,13 +877,13 @@ class Compilers(object):
             "displayable":True,
             "display-name":"gdc HEAD",
             "compile-command":[
-                "/usr/local/gcc-head/bin/gdc",
+                "/usr/local/gdc-head/bin/gdc",
                 "-oprog.exe",
-                "-Wl,-rpath,/usr/local/gcc-head/lib64",
+                "-Wl,-rpath,/usr/local/gdc-head/lib64",
                 "prog.d"
             ],
             "compiler-option-raw":True,
-            "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/gdc --version | head -1 | cut -d' ' -f3-"],
+            "version-command":["/bin/sh", "-c", "/usr/local/gdc-head/bin/gdc --version | head -1 | cut -d' ' -f3-"],
             "run-command":"./prog.exe",
             "display-compile-command":"gdc prog.d",
             "language":"D",
@@ -1004,6 +1027,7 @@ class Compilers(object):
             self.make_ruby() +
             self.make_php() +
             self.make_erlang() +
+            self.make_elixir() +
             self.make_node() +
             self.make_coffee_script() +
             self.make_sqlite() +
