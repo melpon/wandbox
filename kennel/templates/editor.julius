@@ -132,6 +132,7 @@ var EDITOR_MODE_MAPPING = {
   'Groovy': 'text/x-groovy',
   'JavaScript': 'text/javascript',
   'CoffeeScript': 'text/x-coffeescript',
+  'Elixir': 'text/x-ruby',
 }
 function _get_editor_mode(lang) {
   return EDITOR_MODE_MAPPING[lang];
