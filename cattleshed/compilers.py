@@ -248,6 +248,13 @@ class Compilers(object):
                     "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
                 },
             }),
+            ("gcc-4.9.0", {
+                "params": {},
+                "after": {
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
+                    "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
+                },
+            }),
             ("gcc-4.8.2", {
                 "params": {},
                 "after": {
