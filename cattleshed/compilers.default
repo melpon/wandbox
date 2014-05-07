@@ -1186,7 +1186,7 @@
                 "gnu++1y"
             ], 
             "compile-command": [
-                "/usr/local/llvm-head/bin/clang++", 
+                "/usr/local/llvm-head/bin/run-clang++.sh", 
                 "-oprog.exe", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-head/include/c++/v1", 
@@ -1214,7 +1214,7 @@
             "version-command": [
                 "/bin/sh", 
                 "-c", 
-                "/usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+                "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"
             ]
         }, 
         {

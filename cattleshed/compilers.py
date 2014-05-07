@@ -340,6 +340,18 @@ class Compilers(object):
                     "display-name":"clang HEAD",
                     "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
                     "initial-checked":["warning", "gnu++1y", "boost-1.55", "sprout"],
+                    "compile-command":[
+                        "/usr/local/llvm-head/bin/run-clang++.sh",
+                        "-oprog.exe",
+                        "-stdlib=libc++",
+                        "-I/usr/local/libcxx-head/include/c++/v1",
+                        "-L/usr/local/libcxx-head/lib",
+                        "-Wl,-rpath,/usr/local/libcxx-head/lib",
+                        "-nostdinc++",
+                        "-lpthread",
+                        "prog.cc"
+                    ],
+                    "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
                 },
                 "lsupc++": True,
             }),
