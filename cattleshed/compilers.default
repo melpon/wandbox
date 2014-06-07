@@ -2219,7 +2219,7 @@
             ], 
             "display-compile-command": "rustc prog.rs", 
             "compile-command": [
-                "/usr/local/rust-head/bin/rustc", 
+                "/usr/local/rust-head/bin/run-rustc.sh", 
                 "prog.rs"
             ], 
             "name": "rust-head", 
@@ -2229,7 +2229,7 @@
             "version-command": [
                 "/bin/sh", 
                 "-c", 
-                "/usr/local/rust-head/bin/rustc --version | head -1 | cut -d' ' -f2-"
+                "/usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"
             ], 
             "displayable": true, 
             "runtime-option-raw": true

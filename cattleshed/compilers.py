@@ -937,8 +937,8 @@ class Compilers(object):
             "display-compile-command":"rustc prog.rs",
             "language":"Rust",
             "runtime-option-raw":True,
-            "compile-command":["/usr/local/rust-head/bin/rustc", "prog.rs"],
-            "version-command":["/bin/sh", "-c", "/usr/local/rust-head/bin/rustc --version | head -1 | cut -d' ' -f2-"],
+            "compile-command":["/usr/local/rust-head/bin/run-rustc.sh", "prog.rs"],
+            "version-command":["/bin/sh", "-c", "/usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"],
         },{
             "name":"bash",
             "displayable":True,
