@@ -219,7 +219,11 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
     }
   };
 
-  src.onopen = function() {
+  src.onerror = function() {
+    finalize();
+  }
+
+  setTimeout(function() {
     var url = BASE_COMPILE_URL + '/' + post_id;
     $.post(url, {
       compiler: compiler_info.selected_compiler,
@@ -228,11 +232,8 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
       options: compiler_info.compile_options,
       'compiler-option-raw': compiler_info.compiler_option_raw,
       'runtime-option-raw': compiler_info.runtime_option_raw }, function() { });
-  };
+  }, 50);
 
-  src.onerror = function() {
-    finalize();
-  }
 }
 
 ResultWindow.prototype.set_code = function(compiler, code, stdin, outputs) {

@@ -19,6 +19,9 @@ getSourceR ident = do
     req <- Y.waiRequest
     res <- Y.liftIO $ EventSource.eventSourceAppChan chan req
 
+    Y.addHeader "Pragma" "no-chache"
+    Y.addHeader "Cache-Control" "no-chache"
+
     Y.sendWaiResponse res
 
 getEmptySourceR :: Handler ()
