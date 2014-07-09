@@ -490,6 +490,17 @@ class Compilers(object):
                 "after": {
                 },
             }),
+            ("mcs-2.6.7", {
+                "params": {
+                    "mono": "mono-2.6.7",
+                },
+                "after": {
+                    "display-name":"gmcs for Unity on iOS",
+                    "display-compile-command":"gmcs -out:prog.exe prog.cs",
+                    "compile-command":["/usr/local/mono-2.6.7/bin/gmcs-custom", "-out:prog.exe", "prog.cs"],
+                    "run-command":["/usr/local/mono-2.6.7/bin/mono-custom", "prog.exe"]
+                },
+            }),
         ]
         FORMATS = {
             "displayable":True,
