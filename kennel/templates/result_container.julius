@@ -9,13 +9,13 @@ function ResultContainer(id, settings_id) {
 
   $(this.settings_id).find('input.nowrap-output-window').change(function(e) {
     var content = $(self.id + ' .tab-content');
-    $(e.target).attr('checked') ? content.addClass('nowrap') : content.removeClass('nowrap')
+    $(e.target).prop('checked') ? content.addClass('nowrap') : content.removeClass('nowrap')
     if (self.result_changed)
         self.result_changed();
   });
   $(this.settings_id).find('input.expand-output-window').change(function(e) {
     var content = $(self.id + ' .tab-content');
-    $(e.target).attr('checked') ? content.addClass('expand') : content.removeClass('expand')
+    $(e.target).prop('checked') ? content.addClass('expand') : content.removeClass('expand')
     if (self.result_changed)
         self.result_changed();
   });
@@ -85,11 +85,7 @@ ResultContainer.prototype.set_code = function(compiler, code, stdin, outputs) {
 
 ResultContainer.prototype.expand = function(value) {
   var eexpand = $(this.settings_id).find('input.expand-output-window');
-  if (value) {
-    eexpand.attr('checked', '');
-  } else {
-    eexpand.removeAttr('checked');
-  }
+  eexpand.prop('checked', value);
   return eexpand;
 }
 
@@ -102,11 +98,7 @@ ResultContainer.prototype.serialize = function() {
 
 ResultContainer.prototype.deserialize = function(settings) {
   var enowrap = $(this.settings_id).find('input.nowrap-output-window');
-  if (settings.nowrap) {
-    enowrap.attr('checked', '');
-  } else {
-    enowrap.removeAttr('checked');
-  }
+  enowrap.prop('checked', settings.nowrap);
 
   var eexpand = this.expand(settings.expand);
 

@@ -138,7 +138,7 @@ Compiler.prototype.deserialize = function(settings) {
     var elem = $(this);
     var val = elem.val();
     var v = val in options_map;
-    v ? elem.attr('checked', '') : elem.removeAttr('checked');
+    elem.prop('checked', v);
   });
   this._compile_options().find('select > option').each(function() {
     var elem = $(this);

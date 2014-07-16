@@ -57,13 +57,13 @@ import Cache (cacheWith)
 
 resultContainer :: Widget
 resultContainer = do
-  Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+  Y.addScriptRemote "http://code.jquery.com/jquery-2.1.1.min.js"
   $(widgetFile "result_container")
 
 resultWindow :: Widget
 resultWindow = do
   Y.addScriptRemote "//platform.twitter.com/widgets.js"
-  Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+  Y.addScriptRemote "http://code.jquery.com/jquery-2.1.1.min.js"
   Y.addScript $ StaticR polyfills_EventSource_js
   $(widgetFile "result_window")
 
@@ -112,7 +112,7 @@ makeRootR mCodeOutputs = do
     app <- Y.getYesod
     Y.defaultLayout $ do
         Y.setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
-        Y.addScriptRemote "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+        Y.addScriptRemote "http://code.jquery.com/jquery-2.1.1.min.js"
         Y.addScriptRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"
         Y.addScript $ StaticR js_jquery_url_js
         Y.addScript $ StaticR js_jquery_cookie_js

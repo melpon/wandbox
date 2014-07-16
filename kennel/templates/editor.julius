@@ -45,7 +45,7 @@ Editor.prototype._initialize = function() {
   }).change();
   $(this.settings_id).find('input.use-legacy-editor').change(function() {
     var val = self.getValue();
-    var checked = $(this).attr('checked');
+    var checked = $(this).prop('checked');
     if (checked) {
       $(this.id + ' .smart-editor').hide();
       $(this.id + ' .legacy-editor').show();
@@ -66,7 +66,7 @@ Editor.prototype._initialize = function() {
   $(this.id + ' .legacy-editor').hide();
 
   $(this.settings_id).find('input.expand-editor').change(function(e) {
-    if ($(e.target).attr('checked')) {
+    if ($(e.target).prop('checked')) {
       $(this.id + ' .smart-editor').addClass('expand');
     } else {
       $(this.id + ' .smart-editor').removeClass('expand');
@@ -144,11 +144,7 @@ Editor.prototype.setLanguage = function(lang) {
 
 Editor.prototype.expand = function(value) {
   var eexpand = $(this.settings_id).find('input.expand-editor');
-  if (value) {
-    eexpand.attr('checked', '');
-  } else {
-    eexpand.removeAttr('checked');
-  }
+  eexpand.prop('checked', value);
   return eexpand;
 }
 
@@ -166,18 +162,10 @@ Editor.prototype.deserialize = function(settings) {
   ekey.val(settings.keybinding);
 
   var esmart = $(this.settings_id).find('input.use-legacy-editor');
-  if (settings.use_smart_editor) {
-    esmart.attr('checked', '');
-  } else {
-    esmart.removeAttr('checked');
-  }
+  esmart.prop('checked', settings.use_smart_editor);
 
   var eauto = $(this.settings_id).find('input.no-auto-indent');
-  if (settings.no_auto_indent) {
-    eauto.attr('checked', '');
-  } else {
-    eauto.removeAttr('checked');
-  }
+  eauto.prop('checked', settings.no_auto_indent);
 
   var eexpand = this.expand(settings.expand_editor);
 
