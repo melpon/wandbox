@@ -21,9 +21,9 @@ var BASE_COMPILE_URL = '@{EmptyCompileR}'
 function ResultWindow(id) {
   this.id = id;
   $(this.id).empty();
-  var permlink = $('<div class="row-fluid permlink"></div>');
-  var code = $('<div class="row-fluid code-window"></div>');
-  var output = $('<div class="row-fluid output-window"></div>');
+  var permlink = $('<div class="permlink"></div>');
+  var code = $('<div class="code-window"></div>');
+  var output = $('<div class="output-window"></div>');
   $(this.id).append(permlink);
   $(this.id).append(code);
   $(this.id).append(output);
@@ -42,7 +42,7 @@ ResultWindow.prototype._output_window = function() {
 ResultWindow.prototype.permlink = function(compiler_info, code, stdin, outputs) {
   var self = this;
 
-  var a = $('<a href="#" class="btn">Share This Code</a>')
+  var a = $('<a href="#" class="btn btn-default">Share This Code</a>')
     .appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();

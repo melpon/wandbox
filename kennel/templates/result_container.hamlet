@@ -1,12 +1,14 @@
-<div .row-fluid>
-  <div .span10>
+<div .row>
+  <div .col-md-10>
     <div #result-container>
       <div .tabbable .tabs-left>
         <ul .nav .nav-tabs>
-        <div .tab-content>
-  <div .span2>
+      <div .tab-content>
+  <div .col-md-2>
     <div #result-container-settings>
-      <label .checkbox>
-        <input .nowrap-output-window type="checkbox" value="nowrap-output-window">No Wrap
-      <label .checkbox>
-        <input .expand-output-window type="checkbox" value="expand-output-window">Expand
+      <div .checkbox>
+        <label>
+          <input .nowrap-output-window type="checkbox" value="nowrap-output-window">No Wrap
+      <div .checkbox>
+        <label>
+          <input .expand-output-window type="checkbox" value="expand-output-window">Expand

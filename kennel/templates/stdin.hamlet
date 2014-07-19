@@ -1,4 +1,4 @@
-<div .row-fluid>
-  <div .span10>
-    <label .row-fluid>input stdin:
+<div .row>
+  <div .col-md-10>
+    <label>input stdin:
     <div #stdin .stdin>

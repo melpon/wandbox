@@ -1,11 +1,16 @@
-<div .row-fluid>
-  <div .span12 #header>
-    <div .navbar>
-      <div .navbar-inner>
-        <a .brand href="@{RootR}">Wandbox
-        <ul .nav .pull-right>
+<div .row>
+  <div .col-md-12 #header>
+    <div .navbar .navbar-default>
+      <div .navbar-header>
+        <button .navbar-toggle type="button" data-toggle="collapse" data-target="#wandbox-navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        <a .navbar-brand href="@{RootR}">Wandbox
+      <div .collapse .navbar-collapse #wandbox-navbar-collapse>
+        <ul .nav .navbar-nav .navbar-right>
           <li>
-            <a  target="_blank" href="https://github.com/melpon/wandbox">Source
+            <a target="_blank" href="https://github.com/melpon/wandbox">Source
           <li .dropdown>
             <a .dropdown-toggle href="#" data-toggle="dropdown">Plugin <b class="caret"></b>
             <ul .dropdown-menu>
@@ -15,18 +20,22 @@
                 <a href="https://github.com/kosh04/emacs-wandbox" target="_blank">for Emacser
               <li>
                 <a href="https://gist.github.com/kikairoya/7544234" target="_blank">for xyzzy-er
-<div .row-fluid>
-  <div .span2>
+<div .row>
+  <div .col-md-2>
     ^{compiler}
-  <div .span10 #codepanel>
+  <div .col-md-10 #codepanel>
     ^{editor}
-    <div .row-fluid>
-      <div .row-fluid>
-        <p #compiler_name>
-      <div .row-fluid>
-        <p #compile_command>
-    <div .row-fluid>
-      <a href="compile" .btn #compile>Run (or Ctrl+Enter)
-      <img src="@{StaticR compiling_gif}" alt="Compiling" #compiling>
+    <div .row>
+      <div .col-md-12>
+        <div .row>
+          <div .col-md-12>
+            <p #compiler_name>
+        <div .row>
+          <div .col-md-12>
+            <p #compile_command>
+    <div .row>
+      <div .col-md-12>
+        <a href="compile" .btn .btn-default #compile>Run (or Ctrl+Enter)
+        <img src="@{StaticR compiling_gif}" alt="Compiling" #compiling>
     ^{resultContainer}
     ^{stdin}

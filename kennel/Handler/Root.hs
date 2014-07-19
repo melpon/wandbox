@@ -85,8 +85,8 @@ compiler = do
   where
     makeSwitch _ (CompilerSwitchSingle name flags default_ displayName) =
       [whamlet|
-        <div .row-fluid>
-          <label .checkbox>
+        <div .checkbox>
+          <label>
             $if default_
               <input type="checkbox" value="#{name}" data-flags="#{flags}" checked>#{displayName}
             $else
@@ -95,9 +95,10 @@ compiler = do
     makeSwitch compilerName (CompilerSwitchSelect default_ options) = do
       let groupName = compilerName `T.append` default_
       [whamlet|
-        <select .span12>
-          $forall option <- options
-            ^{makeSwitchSelectOption groupName default_ option}
+        <div .checkbox>
+          <select .col-md-12>
+            $forall option <- options
+              ^{makeSwitchSelectOption groupName default_ option}
       |]
     makeSwitchSelectOption groupName default_ (CompilerSwitchSelectOption name displayName displayFlags) =
       [whamlet|
@@ -113,7 +114,7 @@ makeRootR mCodeOutputs = do
     Y.defaultLayout $ do
         Y.setTitle "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ"
         Y.addScriptRemote "http://code.jquery.com/jquery-2.1.1.min.js"
-        Y.addScriptRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"
+        Y.addScriptRemote "//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
         Y.addScript $ StaticR js_jquery_url_js
         Y.addScript $ StaticR js_jquery_cookie_js
         Y.addScript $ StaticR codemirror_lib_codemirror_js
@@ -136,7 +137,7 @@ makeRootR mCodeOutputs = do
         Y.addScript $ StaticR codemirror_mode_coffeescript_coffeescript_js
         Y.addScript $ StaticR codemirror_keymap_vim_js
         Y.addScript $ StaticR codemirror_keymap_emacs_js
-        Y.addStylesheetRemote "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+        Y.addStylesheetRemote "//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
         resultWindow
         $(widgetFile "homepage")
   where

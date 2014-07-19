@@ -1,20 +1,23 @@
-<div .row-fluid>
-  <label>choose compiler:
-  <div .span12 .input-append>
-    <input .span9 #typeahead-search type="text" placeholder="Search">
-    <button .btn #typeahead-clear type="button">×
-  <select .span12 size=#{length compilerInfos} #compiler>
-    $forall ver <- map ciVersion compilerInfos
-      <option value="#{verName ver}" data-command="#{verCompileCommand ver}" data-language="#{verLanguage ver}" data-display-name="#{verDisplayName ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
-<div .row-fluid>
-  <div #compile-options>
-    $forall info <- compilerInfos
-      <div data-compiler="#{verName $ ciVersion info}">
-        $forall sw <- ciSwitches info
-          ^{makeSwitch (verName (ciVersion info)) sw}
-        $if verCompilerOptionRaw $ ciVersion info
-          <label>extra options:
-          <div .span12 .option-raw .compiler-option-raw>
-        $if verRuntimeOptionRaw $ ciVersion info
-          <label>extra options:
-          <div .span12 .option-raw .runtime-option-raw>
+<div .row>
+  <div .col-md-12>
+    <label>choose compiler:
+    <div .input-group>
+      <input .form-control #typeahead-search type="text" placeholder="Search">
+      <span .input-group-btn.>
+        <button .btn .btn-default #typeahead-clear type="button">×
+    <select .wandbox-select size=#{length compilerInfos} #compiler>
+      $forall ver <- map ciVersion compilerInfos
+        <option value="#{verName ver}" data-command="#{verCompileCommand ver}" data-language="#{verLanguage ver}" data-display-name="#{verDisplayName ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
+<div .row>
+  <div .col-md-12>
+    <div #compile-options>
+      $forall info <- compilerInfos
+        <div data-compiler="#{verName $ ciVersion info}">
+          $forall sw <- ciSwitches info
+            ^{makeSwitch (verName (ciVersion info)) sw}
+          $if verCompilerOptionRaw $ ciVersion info
+            <label>extra options:
+            <div .option-raw .compiler-option-raw>
+          $if verRuntimeOptionRaw $ ciVersion info
+            <label>extra options:
+            <div .option-raw .runtime-option-raw>
