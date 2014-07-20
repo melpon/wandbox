@@ -450,6 +450,12 @@ class Compilers(object):
                     "display-name":"ghc HEAD",
                 },
             }),
+            ("ghc-7.8.3", {
+                "params": {
+                },
+                "after": {
+                },
+            }),
             ("ghc-7.6.3", {
                 "params": {
                 },

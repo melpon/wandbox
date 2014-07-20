@@ -1652,6 +1652,35 @@
                 "haskell-optimize"
             ], 
             "compile-command": [
+                "/usr/local/ghc-7.8.3/bin/ghc", 
+                "-o", 
+                "prog.exe", 
+                "prog.hs"
+            ], 
+            "name": "ghc-7.8.3", 
+            "language": "Haskell", 
+            "output-file": "prog.hs", 
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/usr/local/ghc-7.8.3/bin/ghc", 
+                "--numeric-version"
+            ], 
+            "run-command": [
+                "./prog.exe"
+            ], 
+            "display-compile-command": "ghc prog.hs", 
+            "initial-checked": [
+                "haskell-warning"
+            ], 
+            "displayable": true, 
+            "display-name": "ghc"
+        }, 
+        {
+            "switches": [
+                "haskell-warning", 
+                "haskell-optimize"
+            ], 
+            "compile-command": [
                 "/usr/local/ghc-7.6.3/bin/ghc", 
                 "-o", 
                 "prog.exe", 
