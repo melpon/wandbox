@@ -6,6 +6,9 @@
 #compile-options > .selected {
   display: block;
 }
+#compiler option {
+  padding-left: 20px;
+}
 .option-raw .CodeMirror {
   border: 1px solid #888;
   min-height: 50px;
@@ -14,4 +17,11 @@
 .option-raw .CodeMirror-scroll {
   overflow-y: hidden;
   overflow-x: auto;
+}
+.select2-results {
+  min-height: 300px;
+  max-height: none;
+  overflow-y: hidden;
+  overflow-x: auto;
+  height: auto;
 }

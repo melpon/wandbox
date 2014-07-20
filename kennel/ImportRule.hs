@@ -33,6 +33,7 @@ import qualified Data.Conduit                           as Conduit
 import qualified Data.Conduit.Binary                    as ConduitB
 import qualified Data.Conduit.List                      as ConduitL
 import qualified Data.Default                           as Default
+import qualified Data.Function                          as Func
 import qualified Data.HashMap.Strict                    as HMS
 import qualified Data.IORef                             as IORef
 import qualified Data.List                              as List
