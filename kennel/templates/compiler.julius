@@ -60,7 +60,7 @@ Compiler.prototype.get_selected_compiler = function() {
 }
 
 Compiler.prototype.get_selected_compiler_element = function() {
-  return $(this.compiler_id + ' option:selected');
+  return $(this.compiler_id + ' > option:selected');
 }
 
 Compiler.prototype.set_compiler = function(compiler) {
@@ -140,7 +140,7 @@ Compiler.prototype.deserialize = function(settings) {
     var v = val in options_map;
     elem.prop('checked', v);
   });
-  this._compile_options().find('select option').each(function() {
+  this._compile_options().find('select > option').each(function() {
     var elem = $(this);
     var val = elem.val();
     var v = val in options_map;
@@ -165,7 +165,6 @@ $(function() {
 
   $.cookie.json = true;
 
-  /*
   var matchedOption = function(option, searchText) {
     var matched = function(str) {
       return str.toLowerCase().indexOf(searchText.toLowerCase()) >= 0;
@@ -209,6 +208,4 @@ $(function() {
     $('#typeahead-search').val('');
     $('#typeahead-search').change();
   });
-  */
-  $('#compiler').select2();
 });

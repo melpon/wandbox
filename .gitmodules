@@ -7,6 +7,3 @@
 [submodule "submodules/jquery-cookie"]
 	path = submodules/jquery-cookie
 	url = https://github.com/carhartl/jquery-cookie.git
-[submodule "submodules/select2"]
-	path = submodules/select2
-	url = https://github.com/ivaynberg/select2.git

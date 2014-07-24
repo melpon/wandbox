@@ -134,10 +134,6 @@ $(function() {
 
   update_compile_command(compiler);
 
-  if (USING_PERMLINK) {
-    editor.focus();
-  } else {
-    $('#compiler').select2('open');
-  }
+  editor.focus();
 });
 

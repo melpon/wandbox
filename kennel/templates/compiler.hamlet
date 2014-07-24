@@ -1,11 +1,13 @@
 <div .row>
   <div .col-md-12>
     <label>choose compiler:
-    <select .wandbox-select size=#{length compilerInfos + length groupedCompilerInfos} #compiler>
-      $forall infos <- groupedCompilerInfos
-        <optgroup label="#{verLanguage (ciVersion (List.head infos))}">
-          $forall ver <- map ciVersion infos
-            <option value="#{verName ver}" data-command="#{verCompileCommand ver}" data-language="#{verLanguage ver}" data-display-name="#{verDisplayName ver}">#{verDisplayName ver} #{verVersion ver}
+    <div .input-group>
+      <input .form-control #typeahead-search type="text" placeholder="Search">
+      <span .input-group-btn.>
+        <button .btn .btn-default #typeahead-clear type="button">×
+    <select .wandbox-select size=#{length compilerInfos} #compiler>
+      $forall ver <- map ciVersion compilerInfos
+        <option value="#{verName ver}" data-command="#{verCompileCommand ver}" data-language="#{verLanguage ver}" data-display-name="#{verDisplayName ver}">[#{verLanguage ver}] #{verDisplayName ver} #{verVersion ver}
 <div .row>
   <div .col-md-12>
     <div #compile-options>

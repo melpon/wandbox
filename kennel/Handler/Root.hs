@@ -6,8 +6,6 @@ module Handler.Root (
 import Import
 
 import qualified Data.Text                              as T
-import qualified Data.List                              as List
-import qualified Data.Function                          as Func
 import qualified Codec.Binary.Url                       as Url
 import qualified Data.Text.Encoding                     as TE
 import qualified Data.ByteString                        as BS
@@ -22,8 +20,6 @@ import Yesod (whamlet, shamlet)
 import Model (Code(..), LinkOutput(..))
 import Settings.StaticFiles (
     polyfills_EventSource_js,
-    select2_select2_js,
-    select2_select2_css,
     js_jquery_url_js,
     js_jquery_cookie_js,
     codemirror_lib_codemirror_js,
@@ -85,7 +81,6 @@ compiler = do
   port <- Y.handlerToWidget $ extraVMPort <$> getExtra
   cm <- getWidgetCache <$> Y.getYesod
   compilerInfos <- Y.liftIO $ cacheWith (Just 3600) "compilerInfos" (getCompilerInfos host port) cm
-  let groupedCompilerInfos = List.groupBy ((==) `Func.on` (verLanguage . ciVersion)) compilerInfos
   $(widgetFile "compiler")
   where
     makeSwitch _ (CompilerSwitchSingle name flags default_ displayName) =
@@ -143,8 +138,6 @@ makeRootR mCodeOutputs = do
         Y.addScript $ StaticR codemirror_keymap_vim_js
         Y.addScript $ StaticR codemirror_keymap_emacs_js
         Y.addStylesheetRemote "//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
-        Y.addScript $ StaticR select2_select2_js
-        Y.addStylesheet $ StaticR select2_select2_css
         resultWindow
         $(widgetFile "homepage")
   where
