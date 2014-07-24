@@ -955,7 +955,7 @@ class Compilers(object):
             "language":"Rust",
             "runtime-option-raw":True,
             "compile-command":["/usr/local/rust-head/bin/run-rustc.sh", "prog.rs"],
-            "version-command":["/bin/sh", "-c", "/usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"],
+            "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/rust-head/lib:$LD_LIBRARY_PATH /usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"],
         },{
             "name":"bash",
             "displayable":True,

@@ -2285,7 +2285,7 @@
             "version-command": [
                 "/bin/sh", 
                 "-c", 
-                "/usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"
+                "LD_LIBRARY_PATH=/usr/local/rust-head/lib:$LD_LIBRARY_PATH /usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"
             ], 
             "displayable": true, 
             "runtime-option-raw": true
