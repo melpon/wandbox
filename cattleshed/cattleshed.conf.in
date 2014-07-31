@@ -2,7 +2,7 @@
  "system":{
   "listen-port":2012,
   "max-connections":32,
-  "basedir":"/tmp/wandbox",
+  "basedir":"/var/log/wandbox/wandbox",
  },
  "jail":{
   "":{
