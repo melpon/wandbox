@@ -453,12 +453,19 @@ namespace wandbox {
 			   src_filename(target_compiler.output_file),
 			   file(std::make_shared<asio::posix::stream_descriptor>(*this->aio)),
 			   sigs(move(sigs)),
-			   workdir(make_tmpdir("wandboxXXXXXX")),
+			   unique_name(),
+			   workdir(),
 			   received(move(received)),
 			   aiocb(std::make_shared<struct aiocb>()),
 			   target_compiler(target_compiler),
 			   semaphore(move(semaphore))
 		{
+			while (unique_name.empty() || !workdir) try {
+				unique_name = mkdtemp("wandboxXXXXXX");
+				workdir = opendir(unique_name);
+			} catch (std::system_error &e) {
+				if (e.code().value() != ENOTDIR) throw;
+			}
 		}
 		program_writer(const program_writer &) = default;
 		program_writer &operator =(const program_writer &) = default;
@@ -466,26 +473,47 @@ namespace wandbox {
 		program_writer &operator =(program_writer &&) = default;
 		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
-				::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
-				while (true) {
-					mkdirat(workdir, "store", 0700);
-					aiocb->aio_fildes = ::openat(::dirfd(workdir.get()), ("store/" + src_filename).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
+				{
+					::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
+					while (true) {
+						mkdirat(workdir, "store", 0700);
+						aiocb->aio_fildes = ::openat(::dirfd(workdir.get()), ("store/" + src_filename).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
+						if (aiocb->aio_fildes == -1) {
+							if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
+							else yield break;
+						} else {
+							break;
+						}
+					}
+					aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(src_text->c_str()));
+					aiocb->aio_nbytes = src_text->length();
+					aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+					aiocb->aio_sigevent.sigev_signo = SIGHUP;
+					::aio_write(aiocb.get());
+					do {
+						yield sigs->async_wait(move(*this));
+					} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
+					::close(aiocb->aio_fildes);
+				} {
+					::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
+					{
+						auto d = opendir(config.system.storedir);
+						aiocb->aio_fildes = ::openat(::dirfd(d.get()), (unique_name + "_" + src_filename).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
+					}
 					if (aiocb->aio_fildes == -1) {
-						if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
-						else yield break;
+						std::clog << "[" << sock.get() << "]" << "failed to write run log '" << unique_name << "' [" << this << "]" << std::endl;
 					} else {
-						break;
+						aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(src_text->c_str()));
+						aiocb->aio_nbytes = src_text->length();
+						aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+						aiocb->aio_sigevent.sigev_signo = SIGHUP;
+						::aio_write(aiocb.get());
+						do {
+							yield sigs->async_wait(move(*this));
+						} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
+						::close(aiocb->aio_fildes);
 					}
 				}
-				aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(src_text->c_str()));
-				aiocb->aio_nbytes = src_text->length();
-				aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
-				aiocb->aio_sigevent.sigev_signo = SIGHUP;
-				::aio_write(aiocb.get());
-				do {
-					yield sigs->async_wait(move(*this));
-				} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
-				::close(aiocb->aio_fildes);
 				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir), move(target_compiler), move(semaphore))();
 			}
 		}
@@ -495,6 +523,7 @@ namespace wandbox {
 		std::string src_filename;
 		std::shared_ptr<asio::posix::stream_descriptor> file;
 		std::shared_ptr<asio::signal_set> sigs;
+		std::string unique_name;
 		std::shared_ptr<DIR> workdir;
 		std::unordered_map<std::string, std::string> received;
 		std::shared_ptr<struct aiocb> aiocb;
@@ -667,6 +696,11 @@ namespace wandbox {
 			std::clog << "start listening at " << this->ep << std::endl;
 			try {
 				mkdir(config.system.basedir, 0700);
+			} catch (std::system_error &e) {
+				if (e.code().value() != EEXIST) throw;
+			}
+			try {
+				mkdir(config.system.storedir, 0700);
 			} catch (std::system_error &e) {
 				if (e.code().value() != EEXIST) throw;
 			}

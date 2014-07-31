@@ -47,6 +47,7 @@ namespace wandbox {
 		int listen_port;
 		int max_connections;
 		std::string basedir;
+		std::string storedir;
 	};
 
 	struct jail_config {

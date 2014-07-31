@@ -198,7 +198,7 @@ namespace cfg {
 	system_config load_system_config(const cfg::value &values) {
 		using namespace detail;
 		const auto &o = boost::get<cfg::object>(boost::get<cfg::object>(values).at("system"));
-		return { get_int(o, "listen-port"), get_int(o, "max-connections"), get_str(o, "basedir") };
+		return { get_int(o, "listen-port"), get_int(o, "max-connections"), get_str(o, "basedir"), get_str(o, "storedir") };
 	}
 
 	 std::unordered_map<std::string, jail_config> load_jail_config(const cfg::value &values) {

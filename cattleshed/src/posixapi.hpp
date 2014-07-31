@@ -209,14 +209,5 @@ namespace wandbox {
 			std::terminate();
 		}
 	}
-
-	inline std::shared_ptr<DIR> make_tmpdir(const std::string &seed) {
-		while (true) try {
-			return opendir(mkdtemp(seed));
-		} catch (std::system_error &e) {
-			if (e.code().value() != ENOTDIR) throw;
-		}
-	}
-
 }
 #endif
