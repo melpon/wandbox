@@ -91,8 +91,7 @@ POST /compile.json
 
 Compile posted code.
 
-This API accepts "application/json" or
-"application/x-www-form-urlencoded" in a "Content-Type" header.
+This API accepts "application/json" in a "Content-Type" header.
 
 Parameter
 ^^^^^^^^^
