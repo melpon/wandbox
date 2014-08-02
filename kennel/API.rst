@@ -109,6 +109,8 @@ compiler-option-raw [String] (optional, default is a empty string)
   Compile-time any additional options joined by line-break.
 runtime-option-raw [String] (optional, default is a empty string)
   Run-time any additional options joined by line-break.
+save [Bool] (optional, default is false)
+  Generate permanent link if true.
 
 Result
 ^^^^^^
@@ -129,6 +131,10 @@ program_error
   stderr at runtime
 program_message
   merged messages program_output and program_error
+permlink (only ``save`` is true)
+  ``permlink`` is you can pass to `GET /permlink/:link`_.
+url (only ``save`` is true)
+  URL to display on browser.
 
 Sample
 ^^^^^^
@@ -165,9 +171,9 @@ Result
 ^^^^^^
 
 parameter
-  Same as `POST /compile.json`_ Parameter with ``created-at`` is a compiled time formatted by ISO 8601.
+  Same as `POST /compile.json`_ Parameter with ``created-at`` is a compiled time formatted by ISO 8601, and without ``save``.
 result
-  Same as `POST /compile.json`_ Result.
+  Same as `POST /compile.json`_ Result without ``permlink`` and ``url``.
 
 Plugin
 ------------

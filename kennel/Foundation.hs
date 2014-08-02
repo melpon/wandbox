@@ -31,7 +31,7 @@ import ChanMap (ChanMap)
 import Cache (Cache)
 import Settings (PersistConf, widgetFile, Extra(..), staticDir, staticRoot)
 import Settings.Development (development)
-import Api (CompilerInfo)
+import ApiTypes (CompilerInfo)
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application

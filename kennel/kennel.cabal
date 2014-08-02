@@ -28,6 +28,7 @@ library
                      ChanMap
                      Cache
                      Api
+                     ApiTypes
                      VM.Protocol
                      VM.Conduit
                      VM.QuotedPrintable

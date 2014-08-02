@@ -6,7 +6,9 @@ module Api (
 , getCompilerInfos
 , runCode
 , sinkEventSource
+, sinkProtocols
 , sinkJson
+, saveForPermlink
 , getPermlink
 ) where
 
@@ -17,10 +19,10 @@ import qualified Codec.Binary.Url                       as Url
 import qualified Control.Exception                      as Exc
 import qualified Control.Monad                          as Monad
 import qualified Data.Aeson                             as Aeson
-import qualified Data.Aeson.Types                       as AesonTypes
 import qualified Data.ByteString                        as BS
 import qualified Data.ByteString.Char8                  as BSC
 import qualified Data.ByteString.Lazy                   as BSL
+import qualified Data.Char                              as Char
 import qualified Data.Conduit                           as Conduit
 import qualified Data.Conduit.List                      as ConduitL
 import qualified Data.HashMap.Strict                    as HMS
@@ -33,132 +35,18 @@ import qualified Network                                as N
 import qualified Network.Wai.EventSource                as EventSource
 import qualified System.IO                              as I
 import qualified System.Locale                          as Locale
+import qualified System.Random                          as Random
 import qualified Yesod                                  as Y
 
 import Data.Conduit (($$), ($=))
-import Data.Aeson ((.:), (.=))
+import Data.Aeson ((.=))
 
-import Model (Code(..), LinkOutput(..))
+import Model (Code(..), LinkOutput(..), Link(..))
 import VM.Protocol (Protocol(..), ProtocolSpecifier(..))
 import VM.Conduit (connectVM, sendVM, receiveVM)
+import Foundation (Handler)
 
-data CompilerSwitchSelectOption = CompilerSwitchSelectOption
-  { swmoName :: T.Text
-  , swmoDisplayName :: T.Text
-  , swmoDisplayFlags :: T.Text
-  } deriving (Show)
-instance Aeson.FromJSON CompilerSwitchSelectOption where
-  parseJSON (Aeson.Object v) =
-    CompilerSwitchSelectOption <$>
-      v .: "name" <*>
-      v .: "display-name" <*>
-      v .: "display-flags"
-  parseJSON _ = Monad.mzero
-instance Aeson.ToJSON CompilerSwitchSelectOption where
-  toJSON (CompilerSwitchSelectOption name displayName displayFlags) =
-    Aeson.object
-      [ "name" .= name
-      , "display-name" .= displayName
-      , "display-flags" .= displayFlags
-      ]
-
-data CompilerSwitch =
-  CompilerSwitchSingle
-  { swsName :: T.Text
-  , swsFlags :: T.Text
-  , swsDefault :: Bool
-  , swsDisplayName :: T.Text
-  } |
-  CompilerSwitchSelect
-  { swmDefault :: T.Text
-  , swmOptions :: [CompilerSwitchSelectOption]
-  }
-  deriving (Show)
-
-instance Aeson.FromJSON CompilerSwitch where
-  parseJSON (Aeson.Object v) = do
-    typ <- v .: "type" :: AesonTypes.Parser String
-    if typ == "single"
-      then
-        CompilerSwitchSingle <$>
-          v .: "name" <*>
-          v .: "display-flags" <*>
-          v .: "default" <*>
-          v .: "display-name"
-      else
-        CompilerSwitchSelect <$>
-          v .: "default" <*>
-          v .: "options"
-  parseJSON _ = Monad.mzero
-instance Aeson.ToJSON CompilerSwitch where
-  toJSON (CompilerSwitchSingle name flags def displayName) =
-    Aeson.object
-      [ "name" .= name
-      , "display-flags" .= flags
-      , "default" .= def
-      , "display-name" .= displayName
-      ]
-  toJSON (CompilerSwitchSelect def options) =
-    Aeson.object
-      [ "default" .= def
-      , "options" .= options
-      ]
-
-data CompilerVersion = CompilerVersion
-  { verName :: T.Text
-  , verLanguage :: T.Text
-  , verDisplayName :: T.Text
-  , verVersion :: T.Text
-  , verCompileCommand :: T.Text
-  , verCompilerOptionRaw :: Bool
-  , verRuntimeOptionRaw :: Bool
-  } deriving (Show)
-instance Aeson.FromJSON CompilerVersion where
-  parseJSON (Aeson.Object v) =
-    CompilerVersion <$>
-      v .: "name" <*>
-      v .: "language" <*>
-      v .: "display-name" <*>
-      v .: "version" <*>
-      v .: "display-compile-command" <*>
-      v .: "compiler-option-raw" <*>
-      v .: "runtime-option-raw"
-  parseJSON _ = Monad.mzero
-instance Aeson.ToJSON CompilerVersion where
-  toJSON (CompilerVersion name language displayName version compileCommand compilerOptionRaw runtimeOptionRaw) =
-    Aeson.object
-      [ "name" .= name
-      , "language" .= language
-      , "display-name" .= displayName
-      , "version" .= version
-      , "display-compile-command" .= compileCommand
-      , "compiler-option-raw" .= compilerOptionRaw
-      , "runtime-option-raw" .= runtimeOptionRaw
-      ]
-
-data CompilerInfo = CompilerInfo
-  { ciVersion :: CompilerVersion
-  , ciSwitches :: [CompilerSwitch]
-  } deriving (Show)
-
-instance Aeson.FromJSON CompilerInfo where
-  parseJSON json@(Aeson.Object v) = do
-    version <- Aeson.parseJSON json :: AesonTypes.Parser CompilerVersion
-    switches <- Monad.join (Aeson.parseJSON <$> (v .: "switches")) :: AesonTypes.Parser [CompilerSwitch]
-    return $ CompilerInfo version switches
-  parseJSON _ = Monad.mzero
-instance Aeson.ToJSON CompilerInfo where
-  toJSON (CompilerInfo version switch) =
-    Aeson.object
-      [ "name" .= verName version
-      , "language" .= verLanguage version
-      , "display-name" .= verDisplayName version
-      , "version" .= verVersion version
-      , "display-compile-command" .= verCompileCommand version
-      , "compiler-option-raw" .= verCompilerOptionRaw version
-      , "runtime-option-raw" .= verRuntimeOptionRaw version
-      , "switches" .= switch
-      ]
+import ApiTypes
 
 getCompilerInfos :: N.HostName -> N.PortID -> IO [CompilerInfo]
 getCompilerInfos host port = do
@@ -217,6 +105,11 @@ sinkEventSource writeChan_ = do
       Y.liftIO $ writeChan_ $ EventSource.ServerEvent Nothing Nothing [Blaze.fromByteString $ urlEncode spec contents]
       sinkEventSource writeChan_
 
+sinkProtocols :: Conduit.MonadResource m => Conduit.Sink (Either String Protocol) m [Either String Protocol]
+sinkProtocols = do
+    protocols <- ConduitL.consume
+    return protocols
+
 sinkJson :: Conduit.MonadResource m => Conduit.Sink (Either String Protocol) m Aeson.Value
 sinkJson = do
     xs <- sinkJson' []
@@ -269,6 +162,30 @@ codeToJson code =
 
 formatISO8601 :: Clock.UTCTime -> String
 formatISO8601 t = Time.formatTime Locale.defaultTimeLocale "%FT%T%QZ" t
+
+saveForPermlink :: Code -> [Protocol] -> Handler T.Text
+saveForPermlink code protocols = do
+    linkName <- Y.liftIO $ T.pack <$> (Monad.replicateM 16 $ Char.chr <$> randomRAny (0,255) isLinkCode)
+    Y.runDB $ do
+        codeId <- Y.insert code
+        let link = Link linkName codeId
+        linkId <- Y.insert link
+        let outputs = Maybe.mapMaybe (toOutput linkId) $ zip [0..] protocols
+        _ <- Y.insertMany outputs
+        return ()
+    return linkName
+  where
+    toOutput linkId (order, (Protocol spec contents)) = Just $ LinkOutput linkId order (T.pack $ show spec) contents
+    toOutput _ _ = Nothing
+    randomRAny range p = do
+      v <- Random.randomRIO range
+      if p v then return v
+                else randomRAny range p
+    isLinkCode n | 48 <= n && n <= 57 = True -- 0-9
+    isLinkCode n | 65 <= n && n <= 90 = True -- A-Z
+    isLinkCode n | 97 <= n && n <= 122 = True -- a-z
+    isLinkCode _ = False
+
 
 getPermlink :: Conduit.MonadResource m => Code -> [LinkOutput] -> m Aeson.Value
 getPermlink code outputs = do
