@@ -697,12 +697,18 @@ namespace wandbox {
 			try {
 				mkdir(config.system.basedir, 0700);
 			} catch (std::system_error &e) {
-				if (e.code().value() != EEXIST) throw;
+				if (e.code().value() != EEXIST) {
+					std::clog << "failed to create basedir, check permission." << std::endl;
+					throw;
+				}
 			}
 			try {
 				mkdir(config.system.storedir, 0700);
 			} catch (std::system_error &e) {
-				if (e.code().value() != EEXIST) throw;
+				if (e.code().value() != EEXIST) {
+					std::clog << "failed to create storedir, check permission." << std::endl;
+					throw;
+				}
 			}
 			basedir = opendir(config.system.basedir);
 			chdir(basedir);
@@ -754,7 +760,12 @@ int main(int argc, char **argv) {
 				std::clog.rdbuf(logbuf.get());
 			}
 		}
-		config = load_config(config_files);
+		try {
+			config = load_config(config_files);
+		} catch (...) {
+			std::clog << "failed to read config file(s), check existence or syntax." << std::endl;
+			throw;
+		}
 	}
 	auto aio = std::make_shared<asio::io_service>();
 	listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);
