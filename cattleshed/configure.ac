@@ -59,23 +59,11 @@ AC_ARG_ENABLE([install-setcap],
               [if test "x$enableval" = xno; then setcap_cmd=true; fi])
 AC_SUBST([setcap_cmd])
 
-# Checks for libraries.
-AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_LIB([rt], [aio_write])
-AC_CHECK_LIB([cap], [cap_set_proc])
+AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([missing pthread function])])
+AC_CHECK_LIB([rt], [aio_write], [], [AC_MSG_ERROR([missing aio function])])
+AC_CHECK_LIB([cap], [cap_set_proc], [], [AC_MSG_ERROR([missing capability function])])
 
-# Checks for header files.
-AC_CHECK_HEADERS([fcntl.h stdlib.h sys/time.h syslog.h unistd.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_C_INLINE
-AC_TYPE_MODE_T
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-
-# Checks for library functions.
-AC_FUNC_FORK
-AC_CHECK_FUNCS([dup2 fchdir getcwd mkdir realpath strerror])
+AC_CHECK_HEADER([sys/capability.h], [], [AC_MSG_ERROR([missing libcap-dev])])
 
 AC_CONFIG_FILES([Makefile src/Makefile test/Makefile scripts/Makefile])
 AC_OUTPUT
