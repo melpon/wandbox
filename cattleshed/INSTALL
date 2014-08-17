@@ -1,0 +1,42 @@
+* Prerequires
+
+ - gcc >= 4.6
+ - boost >= 1.47
+ - libcap-dev
+ - linux >= 3.2
+
+ cattleshed can run on linux only.
+
+
+* Build Cattleshed
+
+ ~$ cd wandbox/cattleshed
+ cattleshed$ ./configure --prefix=$PREFIX --with-boost=$BOOSTDIR
+ cattleshed$ make
+ cattleshed$ sudo make install
+
+ For more configuration options, see "./configure --help".
+ You may need to run "autoreconf -i" before run "./configure" depending to
+ versions of your autotools.
+ cattleshed uses capabilities(7) and embed aux program path into binary so 
+ cannot run without install.
+
+
+* Prepare host environment
+
+ - Create jail's working directory written in $PREFIX/etc/cattleshed.conf.
+ - Create ran log directory written in $PREFIX/etc/cattleshed.conf.
+ - Install compilers/runtimes/interpreters you want to provide via cattleshed.
+ - Edit $PREFIX/etc/cattleshed.conf.d/compilers.default for your providing
+   compilers/runtimes/interpreters.
+ -- All files stored in cattleshed.conf.d are automatically globbed by
+    cattleshed, so you can remove compilers.default and provide your
+    configuration file split by Languages, Versions, etc.
+
+
+* Run
+
+ Run $PREFIX/bin/cattleshed as a user permitted to rwx to jails' working
+ directory and ran log directory except root.
+
+ DO NOT RUN CATTLESHED AS ROOT OR ALL YOUR SYSTEM WILL BELONG TO THE CRACKER.

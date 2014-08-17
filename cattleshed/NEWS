@@ -1,0 +1,2 @@
+* Sun Aug 17 2014 (+0900)
+ - import configure script and need not to run autoreconf
