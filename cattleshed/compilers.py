@@ -876,6 +876,44 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_scala(self):
+        NAMES = [
+           ("scala-2.12.x", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"scala-2.12.x HEAD",
+                },
+           }),
+           ("scala-2.11.x", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"scala-2.11.x HEAD",
+                },
+           }),
+           ("scala-2.11.2", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.scala",
+            "run-command":["/bin/bash", "/usr/local/{name}/bin/run.sh"],
+            "display-name":"scala",
+            "display-compile-command":"scala prog.scala",
+            "jail-name": "jvm",
+            "language":"Scala",
+            "runtime-option-raw":True,
+            "compile-command":["/usr/local/{name}/bin/scalac", "prog.scala"],
+            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/scala -version 2>&1 | cut -d' ' -f5"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-c",
@@ -1076,6 +1114,7 @@ class Compilers(object):
             self.make_spidermonkey() +
             self.make_coffee_script() +
             self.make_sqlite() +
+            self.make_scala() +
             self.make_default2()
         )
 
