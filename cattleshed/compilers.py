@@ -57,6 +57,22 @@ class Switches(object):
                 "flags":"-std=gnu++1y",
                 "display-name":"C++1y(GNU)",
             }),
+            ("c++14", {
+                "flags":["-std=c++14", "-pedantic"],
+                "display-name":"C++14",
+            }),
+            ("gnu++14", {
+                "flags":"-std=gnu++14",
+                "display-name":"C++14(GNU)",
+            }),
+            ("c++1z", {
+                "flags":["-std=c++1z", "-pedantic"],
+                "display-name":"C++1z",
+            }),
+            ("gnu++1z", {
+                "flags":"-std=gnu++1z",
+                "display-name":"C++1z(GNU)",
+            }),
         ]
         return self.resolve_conflicts(pairs)
 
@@ -350,8 +366,8 @@ class Compilers(object):
                 },
                 "after": {
                     "display-name":"clang HEAD",
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-                    "initial-checked":["warning", "gnu++1y", "boost-1.56", "sprout"],
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"],
+                    "initial-checked":["warning", "gnu++1z", "boost-1.56", "sprout"],
                     "compile-command":[
                         "/usr/local/llvm-head/bin/run-clang++.sh",
                         "-oprog.exe",
@@ -364,6 +380,29 @@ class Compilers(object):
                         "prog.cc"
                     ],
                     "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
+                },
+                "lsupc++": True,
+            }),
+            ("clang-3.5", {
+                "params": {
+                    "llvm": "llvm-3.5",
+                    "libcxx": "libcxx-3.5",
+                },
+                "after": {
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"],
+                    "initial-checked":["warning", "gnu++1z", "boost-1.56", "sprout"],
+                    "compile-command":[
+                        "/usr/local/llvm-3.5/bin/run-clang++.sh",
+                        "-oprog.exe",
+                        "-stdlib=libc++",
+                        "-I/usr/local/libcxx-3.5/include/c++/v1",
+                        "-L/usr/local/libcxx-3.5/lib",
+                        "-Wl,-rpath,/usr/local/libcxx-3.5/lib",
+                        "-nostdinc++",
+                        "-lpthread",
+                        "prog.cc"
+                    ],
+                    "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-3.5/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
                 },
                 "lsupc++": True,
             }),

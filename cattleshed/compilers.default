@@ -105,6 +105,27 @@
             ], 
             "display-flags": "-I/usr/local/boost-1.48.0/include"
         }, 
+        "gnu++14": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
+            ], 
+            "display-name": "C++14(GNU)", 
+            "flags": "-std=gnu++14"
+        }, 
         "warning": {
             "display-name": "Warnings", 
             "flags": [
@@ -124,7 +145,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++11", 
             "flags": [
@@ -144,7 +169,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++11(GNU)", 
             "flags": "-std=gnu++11"
@@ -161,7 +190,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++0x", 
             "flags": [
@@ -238,6 +271,27 @@
             "flags": [], 
             "display-flags": ""
         }, 
+        "gnu++1z": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
+            ], 
+            "display-name": "C++1z(GNU)", 
+            "flags": "-std=gnu++1z"
+        }, 
         "c++98": {
             "conflicts": [
                 "c89", 
@@ -250,7 +304,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++03", 
             "flags": [
@@ -261,6 +319,30 @@
         "haskell-optimize": {
             "display-name": "Optimization", 
             "flags": "-O2"
+        }, 
+        "c++1z": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
+            ], 
+            "display-name": "C++1z", 
+            "flags": [
+                "-std=c++1z", 
+                "-pedantic"
+            ]
         }, 
         "c++1y": {
             "conflicts": [
@@ -274,7 +356,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++1y", 
             "flags": [
@@ -294,7 +380,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++03(GNU)", 
             "flags": "-std=gnu++98"
@@ -311,7 +401,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C89", 
             "flags": [
@@ -339,7 +433,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++1y(GNU)", 
             "flags": "-std=gnu++1y"
@@ -381,7 +479,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C11", 
             "flags": [
@@ -401,7 +503,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C++0x(GNU)", 
             "flags": "-std=gnu++0x"
@@ -418,7 +524,11 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "display-name": "C99", 
             "flags": [
@@ -805,6 +915,30 @@
         "mono-optimize": {
             "display-name": "Optimization", 
             "flags": "-optimize"
+        }, 
+        "c++14": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
+            ], 
+            "display-name": "C++14", 
+            "flags": [
+                "-std=c++14", 
+                "-pedantic"
+            ]
         }
     }, 
     "compilers": [
@@ -1302,8 +1436,10 @@
                 "gnu++98", 
                 "c++11", 
                 "gnu++11", 
-                "c++1y", 
-                "gnu++1y"
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "compile-command": [
                 "/usr/local/llvm-head/bin/run-clang++.sh", 
@@ -1326,7 +1462,7 @@
             "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
             "initial-checked": [
                 "warning", 
-                "gnu++1y", 
+                "gnu++1z", 
                 "boost-1.56", 
                 "sprout"
             ], 
@@ -1335,6 +1471,64 @@
                 "/bin/sh", 
                 "-c", 
                 "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "boost-1.56", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
+            ], 
+            "compile-command": [
+                "/usr/local/llvm-3.5/bin/run-clang++.sh", 
+                "-oprog.exe", 
+                "-stdlib=libc++", 
+                "-I/usr/local/libcxx-3.5/include/c++/v1", 
+                "-L/usr/local/libcxx-3.5/lib", 
+                "-Wl,-rpath,/usr/local/libcxx-3.5/lib", 
+                "-nostdinc++", 
+                "-lpthread", 
+                "prog.cc", 
+                "-lsupc++"
+            ], 
+            "name": "clang-3.5", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "clang++ prog.cc -stdlib=libc++", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1z", 
+                "boost-1.56", 
+                "sprout"
+            ], 
+            "display-name": "clang", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-3.5/bin/clang++ --version | head -1 | cut -d' ' -f3-"
             ]
         }, 
         {
