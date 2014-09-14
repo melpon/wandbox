@@ -33,8 +33,3 @@ $newline never
         <script>
             window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})
     \<![endif]-->
-
-        <footer>
-            <p>
-                <small>
-                    Released commit is #{revisionText}
