@@ -60,7 +60,7 @@ Compiler.prototype.get_selected_compiler = function() {
 }
 
 Compiler.prototype.get_selected_compiler_element = function() {
-  return $(this.compiler_id + ' > option:selected');
+  return $(this.compiler_id + ' > :enabled:eq(' + $(this.compiler_id)[0].selectedIndex + ')');
 }
 
 Compiler.prototype.set_compiler = function(compiler) {
