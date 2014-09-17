@@ -121,11 +121,16 @@ private:
                 proto.command = command;
                 proto.contents = quoted_printable::decode(contents);
                 handler(e, proto);
-                clear();
+                if (command == "Control" && contents == "Finish") {
+                    disconnect();
+                    return;
+                } else {
+                    clear();
+                }
             }
-            if (cs == consume_state_t::read_completed ||
-                cs == consume_state_t::read_line && command == "Control" && contents == "Finish") {
-                return disconnect();
+            if (cs == consume_state_t::read_completed) {
+                disconnect();
+                return;
             }
             if (cs == consume_state_t::error_large_command ||
                 cs == consume_state_t::error_large_content_size ||
@@ -134,7 +139,8 @@ private:
                 // error
                 booster::system::error_code ec(-1, booster::system::system_category);
                 handler(ec, protocol());
-                return disconnect();
+                disconnect();
+                return;
             }
         }
         read();
