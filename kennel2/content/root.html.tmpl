@@ -1,0 +1,160 @@
+<% c++ #include "content/root.h" %>
+<% skin kennel %>
+<% view root uses content::root %>
+
+<% template includes() %>
+<link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="//platform.twitter.com/widgets.js"></script>
+<script src="/static/js/jquery.url.js"></script>
+<script src="/static/js/jquery.cookie.js"></script>
+<script src="/static/codemirror/lib/codemirror.js"></script>
+<script src="/static/codemirror/mode/clike/clike.js"></script>
+<script src="/static/codemirror/mode/d/d.js"></script>
+<script src="/static/codemirror/mode/ruby/ruby.js"></script>
+<script src="/static/codemirror/mode/python/python.js"></script>
+<script src="/static/codemirror/mode/perl/perl.js"></script>
+<script src="/static/codemirror/mode/erlang/erlang.js"></script>
+<script src="/static/codemirror/mode/haskell/haskell.js"></script>
+<script src="/static/codemirror/mode/shell/shell.js"></script>
+<script src="/static/codemirror/mode/lua/lua.js"></script>
+<script src="/static/codemirror/mode/php/php.js"></script>
+<script src="/static/codemirror/mode/commonlisp/commonlisp.js"></script>
+<script src="/static/codemirror/mode/pascal/pascal.js"></script>
+<script src="/static/codemirror/mode/rust/rust.js"></script>
+<script src="/static/codemirror/mode/groovy/groovy.js"></script>
+<script src="/static/codemirror/mode/javascript/javascript.js"></script>
+<script src="/static/codemirror/mode/coffeescript/coffeescript.js"></script>
+<script src="/static/codemirror/keymap/vim.js"></script>
+<script src="/static/codemirror/keymap/emacs.js"></script>
+<script src="/static/polyfills/EventSource.js"></script>
+<% end template %>
+
+<% template render() %>
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="UTF-8">
+
+        <title><%= title %></title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+
+        <% include includes() %>
+
+        <!--[if lt IE 9]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <script>
+            document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
+        </script>
+    </head>
+    <body>
+        <div id="main" role="main">
+            <div class="container-fluid">
+                <% include main() %>
+            </div>
+        </div>
+    </body>
+    <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you want to support IE 6.  chromium.org/developers/how-tos/chrome-frame-getting-started -->
+    <!--[if lt IE 7 ]>
+        <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+        <script>
+            window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})
+        </script>
+    <![endif]-->
+</html>
+<% end template %>
+
+<% template main() %>
+<div class="row">
+  <div class="col-md-12" id="header">
+    <div class="navbar navbar-default">
+      <div class="navbar-header">
+        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#wandbox-navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="@{RootR}">Wandbox</a>
+      </div>
+      <div class="collapse navbar-collapse" id="wandbox-navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a target="_blank" href="https://github.com/melpon/wandbox">Source</a>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" href="#" data-toggle="dropdown">Plugin <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li>
+                <a href="https://github.com/rhysd/wandbox-vim" target="_blank">for Vimmer</a>
+              </li>
+              <li>
+                <a href="https://github.com/kosh04/emacs-wandbox" target="_blank">for Emacser</a>
+              </li>
+              <li>
+                <a href="https://gist.github.com/kikairoya/7544234" target="_blank">for xyzzy-er</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-2">
+    <% include compiler() %>
+  </div>
+  <div class="col-md-10" id="codepanel">
+    <% include editor() %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <p id="compiler_name"></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <p id="compile_command"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <a href="compile" class="btn btn-default" id="compile">Run (or Ctrl+Enter)</a>
+        <img src="@{StaticR compiling_gif}" alt="Compiling" id="compiling">
+      </div>
+    </div>
+    <% include result_container() %>
+    <% include stdin() %>
+  </div>
+</div>
+<% end template %>
+
+<% template compiler() %>
+<% end template %>
+
+<% template editor() %>
+<% end template %>
+
+<% template result_container() %>
+<% end template %>
+
+<% template stdin() %>
+<% end template %>
+
+<% end view %>
+<% end skin %>
