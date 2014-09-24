@@ -5,6 +5,7 @@
 #include <cppcms/service.h>
 #include <cppcms/http_context.h>
 #include <cppcms/http_response.h>
+#include <cppcms/json.h>
 #include <booster/system_error.h>
 #include <iostream>
 #include <fstream>
@@ -13,28 +14,44 @@
 #include "eventsource.h"
 
 class kennel : public cppcms::application {
-    std::map<std::string, eventsource> eventsources_;
 public:
     kennel(cppcms::service &srv) : cppcms::application(srv) {
-        dispatcher().assign("/static/([a-zA-Z0-9_\\-/\\.]+\\.(js|css|png))", &kennel::serve_file, this, 1);
-        dispatcher().assign("/source/([a-zA-Z0-9]+)", &kennel::connect_source, this, 1);
-        dispatcher().assign("/compile/([a-zA-Z0-9]+)", &kennel::compile, this, 1);
+        dispatcher().assign("/static/([a-zA-Z0-9_\\-/\\.]+\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 2);
+        mapper().assign("static", "/static");
+
+        dispatcher().assign("/compile/?", &kennel::compile, this);
+        mapper().assign("compile", "/compile");
+
+        dispatcher().assign("/?", &kennel::root, this);
+        mapper().assign("root", "");
+
+        mapper().root("/wandbox/cppcms");
     }
-    void connect_source(std::string name) {
-        auto context = release_context();
-        //auto self = booster::intrusive_ptr<kennel>(this);
-        context->async_on_peer_reset([this, name]() {
-            std::cout << "peer reset: " << name << std::endl;
-            this->eventsources_.erase(name);
+
+    cppcms::json::value get_compiler_infos() {
+        std::vector<protocol> protos = {
+            protocol{"Version", ""},
+        };
+        std::string json;
+        send_command(service().get_io_service(), protos, [&json](const booster::system::error_code& e, const protocol& proto) {
+            if (e)
+                return (void)(std::cout << e.message() << std::endl);
+            json = proto.contents;
         });
-        eventsources_[name] = eventsource(context);
+        std::stringstream ss(json);
+        cppcms::json::value value;
+        value.load(ss, true, nullptr);
+        //value.save(std::cout, cppcms::json::readable);
+        return value;
     }
-    void compile(std::string name) {
-        for (auto&& x: eventsources_)
-            std::cout << x.first << std::endl;
-        auto it = eventsources_.find(name);
-        if (it == eventsources_.end())
-            return;
+
+    void root() {
+        content::root c;
+        c.compiler_infos = get_compiler_infos();
+        render("root", c);
+    }
+    void compile() {
+        auto es = eventsource(release_context());
 
         std::vector<protocol> protos = {
             protocol{"Control", "compiler=gcc-4.8.1"},
@@ -45,38 +62,30 @@ public:
             protocol{"CompilerOption", ""},
             protocol{"Control", "run"},
         };
-        it->second.send_header();
-        auto self = booster::intrusive_ptr<kennel>(this);
-        send_command(service().get_io_service(), protos, [self, name](const booster::system::error_code& e, const protocol& proto) {
+        es.send_header();
+        send_command_async(service().get_io_service(), protos, [es](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::cout << e.message() << std::endl);
-            auto it = self->eventsources_.find(name);
-            if (it == self->eventsources_.end())
-                return;
-            it->second.send_data(proto.command + ": " + proto.contents, true);
-            std::cout << proto.command << ": " << proto.contents << std::endl;
+            es.send_data(proto.command + ":" + proto.contents, true);
+            std::cout << proto.command << ":" << proto.contents << std::endl;
         });
     }
-    //virtual void main(std::string url) {
-    //    //content::root c;
-    //    //c.title = "[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ";
-    //    //render("root", c);
-    //    //f(this->service());
-    //    //response().out() << "HTTP/1.1 200 OK\n";
-    //    eventsource es(release_context());
-    //    es.send_header();
-    //    es.send_data("test", true);
-    //    es.send_data("test\n", true);
-    //    es.send_data("test\n\n", true);
-    //    es.close();
-    //}
-    void serve_file(std::string file_name) {
+    void serve_file(std::string file_name, std::string ext) {
         std::cout << file_name << std::endl;
         std::ifstream f(("../kennel/static/" + file_name).c_str());
+        if (!f)
+            f.open(("static/" + file_name).c_str());
+
         if (!f) {
             response().status(404);
         } else {
-            response().content_type("application/octet-stream");
+            std::string content_type =
+                ext == "js" ? "text/javascript" :
+                ext == "css" ? "text/css" :
+                ext == "gif" ? "image/gif" :
+                ext == "png" ? "image/png" :
+                               "";
+            response().content_type(content_type);
             response().out() << f.rdbuf();
         }
     }

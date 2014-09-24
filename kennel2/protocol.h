@@ -103,11 +103,14 @@ private:
     socket_ptr_t sock;
     handler_t handler;
     char buf[BUFSIZ];
+    int line;
+    int max_line;
 
-    void read_(const booster::system::error_code& e, std::size_t size) {
+    bool read_(const booster::system::error_code& e, std::size_t size) {
         if (e) {
             (void)handler(e, protocol());
-            return disconnect();
+            disconnect();
+            return true;
         }
         for (auto i = 0; i < size; i++) {
             auto c = buf[i];
@@ -121,16 +124,18 @@ private:
                 proto.command = command;
                 proto.contents = quoted_printable::decode(contents);
                 handler(e, proto);
-                if (command == "Control" && contents == "Finish") {
+                line += 1;
+                if (command == "Control" && contents == "Finish" ||
+                    max_line > 0 && line == max_line) {
                     disconnect();
-                    return;
+                    return true;
                 } else {
                     clear();
                 }
             }
             if (cs == consume_state_t::read_completed) {
                 disconnect();
-                return;
+                return true;
             }
             if (cs == consume_state_t::error_large_command ||
                 cs == consume_state_t::error_large_content_size ||
@@ -140,29 +145,66 @@ private:
                 booster::system::error_code ec(-1, booster::system::system_category);
                 handler(ec, protocol());
                 disconnect();
-                return;
+                return true;
             }
         }
-        read();
+        return false;
     }
 
 public:
-    async_read_protocol_t(socket_ptr_t sock, const handler_t& handler) : sock(sock), handler(handler) {
+    async_read_protocol_t(socket_ptr_t sock, const handler_t& handler, int max_line = 0) : sock(sock), handler(handler), line(0), max_line(max_line) {
         clear();
     }
 
     void read() {
+        while (true) {
+            booster::system::error_code ec;
+            auto size = sock->read_some(booster::aio::buffer(buf, sizeof(buf)), ec);
+            if (this->read_(ec, size)) {
+                break;
+            }
+        }
+    }
+    void read_async() {
         auto self = this->shared_from_this();
         sock->async_read_some(
             booster::aio::buffer(buf, sizeof(buf)),
             [self](const booster::system::error_code& e, std::size_t size) {
-                self->read_(e, size);
+                if (!self->read_(e, size))
+                    self->read_async();
             });
     }
 };
 
 template<class F>
 void send_command(booster::aio::io_service& service, std::vector<protocol> protos, F f) {
+    booster::shared_ptr<booster::aio::stream_socket> sock(new booster::aio::stream_socket(service));
+
+    std::cout << "open start" << std::endl;
+    booster::system::error_code ec;
+    sock->open(booster::aio::family_type::pf_inet);
+
+    booster::aio::endpoint ep("127.0.0.1", 2013);
+    std::cout << "connect start" << std::endl;
+    sock->connect(ep);
+
+    std::cout << "connected" << std::endl;
+    std::string send_string;
+    for (auto&& proto: protos) {
+        send_string += proto.to_string();
+    }
+
+    sock->write(booster::aio::buffer(send_string));
+
+    std::string result;
+    char buf[1024];
+
+    booster::shared_ptr<async_read_protocol_t> arp(new async_read_protocol_t(sock, f, 1));
+    arp->read();
+}
+
+template<class F>
+void send_command_async(booster::aio::io_service& service, std::vector<protocol> protos, F f) {
     booster::shared_ptr<booster::aio::stream_socket> sock(new booster::aio::stream_socket(service));
 
     std::cout << "open start" << std::endl;
@@ -191,7 +233,7 @@ void send_command(booster::aio::io_service& service, std::vector<protocol> proto
             std::cout << "written" << std::endl;
 
             booster::shared_ptr<async_read_protocol_t> arp(new async_read_protocol_t(sock, f));
-            arp->read();
+            arp->read_async();
         });
     });
 }
