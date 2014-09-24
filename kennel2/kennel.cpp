@@ -51,17 +51,27 @@ public:
         render("root", c);
     }
     void compile() {
-        auto es = eventsource(release_context());
-
+        if (request().request_method() != "POST") {
+            response().status(404);
+            return;
+        }
+        auto p = request().raw_post_data();
+        std::stringbuf sb(std::ios_base::in);
+        sb.pubsetbuf(static_cast<char*>(p.first), p.second);
+        std::istream is(&sb);
+        cppcms::json::value value;
+        value.load(is, true, nullptr);
         std::vector<protocol> protos = {
-            protocol{"Control", "compiler=gcc-4.8.1"},
-            protocol{"StdIn", ""},
-            protocol{"CompilerOptionRaw", ""},
-            protocol{"RuntimeOptionRaw", ""},
-            protocol{"Source", "#include<iostream>\nint main() { std::cout << \"hoge-\" << std::endl; }\n"},
-            protocol{"CompilerOption", ""},
+            protocol{"Control", "compiler=" + value["compiler"].str()},
+            protocol{"StdIn", value.get("stdin", "")},
+            protocol{"CompilerOptionRaw", value.get("compiler-option-raw", "")},
+            protocol{"RuntimeOptionRaw", value.get("runtime-option-raw", "")},
+            protocol{"Source", value["code"].str()},
+            protocol{"CompilerOption", value.get("options", "")},
             protocol{"Control", "run"},
         };
+
+        auto es = eventsource(release_context());
         es.send_header();
         send_command_async(service().get_io_service(), protos, [es](const booster::system::error_code& e, const protocol& proto) {
             if (e)
