@@ -7,4 +7,7 @@
       [ "/hello"
       ]
     }
+, "gzip" :
+    { "enable": false
+    }
 }
