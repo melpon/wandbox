@@ -187,9 +187,8 @@ public:
     }
 
     void serve_file(std::string file_name, std::string ext) {
-        std::ifstream f(("../kennel/static/" + file_name).c_str());
-        if (!f)
-            f.open(("static/" + file_name).c_str());
+        auto static_dir = service().settings()["application"]["static_dir"].str();
+        std::ifstream f((static_dir + "/" + file_name).c_str());
 
         if (!f) {
             response().status(404);
