@@ -56,16 +56,16 @@ var PostEventSource = function (url, obj) {
 
           // TODO handle 'event' (for buffer name), retry
           for (; i < parts.length; i++) {
-            line = parts[i].replace(reTrim, '');
+            line = parts[i];
             if (line.indexOf('event') == 0) {
-              eventType = line.replace(/event:?\s*/, '');
+              eventType = line.replace(/event:? ?/, '');
             } else if (line.indexOf('retry') == 0) {
-              retry = parseInt(line.replace(/retry:?\s*/, ''));
+              retry = parseInt(line.replace(/retry:? ?/, ''));
               if(!isNaN(retry)) { interval = retry; }
             } else if (line.indexOf('data') == 0) {
-              data.push(line.replace(/data:?\s*/, ''));
+              data.push(line.replace(/data:? ?/, ''));
             } else if (line.indexOf('id:') == 0) {
-              lastEventId = line.replace(/id:?\s*/, '');
+              lastEventId = line.replace(/id:? ?/, '');
             } else if (line.indexOf('id') == 0) { // this resets the id
               lastEventId = null;
             } else if (line == '') {

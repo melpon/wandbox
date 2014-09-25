@@ -31,7 +31,7 @@ public:
     void send(const std::string& name, const std::string& contents, bool flush) const {
         std::string buf;
         buf += name;
-        buf += ':';
+        buf += ": ";
         for (std::size_t i = 0; i < contents.size(); i++) {
             auto c = contents[i];
             buf += c;
