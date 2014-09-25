@@ -10,4 +10,7 @@
 , "gzip" :
     { "enable": false
     }
+, "cache" :
+    { "backend": "thread_shared"
+    }
 }
