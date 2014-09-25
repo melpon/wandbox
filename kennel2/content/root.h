@@ -4,6 +4,11 @@
 
 namespace content {
     struct root : public cppcms::base_content {
+        root() {
+            using_permlink = false;
+            permlink = "null";
+        }
+
         cppcms::json::value compiler_infos;
         cppcms::json::value sw; // loop variable
         cppcms::json::value opt; // loop variable
@@ -16,5 +21,8 @@ namespace content {
         bool getbool(cppcms::json::value& v, const std::string& key) {
             return v[key].boolean();
         }
+
+        bool using_permlink;
+        std::string permlink;
     };
 }

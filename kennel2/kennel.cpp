@@ -12,9 +12,11 @@
 #include <booster/aio/deadline_timer.h>
 #include <iostream>
 #include <fstream>
+#include <random>
 #include "content/root.h"
 #include "protocol.h"
 #include "eventsource.h"
+#include "permlink.h"
 
 namespace cppcms {
     template<>
@@ -41,6 +43,11 @@ public:
         dispatcher().assign("/compile/?", &kennel::compile, this);
         mapper().assign("compile", "/compile");
 
+        dispatcher().assign("/permlink/?", &kennel::post_permlink, this);
+        mapper().assign("permlink", "/permlink");
+
+        dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink, this, 1);
+
         dispatcher().assign("/?", &kennel::root, this);
         mapper().assign("root", "");
 
@@ -48,32 +55,36 @@ public:
 
     }
 
+    cppcms::json::value json_post_data() {
+        auto p = request().raw_post_data();
+        std::stringbuf sb(std::ios_base::in);
+        sb.pubsetbuf(static_cast<char*>(p.first), p.second);
+        std::istream is(&sb);
+        cppcms::json::value value;
+        value.load(is, true, nullptr);
+        return value;
+    }
+
     cppcms::json::value get_compiler_infos_or_cache() {
         cppcms::json::value json;
-std::cout << "compiler: " << __LINE__ << std::endl;
         if (!cache().fetch_data("compiler_infos", json)) {
-std::cout << "compiler: " << __LINE__ << std::endl;
             if (!cache().fetch_data("compiler_infos_persist", json)) {
-std::cout << "compiler: " << __LINE__ << std::endl;
                 json = get_compiler_infos();
                 cache().store_data("compiler_infos", json, 10);
                 cache().store_data("compiler_infos_persist", json, -1);
             } else {
                 cache().store_data("compiler_infos", json, 10);
-std::cout << "compiler: " << __LINE__ << std::endl;
 
                 update_timer.set_io_service(service().get_io_service());
                 update_timer.expires_from_now(booster::ptime::seconds(1));
                 booster::intrusive_ptr<kennel> self(this);
                 update_timer.async_wait([self](const booster::system::error_code& e) {
-std::cout << "compiler: " << __LINE__ << std::endl;
                     auto json = self->get_compiler_infos();
                     self->cache().store_data("compiler_infos", json, 10);
                     self->cache().store_data("compiler_infos_persist", json, -1);
                 });
             }
         }
-std::cout << "compiler: " << __LINE__ << std::endl;
         return json;
     }
     cppcms::json::value get_compiler_infos() {
@@ -103,12 +114,7 @@ std::cout << "compiler: " << __LINE__ << std::endl;
             response().status(404);
             return;
         }
-        auto p = request().raw_post_data();
-        std::stringbuf sb(std::ios_base::in);
-        sb.pubsetbuf(static_cast<char*>(p.first), p.second);
-        std::istream is(&sb);
-        cppcms::json::value value;
-        value.load(is, true, nullptr);
+        auto value = json_post_data();
         std::vector<protocol> protos = {
             protocol{"Control", "compiler=" + value["compiler"].str()},
             protocol{"StdIn", value.get("stdin", "")},
@@ -128,6 +134,50 @@ std::cout << "compiler: " << __LINE__ << std::endl;
             std::cout << proto.command << ":" << proto.contents << std::endl;
         });
     }
+    void post_permlink() {
+        if (request().request_method() != "POST") {
+            response().status(404);
+            return;
+        }
+        auto value = json_post_data();
+        permlink pl;
+        // make random name
+        std::string permlink_name;
+        {
+            std::random_device seed_gen;
+            std::mt19937 engine(seed_gen());
+            std::uniform_int_distribution<> dist(0, 127);
+            while (permlink_name.size() < 16) {
+                auto c = (char)dist(engine);
+                if ('0' <= c && c <= '9' ||
+                    'a' <= c && c <= 'z' ||
+                    'A' <= c && c <= 'Z') {
+                    permlink_name.push_back(c);
+                }
+            }
+        }
+        pl.make_permlink(permlink_name, value);
+
+        response().content_type("application/json");
+        cppcms::json::value result;
+        result["success"] = true;
+        result["link"] = permlink_name;
+        result.save(response().out(), cppcms::json::compact);
+    }
+    void get_permlink(std::string permlink_name) {
+        content::root c;
+        c.compiler_infos = get_compiler_infos_or_cache();
+
+        permlink pl;
+        auto result = pl.get_permlink(permlink_name);
+        std::stringstream ss;
+        result.save(ss, cppcms::json::compact);
+        c.using_permlink = true;
+        c.permlink = ss.str();
+
+        render("root", c);
+    }
+
     void serve_file(std::string file_name, std::string ext) {
         std::ifstream f(("../kennel/static/" + file_name).c_str());
         if (!f)
@@ -149,6 +199,9 @@ std::cout << "compiler: " << __LINE__ << std::endl;
 };
 
 int main(int argc, char** argv) try {
+    permlink pl;
+    pl.init();
+
     cppcms::service service(argc, argv);
     service.applications_pool().mount(
         cppcms::applications_factory<kennel>()

@@ -671,18 +671,21 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, stdin, outp
   if (pm.hasClass('disable')) return;
   pm.addClass('disable');
 
-  var str_outputs = $.map(outputs, function(e) {
-    return e.type + ',' + e.output;
+  outputs = $.map(outputs, function(e) {
+    return { type: e.type, output: e.output };
   });
 
-  $.post('@{PermlinkR}', {
+  var data = {
     compiler: compiler_info.selected_compiler,
     code: code,
     stdin: stdin,
     options: compiler_info.compile_options,
     'compiler-option-raw': compiler_info.compiler_option_raw,
     'runtime-option-raw': compiler_info.runtime_option_raw,
-    outputs: str_outputs },
+    outputs: outputs,
+  };
+
+  $.post(URL_PERMLINK, JSON.stringify(data),
     function(json) {
       if (!json.success) {
         pm.removeClass('disable');
@@ -691,17 +694,16 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, stdin, outp
 
       pm.remove();
 
-      var approot = '@{RootR}'
-      if (approot[approot.length - 1] == '/') {
-        approot = approot.substr(0, approot.length - 1);
-      }
-      var url = approot + '/permlink/' + json.link;
+      var url = URL_PERMLINK + '/' + json.link;
       $('<a href="' + url + '" target="_blank" id="permlink">URL</a>')
         .appendTo(self._permlink());
 
+      var xs = document.URL.split('/');
+      var abs_url =  xs[0] + "//" + xs[2] + url;
+      console.log(abs_url);
       var div = $('<div></div>').appendTo(self._permlink());
       twttr.widgets.createShareButton(
-        url,
+        abs_url,
         div[0],
         function() { },
         {

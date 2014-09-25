@@ -78,8 +78,9 @@
 
 <script>
 var URL_COMPILE = '<% url "compile" %>';
-var USING_PERMLINK = false;
-var JSON_CODE = null;
+var URL_PERMLINK = '<% url "permlink" %>';
+var USING_PERMLINK = <% if using_permlink %>true<% else %>false<% end %>;
+var JSON_CODE = <%= permlink | raw %>;
 var DEFAULT_COMPILER = 'gcc-head';
 var EDITOR_MODE_MAPPING = {
   'C++': 'text/x-c++src',
