@@ -48,6 +48,10 @@ public:
 
         dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink, this, 1);
 
+        dispatcher().assign("/api/list.json", &kennel::api_list, this);
+        dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
+        dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
+
         dispatcher().assign("/?", &kennel::root, this);
         mapper().assign("root", "");
 
@@ -96,7 +100,7 @@ public:
             if (e)
                 return (void)(std::cout << e.message() << std::endl);
             json = proto.contents;
-        });
+        }, 1);
         std::stringstream ss(json);
         cppcms::json::value value;
         value.load(ss, true, nullptr);
@@ -109,12 +113,7 @@ public:
         c.compiler_infos = get_compiler_infos_or_cache();
         render("root", c);
     }
-    void compile() {
-        if (request().request_method() != "POST") {
-            response().status(404);
-            return;
-        }
-        auto value = json_post_data();
+    static std::vector<protocol> make_protocols(const cppcms::json::value& value) {
         std::vector<protocol> protos = {
             protocol{"Control", "compiler=" + value["compiler"].str()},
             protocol{"StdIn", value.get("stdin", "")},
@@ -124,6 +123,15 @@ public:
             protocol{"CompilerOption", value.get("options", "")},
             protocol{"Control", "run"},
         };
+        return protos;
+    }
+    void compile() {
+        if (request().request_method() != "POST") {
+            response().status(404);
+            return;
+        }
+        auto value = json_post_data();
+        auto protos = make_protocols(value);
 
         auto es = eventsource(release_context());
         es.send_header();
@@ -134,6 +142,21 @@ public:
             std::cout << proto.command << ":" << proto.contents << std::endl;
         });
     }
+    static std::string make_random_name() {
+        std::string name;
+        std::random_device seed_gen;
+        std::mt19937 engine(seed_gen());
+        std::uniform_int_distribution<> dist(0, 127);
+        while (name.size() < 16) {
+            auto c = (char)dist(engine);
+            if ('0' <= c && c <= '9' ||
+                'a' <= c && c <= 'z' ||
+                'A' <= c && c <= 'Z') {
+                name.push_back(c);
+            }
+        }
+        return name;
+    }
     void post_permlink() {
         if (request().request_method() != "POST") {
             response().status(404);
@@ -141,21 +164,7 @@ public:
         }
         auto value = json_post_data();
         permlink pl;
-        // make random name
-        std::string permlink_name;
-        {
-            std::random_device seed_gen;
-            std::mt19937 engine(seed_gen());
-            std::uniform_int_distribution<> dist(0, 127);
-            while (permlink_name.size() < 16) {
-                auto c = (char)dist(engine);
-                if ('0' <= c && c <= '9' ||
-                    'a' <= c && c <= 'z' ||
-                    'A' <= c && c <= 'Z') {
-                    permlink_name.push_back(c);
-                }
-            }
-        }
+        std::string permlink_name = make_random_name();
         pl.make_permlink(permlink_name, value);
 
         response().content_type("application/json");
@@ -195,6 +204,94 @@ public:
             response().content_type(content_type);
             response().out() << f.rdbuf();
         }
+    }
+
+    void api_list() {
+        response().content_type("application/json");
+        get_compiler_infos_or_cache().save(response().out(), cppcms::json::compact);
+    }
+
+    static void update_compile_result(cppcms::json::value& result, const protocol& proto) {
+        static auto append = [](cppcms::json::value& v, const std::string& str) {
+            if (v.is_undefined())
+                v = str;
+            else
+                v.str() += str;
+        };
+        if (false) {
+        } else if (proto.command == "CompilerMessageS") {
+            append(result["compiler_output"], proto.contents);
+            append(result["compiler_message"], proto.contents);
+        } else if (proto.command == "CompilerMessageE") {
+            append(result["compiler_error"], proto.contents);
+            append(result["compiler_message"], proto.contents);
+        } else if (proto.command == "StdOut") {
+            append(result["program_output"], proto.contents);
+            append(result["program_message"], proto.contents);
+        } else if (proto.command == "StdErr") {
+            append(result["program_error"], proto.contents);
+            append(result["program_message"], proto.contents);
+        } else if (proto.command == "ExitCode") {
+            append(result["status"], proto.contents);
+        } else if (proto.command == "Signal") {
+            append(result["signal"], proto.contents);
+        } else {
+            //append(result["error"], proto.contents);
+        }
+    }
+    void api_compile() {
+        if (request().request_method() != "POST") {
+            response().status(404);
+            return;
+        }
+
+        auto value = json_post_data();
+        auto save = value.get("save", false);
+        auto protos = make_protocols(value);
+
+        cppcms::json::value result;
+        cppcms::json::value outputs;
+        outputs.array({});
+        send_command(service().get_io_service(), protos, [this, &result, &outputs, save](const booster::system::error_code& e, const protocol& proto) {
+            if (e)
+                return (void)(std::cout << e.message() << std::endl);
+
+            update_compile_result(result, proto);
+
+            if (save) {
+                cppcms::json::value v;
+                v["type"] = proto.command;
+                v["output"] = proto.contents;
+                outputs.array().push_back(v);
+            }
+        });
+
+        if (save) {
+            permlink pl;
+            std::string permlink_name = make_random_name();
+            value["outputs"] = outputs;
+            pl.make_permlink(permlink_name, value);
+            result["permlink"] = permlink_name;
+            result["url"] = "http://melpon.org/wandbox/cppcms/permlink/" + permlink_name;
+        }
+        response().content_type("application/json");
+        result.save(response().out(), cppcms::json::readable);
+    }
+    void api_permlink(std::string permlink_name) {
+        permlink pl;
+        auto value = pl.get_permlink(permlink_name);
+        cppcms::json::value outputs;
+        for (auto&& output: value["outputs"].array()) {
+            update_compile_result(outputs, protocol{output["type"].str(), output["output"].str()});
+        }
+        value.object().erase("outputs");
+
+        cppcms::json::value result;
+        result["parameter"] = value;
+        result["result"] = outputs;
+
+        response().content_type("application/json");
+        result.save(response().out(), cppcms::json::readable);
     }
 };
 

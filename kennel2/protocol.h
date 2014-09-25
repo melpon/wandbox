@@ -177,7 +177,7 @@ public:
 };
 
 template<class F>
-void send_command(booster::aio::io_service& service, std::vector<protocol> protos, F f) {
+void send_command(booster::aio::io_service& service, std::vector<protocol> protos, F f, int max_line = 0) {
     booster::shared_ptr<booster::aio::stream_socket> sock(new booster::aio::stream_socket(service));
 
     std::cout << "open start" << std::endl;
@@ -199,12 +199,12 @@ void send_command(booster::aio::io_service& service, std::vector<protocol> proto
     std::string result;
     char buf[1024];
 
-    booster::shared_ptr<async_read_protocol_t> arp(new async_read_protocol_t(sock, f, 1));
+    booster::shared_ptr<async_read_protocol_t> arp(new async_read_protocol_t(sock, f, max_line));
     arp->read();
 }
 
 template<class F>
-void send_command_async(booster::aio::io_service& service, std::vector<protocol> protos, F f) {
+void send_command_async(booster::aio::io_service& service, std::vector<protocol> protos, F f, int max_line = 0) {
     booster::shared_ptr<booster::aio::stream_socket> sock(new booster::aio::stream_socket(service));
 
     std::cout << "open start" << std::endl;
@@ -215,7 +215,7 @@ void send_command_async(booster::aio::io_service& service, std::vector<protocol>
 
     booster::aio::endpoint ep("127.0.0.1", 2013);
     std::cout << "connect start" << std::endl;
-    sock->async_connect(ep, [sock, f, protos](const booster::system::error_code& e) {
+    sock->async_connect(ep, [sock, f, max_line, protos](const booster::system::error_code& e) {
         if (e)
             return (void)f(e, protocol());
         std::cout << "connected" << std::endl;
@@ -225,14 +225,14 @@ void send_command_async(booster::aio::io_service& service, std::vector<protocol>
         }
         std::size_t send_string_size = send_string.size();
 
-        sock->async_write(booster::aio::buffer(send_string), [sock, f, send_string_size](const booster::system::error_code& e, std::size_t send_size) {
+        sock->async_write(booster::aio::buffer(send_string), [sock, f, max_line, send_string_size](const booster::system::error_code& e, std::size_t send_size) {
             if (e)
                 return (void)f(e, protocol());
             assert(send_size == send_string_size);
 
             std::cout << "written" << std::endl;
 
-            booster::shared_ptr<async_read_protocol_t> arp(new async_read_protocol_t(sock, f));
+            booster::shared_ptr<async_read_protocol_t> arp(new async_read_protocol_t(sock, f, max_line));
             arp->read_async();
         });
     });
