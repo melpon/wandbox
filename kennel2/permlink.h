@@ -5,7 +5,7 @@
 class permlink {
     cppdb::session sql;
 public:
-    permlink() : sql("sqlite3:db=kennel_production.sqlite;@pool_size=10") {
+    permlink(cppcms::service& service) : sql(service.settings()["application"]["database"].str()) {
     }
     void init() {
         cppdb::transaction guard(sql);

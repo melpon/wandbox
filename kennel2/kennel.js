@@ -1,11 +1,12 @@
-{ "service" :
+{ "application" :
+    { "database": "sqlite3:db=kennel_production.sqlite;@pool_size=10"
+    , "scheme": "http"
+    , "domain": "melpon.org"
+    , "root": "/wandbox/cppcms"
+    }
+, "service" :
     { "api" : "http"
     , "port" : 8088
-    }
-, "http" :
-    { "script_names" :
-      [ "/hello"
-      ]
     }
 , "gzip" :
     { "enable": false

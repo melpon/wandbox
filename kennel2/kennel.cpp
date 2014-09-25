@@ -55,8 +55,7 @@ public:
         dispatcher().assign("/?", &kennel::root, this);
         mapper().assign("root", "");
 
-        mapper().root("/wandbox/cppcms");
-
+        mapper().root(srv.settings()["application"]["root"].str());
     }
 
     cppcms::json::value json_post_data() {
@@ -163,7 +162,7 @@ public:
             return;
         }
         auto value = json_post_data();
-        permlink pl;
+        permlink pl(service());
         std::string permlink_name = make_random_name();
         pl.make_permlink(permlink_name, value);
 
@@ -177,7 +176,7 @@ public:
         content::root c;
         c.compiler_infos = get_compiler_infos_or_cache();
 
-        permlink pl;
+        permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
         std::stringstream ss;
         result.save(ss, cppcms::json::compact);
@@ -267,18 +266,23 @@ public:
         });
 
         if (save) {
-            permlink pl;
+            permlink pl(service());
             std::string permlink_name = make_random_name();
             value["outputs"] = outputs;
             pl.make_permlink(permlink_name, value);
             result["permlink"] = permlink_name;
-            result["url"] = "http://melpon.org/wandbox/cppcms/permlink/" + permlink_name;
+
+            auto settings = service().settings()["application"];
+            auto scheme = settings["scheme"].str();
+            auto domain = settings["domain"].str();
+            auto root = settings["root"].str();
+            result["url"] = scheme + "://" + domain + root + "/permlink/" + permlink_name;
         }
         response().content_type("application/json");
         result.save(response().out(), cppcms::json::readable);
     }
     void api_permlink(std::string permlink_name) {
-        permlink pl;
+        permlink pl(service());
         auto value = pl.get_permlink(permlink_name);
         cppcms::json::value outputs;
         for (auto&& output: value["outputs"].array()) {
@@ -296,10 +300,11 @@ public:
 };
 
 int main(int argc, char** argv) try {
-    permlink pl;
+    cppcms::service service(argc, argv);
+
+    permlink pl(service);
     pl.init();
 
-    cppcms::service service(argc, argv);
     service.applications_pool().mount(
         cppcms::applications_factory<kennel>()
     );
