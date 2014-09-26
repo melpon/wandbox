@@ -10,3 +10,4 @@ kennel.json: kennel.json.in
 install-data-local:
 	cd static; find . | while read file; do if [ -d "$$file" -a -L "$$file" ]; then find "$$file/" -type f | while read file2; do $(install_sh_DATA) "$$file2" "$(DESTDIR)$(staticdir)/$$file2"; done; elif [ -f "$$file" ]; then $(install_sh_DATA) "$$file" "$(DESTDIR)$(staticdir)/$$file"; fi; done
 	$(mkinstalldirs) $(DESTDIR)$(localstatedir)
+	chmod 777 $(DESTDIR)$(localstatedir)
