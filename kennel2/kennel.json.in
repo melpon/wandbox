@@ -3,11 +3,11 @@
     , "static_dir": "@staticdir@"
     , "scheme": "http"
     , "domain": "melpon.org"
-    , "root": "/wandbox/cppcms"
+    , "root": "/wandbox"
     }
 , "service" :
     { "api" : "http"
-    , "port" : 8088
+    , "port" : 3500
     }
 , "gzip" :
     { "enable": false
