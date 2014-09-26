@@ -9,9 +9,6 @@ mkdir cppcms
 cd cppcms
 
 git clone https://github.com/melpon/cppcms source
-cd source
-tar xf cppcms_boost.tar.bz2
-cd ..
 
 mkdir build
 cd build

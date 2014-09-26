@@ -12,8 +12,12 @@ AC_PROG_CXX
 AC_ARG_WITH(cppcms,
 [AS_HELP_STRING([--with-cppcms=PATH],
                 [specify prefix directory for installed CppCMS package.
-                 Equivalent to --with-cppcms-include=PATH/include
+                 Equivalent to --with-cppcms-bin=PATH/bin
+                 plus --with-cppcms-include=PATH/include
                  plus --with-cppcms-lib=PATH/lib])])
+AC_ARG_WITH(cppcms-bin,
+[AS_HELP_STRING([--with-cppcms-bin=PATH],
+                [specify directory for installed CppCMS binary])])
 AC_ARG_WITH(cppcms-include,
 [AS_HELP_STRING([--with-cppcms-include=PATH],
                 [specify directory for installed CppCMS include files])])
@@ -23,9 +27,13 @@ AC_ARG_WITH(cppcms-lib,
 
 cppcmslibnames="-lcppcms -lbooster"
 if test "x$with_cppcms" != x; then
+  cppcmstmplcc="$with_cppcms/bin/cppcms_tmpl_cc"
   cppcmsrpath="-Wl,-rpath,$with_cppcms/lib"
   cppcmslibs="-L$with_cppcms/lib"
   cppcmsinc="-I$with_cppcms/include"
+fi
+if test "x$with_cppcms_bin" != x; then
+  cppcmstmplcc="$with_cppcms_bin/cppcms_tmpl_cc"
 fi
 if test "x$with_cppcms_include" != x; then
   cppcmsinc="-I$with_cppcms_include"
@@ -64,6 +72,9 @@ fi
 CXXFLAGS="$CXXFLAGS $cppcmsinc $cppdbinc"
 LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -lcrypto -lpcre -lpthread -lsqlite3 -lz -ldl"
 LDFLAGS="$LDFLAGS $cppcmsrpath $cppdbrpath"
+
+CPPCMS_TMPL_CC="$cppcmstmplcc"
+AC_SUBST(CPPCMS_TMPL_CC)
 
 # AC_MSG_CHECKING([for cppcms])
 # AC_LANG([C++])
