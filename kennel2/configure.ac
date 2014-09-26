@@ -62,7 +62,7 @@ if test "x$with_cppdb_lib" != x; then
 fi
 
 CXXFLAGS="$CXXFLAGS $cppcmsinc $cppdbinc"
-LIBS="$LIBS $cppcmslibs $cppcmslibnames $cppdblibnames"
+LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -lcrypto -lpcre -lpthread -lsqlite3 -lz -ldl"
 LDFLAGS="$LDFLAGS $cppcmsrpath $cppdbrpath"
 
 # AC_MSG_CHECKING([for cppcms])
