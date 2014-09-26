@@ -2,7 +2,8 @@
 
 set -ex
 
-DIR=`cd $(dirname $0); pwd`
+cd $(dirname $0)
+DIR=`pwd`
 
 rm -rf cppdb || true
 mkdir cppdb
