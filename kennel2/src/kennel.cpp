@@ -97,7 +97,7 @@ public:
             protocol{"Version", ""},
         };
         std::string json;
-        send_command(service().get_io_service(), protos, [&json](const booster::system::error_code& e, const protocol& proto) {
+        send_command(service(), protos, [&json](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::cout << e.message() << std::endl);
             json = proto.contents;
@@ -136,7 +136,7 @@ public:
 
         auto es = eventsource(release_context());
         es.send_header();
-        send_command_async(service().get_io_service(), protos, [es](const booster::system::error_code& e, const protocol& proto) {
+        send_command_async(service(), protos, [es](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::cout << e.message() << std::endl);
             es.send_data(proto.command + ":" + proto.contents, true);
@@ -252,7 +252,7 @@ public:
         cppcms::json::value result;
         cppcms::json::value outputs;
         outputs.array({});
-        send_command(service().get_io_service(), protos, [this, &result, &outputs, save](const booster::system::error_code& e, const protocol& proto) {
+        send_command(service(), protos, [this, &result, &outputs, save](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::cout << e.message() << std::endl);
 

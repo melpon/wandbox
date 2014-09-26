@@ -177,14 +177,13 @@ public:
 };
 
 template<class F>
-void send_command(booster::aio::io_service& service, std::vector<protocol> protos, F f, int max_line = 0) {
+void send_command(booster::aio::io_service& service, booster::aio::endpoint ep, std::vector<protocol> protos, F f, int max_line = 0) {
     booster::shared_ptr<booster::aio::stream_socket> sock(new booster::aio::stream_socket(service));
 
     std::cout << "open start" << std::endl;
     booster::system::error_code ec;
     sock->open(booster::aio::family_type::pf_inet);
 
-    booster::aio::endpoint ep("127.0.0.1", 2013);
     std::cout << "connect start" << std::endl;
     sock->connect(ep);
 
@@ -204,7 +203,7 @@ void send_command(booster::aio::io_service& service, std::vector<protocol> proto
 }
 
 template<class F>
-void send_command_async(booster::aio::io_service& service, std::vector<protocol> protos, F f, int max_line = 0) {
+void send_command_async(booster::aio::io_service& service, booster::aio::endpoint ep, std::vector<protocol> protos, F f, int max_line = 0) {
     booster::shared_ptr<booster::aio::stream_socket> sock(new booster::aio::stream_socket(service));
 
     std::cout << "open start" << std::endl;
@@ -213,7 +212,6 @@ void send_command_async(booster::aio::io_service& service, std::vector<protocol>
     if (ec)
         return (void)f(ec, protocol());
 
-    booster::aio::endpoint ep("127.0.0.1", 2013);
     std::cout << "connect start" << std::endl;
     sock->async_connect(ep, [sock, f, max_line, protos](const booster::system::error_code& e) {
         if (e)
@@ -236,6 +234,24 @@ void send_command_async(booster::aio::io_service& service, std::vector<protocol>
             arp->read_async();
         });
     });
+}
+
+template<class F>
+void send_command(cppcms::service& srv, std::vector<protocol> protos, F f, int max_line = 0) {
+    auto host = srv.settings()["application"]["cattleshed"]["host"].str();
+    auto port = (int)srv.settings()["application"]["cattleshed"]["port"].number();
+    booster::aio::endpoint ep(host, port);
+
+    send_command(srv.get_io_service(), ep, protos, f, max_line);
+}
+
+template<class F>
+void send_command_async(cppcms::service& srv, std::vector<protocol> protos, F f, int max_line = 0) {
+    auto host = srv.settings()["application"]["cattleshed"]["host"].str();
+    auto port = (int)srv.settings()["application"]["cattleshed"]["port"].number();
+    booster::aio::endpoint ep(host, port);
+
+    send_command_async(srv.get_io_service(), ep, protos, f, max_line);
 }
 
 #endif // PROTOCOL_H_INCLUDED
