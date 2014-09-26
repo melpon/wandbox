@@ -1,3 +1,3 @@
 #!/bin/bash
 
-build/kennel -c kennel.js
+build/kennel -c src/kennel.js

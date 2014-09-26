@@ -1,6 +1,6 @@
 { "application" :
-    { "database": "sqlite3:db=kennel_production.sqlite;@pool_size=10"
-    , "static_dir": "static"
+    { "database": "sqlite3:db=@localstatedir@/kennel_production.sqlite;@pool_size=10"
+    , "static_dir": "@sysconfdir@/static"
     , "scheme": "http"
     , "domain": "melpon.org"
     , "root": "/wandbox/cppcms"

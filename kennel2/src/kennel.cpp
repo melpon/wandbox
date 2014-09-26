@@ -13,7 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <random>
-#include "content/root.h"
+#include "root.h"
 #include "protocol.h"
 #include "eventsource.h"
 #include "permlink.h"
