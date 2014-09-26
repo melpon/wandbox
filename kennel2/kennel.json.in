@@ -1,0 +1,18 @@
+{ "application" :
+    { "database": "sqlite3:db=@localstatedir@/kennel_production.sqlite;@pool_size=10"
+    , "static_dir": "@staticdir@"
+    , "scheme": "http"
+    , "domain": "melpon.org"
+    , "root": "/wandbox"
+    }
+, "service" :
+    { "api" : "http"
+    , "port" : 3500
+    }
+, "gzip" :
+    { "enable": false
+    }
+, "cache" :
+    { "backend": "thread_shared"
+    }
+}

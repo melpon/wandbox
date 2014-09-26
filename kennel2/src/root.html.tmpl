@@ -1,0 +1,319 @@
+<% c++ #include "root.h" %>
+<% skin kennel %>
+<% view root uses content::root %>
+
+<% template render() %>
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="UTF-8">
+
+        <title>[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+
+        <% include includes() %>
+
+        <!--[if lt IE 9]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <script>
+            document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
+        </script>
+    </head>
+    <body>
+        <div id="main" role="main">
+            <div class="container-fluid">
+                <% include main() %>
+            </div>
+        </div>
+    </body>
+    <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you want to support IE 6.  chromium.org/developers/how-tos/chrome-frame-getting-started -->
+    <!--[if lt IE 7 ]>
+        <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+        <script>
+            window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})
+        </script>
+    <![endif]-->
+</html>
+<% end template %>
+
+<% template includes() %>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="<% url "static" %>/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="<% url "static" %>/css/root.css">
+
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="//platform.twitter.com/widgets.js"></script>
+<script src="<% url "static" %>/js/jquery.url.js"></script>
+<script src="<% url "static" %>/js/jquery.cookie.js"></script>
+<script src="<% url "static" %>/codemirror/lib/codemirror.js"></script>
+<script src="<% url "static" %>/codemirror/mode/clike/clike.js"></script>
+<script src="<% url "static" %>/codemirror/mode/d/d.js"></script>
+<script src="<% url "static" %>/codemirror/mode/ruby/ruby.js"></script>
+<script src="<% url "static" %>/codemirror/mode/python/python.js"></script>
+<script src="<% url "static" %>/codemirror/mode/perl/perl.js"></script>
+<script src="<% url "static" %>/codemirror/mode/erlang/erlang.js"></script>
+<script src="<% url "static" %>/codemirror/mode/haskell/haskell.js"></script>
+<script src="<% url "static" %>/codemirror/mode/shell/shell.js"></script>
+<script src="<% url "static" %>/codemirror/mode/lua/lua.js"></script>
+<script src="<% url "static" %>/codemirror/mode/php/php.js"></script>
+<script src="<% url "static" %>/codemirror/mode/commonlisp/commonlisp.js"></script>
+<script src="<% url "static" %>/codemirror/mode/pascal/pascal.js"></script>
+<script src="<% url "static" %>/codemirror/mode/rust/rust.js"></script>
+<script src="<% url "static" %>/codemirror/mode/groovy/groovy.js"></script>
+<script src="<% url "static" %>/codemirror/mode/javascript/javascript.js"></script>
+<script src="<% url "static" %>/codemirror/mode/coffeescript/coffeescript.js"></script>
+<script src="<% url "static" %>/codemirror/keymap/vim.js"></script>
+<script src="<% url "static" %>/codemirror/keymap/emacs.js"></script>
+<script src="<% url "static" %>/js/PostEventSource.js"></script>
+
+<script>
+var URL_COMPILE = '<% url "compile" %>';
+var URL_PERMLINK = '<% url "permlink" %>';
+var USING_PERMLINK = <% if using_permlink %>true<% else %>false<% end %>;
+var JSON_CODE = <%= permlink | raw %>;
+var DEFAULT_COMPILER = 'gcc-head';
+var EDITOR_MODE_MAPPING = {
+  'C++': 'text/x-c++src',
+  'C': 'text/x-csrc',
+  'CPP': 'text/x-csrc',
+  'D': 'text/x-d',
+  'Ruby': 'text/x-ruby',
+  'Python': 'text/x-python',
+  'Perl': 'text/x-perl',
+  'Erlang': 'text/x-erlang',
+  'C#': 'text/x-csharp',
+  'Haskell': 'text/x-haskell',
+  'Bash script': 'text/x-sh',
+  'Lua': 'text/x-lua',
+  'PHP': 'text/x-php',
+  'Lisp': 'text/x-common-lisp',
+  'Pascal': 'text/x-pascal',
+  'Rust': 'text/x-rustsrc',
+  'Java': 'text/x-java',
+  'Groovy': 'text/x-groovy',
+  'JavaScript': 'text/javascript',
+  'CoffeeScript': 'text/x-coffeescript',
+  'Elixir': 'text/x-ruby',
+  'Scala': 'text/x-scala',
+};
+</script>
+
+<script src="<% url "static" %>/js/root.js"></script>
+<% end template %>
+
+<% template main() %>
+<div class="row">
+  <div class="col-md-12" id="header">
+    <div class="navbar navbar-default">
+      <div class="navbar-header">
+        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#wandbox-navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="<% url "root" %>">Wandbox</a>
+      </div>
+      <div class="collapse navbar-collapse" id="wandbox-navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a target="_blank" href="https://github.com/melpon/wandbox">Source</a>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" href="#" data-toggle="dropdown">Plugin <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li>
+                <a href="https://github.com/rhysd/wandbox-vim" target="_blank">for Vimmer</a>
+              </li>
+              <li>
+                <a href="https://github.com/kosh04/emacs-wandbox" target="_blank">for Emacser</a>
+              </li>
+              <li>
+                <a href="https://gist.github.com/kikairoya/7544234" target="_blank">for xyzzy-er</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-2">
+    <% include compiler() %>
+  </div>
+  <div class="col-md-10" id="codepanel">
+    <% include editor() %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <p id="compiler_name"></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <p id="compile_command"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <a href="compile" class="btn btn-default" id="compile">Run (or Ctrl+Enter)</a>
+        <img src="<% url "static" %>/compiling.gif" alt="Compiling" id="compiling">
+      </div>
+    </div>
+    <% include result_container() %>
+    <% include stdin() %>
+  </div>
+</div>
+<% end template %>
+
+<% template compiler() %>
+<div class="row">
+  <div class="col-md-12">
+    <label>choose compiler:</label>
+    <div class="input-group">
+      <input class="form-control" id="typeahead-search" type="text" placeholder="Search"></input>
+      <span class="input-group-btn">
+        <button class="btn btn-default" id="typeahead-clear" type="button">×</button>
+      </span>
+    </div>
+    <select class="wandbox-select" size=<%= compiler_infos.array().size() %> id="compiler">
+      <% foreach info in compiler_infos.array() %>
+        <% item %>
+          <option value="<%= info | ext getstr("name") %>" data-command="<%= info | ext getstr("display-compile-command") %>" data-language="<%= info | ext getstr("language") %>" data-display-name="<%= info | ext getstr("display-name") %>">
+            [<%= info | ext getstr("language") %>] <%= info | ext getstr("display-name") %> <%= info | ext getstr("version") %>
+          </option>
+        <% end %>
+      <% end %>
+    </select>
+  </div>
+</div>
+<div .row>
+  <div class="col-md-12">
+    <div id="compile-options">
+      <% foreach info in compiler_infos.array() %>
+        <% item %>
+          <div data-compiler="<%= info | ext getstr("name") %>">
+            <% c++ for (auto&& sw: info["switches"].array()) { %>
+              <% c++ content.sw = sw; %>
+              <% if (sw["type"] == "single") %>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="<%= sw | ext getstr("name") %>" data-flags="<%= sw | ext getstr("display-flags") %>" <% if (sw["default"].boolean()) %>checked<% end %>>
+                      <%= sw | ext getstr("display-name") %>
+                    </input>
+                  </label>
+                </div>
+              <% else %>
+                <div class="checkbox">
+                  <select class="col-md-12">
+                    <% c++ for (auto&& opt: sw["options"].array()) { %>
+                      <% c++ content.opt = opt; %>
+                      <option name="compile-option-groups-#{groupName}" value="<%= opt | ext getstr("name") %>" data-flags="<%= opt | ext getstr("display-flags") %>" <% if (opt["name"].str() == sw["default"].str()) %>selected<% end %>>
+                        <%= opt | ext getstr("display-name") %>
+                      </option>
+                    <% c++ } %>
+                  </select>
+                </div>
+              <% end %>
+            <% c++ } %>
+            <% if (info["compiler-option-raw"].boolean()) %>
+              <label>extra options:</label>
+              <div class="option-raw compiler-option-raw"></div>
+            <% end %>
+            <% if (info["runtime-option-raw"].boolean()) %>
+              <label>extra options:</label>
+              <div class="option-raw runtime-option-raw"></div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+<% end template %>
+
+<% template editor() %>
+<div class="row">
+  <div class="col-md-10">
+    <label>input code:</label>
+    <div id="editor"></div>
+  </div>
+  <div class="col-md-2" id="editor-settings">
+    <label>choose key binding:</label>
+    <div class="checkbox">
+      <select class="wandbox-select" size=3>
+        <option value="default" selected>default</option>
+        <option value="vim">Vim</option>
+        <option value="emacs">Emacs</option>
+      </select>
+    </div>
+    <div class="checkbox">
+      <label>
+        <input class="use-legacy-editor" type="checkbox" value="use-legacy-editor">Use Legacy Editor</input>
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        <input class="no-auto-indent" type="checkbox" value="no-auto-indent">OFF Auto Indent</input>
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        <input class="expand-editor" type="checkbox" value="expand-editor">Expand</input>
+      </label>
+    </div>
+  </div>
+</div>
+<% end template %>
+
+<% template result_container() %>
+<div class="row">
+  <div class="col-md-10">
+    <div id="result-container">
+      <div class="tabbable tabs-left">
+        <ul class="nav nav-tabs"></ul>
+      </div>
+      <div class="tab-content"></div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div id="result-container-settings">
+      <div class="checkbox">
+        <label>
+          <input class="nowrap-output-window" type="checkbox" value="nowrap-output-window">No Wrap</input>
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input class="expand-output-window" type="checkbox" value="expand-output-window">Expand</input>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+<% end template %>
+
+<% template stdin() %>
+<div class="row">
+  <div class="col-md-10">
+    <label>input stdin:</label>
+    <div class="stdin" id="stdin"></div>
+  </div>
+</div>
+<% end template %>
+
+<% end view %>
+<% end skin %>

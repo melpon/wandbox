@@ -1,0 +1,4 @@
+cppcms/
+cppdb/
+build/
+*.sqlite
