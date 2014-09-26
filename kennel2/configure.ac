@@ -76,6 +76,9 @@ LDFLAGS="$LDFLAGS $cppcmsrpath $cppdbrpath"
 CPPCMS_TMPL_CC="$cppcmstmplcc"
 AC_SUBST(CPPCMS_TMPL_CC)
 
+STATIC_DIR="$sysconfdir/static"
+AC_SUBST(STATIC_DIR)
+
 # AC_MSG_CHECKING([for cppcms])
 # AC_LANG([C++])
 # AC_TRY_LINK(
