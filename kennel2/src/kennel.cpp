@@ -37,7 +37,9 @@ class kennel : public cppcms::application {
     booster::aio::deadline_timer update_timer;
 public:
     kennel(cppcms::service &srv) : cppcms::application(srv) {
-        dispatcher().assign("/static/([a-zA-Z0-9_\\-/\\.]+\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 2);
+        dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/)*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 4);
+        dispatcher().assign("/static/(js/jquery.cookie.(js))", &kennel::serve_file, this, 1, 2);
+        dispatcher().assign("/static/(js/jquery.url.(js))", &kennel::serve_file, this, 1, 2);
         mapper().assign("static", "/static");
 
         dispatcher().assign("/compile/?", &kennel::compile, this);
