@@ -4,7 +4,7 @@
     , "scheme": "http"
     , "domain": "melpon.org"
     , "root": "/wandbox"
-    , "cattleshed": {
+    , "cattleshed":
         { "host" : "127.0.0.1"
         , "port" : 2012
         }
