@@ -17,14 +17,17 @@ make
 echo "exec /usr/local/cattleshed/bin/cattleshed" > runserver.sh
 cd ../
 
-cd kennel
-rm -r dist/ || /bin/true
-cabal-dev install
+cd kennel2
+git clean -xdqf .
+autoreconf -i
+./configure --prefix=/usr/local/kennel2 --with-cppcms=/usr/local/cppcms --with-cppdb=/usr/local/cppdb
+make
 cd ../
 '
 make -C ~wandbox/wandbox/cattleshed install
-stop kennel || true
+make -C ~wandbox/wandbox/kennel2 install
+stop kennel2 || true
 stop cattleshed || true
 sleep 1
 start cattleshed
-start kennel
+start kennel2
