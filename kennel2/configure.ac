@@ -79,6 +79,16 @@ AC_SUBST(CPPCMS_TMPL_CC)
 STATIC_DIR="$sysconfdir/static"
 AC_SUBST(STATIC_DIR)
 
+AC_ARG_WITH(databasedir,
+[AS_HELP_STRING([--databasedir=PATH],
+                [specify where pemlink database is stored in (default: $localstatedir/lib/kennel)])])
+if test "x$databasedir" != x; then
+  DATABASE_DIR="$databasedir"
+else
+  DATABASE_DIR="$localstatedir/lib/kennel"
+fi
+AC_SUBST(DATABASE_DIR)
+
 # AC_MSG_CHECKING([for cppcms])
 # AC_LANG([C++])
 # AC_TRY_LINK(
