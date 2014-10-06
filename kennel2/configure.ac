@@ -89,21 +89,17 @@ else
 fi
 AC_SUBST(DATABASE_DIR)
 
-# AC_MSG_CHECKING([for cppcms])
-# AC_LANG([C++])
-# AC_TRY_LINK(
-#  [
-#   #include "boost/version.hpp"
-#   #include "boost/system/error_code.hpp"
-#  ], [
-#   #if !defined(BOOST_VERSION) || BOOST_VERSION < 104700
-#   choke me
-#   #endif
-#   boost::system::error_code ec;
-#   (void)ec;
-#  ],
-#  [AC_MSG_RESULT([yes])],
-#  [AC_MSG_RESULT([no]); AC_MSG_ERROR([cattleshed requires customized CppCMS. Try to get sources from https://github.com/melpon/cppdb])])
+AC_MSG_CHECKING([for cppcms])
+AC_LANG([C++])
+AC_TRY_LINK(
+ [
+  #include <cppcms/http_response.h>
+ ], [
+  void (cppcms::http::response::*x)(int, int) = &cppcms::http::response::protocol;
+  (void)x;
+ ],
+ [AC_MSG_RESULT([yes])],
+ [AC_MSG_RESULT([no]); AC_MSG_ERROR([kennel requires customized CppCMS. Try to get sources from https://github.com/melpon/cppdb])])
 
 AC_MSG_CHECKING([for cppdb])
 AC_LANG([C++])
