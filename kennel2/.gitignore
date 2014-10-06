@@ -26,4 +26,10 @@ install-sh
 missing
 src/Makefile.in
 src/root.html.cpp
-
+AUTHORS
+ChangeLog
+NEWS
+README
+cppcms/
+cppdb/
+install/
