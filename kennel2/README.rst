@@ -64,16 +64,20 @@ document says:
 
 \4. Install kennel.
 
-kennel requires autoconf.
-
-::
+kennel requires autoconf::
 
   yum install autoconf
 
 There are kennel settings (root, port, domain, etc) in ``kennel.json.in``.
-You can rewrite this file.
+You can rewrite this file before run ``./configure``.
 
-::
+https://github.com/melpon/wandbox/blob/master/kennel2/kennel.json.in
+
+"application" is kennel specific settings.
+
+Others are `CppCMS settings <http://cppcms.com/wikipp/en/page/cppcms_1x_config>`_.
+
+And then install kennel::
 
   cd wandbox/kennel
   ./autogen.sh
