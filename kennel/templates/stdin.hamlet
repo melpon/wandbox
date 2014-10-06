@@ -1,4 +1,0 @@
-<div .row>
-  <div .col-md-10>
-    <label>input stdin:
-    <div #stdin .stdin>
