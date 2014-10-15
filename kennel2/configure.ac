@@ -69,8 +69,16 @@ if test "x$with_cppdb_lib" != x; then
   cppdblibs="-L$with_cppdb_lib"
 fi
 
+AC_CHECK_LIB([pcre], [pcre_compile], [], [AC_MSG_ERROR([missing pcre function])])
+AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([missing pthread function])])
+AC_CHECK_LIB([sqlite3], [sqlite3_open_v2], [], [AC_MSG_ERROR([missing sqlite3 function])])
+AC_CHECK_LIB([z], [deflateReset], [], [AC_MSG_ERROR([missing z function])])
+AC_CHECK_LIB([dl], [dlopen], [], [AC_MSG_ERROR([missing dl function])])
+
 CXXFLAGS="$CXXFLAGS $cppcmsinc $cppdbinc"
-LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -lcrypto -lpcre -lpthread -lsqlite3 -lz -ldl"
+CRYPT="-lgcrypt"
+DEFAULT_LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -lpcre -lpthread -lsqlite3 -lz -ldl"
+LIBS="$DEFAULT_LIBS"
 LDFLAGS="$LDFLAGS $cppcmsrpath $cppdbrpath"
 
 CPPCMS_TMPL_CC="$cppcmstmplcc"
@@ -91,7 +99,7 @@ AC_SUBST(DATABASE_DIR)
 
 AC_MSG_CHECKING([for cppcms])
 AC_LANG([C++])
-AC_TRY_LINK(
+AC_TRY_COMPILE(
  [
   #include <cppcms/http_response.h>
  ], [
@@ -99,7 +107,7 @@ AC_TRY_LINK(
   (void)x;
  ],
  [AC_MSG_RESULT([yes])],
- [AC_MSG_RESULT([no]); AC_MSG_ERROR([kennel requires customized CppCMS. Try to get sources from https://github.com/melpon/cppdb])])
+ [AC_MSG_RESULT([no]); AC_MSG_ERROR([kennel requires customized CppCMS. Try to get sources from https://github.com/melpon/cppcms])])
 
 AC_MSG_CHECKING([for cppdb])
 AC_LANG([C++])
@@ -113,12 +121,31 @@ AC_TRY_LINK(
  [AC_MSG_RESULT([yes])],
  [AC_MSG_RESULT([no]); AC_MSG_ERROR([kennel requires CppDB with SQLite3.])])
 
-AC_CHECK_LIB([crypto], [SHA512_Init], [], [AC_MSG_ERROR([missing crypto function])])
-AC_CHECK_LIB([pcre], [pcre_compile], [], [AC_MSG_ERROR([missing pcre function])])
-AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([missing pthread function])])
-AC_CHECK_LIB([sqlite3], [sqlite3_open_v2], [], [AC_MSG_ERROR([missing sqlite3 function])])
-AC_CHECK_LIB([z], [deflateReset], [], [AC_MSG_ERROR([missing z function])])
-AC_CHECK_LIB([dl], [dlopen], [], [AC_MSG_ERROR([missing dl function])])
+CRYPT="-lgcrypt"
+LIBS="$DEFAULT_LIBS $CRYPT"
+AC_MSG_CHECKING([for gcrypt])
+AC_LANG([C++])
+AC_TRY_LINK(
+ [
+  #include <cppcms/crypto.h>
+ ], [
+  cppcms::crypto::key key;
+  (void)key;
+ ],
+ [AC_MSG_RESULT([yes])],
+ [AC_MSG_RESULT([no])
+  CRYPT="-lcrypto"
+  LIBS="$DEFAULT_LIBS $CRYPT"
+  AC_MSG_CHECKING([for OpenSSL])
+  AC_LANG([C++])
+  AC_TRY_LINK(
+   [
+    #include <cppcms/crypto.h>
+   ], [
+    cppcms::crypto::key key;
+   ],
+   [AC_MSG_RESULT([yes])],
+   [AC_MSG_RESULT([no]); AC_MSG_ERROR([mising gcrypt or OpenSSL library])])])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
