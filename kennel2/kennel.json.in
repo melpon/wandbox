@@ -17,6 +17,6 @@
     { "enable": false
     }
 , "cache" :
-    { "backend": "thread_shared"
+    { "backend": "process_shared"
     }
 }
