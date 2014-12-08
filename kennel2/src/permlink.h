@@ -1,6 +1,9 @@
-#include <cppdb/frontend.h>
+#ifndef PERMLINK_H_INCLUDED
+#define PERMLINK_H_INCLUDED
+
 #include <iostream>
 #include <ctime>
+#include "libs.h"
 
 class permlink {
     cppdb::session sql;
@@ -146,3 +149,5 @@ public:
         return value;
     }
 };
+
+#endif // PERMLINK_H_INCLUDED

@@ -1,6 +1,8 @@
-#include <cppcms/view.h>
-#include <cppcms/json.h>
+#ifndef ROOT_H_INCLUDED
+#define ROOT_H_INCLUDED
+
 #include <string>
+#include "libs.h"
 
 namespace content {
     struct root : public cppcms::base_content {
@@ -26,3 +28,5 @@ namespace content {
         std::string permlink;
     };
 }
+
+#endif // ROOT_H_INCLUDED

@@ -1,11 +1,10 @@
 #ifndef EVENTSOURCE_H_INCLUDED
 #define EVENTSOURCE_H_INCLUDED
 
-#include <cppcms/http_context.h>
-#include <cppcms/http_response.h>
 #include <string>
 #include <sstream>
 #include <ios>
+#include "libs.h"
 
 class eventsource {
     void send_chunk(const std::string& buf, bool flush) const {

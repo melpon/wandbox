@@ -1,18 +1,7 @@
-#include <cppcms/application.h>
-#include <cppcms/applications_pool.h>
-#include <cppcms/url_dispatcher.h>
-#include <cppcms/url_mapper.h>
-#include <cppcms/service.h>
-#include <cppcms/http_context.h>
-#include <cppcms/http_response.h>
-#include <cppcms/json.h>
-#include <cppcms/serialization.h>
-#include <booster/system_error.h>
-#include <booster/posix_time.h>
-#include <booster/aio/deadline_timer.h>
 #include <iostream>
 #include <fstream>
 #include <random>
+#include "libs.h"
 #include "root.h"
 #include "protocol.h"
 #include "eventsource.h"
@@ -83,7 +72,7 @@ public:
                 update_timer.set_io_service(service().get_io_service());
                 update_timer.expires_from_now(booster::ptime::seconds(1));
                 booster::intrusive_ptr<kennel> self(this);
-                update_timer.async_wait([self](const booster::system::error_code& e) {
+                update_timer.async_wait([self](const booster::system::error_code&) {
                     auto json = self->get_compiler_infos();
                     self->cache().store_data("compiler_infos", json, 10);
                     self->cache().store_data("compiler_infos_persist", json, -1);
@@ -150,9 +139,9 @@ public:
         std::uniform_int_distribution<> dist(0, 127);
         while (name.size() < 16) {
             auto c = (char)dist(engine);
-            if ('0' <= c && c <= '9' ||
-                'a' <= c && c <= 'z' ||
-                'A' <= c && c <= 'Z') {
+            if (('0' <= c && c <= '9') ||
+                ('a' <= c && c <= 'z') ||
+                ('A' <= c && c <= 'Z')) {
                 name.push_back(c);
             }
         }

@@ -1,16 +1,10 @@
 #ifndef PROTOCOL_H_INCLUDED
 #define PROTOCOL_H_INCLUDED
 
-#include <booster/aio/io_service.h>
-#include <booster/aio/stream_socket.h>
-#include <booster/aio/buffer.h>
-#include <booster/shared_ptr.h>
-#include <booster/enable_shared_from_this.h>
-#include <booster/function.h>
-#include <booster/system_error.h>
 #include <string>
 #include <vector>
 #include <cstdio>
+#include "libs.h"
 #include "quoted_printable.h"
 
 struct protocol {
@@ -69,7 +63,7 @@ class async_read_protocol_t : public booster::enable_shared_from_this<async_read
                 return consume_state_t::error_out_of_digit;
             }
         } else if (state == read_state_t::contents) {
-            if (content_size == contents.size()) {
+            if (content_size == static_cast<int>(contents.size())) {
                 if (c == '\n') {
                     return consume_state_t::read_line;
                 } else {
@@ -112,7 +106,7 @@ private:
             disconnect();
             return true;
         }
-        for (auto i = 0; i < size; i++) {
+        for (std::size_t i = 0; i < size; i++) {
             auto c = buf[i];
             auto cs = consume(c);
             if (cs == consume_state_t::more) {
@@ -125,8 +119,8 @@ private:
                 proto.contents = quoted_printable::decode(contents);
                 handler(e, proto);
                 line += 1;
-                if (command == "Control" && contents == "Finish" ||
-                    max_line > 0 && line == max_line) {
+                if ((command == "Control" && contents == "Finish") ||
+                    (max_line > 0 && line == max_line)) {
                     disconnect();
                     return true;
                 } else {
@@ -194,9 +188,6 @@ void send_command(booster::aio::io_service& service, booster::aio::endpoint ep, 
     }
 
     sock->write(booster::aio::buffer(send_string));
-
-    std::string result;
-    char buf[1024];
 
     booster::shared_ptr<async_read_protocol_t> arp(new async_read_protocol_t(sock, f, max_line));
     arp->read();
