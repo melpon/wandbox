@@ -30,6 +30,15 @@ public:
             << cppdb::exec;
 
         sql <<
+            "CREATE TABLE IF NOT EXISTS compiler_info ("
+            "  id                   INTEGER PRIMARY KEY,"
+            "  code_id              INTEGER NOT NULL REFERENCES code,"
+            "  json                 VARCHAR NOT NULL,"
+            "  CONSTRAINT unique_compiler_info UNIQUE (code_id)"
+            ")"
+            << cppdb::exec;
+
+        sql <<
             "CREATE TABLE IF NOT EXISTS link ("
             "  id           INTEGER PRIMARY KEY,"
             "  permlink     VARCHAR NOT NULL,"
@@ -52,7 +61,7 @@ public:
         sql.commit();
     }
 
-    void make_permlink(std::string permlink_name, cppcms::json::value code) {
+    void make_permlink(std::string permlink_name, cppcms::json::value code, cppcms::json::value compiler_info) {
         std::time_t now_time = std::time(nullptr);
         std::tm now = *std::gmtime(&now_time);
 
@@ -76,6 +85,16 @@ public:
 
         auto code_id = stat.last_insert_id();
         std::cout << code_id << std::endl;
+
+        std::stringstream ss;
+        compiler_info.save(ss, cppcms::json::compact);
+        stat = sql <<
+            "INSERT INTO compiler_info (code_id, json) "
+            "VALUES (?, ?)"
+            << code_id
+            << ss.str()
+            << cppdb::exec;
+        std::cout << "compiler_info id: " << stat.last_insert_id() << std::endl;
 
         stat = sql <<
             "INSERT INTO link (permlink, code_id) "

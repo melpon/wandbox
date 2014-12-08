@@ -153,9 +153,22 @@ public:
             return;
         }
         auto value = json_post_data();
+
+        auto compiler_infos = get_compiler_infos_or_cache();
+        // find compiler info.
+        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
+            [&value](cppcms::json::value& v) {
+                return v["name"].str() == value["compiler"].str();
+            });
+        // error if the compiler is not found
+        if (it == compiler_infos.array().end()) {
+            response().status(400);
+            return;
+        }
+
         permlink pl(service());
         std::string permlink_name = make_random_name();
-        pl.make_permlink(permlink_name, value);
+        pl.make_permlink(permlink_name, value, *it);
 
         response().content_type("application/json");
         cppcms::json::value result;
@@ -238,6 +251,19 @@ public:
         auto save = value.get("save", false);
         auto protos = make_protocols(value);
 
+        auto compiler_infos = get_compiler_infos_or_cache();
+        // find compiler info.
+        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
+            [&value](cppcms::json::value& v) {
+                return v["name"].str() == value["compiler"].str();
+            });
+        // error if the compiler is not found
+        if (it == compiler_infos.array().end()) {
+            response().status(400);
+            return;
+        }
+
+
         cppcms::json::value result;
         cppcms::json::value outputs;
         outputs.array({});
@@ -259,7 +285,7 @@ public:
             permlink pl(service());
             std::string permlink_name = make_random_name();
             value["outputs"] = outputs;
-            pl.make_permlink(permlink_name, value);
+            pl.make_permlink(permlink_name, value, *it);
             result["permlink"] = permlink_name;
 
             auto settings = service().settings()["application"];
