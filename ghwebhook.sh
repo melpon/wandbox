@@ -19,7 +19,7 @@ cd ../
 
 cd kennel2
 git clean -xdqf .
-autoreconf -i
+./autogen.sh
 ./configure --prefix=/usr/local/kennel2 --with-cppcms=/usr/local/cppcms --with-cppdb=/usr/local/cppdb
 make
 cd ../
