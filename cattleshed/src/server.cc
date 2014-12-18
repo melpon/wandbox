@@ -431,7 +431,6 @@ namespace wandbox {
 		std::shared_ptr<tcp::socket> sock;
 		std::shared_ptr<socket_write_buffer> sockbuf;
 		std::unordered_map<std::string, std::string> received;
-		std::unordered_map<std::string, std::string> sources;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::shared_ptr<DIR> workdir;
 		std::deque<command_type> commands;
