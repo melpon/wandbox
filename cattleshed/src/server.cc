@@ -431,6 +431,7 @@ namespace wandbox {
 		std::shared_ptr<tcp::socket> sock;
 		std::shared_ptr<socket_write_buffer> sockbuf;
 		std::unordered_map<std::string, std::string> received;
+		std::unordered_map<std::string, std::string> sources;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::shared_ptr<DIR> workdir;
 		std::deque<command_type> commands;
@@ -446,11 +447,9 @@ namespace wandbox {
 
 	struct program_writer: private coroutine {
 		typedef void result_type;
-		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received, compiler_trait target_compiler, std::shared_ptr<void> semaphore)
+		program_writer(std::shared_ptr<asio::io_service> aio, std::shared_ptr<tcp::socket> sock, std::shared_ptr<asio::signal_set> sigs, std::unordered_map<std::string, std::string> received, std::unordered_map<std::string, std::string> sources, compiler_trait target_compiler, std::shared_ptr<void> semaphore)
 			 : aio(move(aio)),
 			   sock(move(sock)),
-			   src_text(std::make_shared<std::string>(received["Source"])),
-			   src_filename(target_compiler.output_file),
 			   file(std::make_shared<asio::posix::stream_descriptor>(*this->aio)),
 			   sigs(move(sigs)),
 			   unique_name(),
@@ -460,6 +459,8 @@ namespace wandbox {
 			   target_compiler(target_compiler),
 			   semaphore(move(semaphore))
 		{
+			for (auto&& t: sources) this->sources.emplace_back(std::move(t.first), t.second);
+
 			while (unique_name.empty() || !workdir) try {
 				unique_name = mkdtemp("wandboxXXXXXX");
 				workdir = opendir(unique_name);
@@ -473,38 +474,27 @@ namespace wandbox {
 		program_writer &operator =(program_writer &&) = default;
 		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
-				{
-					::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
-					while (true) {
-						mkdirat(workdir, "store", 0700);
-						aiocb->aio_fildes = ::openat(::dirfd(workdir.get()), ("store/" + src_filename).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
-						if (aiocb->aio_fildes == -1) {
-							if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
-							else yield break;
-						} else {
-							break;
-						}
+				while (!sources.empty()) {
+					current_source = std::move(sources.front());
+					sources.pop_front();
+					if (current_source.filename.empty()) {
+						current_source.filename = target_compiler.output_file;
 					}
-					aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(src_text->c_str()));
-					aiocb->aio_nbytes = src_text->length();
-					aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
-					aiocb->aio_sigevent.sigev_signo = SIGHUP;
-					::aio_write(aiocb.get());
-					do {
-						yield sigs->async_wait(move(*this));
-					} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
-					::close(aiocb->aio_fildes);
-				} {
-					::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
+					std::clog << "[" << sock.get() << "]" << "write file '" << current_source.filename << "' [" << this << "]" << std::endl;
+
 					{
-						auto d = opendir(config.system.storedir);
-						aiocb->aio_fildes = ::openat(::dirfd(d.get()), (unique_name + "_" + src_filename).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
-					}
-					if (aiocb->aio_fildes == -1) {
-						std::clog << "[" << sock.get() << "]" << "failed to write run log '" << unique_name << "' [" << this << "]" << std::endl;
-					} else {
-						aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(src_text->c_str()));
-						aiocb->aio_nbytes = src_text->length();
+						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
+						while (true) {
+							aiocb->aio_fildes = recursive_create_open_at(::dirfd(workdir.get()), "store/" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
+							if (aiocb->aio_fildes == -1) {
+								if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
+								else yield break;
+							} else {
+								break;
+							}
+						}
+						aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(current_source.source.c_str()));
+						aiocb->aio_nbytes = current_source.source.length();
 						aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
 						aiocb->aio_sigevent.sigev_signo = SIGHUP;
 						::aio_write(aiocb.get());
@@ -512,6 +502,25 @@ namespace wandbox {
 							yield sigs->async_wait(move(*this));
 						} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
 						::close(aiocb->aio_fildes);
+					} {
+						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
+						{
+							auto d = opendir(config.system.storedir);
+							aiocb->aio_fildes = recursive_create_open_at(::dirfd(d.get()), unique_name + "/" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
+						}
+						if (aiocb->aio_fildes == -1) {
+							std::clog << "[" << sock.get() << "]" << "failed to write run log '" << unique_name << "' [" << this << "]" << std::endl;
+						} else {
+							aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(current_source.source.c_str()));
+							aiocb->aio_nbytes = current_source.source.length();
+							aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+							aiocb->aio_sigevent.sigev_signo = SIGHUP;
+							::aio_write(aiocb.get());
+							do {
+								yield sigs->async_wait(move(*this));
+							} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
+							::close(aiocb->aio_fildes);
+						}
 					}
 				}
 				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir), move(target_compiler), move(semaphore))();
@@ -519,8 +528,6 @@ namespace wandbox {
 		}
 		std::shared_ptr<asio::io_service> aio;
 		std::shared_ptr<tcp::socket> sock;
-		std::shared_ptr<std::string> src_text;
-		std::string src_filename;
 		std::shared_ptr<asio::posix::stream_descriptor> file;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::string unique_name;
@@ -529,6 +536,69 @@ namespace wandbox {
 		std::shared_ptr<struct aiocb> aiocb;
 		compiler_trait target_compiler;
 		std::shared_ptr<void> semaphore;
+
+		struct source_file_t {
+			std::string filename;
+			std::string source;
+			source_file_t() = default;
+			source_file_t(std::string filename, std::string source)
+				: filename(std::move(filename)),
+				  source(std::move(source)) {
+			}
+			source_file_t(const source_file_t &) = default;
+			source_file_t &operator =(const source_file_t &) = default;
+			source_file_t(source_file_t &&) = default;
+			source_file_t &operator =(source_file_t &&) = default;
+		};
+		std::deque<source_file_t> sources;
+		source_file_t current_source;
+
+	private:
+		static int recursive_create_open_at(int at, const std::string &filename, int flags, int dirmode, int filemode) {
+			// FIXME: must canonicalize invalid UTF-8 sequence in `filename'
+			if (filename[0] == '/') return -1;
+
+			std::vector<int> dirfds;
+			const auto closeall = [&dirfds]() {
+				for (int fd: dirfds) ::close(fd);
+				dirfds.clear();
+			};
+
+			std::vector<std::string> dirs;
+			boost::algorithm::split(dirs, filename, boost::is_any_of("/"));
+
+			if (dirs.empty()) return -1;
+
+			const auto targetfile = std::move(dirs.back());
+			dirs.pop_back();
+			errno = 0;
+			if (dirs.empty()) return ::openat(at, targetfile.c_str(), flags, filemode);
+
+			dirfds.reserve(dirs.size());
+
+			for (auto &&x: dirs) {
+				if (x == "") continue;
+				if (x == ".") continue;
+				if (x == "..") {
+					if (dirfds.empty()) return -1;
+					int fd = dirfds.back();
+					dirfds.pop_back();
+					::close(fd);
+				} else {
+					errno = 0;
+					::mkdirat(dirfds.empty() ? at : dirfds.back(), x.c_str(), dirmode);
+					int dirfd = ::openat(dirfds.empty() ? at : dirfds.back(), x.c_str(), O_DIRECTORY|O_PATH|O_RDWR);
+					if (dirfd == -1) return closeall(), -1;
+					dirfds.push_back(dirfd);
+				}
+			}
+
+			errno = 0;
+			int newfd = ::openat(dirfds.empty() ? at : dirfds.back(), targetfile.c_str(), flags, filemode);
+			closeall();
+			return newfd;
+		}
+
 	};
 
 	struct version_sender: private coroutine {
@@ -652,9 +722,13 @@ namespace wandbox {
 							std::clog << "[" << sock.get() << "]" << "selected compiler '" << ccname << "' is not configured" << std::endl;
 							return (void)sock->close(ec);
 						}
-						return program_writer(move(aio), move(sock), move(sigs), move(received), *c, move(semaphore))();
+						return program_writer(move(aio), move(sock), move(sigs), move(received), move(sources), *c, move(semaphore))();
 					} else if (command == "Version") {
 						return version_sender(move(aio), move(sock), move(sigs), move(semaphore))();
+					} else if (command == "SourceFileName") {
+						current_filename = quoted_printable::decode(move(data));
+					} else if (command == "Source") {
+						sources[current_filename] += quoted_printable::decode(move(data));
 					} else {
 						received[command] += quoted_printable::decode(move(data));
 					}
@@ -667,6 +741,8 @@ namespace wandbox {
 		std::shared_ptr<std::vector<char>> buf;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::unordered_map<std::string, std::string> received;
+		std::unordered_map<std::string, std::string> sources;
+		std::string current_filename;
 		std::shared_ptr<void> semaphore;
 	};
 
