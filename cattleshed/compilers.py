@@ -265,8 +265,8 @@ class Compilers(object):
                 "after": {
                     "display-name":"gcc HEAD",
                     "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"],
-                    "initial-checked":["warning", "gnu++1y", "boost-1.56", "sprout"],
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y", "c++1z", "gnu++1z"],
+                    "initial-checked":["warning", "gnu++1z", "boost-1.56", "sprout"],
                 },
             }),
             ("gcc-4.9.1", {

@@ -964,7 +964,9 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "c++1z", 
+                "gnu++1z"
             ], 
             "compile-command": [
                 "/usr/local/gcc-head/bin/g++", 
@@ -982,7 +984,7 @@
             "display-compile-command": "g++ prog.cc", 
             "initial-checked": [
                 "warning", 
-                "gnu++1y", 
+                "gnu++1z", 
                 "boost-1.56", 
                 "sprout"
             ], 
