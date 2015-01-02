@@ -18,6 +18,14 @@
 
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
+    <% if using_permlink %>
+      <% if (!content.twitter_title.empty()) %>
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="<%= twitter_title %>" />
+        <meta name="twitter:description" content="<%= twitter_description %>" />
+      <% end if %>
+    <% end if %>
+
     <% include includes() %>
 
     <!--[if lt IE 9]>

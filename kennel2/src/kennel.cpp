@@ -187,6 +187,13 @@ public:
         c.using_permlink = true;
         c.permlink = ss.str();
 
+        auto info = result["compiler-info"];
+        if (!info.is_undefined()) {
+            std::string title = "[" + info["language"].str() + "] " + info["display-name"].str() + " " + info["version"].str();
+            std::string description = result["code"].str();
+            c.set_twitter(std::move(title), std::move(description));
+        }
+
         render("root", c);
     }
 

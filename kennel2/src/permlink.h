@@ -165,6 +165,21 @@ public:
             value["outputs"][n]["output"] = r.get<std::string>("output");
             n += 1;
         }
+
+        // load compiler_info if exists.
+        r = sql <<
+            "SELECT json "
+            "FROM compiler_info "
+            "WHERE code_id=?"
+            << code_id
+            << cppdb::row;
+        if (!r.empty()) {
+            cppcms::json::value compiler_info;
+            std::stringstream ss(r.get<std::string>("json"));
+            if (compiler_info.load(ss, true)) {
+                value["compiler-info"] = compiler_info;
+            }
+        }
         return value;
     }
 };
