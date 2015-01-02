@@ -9,39 +9,39 @@
 <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
 <!--[if gt IE 8]><!-->
 <html class="no-js" lang="en"> <!--<![endif]-->
-    <head>
-        <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8">
 
-        <title>[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ</title>
-        <meta name="description" content="">
-        <meta name="author" content="">
+    <title>[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-        <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
 
-        <% include includes() %>
+    <% include includes() %>
 
-        <!--[if lt IE 9]>
-        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-
-        <script>
-            document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
-        </script>
-    </head>
-    <body>
-        <div id="main" role="main">
-            <div class="container-fluid">
-                <% include main() %>
-            </div>
-        </div>
-    </body>
-    <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you want to support IE 6.  chromium.org/developers/how-tos/chrome-frame-getting-started -->
-    <!--[if lt IE 7 ]>
-        <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
-        <script>
-            window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})
-        </script>
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script>
+      document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
+    </script>
+  </head>
+  <body>
+    <div id="main" role="main">
+      <div class="container-fluid">
+        <% include main() %>
+      </div>
+    </div>
+  </body>
+  <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you want to support IE 6.  chromium.org/developers/how-tos/chrome-frame-getting-started -->
+  <!--[if lt IE 7 ]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>
+      window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})
+    </script>
+  <![endif]-->
 </html>
 <% end template %>
 
