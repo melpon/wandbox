@@ -3,6 +3,7 @@
 #include <random>
 #include "libs.h"
 #include "root.h"
+#include "nojs_root.h"
 #include "protocol.h"
 #include "eventsource.h"
 #include "permlink.h"
@@ -42,6 +43,13 @@ public:
         dispatcher().assign("/api/list.json", &kennel::api_list, this);
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
         dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
+
+        dispatcher().assign("/nojs/(.+)/compile/?", &kennel::nojs_compile, this, 1);
+        mapper().assign("nojs-compile", "/nojs/{1}/compile");
+        dispatcher().assign("/nojs/([a-zA-Z0-9_\\-\\.]+)/?", &kennel::nojs_root, this, 1);
+        mapper().assign("nojs-root", "/nojs/{1}");
+        dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
+        mapper().assign("nojs-list", "/nojs");
 
         dispatcher().assign("/?", &kennel::root, this);
         mapper().assign("root", "");
@@ -114,6 +122,40 @@ public:
             protocol{"Control", "run"},
         };
         return protos;
+    }
+    static cppcms::json::value form_to_json(const cppcms::http::request::form_type& form) {
+        cppcms::json::value result;
+        auto set_if_exists = [&result, &form](const std::string& result_key, const std::string& form_key) {
+            auto it = form.find(form_key);
+            if (it != form.end())
+                result[result_key].str(it->second);
+        };
+        auto starts_with = [](const std::string& str, const std::string& target) {
+            return std::equal(target.begin(), target.end(), str.begin());
+        };
+        auto join = [](const std::vector<std::string>& v, const std::string& sep) -> std::string {
+            std::string result;
+            if (v.empty()) return result;
+            result += v.front();
+            for (int i = 1; i < (int)v.size(); i++) result += sep + v[i];
+            return result;
+        };
+
+        std::vector<std::string> options;
+        for (auto&& kv: form) {
+            if (starts_with(kv.first, "checkbox-") || starts_with(kv.first, "select-")) {
+                options.push_back(kv.second);
+            }
+        }
+        set_if_exists("compiler", "compiler");
+        set_if_exists("stdin", "stdin");
+        set_if_exists("compiler-option-raw", "compiler-option-raw");
+        set_if_exists("runtime-option-raw", "runtime-option-raw");
+        set_if_exists("code", "code");
+        if (not options.empty()) {
+            result["options"] = join(options, ",");
+        }
+        return result;
     }
     void compile() {
         if (request().request_method() != "POST") {
@@ -255,21 +297,23 @@ public:
         }
 
         auto value = json_post_data();
+        api_compile_internal(json_post_data());
+    }
+    void api_compile_internal(cppcms::json::value value) {
+        auto compiler = value["compiler"].str();
         auto save = value.get("save", false);
         auto protos = make_protocols(value);
-
         auto compiler_infos = get_compiler_infos_or_cache();
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
-            [&value](cppcms::json::value& v) {
-                return v["name"].str() == value["compiler"].str();
+            [&compiler](cppcms::json::value& v) {
+                return v["name"].str() == compiler;
             });
         // error if the compiler is not found
         if (it == compiler_infos.array().end()) {
             response().status(400);
             return;
         }
-
 
         cppcms::json::value result;
         cppcms::json::value outputs;
@@ -319,6 +363,42 @@ public:
 
         response().content_type("application/json");
         result.save(response().out(), cppcms::json::readable);
+    }
+
+    void nojs_list() {
+        content::root c;
+        c.compiler_infos = get_compiler_infos_or_cache();
+        render("nojs_list", c);
+    }
+
+    void nojs_root(std::string compiler) {
+        auto compiler_infos = get_compiler_infos_or_cache();
+        // find compiler info.
+        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
+            [&compiler](cppcms::json::value& v) {
+                return v["name"].str() == compiler;
+            });
+        // error if the compiler is not found
+        if (it == compiler_infos.array().end()) {
+            response().status(404);
+            return;
+        }
+        content::nojs_root c;
+        c.compiler_info = *it;
+        render("nojs_root", c);
+    }
+    void nojs_compile(std::string compiler) {
+        if (request().request_method() != "POST") {
+            response().status(404);
+            return;
+        }
+
+        auto json = form_to_json(request().post());
+        if (json["compiler"].str() != compiler) {
+            response().status(405);
+            return;
+        }
+        api_compile_internal(json);
     }
 };
 

@@ -25,7 +25,7 @@ depcomp
 install-sh
 missing
 src/Makefile.in
-src/root.cpp
+src/skin_kennel.cpp
 AUTHORS
 ChangeLog
 NEWS

@@ -1,0 +1,72 @@
+<% c++ #include "nojs_root.h" %>
+<% skin kennel %>
+<% view nojs_root uses content::nojs_root %>
+
+<% template render() %>
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+
+    <title>[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ</title>
+    <meta name="description" content="Wandbox is Online Compiler">
+    <meta name="author" content="melpon, kikairoya">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  </head>
+  <body>
+    <form action="<% url "nojs-compile" using compiler_info | ext getstr("name") %>" method="POST">
+      <p><label>name:</label> <%= compiler_info | ext getstr("name") %></p>
+      <p><label>language:</label> <%= compiler_info | ext getstr("language") %></p>
+      <p><label>version:</label> <%= compiler_info | ext getstr("version") %></p>
+      <p><label>display-compile-command:</label> <%= compiler_info | ext getstr("display-compile-command") %></p>
+      <p><label>display-name:</label> <%= compiler_info | ext getstr("display-name") %></p>
+      <input type="hidden" name="compiler" value="<%= compiler_info | ext getstr("name") %>"></input>
+      <p>source code:</p>
+      <p><textarea name="code" rows="10" cols="78"></textarea></p>
+      <% c++ for (auto&& sw: content.compiler_info["switches"].array()) { %>
+        <p>
+          <% c++ content.sw = sw; %>
+          <% if (sw["type"] == "single") %>
+            <label>
+              <input name="checkbox-<%= sw | ext getstr("name") %>" type="checkbox" value="<%= sw | ext getstr("name") %>" <% if (sw["default"].boolean()) %>checked<% end %>>
+                <%= sw | ext getstr("display-name") %>
+              </input>
+            </label>
+          <% else %>
+              <select name="select-<%= sw | ext getstr("default") %>">
+                <% c++ for (auto&& opt: sw["options"].array()) { %>
+                  <% c++ content.opt = opt; %>
+                  <option name="compile-option-groups-#{groupName}" value="<%= opt | ext getstr("name") %>" <% if (opt["name"].str() == sw["default"].str()) %>selected<% end %>>
+                    <%= opt | ext getstr("display-name") %>
+                  </option>
+                <% c++ } %>
+              </select>
+            </div>
+          <% end %>
+        </p>
+      <% c++ } %>
+      <% if (content.compiler_info["compiler-option-raw"].boolean()) %>
+        <p><label>extra options:</label></p>
+        <p><textarea name="compiler-option-raw" rows="3" cols="20"></textarea></p>
+      <% end %>
+      <% if (content.compiler_info["runtime-option-raw"].boolean()) %>
+        <p><label>extra options:</label></p>
+        <p><textarea name="runtime-option-raw" rows="3" cols="20"></textarea></p>
+      <% end %>
+      <p><label>stdin:</label></p>
+      <p><textarea name="stdin" rows="3" cols="20"></textarea></p>
+      <p><input type="submit" value="Run"></input></p>
+    </form>
+  </body>
+</html>
+<% end template %>
+
+<% end view %>
+<% end skin %>

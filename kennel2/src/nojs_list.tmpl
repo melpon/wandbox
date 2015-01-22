@@ -1,0 +1,40 @@
+<% c++ #include "root.h" %>
+<% skin kennel %>
+<% view nojs_list uses content::root %>
+
+<% template render() %>
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+
+    <title>[Wandbox]三へ( へ՞ਊ ՞)へ ﾊｯﾊｯ</title>
+    <meta name="description" content="Wandbox is Online Compiler">
+    <meta name="author" content="melpon, kikairoya">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  </head>
+  <body>
+    <% foreach info in compiler_infos.array() %>
+      <% item %>
+        <ul>
+          <li>
+            <a href="<% url "nojs-root" using info | ext getstr("name") %>">
+              [<%= info | ext getstr("language") %>] <%= info | ext getstr("display-name") %> <%= info | ext getstr("version") %>
+            </a>
+          </li>
+        </ul>
+      <% end item %>
+    <% end foreach %>
+  </body>
+</html>
+<% end template %>
+
+<% end view %>
+<% end skin %>
