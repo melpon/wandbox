@@ -22,7 +22,7 @@
     "--",
     "@bindir@/cattlegrid",
     "--rootdir=./jail",
-    "--mount=/bin,/etc,/lib,/lib32,/lib64,/usr/bin,/usr/lib,/usr/lib64,/usr/include,/usr/local",
+    "--mount=/bin,/etc,/lib,/lib32,/lib64,/usr/bin,/usr/lib,/usr/lib64,/usr/include,/usr/local,/usr/share",
     "--rwmount=/tmp=./jail/tmp,/home/jail=./store",
     "--devices=/dev/null,/dev/zero,/dev/full,/dev/random,/dev/urandom",
     "--chdir=/home/jail",
