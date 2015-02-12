@@ -960,6 +960,35 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_lua(self):
+        NAMES = [
+           ("lua-5.3.0", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
+           ("lua-5.2.2", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.lua",
+            "run-command":["/usr/local/{name}/bin/lua", "prog.lua"],
+            "display-name":"lua",
+            "display-compile-command":"lua prog.lua",
+            "language":"Lua",
+            "runtime-option-raw":True,
+            "compile-command":"/bin/true",
+            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/lua -v | cut -d' ' -f2"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-c",
@@ -1071,17 +1100,6 @@ class Compilers(object):
             "compile-command":"/bin/true",
             "version-command":["/bin/sh", "-c", "/bin/bash --version | head -1"],
         },{
-            "name":"lua-5.2.2",
-            "displayable":True,
-            "output-file":"prog.lua",
-            "display-name":"lua",
-            "display-compile-command":"lua prog.lua",
-            "language":"Lua",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/lua-5.2.2/bin/lua", "prog.lua"],
-            "version-command":["/bin/sh", "-c", "/usr/local/lua-5.2.2/bin/lua -v | cut -d' ' -f2"],
-        },{
             "name":"lazyk",
             "displayable":True,
             "output-file":"prog.lazy",
@@ -1161,6 +1179,7 @@ class Compilers(object):
             self.make_coffee_script() +
             self.make_sqlite() +
             self.make_scala() +
+            self.make_lua() +
             self.make_default2()
         )
 
