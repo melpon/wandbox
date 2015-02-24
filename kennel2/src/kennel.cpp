@@ -259,6 +259,7 @@ public:
 
     void api_list() {
         response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
         get_compiler_infos_or_cache().save(response().out(), cppcms::json::compact);
     }
 
@@ -346,6 +347,7 @@ public:
             result["url"] = scheme + "://" + domain + root + "/permlink/" + permlink_name;
         }
         response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
         result.save(response().out(), cppcms::json::readable);
     }
     void api_permlink(std::string permlink_name) {
@@ -362,6 +364,7 @@ public:
         result["result"] = outputs;
 
         response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
         result.save(response().out(), cppcms::json::readable);
     }
 
