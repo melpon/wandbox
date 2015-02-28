@@ -395,6 +395,29 @@ class Compilers(object):
                 },
                 "lsupc++": True,
             }),
+            ("clang-3.6", {
+                "params": {
+                    "llvm": "llvm-3.6",
+                    "libcxx": "libcxx-3.6",
+                },
+                "after": {
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"],
+                    "initial-checked":["warning", "gnu++1z", "boost-1.57", "sprout"],
+                    "compile-command":[
+                        "/usr/local/llvm-3.6/bin/run-clang++.sh",
+                        "-oprog.exe",
+                        "-stdlib=libc++",
+                        "-I/usr/local/libcxx-3.6/include/c++/v1",
+                        "-L/usr/local/libcxx-3.6/lib",
+                        "-Wl,-rpath,/usr/local/libcxx-3.6/lib",
+                        "-nostdinc++",
+                        "-lpthread",
+                        "prog.cc"
+                    ],
+                    "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-3.6/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
+                },
+                "lsupc++": True,
+            }),
             ("clang-3.5", {
                 "params": {
                     "llvm": "llvm-3.5",
