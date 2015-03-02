@@ -3,7 +3,8 @@
     , "static_dir": "@staticdir@"
     , "scheme": "http"
     , "domain": "melpon.org"
-    , "root": "/wandbox"
+    , "map_root": "/wandbox"
+    , "dispatch_root": ""
     , "cattleshed":
         { "host" : "127.0.0.1"
         , "port" : 2012

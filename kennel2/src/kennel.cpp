@@ -53,8 +53,6 @@ public:
 
         dispatcher().assign("/?", &kennel::root, this);
         mapper().assign("root", "");
-
-        mapper().root(srv.settings()["application"]["root"].str());
     }
 
     cppcms::json::value json_post_data() {
@@ -343,7 +341,7 @@ public:
             auto settings = service().settings()["application"];
             auto scheme = settings["scheme"].str();
             auto domain = settings["domain"].str();
-            auto root = settings["root"].str();
+            auto root = settings["map_root"].str();
             result["url"] = scheme + "://" + domain + root + "/permlink/" + permlink_name;
         }
         response().content_type("application/json");
@@ -405,6 +403,17 @@ public:
     }
 };
 
+class kennel_root : public cppcms::application {
+    kennel app_;
+
+public:
+    kennel_root(cppcms::service &srv) : cppcms::application(srv), app_(srv) {
+        auto map_root = srv.settings()["application"]["map_root"].str();
+        auto dispatch_root = srv.settings()["application"]["dispatch_root"].str();
+        add(app_, "root", map_root + "{1}", dispatch_root + "((/.*)?)", 1);
+    }
+};
+
 int main(int argc, char** argv) try {
     cppcms::service service(argc, argv);
 
@@ -412,7 +421,7 @@ int main(int argc, char** argv) try {
     pl.init();
 
     service.applications_pool().mount(
-        cppcms::applications_factory<kennel>()
+        cppcms::applications_factory<kennel_root>()
     );
     service.run();
 } catch (std::exception const &e) {
