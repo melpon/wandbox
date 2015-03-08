@@ -17,6 +17,7 @@ namespace wandbox {
 	namespace mendex = boost::multi_index;
 
 	struct switch_trait {
+		std::string group_name;
 		std::string name;
 		std::vector<std::string> flags;
 		std::string display_name;
@@ -25,6 +26,15 @@ namespace wandbox {
 		bool runtime;
 		int insert_position;
 	};
+
+	typedef mendex::multi_index_container<
+		switch_trait,
+		mendex::indexed_by<
+			mendex::sequenced<>,
+			mendex::hashed_unique<mendex::member<switch_trait, std::string, &switch_trait::name>>,
+			mendex::hashed_non_unique<mendex::member<switch_trait, std::string, &switch_trait::group_name>>
+		>
+	> local_switch_t;
 	struct compiler_trait {
 		std::string name;
 		std::string language;
@@ -36,6 +46,7 @@ namespace wandbox {
 		std::string display_compile_command;
 		std::string jail_name;
 		std::vector<std::string> switches;
+		local_switch_t local_switches;
 		std::unordered_set<std::string> initial_checked;
 		bool displayable;
 		bool compiler_option_raw;

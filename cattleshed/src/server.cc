@@ -15,6 +15,7 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/optional.hpp>
 #include <boost/program_options.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -40,6 +41,25 @@ namespace wandbox {
 	namespace ptime = boost::posix_time;
 	namespace phx = boost::phoenix;
 	namespace qi = boost::spirit::qi;
+
+	template <typename KeyT, typename ValueT, typename Hash, typename Pred, typename Alloc, typename ActualKey>
+	boost::optional<const ValueT &> map_find(const std::unordered_map<KeyT, ValueT, Hash, Pred, Alloc> &m, ActualKey &&k) {
+		const auto ite = m.find(std::forward<ActualKey>(k));
+		if (ite == m.end()) return boost::none;
+		return ite->second;
+	}
+	template <typename KeyT, typename ValueT, typename Compare, typename Alloc, typename ActualKey>
+	boost::optional<const ValueT &> map_find(const std::map<KeyT, ValueT, Compare, Alloc> &m, ActualKey &&k) {
+		const auto ite = m.find(std::forward<ActualKey>(k));
+		if (ite == m.end()) return boost::none;
+		return ite->second;
+	}
+	template <int Nth, typename Map, typename KeyT>
+	boost::optional<const typename Map::value_type &> map_multi_index_find(const Map &m, KeyT &&k) {
+		const auto ite = m.template get<Nth>().find(k);
+		if (ite == m.template get<Nth>().end()) return boost::none;
+		return *ite;
+	}
 
 	using std::size_t;
 	using std::move;
@@ -307,34 +327,32 @@ namespace wandbox {
 					auto ccargs = target_compiler.compile_command;
 					auto progargs = target_compiler.run_command;
 
-					const auto it = received.find("CompilerOption");
-					if (it != received.end()) {
+					if (const auto r = map_find(received, "CompilerOption")) {
 						std::unordered_set<std::string> selected_switches;
 						{
-							auto ite = it->second.begin();
-							qi::parse(ite, it->second.end(), qi::as_string[+(qi::char_-','-'\n')] % ',', selected_switches);
+							auto ite = r->begin();
+							qi::parse(ite, r->end(), qi::as_string[+(qi::char_-','-'\n')] % ',', selected_switches);
 						}
-
 						for (const auto &sw: target_compiler.switches) {
 							if (selected_switches.count(sw) == 0) continue;
-							const auto ite = config.switches.find(sw);
-							if (ite == config.switches.end()) continue;
-							const auto f = [ite](std::vector<std::string> &args) {
-								if (ite->second.insert_position == 0) {
-									args.insert(args.end(), ite->second.flags.begin(), ite->second.flags.end());
+							auto t = map_multi_index_find<1>(target_compiler.local_switches, sw);
+							if (!t) t = map_find(config.switches, sw);
+							if (!t) continue;
+							const auto f = [t](std::vector<std::string> &args) {
+								if (t->insert_position == 0) {
+									args.insert(args.end(), t->flags.begin(), t->flags.end());
 								} else {
-									args.insert(args.begin() + ite->second.insert_position, ite->second.flags.begin(), ite->second.flags.end());
+									args.insert(args.begin() + t->insert_position, t->flags.begin(), t->flags.end());
 								}
 							};
-							f(ite->second.runtime ? progargs : ccargs);
+							f(t->runtime ? progargs : ccargs);
 						}
 					}
 
 					for (auto &x: { std::make_pair("CompilerOptionRaw", &ccargs), std::make_pair("RuntimeOptionRaw", &progargs) }) {
-						const auto it = received.find(x.first);
-						if (it != received.end()) {
+						if (const auto r = map_find(received, x.first)) {
 							std::vector<std::string> s;
-							auto input = it->second;
+							auto input = *r;
 							boost::algorithm::replace_all(input, "\r\n", "\n");
 							boost::algorithm::split(s, input, boost::is_any_of("\r\n"));
 							if (not s.empty() && s.back().empty()) {

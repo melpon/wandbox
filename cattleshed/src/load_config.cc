@@ -143,6 +143,34 @@ namespace cfg {
 		}
 	}
 
+	void load_switch_single(compiler_trait &ct, const cfg::object &o) {
+		using namespace detail;
+		switch_trait t;
+		t.group_name = t.name = get_str(o, "name");
+		t.display_name = get_str(o, "display-name");
+		t.runtime = get_bool(o, "runtime");
+		t.insert_position = get_int(o, "insert-position");
+		if (const auto v = find(o, "flags")) {
+			for (auto &&e: boost::get<cfg::array>(*v)) {
+				auto &&c = boost::get<cfg::object>(e);
+				t.name = get_str(c, "name");
+				t.flags = get_str_array(c, "values");
+				if (const auto v = find(c, "display-flags")) t.display_flags = boost::get<cfg::string>(*v);
+				else t.display_flags = boost::none;
+				if (const auto v = find(c, "display-name")) t.display_name = boost::get<cfg::string>(*v);
+				else t.display_name = t.name;
+				ct.local_switches.push_back(t);
+				ct.switches.push_back(t.name);
+			}
+		} else {
+			t.flags = get_str_array(o, "values");
+			if (const auto v = find(o, "display-flags")) t.display_flags = boost::get<cfg::string>(*v);
+			else t.display_flags = boost::none;
+			ct.local_switches.push_back(t);
+			ct.switches.push_back(t.name);
+		}
+	}
+
 	compiler_set load_compiler_trait(const cfg::value &o) {
 		using namespace detail;
 		compiler_set ret;
@@ -162,7 +190,17 @@ namespace cfg {
 			t.displayable = get_bool(y, "displayable");
 			t.compiler_option_raw = get_bool(y, "compiler-option-raw");
 			t.runtime_option_raw = get_bool(y, "runtime-option-raw");
-			t.switches = get_str_array(y, "switches");
+			if (const auto &v = find(y, "switches")) {
+				if (const auto *s = boost::get<cfg::string>(&*v)) {
+					t.switches = { *s };
+				} else for (const auto &s: boost::get<cfg::array>(*v)) {
+					if (const auto *k = boost::get<cfg::string>(&s)) {
+						t.switches.emplace_back(*k);
+					} else {
+						load_switch_single(t, boost::get<cfg::object>(s));
+					}
+				}
+			}
 			for (auto &x: get_str_array(y, "initial-checked")) t.initial_checked.insert(std::move(x));
 			const auto inherits = get_str_array(y, "inherits");
 			if (!inherits.empty()) inherit_map[t.name] = inherits;
@@ -201,7 +239,7 @@ namespace cfg {
 		return { get_int(o, "listen-port"), get_int(o, "max-connections"), get_str(o, "basedir"), get_str(o, "storedir") };
 	}
 
-	 std::unordered_map<std::string, jail_config> load_jail_config(const cfg::value &values) {
+	std::unordered_map<std::string, jail_config> load_jail_config(const cfg::value &values) {
 		using namespace detail;
 		std::unordered_map<std::string, jail_config> ret;
 		for (const auto &p: boost::get<cfg::object>(boost::get<cfg::object>(values).at("jail"))) {
@@ -498,8 +536,45 @@ namespace cfg {
 		std::vector<std::string> swlist;
 		{
 			std::unordered_set<std::string> used;
+			{
+				for (const auto &sw: compiler.local_switches.get<1>()) {
+					auto rng = compiler.local_switches.get<2>().equal_range(sw.group_name);
+					if (rng.first->name != sw.name) continue;
+					if (std::next(rng.first) != rng.second) {
+						std::vector<std::string> sel;
+						std::string def;
+						for (; rng.first != rng.second; ++rng.first) {
+							auto &&sw = *rng.first;
+							sel.emplace_back(
+								"{"
+									"\"name\":\"" + json_stringize(sw.name) + "\","
+									"\"display-name\":\"" + json_stringize(sw.display_name) + "\","
+									"\"display-flags\":\"" + json_stringize((sw.display_flags ? *sw.display_flags : boost::algorithm::join(sw.flags, " "))) + "\""
+								"}");
+							if (compiler.initial_checked.count(sw.name) != 0) def = sw.name;
+						}
+						swlist.emplace_back(
+							"{"
+								"\"type\":\"select\","
+								"\"default\":\"" + json_stringize(def) + "\","
+								"\"options\":[" + boost::algorithm::join(sel, ",") + "]"
+							"}");
+					} else {
+						auto &&sw = *rng.first;
+						swlist.emplace_back(
+							"{"
+								"\"name\":\"" + json_stringize(sw.name) + "\","
+								"\"type\":\"single\","
+								"\"display-name\":\"" + json_stringize(sw.display_name) + "\","
+								"\"display-flags\":\"" + json_stringize((sw.display_flags ? *sw.display_flags : boost::algorithm::join(sw.flags, " "))) + "\","
+								"\"default\":" + (compiler.initial_checked.count(sw.name) != 0 ? "true" : "false") +
+							"}");
+					}
+				}
+			}
 			for (const auto &swname: compiler.switches) {
 				if (used.count(swname) != 0) continue;
+				if (compiler.local_switches.get<1>().count(swname)) continue;
 				const auto ite = switches.find(swname);
 				if (ite == switches.end()) continue;
 				const auto &sw = ite->second;
