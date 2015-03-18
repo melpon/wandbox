@@ -5,7 +5,8 @@ var reTrim = /^(\s|\u00A0)+|(\s|\u00A0)+$/g;
 var PostEventSource = function (url, obj) {
   var eventsource = this,
       lastEventId = null,
-      cache = '';
+      cache = '',
+      data = [];
 
   if (!url || typeof url != 'string') {
     throw new SyntaxError('Not enough arguments');
@@ -45,17 +46,18 @@ var PostEventSource = function (url, obj) {
             responseText = this.responseText || '';
           } catch (e) {}
 
+          var index = responseText.lastIndexOf("\n")
+          responseText = responseText.substr(0, index + 1);
           // process this.responseText
           var parts = responseText.substr(cache.length).split("\n"),
               eventType = 'message',
-              data = [],
               i = 0,
               line = '';
 
           cache = responseText;
 
           // TODO handle 'event' (for buffer name), retry
-          for (; i < parts.length; i++) {
+          for (; i < parts.length - 1; i++) {
             line = parts[i];
             if (line.indexOf('event') == 0) {
               eventType = line.replace(/event:? ?/, '');

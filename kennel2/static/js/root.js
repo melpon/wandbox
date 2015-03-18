@@ -700,7 +700,6 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, stdin, outp
 
       var xs = document.URL.split('/');
       var abs_url =  xs[0] + "//" + xs[2] + url;
-      console.log(abs_url);
       var div = $('<div></div>').appendTo(self._permlink());
       twttr.widgets.createShareButton(
         abs_url,
