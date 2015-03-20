@@ -239,10 +239,16 @@ footer {
   margin: 0px;
 
   background-color: #000000;
-  color: #ffffff;
   height: 300px;
   overflow-y: scroll;
-  white-space: pre-wrap;
+}
+.output-window pre {
+  margin: 0px 0px 10px;
+  padding: 0px;
+
+  background-color: #000000;
+  color: #ffffff;
+  border: 0px;
   font-family: "Courier New", monospace;
 }
 .output-window .CompilerMessageE {

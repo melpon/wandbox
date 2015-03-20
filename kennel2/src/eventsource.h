@@ -36,7 +36,7 @@ public:
             buf += c;
             if (c == '\n') {
                 buf += name;
-                buf += ':';
+                buf += ": ";
             } else if (c == '\r') {
                 auto c2 = contents[i + 1];
                 if (c2 == '\n') {
@@ -44,7 +44,7 @@ public:
                     i += 1;
                 }
                 buf += name;
-                buf += ':';
+                buf += ": ";
             }
         }
         buf += '\n';

@@ -825,10 +825,10 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
       var p = preview_paragraph;
       p.text(p.text() + data.message)
     } else {
-      var p = $('<p>').addClass(data.type)
-                      .attr('data-type', data.type)
-                      .text(data.message)
-                      .appendTo(output);
+      var p = $('<pre>').addClass(data.type)
+                        .attr('data-type', data.type)
+                        .text(data.message)
+                        .appendTo(output);
       preview_paragraph = p;
     }
     output[0].scrollTop = output[0].scrollHeight;
