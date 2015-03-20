@@ -13,6 +13,16 @@
             ], 
             "display-flags": "-I/usr/local/sprout"
         }, 
+        "cpp-no-pedantic": {
+            "conflicts": [
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
+            ], 
+            "display-name": "no pedantic", 
+            "flags": [], 
+            "display-flags": ""
+        }, 
         "boost-1.49": {
             "conflicts": [
                 "boost-nothing", 
@@ -155,8 +165,7 @@
             ], 
             "display-name": "C++1z", 
             "flags": [
-                "-std=c++1z", 
-                "-pedantic"
+                "-std=c++1z"
             ]
         }, 
         "c++11": {
@@ -179,8 +188,7 @@
             ], 
             "display-name": "C++11", 
             "flags": [
-                "-std=c++11", 
-                "-pedantic"
+                "-std=c++11"
             ]
         }, 
         "gnu++11": {
@@ -224,9 +232,20 @@
             ], 
             "display-name": "C++0x", 
             "flags": [
-                "-std=c++0x", 
-                "-pedantic"
+                "-std=c++0x"
             ]
+        }, 
+        "cpp-pedantic": {
+            "conflicts": [
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
+            ], 
+            "display-name": "-pedantic", 
+            "flags": [
+                "-pedantic"
+            ], 
+            "display-flags": "-pedantic"
         }, 
         "boost-1.47": {
             "conflicts": [
@@ -340,8 +359,7 @@
             ], 
             "display-name": "C++03", 
             "flags": [
-                "-std=c++98", 
-                "-pedantic"
+                "-std=c++98"
             ]
         }, 
         "haskell-optimize": {
@@ -420,8 +438,7 @@
             ], 
             "display-name": "C++1y", 
             "flags": [
-                "-std=c++1y", 
-                "-pedantic"
+                "-std=c++1y"
             ]
         }, 
         "gnu++98": {
@@ -465,8 +482,7 @@
             ], 
             "display-name": "C89", 
             "flags": [
-                "-std=c89", 
-                "-pedantic-errors"
+                "-std=c89"
             ]
         }, 
         "coffee-compile-only": {
@@ -543,8 +559,7 @@
             ], 
             "display-name": "C11", 
             "flags": [
-                "-std=c11", 
-                "-pedantic-errors"
+                "-std=c11"
             ]
         }, 
         "gnu++0x": {
@@ -588,8 +603,7 @@
             ], 
             "display-name": "C99", 
             "flags": [
-                "-std=c99", 
-                "-pedantic-errors"
+                "-std=c99"
             ]
         }, 
         "boost-nothing-header": {
@@ -999,9 +1013,20 @@
             ], 
             "display-name": "C++14", 
             "flags": [
-                "-std=c++14", 
-                "-pedantic"
+                "-std=c++14"
             ]
+        }, 
+        "cpp-pedantic-errors": {
+            "conflicts": [
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
+            ], 
+            "display-name": "-pedantic-errors", 
+            "flags": [
+                "-pedantic-errors"
+            ], 
+            "display-flags": "-pedantic-errors"
         }
     }, 
     "compilers": [
@@ -1030,7 +1055,10 @@
                 "c++1y", 
                 "gnu++1y", 
                 "c++1z", 
-                "gnu++1z"
+                "gnu++1z", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-head/bin/g++", 
@@ -1050,7 +1078,8 @@
                 "warning", 
                 "gnu++1z", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc HEAD", 
             "version-command": [
@@ -1082,7 +1111,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.9.2/bin/g++", 
@@ -1102,7 +1134,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1133,7 +1166,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.9.1/bin/g++", 
@@ -1153,7 +1189,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1184,7 +1221,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.9.0/bin/g++", 
@@ -1204,7 +1244,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1235,7 +1276,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.8.2/bin/g++", 
@@ -1255,7 +1299,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1286,7 +1331,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.8.1/bin/g++", 
@@ -1306,7 +1354,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1335,7 +1384,10 @@
                 "c++98", 
                 "gnu++98", 
                 "c++11", 
-                "gnu++11"
+                "gnu++11", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.7.3/bin/g++", 
@@ -1355,7 +1407,8 @@
                 "warning", 
                 "gnu++11", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1384,7 +1437,10 @@
                 "c++98", 
                 "gnu++98", 
                 "c++0x", 
-                "gnu++0x"
+                "gnu++0x", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.6.4/bin/g++", 
@@ -1404,7 +1460,8 @@
                 "warning", 
                 "gnu++0x", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1432,7 +1489,10 @@
                 "c++98", 
                 "gnu++98", 
                 "c++0x", 
-                "gnu++0x"
+                "gnu++0x", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/gcc-4.5.4/bin/g++", 
@@ -1451,7 +1511,8 @@
             "initial-checked": [
                 "warning", 
                 "gnu++0x", 
-                "boost-1.57"
+                "boost-1.57", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1498,7 +1559,8 @@
             "initial-checked": [
                 "oldgcc-warning", 
                 "gnu++0x", 
-                "boost-1.57"
+                "boost-1.57", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1532,7 +1594,8 @@
             "display-compile-command": "g++ prog.cc", 
             "initial-checked": [
                 "oldgcc-warning", 
-                "gnu++0x"
+                "gnu++0x", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
             "version-command": [
@@ -1565,7 +1628,10 @@
                 "c++14", 
                 "gnu++14", 
                 "c++1z", 
-                "gnu++1z"
+                "gnu++1z", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-head/bin/run-clang++.sh", 
@@ -1590,7 +1656,8 @@
                 "warning", 
                 "gnu++1z", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang HEAD", 
             "version-command": [
@@ -1624,7 +1691,10 @@
                 "c++14", 
                 "gnu++14", 
                 "c++1z", 
-                "gnu++1z"
+                "gnu++1z", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-3.6/bin/run-clang++.sh", 
@@ -1649,7 +1719,8 @@
                 "warning", 
                 "gnu++1z", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
             "version-command": [
@@ -1683,7 +1754,10 @@
                 "c++14", 
                 "gnu++14", 
                 "c++1z", 
-                "gnu++1z"
+                "gnu++1z", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-3.5/bin/run-clang++.sh", 
@@ -1708,7 +1782,8 @@
                 "warning", 
                 "gnu++1z", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
             "version-command": [
@@ -1740,7 +1815,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-3.4/bin/clang++", 
@@ -1765,7 +1843,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
             "version-command": [
@@ -1797,7 +1876,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-3.3/bin/clang++", 
@@ -1822,7 +1904,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
             "version-command": [
@@ -1854,7 +1937,10 @@
                 "c++11", 
                 "gnu++11", 
                 "c++1y", 
-                "gnu++1y"
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-3.2/bin/clang++", 
@@ -1878,7 +1964,8 @@
                 "warning", 
                 "gnu++1y", 
                 "boost-1.57", 
-                "sprout"
+                "sprout", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
             "version-command": [
@@ -1907,7 +1994,10 @@
                 "c++98", 
                 "gnu++98", 
                 "c++11", 
-                "gnu++11"
+                "gnu++11", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-3.1/bin/clang++", 
@@ -1930,7 +2020,8 @@
             "initial-checked": [
                 "warning", 
                 "gnu++11", 
-                "boost-1.57"
+                "boost-1.57", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
             "version-command": [
@@ -1959,7 +2050,10 @@
                 "c++98", 
                 "gnu++98", 
                 "c++11", 
-                "gnu++11"
+                "gnu++11", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
             ], 
             "compile-command": [
                 "/usr/local/llvm-3.0/bin/clang++", 
@@ -1982,7 +2076,8 @@
             "initial-checked": [
                 "warning", 
                 "gnu++11", 
-                "boost-1.57"
+                "boost-1.57", 
+                "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
             "version-command": [
