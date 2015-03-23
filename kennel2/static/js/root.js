@@ -799,7 +799,7 @@ ResultWindow.prototype.post_code = function(compiler, code, stdin) {
   var finalize = function() {
     src.close();
 
-    var outputs = self._output_window().find('p').map(function(n,e) {
+    var outputs = self._output_window().find('pre').map(function(n,e) {
         return { 'type': $(e).attr('data-type'), 'output': $(e).text() };
     });
     self.permlink(compiler_info, code, stdin, outputs);
@@ -850,10 +850,10 @@ ResultWindow.prototype.set_code = function(compiler, code, stdin, outputs) {
   $.each(outputs, function(n,e) {
     var type = e.type;
     var output = e.output;
-    $('<p>').addClass(type)
-            .attr('data-type', type)
-            .text(output)
-            .appendTo(self._output_window());
+    $('<pre>').addClass(type)
+              .attr('data-type', type)
+              .text(output)
+              .appendTo(self._output_window());
   });
 }
 
