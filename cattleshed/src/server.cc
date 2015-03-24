@@ -531,7 +531,7 @@ namespace wandbox {
 							struct tm l;
 							::localtime_r(&t, &l);
 							::strftime(s, 64, "%Y%m%d", &l);
-							aiocb->aio_fildes = recursive_create_open_at(::dirfd(d.get()), "./" + config.system.storedir + s + "/" + unique_name + "/" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
+							aiocb->aio_fildes = recursive_create_open_at(::dirfd(d.get()), "./" + config.system.storedir + "/" + s + "/" + unique_name + "/" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
 						}
 						if (aiocb->aio_fildes == -1) {
 							std::clog << "[" << sock.get() << "]" << "failed to write run log '" << unique_name << "' [" << this << "]" << std::endl;
