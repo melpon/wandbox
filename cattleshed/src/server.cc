@@ -584,6 +584,13 @@ namespace wandbox {
 
 	private:
 		static int recursive_create_open_at(int at, const std::string &filename, int flags, int dirmode, int filemode) {
+			return with_recursive_create_at(at, filename, dirmode, [&](int at, const char *file) { return ::openat(at, file, flags, filemode); });
+		}
+		static int mkdir_p_at(int at, const std::string &dirname, int dirmode) {
+			return with_recursive_create_at(at, dirname, dirmode, [&](int at, const char *dir) { return ::mkdirat(at, dir, dirmode); });
+		}
+		template <typename Fn>
+		static int with_recursive_create_at(int at, const std::string &filename, int dirmode, Fn &&callback) {
 			// FIXME: must canonicalize invalid UTF-8 sequence in `filename'
 			if (filename[0] == '/') return -1;
 
@@ -601,7 +608,7 @@ namespace wandbox {
 			const auto targetfile = std::move(dirs.back());
 			dirs.pop_back();
 			errno = 0;
-			if (dirs.empty()) return ::openat(at, targetfile.c_str(), flags, filemode);
+			if (dirs.empty()) return std::forward<Fn>(callback)(at, targetfile.c_str());
 
 			dirfds.reserve(dirs.size());
 
@@ -623,7 +630,7 @@ namespace wandbox {
 			}
 
 			errno = 0;
-			int newfd = ::openat(dirfds.empty() ? at : dirfds.back(), targetfile.c_str(), flags, filemode);
+			int newfd = std::forward<Fn>(callback)(dirfds.empty() ? at : dirfds.back(), targetfile.c_str());
 			closeall();
 			return newfd;
 		}
