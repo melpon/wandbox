@@ -26,7 +26,7 @@ xyzzy
 Wandbox as a Background Infrastructure
 --------------------------------------
 
-You can use Wandbox API from another services (that is, HTTP response header has ``Access-Control-Allow-Origin: *``).
+You can use Wandbox API from another services (that is, Wandbox API's HTTP response header has ``Access-Control-Allow-Origin: *``).
 
 Following services are using Wandbox on background.
 
