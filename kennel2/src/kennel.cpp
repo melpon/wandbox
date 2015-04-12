@@ -1,12 +1,14 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <algorithm>
 #include "libs.h"
 #include "root.h"
 #include "nojs_root.h"
 #include "protocol.h"
 #include "eventsource.h"
 #include "permlink.h"
+#include "../../cattleshed/src/syslogstream.cc"
 
 namespace cppcms {
     template<>
@@ -94,13 +96,13 @@ public:
         std::string json;
         send_command(service(), protos, [&json](const booster::system::error_code& e, const protocol& proto) {
             if (e)
-                return (void)(std::cout << e.message() << std::endl);
+                return (void)(std::clog << e.message() << std::endl);
             json = proto.contents;
         }, 1);
         std::stringstream ss(json);
         cppcms::json::value value;
         value.load(ss, true, nullptr);
-        //value.save(std::cout, cppcms::json::readable);
+        //value.save(std::clog, cppcms::json::readable);
         return value;
     }
 
@@ -167,9 +169,9 @@ public:
         es.send_header();
         send_command_async(service(), protos, [es](const booster::system::error_code& e, const protocol& proto) {
             if (e)
-                return (void)(std::cout << e.message() << std::endl);
+                return (void)(std::clog << e.message() << std::endl);
             es.send_data(proto.command + ":" + proto.contents, true);
-            std::cout << proto.command << ":" << proto.contents << std::endl;
+            std::clog << proto.command << ":" << proto.contents << std::endl;
         });
     }
     static std::string make_random_name() {
@@ -319,7 +321,7 @@ public:
         outputs.array({});
         send_command(service(), protos, [this, &result, &outputs, save](const booster::system::error_code& e, const protocol& proto) {
             if (e)
-                return (void)(std::cout << e.message() << std::endl);
+                return (void)(std::clog << e.message() << std::endl);
 
             update_compile_result(result, proto);
 
@@ -415,6 +417,17 @@ public:
 };
 
 int main(int argc, char** argv) try {
+    std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*){});
+
+    {
+        const auto ite = std::find(argv, argv+argc, std::string("--syslog"));
+        if (ite != argv+argc) {
+            std::clog.rdbuf(new wandbox::syslogstreambuf("kennel2", LOG_PID, LOG_DAEMON, LOG_DEBUG));
+            std::rotate(ite, ite+1, argv+argc);
+            --argc;
+        }
+    }
+
     cppcms::service service(argc, argv);
 
     permlink pl(service);

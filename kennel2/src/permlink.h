@@ -84,7 +84,7 @@ public:
             << cppdb::exec;
 
         auto code_id = stat.last_insert_id();
-        std::cout << code_id << std::endl;
+        //std::clog << code_id << std::endl;
 
         std::stringstream ss;
         compiler_info.save(ss, cppcms::json::compact);
@@ -94,7 +94,7 @@ public:
             << code_id
             << ss.str()
             << cppdb::exec;
-        std::cout << "compiler_info id: " << stat.last_insert_id() << std::endl;
+        //std::clog << "compiler_info id: " << stat.last_insert_id() << std::endl;
 
         stat = sql <<
             "INSERT INTO link (permlink, code_id) "
@@ -104,7 +104,7 @@ public:
             << cppdb::exec;
 
         auto link_id = stat.last_insert_id();
-        std::cout << link_id << std::endl;
+        //std::clog << link_id << std::endl;
 
         int order = 1;
         stat = sql <<

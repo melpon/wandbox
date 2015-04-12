@@ -98,6 +98,7 @@ namespace wandbox {
 		struct semaphore_object {
 			template <typename F>
 			semaphore_object(asio::io_service &aio, const std::shared_ptr<asio::posix::stream_descriptor> &des, F &&f): aio(aio), des(des) {
+				std::clog << "[" << (void *)this << "]" << " semaphore create" << std::endl;
 				const auto b = std::make_shared< std::array<unsigned char, 8> >();
 				asio::async_read(*des, asio::buffer(*b), std::bind<void>([](F f, error_code ec, std::shared_ptr<void>) { if (!ec) f(); }, std::forward<F>(f), _1, b));
 			}
@@ -108,6 +109,7 @@ namespace wandbox {
 			~semaphore_object() noexcept try {
 				const std::uint64_t b = 1;
 				asio::write(*des, asio::buffer(&b, sizeof(b)));
+				std::clog << "[" << (void *)this << "]" << " semaphore destroy" << std::endl;
 			} catch (...) {
 			}
 			asio::io_service &aio;
@@ -500,7 +502,7 @@ namespace wandbox {
 					if (current_source.filename.empty()) {
 						current_source.filename = target_compiler.output_file;
 					}
-					std::clog << "[" << sock.get() << "]" << "write file '" << current_source.filename << "' [" << this << "]" << std::endl;
+					std::clog << "[" << sock.get() << "]" << "writing file '" << current_source.filename << "' [" << this << "]" << std::endl;
 
 					{
 						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
@@ -524,6 +526,7 @@ namespace wandbox {
 						::close(aiocb->aio_fildes);
 					} {
 						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
+						std::clog << "[" << sock.get() << "]" << "create log directory '" << unique_name << "' [" << this << "]" << std::endl;
 						{
 							auto d = opendir("/");
 							char s[64];
@@ -545,6 +548,7 @@ namespace wandbox {
 								yield sigs->async_wait(move(*this));
 							} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
 							::close(aiocb->aio_fildes);
+							std::clog << "[" << sock.get() << "]" << "write success '" << unique_name << "' [" << this << "]" << std::endl;
 						}
 					}
 				}
@@ -687,6 +691,7 @@ namespace wandbox {
 					auto s = "[" + boost::algorithm::join(move(versions), ",") + "]";
 					sockbuf->async_write_command("VersionResult", move(s), move(*this));
 				}
+				std::clog << "[" << sock.get() << "]" << "finished [" << this << "]" << std::endl;
 			}
 		}
 		std::shared_ptr<asio::io_service> aio;

@@ -10,7 +10,7 @@ class eventsource {
     void send_chunk(const std::string& buf, bool flush) const {
         std::ostringstream oss;
         oss << std::hex << buf.size();
-        std::cout << oss.str() << "\r\n" << buf << "\r\n" << std::flush;
+        //std::clog << oss.str() << "\r\n" << buf << "\r\n" << std::flush;
         context->response().out() << oss.str() << "\r\n" << buf << "\r\n";
         if (flush)
             context->response().out() << std::flush;
