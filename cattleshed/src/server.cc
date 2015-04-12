@@ -476,7 +476,6 @@ namespace wandbox {
 			   sigs(move(sigs)),
 			   unique_name(),
 			   workdir(),
-			   tmpdir(),
 			   received(move(received)),
 			   aiocb(std::make_shared<struct aiocb>()),
 			   target_compiler(target_compiler),
@@ -497,16 +496,6 @@ namespace wandbox {
 		program_writer &operator =(program_writer &&) = default;
 		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
-				{
-					std::clog << "[" << sock.get() << "]" << "create log directory '" << unique_name << "' [" << this << "]" << std::endl;
-					auto d = opendir("/");
-					char s[64];
-					time_t t = ::time(0);
-					struct tm l;
-					::localtime_r(&t, &l);
-					::strftime(s, 64, "%Y%m%d", &l);
-					tmpdir = mkdir_p_at(::dirfd(d.get()), "./" + config.system.storedir + "/" + s + "/" + unique_name, 0700);
-				}
 				while (!sources.empty()) {
 					current_source = std::move(sources.front());
 					sources.pop_front();
@@ -537,8 +526,15 @@ namespace wandbox {
 						::close(aiocb->aio_fildes);
 					} {
 						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
+						std::clog << "[" << sock.get() << "]" << "create log directory '" << unique_name << "' [" << this << "]" << std::endl;
 						{
-							aiocb->aio_fildes = recursive_create_open_at(::dirfd(tmpdir.get()), "./" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
+							auto d = opendir("/");
+							char s[64];
+							time_t t = ::time(0);
+							struct tm l;
+							::localtime_r(&t, &l);
+							::strftime(s, 64, "%Y%m%d", &l);
+							aiocb->aio_fildes = recursive_create_open_at(::dirfd(d.get()), "./" + config.system.storedir + "/" + s + "/" + unique_name + "/" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
 						}
 						if (aiocb->aio_fildes == -1) {
 							std::clog << "[" << sock.get() << "]" << "failed to write run log '" << unique_name << "' [" << this << "]" << std::endl;
@@ -564,7 +560,7 @@ namespace wandbox {
 		std::shared_ptr<asio::posix::stream_descriptor> file;
 		std::shared_ptr<asio::signal_set> sigs;
 		std::string unique_name;
-		std::shared_ptr<DIR> workdir, tmpdir;
+		std::shared_ptr<DIR> workdir;
 		std::unordered_map<std::string, std::string> received;
 		std::shared_ptr<struct aiocb> aiocb;
 		compiler_trait target_compiler;
@@ -588,18 +584,6 @@ namespace wandbox {
 
 	private:
 		static int recursive_create_open_at(int at, const std::string &filename, int flags, int dirmode, int filemode) {
-			return with_recursive_create_at(at, filename, dirmode, [&](int at, const char *file) { return ::openat(at, file, flags, filemode); });
-		}
-		static std::shared_ptr<DIR> mkdir_p_at(int at, const std::string &dirname, int dirmode) {
-			int fd = with_recursive_create_at(at, dirname, dirmode, [&](int at, const char *dir) {
-				::mkdirat(at, dir, dirmode);
-				return ::openat(at, dir, O_RDWR|O_DIRECTORY);
-			});
-			if (fd == -1) return {};
-			return std::shared_ptr<DIR>(fdopendir(fd), &::closedir);
-		}
-		template <typename Fn>
-		static int with_recursive_create_at(int at, const std::string &filename, int dirmode, Fn &&callback) {
 			// FIXME: must canonicalize invalid UTF-8 sequence in `filename'
 			if (filename[0] == '/') return -1;
 
@@ -617,7 +601,7 @@ namespace wandbox {
 			const auto targetfile = std::move(dirs.back());
 			dirs.pop_back();
 			errno = 0;
-			if (dirs.empty()) return std::forward<Fn>(callback)(at, targetfile.c_str());
+			if (dirs.empty()) return ::openat(at, targetfile.c_str(), flags, filemode);
 
 			dirfds.reserve(dirs.size());
 
@@ -639,7 +623,7 @@ namespace wandbox {
 			}
 
 			errno = 0;
-			int newfd = std::forward<Fn>(callback)(dirfds.empty() ? at : dirfds.back(), targetfile.c_str());
+			int newfd = ::openat(dirfds.empty() ? at : dirfds.back(), targetfile.c_str(), flags, filemode);
 			closeall();
 			return newfd;
 		}
