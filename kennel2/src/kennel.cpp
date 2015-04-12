@@ -171,7 +171,7 @@ public:
             if (e)
                 return (void)(std::clog << e.message() << std::endl);
             es.send_data(proto.command + ":" + proto.contents, true);
-            std::clog << proto.command << ":" << proto.contents << std::endl;
+            //std::clog << proto.command << ":" << proto.contents << std::endl;
         });
     }
     static std::string make_random_name() {
