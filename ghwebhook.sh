@@ -14,7 +14,7 @@ git clean -xfdq .
 autoreconf -i
 CC=/usr/local/gcc-4.8.2/bin/gcc CXX="/usr/local/gcc-4.8.2/bin/g++ -static-libstdc++ -static-libgcc" ./configure --prefix=/usr/local/cattleshed --with-boost=/usr/local/boost-1.57.0
 make
-echo "exec /usr/local/cattleshed/bin/cattleshed" > runserver.sh
+echo "exec /usr/local/cattleshed/bin/cattleshed --syslog" > runserver.sh
 cd ../
 
 cd kennel2
