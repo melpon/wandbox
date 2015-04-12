@@ -13,7 +13,7 @@ function post_code(compiler, result_container) {
 
 function update_compile_command(compiler) {
   var command = compiler.get_selected_compiler_element().attr('data-command');
-  var compiler_name = compiler.get_selected_compiler_element().text();
+  var compiler_name = compiler.get_selected_compiler_element().attr('data-compiler');
   var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
   var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
   var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
@@ -62,7 +62,7 @@ $(function() {
   };
 
   // create compiler
-  var compiler = new Compiler('#compiler', '#compile-options');
+  var compiler = new Compiler('#wandbox-compiler', '#wandbox-compile-options');
   compiler.compiler_changed = function() {
     if (!USING_PERMLINK)
       save('wandbox.compiler.current', compiler.serialize_current());
@@ -140,17 +140,36 @@ function to_id(id) {
 
 function Compiler(compiler_id, compile_options_id) {
   var self = this;
-
-  this.compiler_id = compiler_id;
-  this.compile_options_id = compile_options_id;
-
-  $(this.compiler_id).change(function() {
-    $(self.compile_options_id).children().removeClass('selected');
-    self._compile_options().addClass('selected');
+  $('.wandbox-dropdown-area').click(function (e) {
+    if (!$(e.target).hasClass('wandbox-dropdown-listitem')) {
+      e.stopPropagation();
+    }
+  });
+  $('a.wandbox-dropdown-listitem').hover(function (e) {
+    $('.wandbox-dropdown-version').text($(e.target).attr('data-display-name'));
+    $('.wandbox-dropdown-version').attr('title', $(e.target).attr('data-display-name'));
+  });
+  $('a.wandbox-dropdown-listitem').on('shown.bs.tab', function (e) {
+    $('.wandbox-current-compiler-text').text($(e.target).attr('data-display-name'));
+    $('.wandbox-current-compiler-text').attr('title', $(e.target).attr('data-display-name'));
+    // active language
+    var lang = $($(e.target).attr('href')).attr('data-language');
+    var tab_id = LANGUAGE_NAME_TO_TAB_ID[lang];
+    var $lang = $('.wandbox-dropdown-lang-area a[href="#' + tab_id + '"]');
+    $lang.tab('show');
 
     if (self.compiler_changed)
       self.compiler_changed();
   });
+  $('.wandbox-dropdown-lang-area a').click(function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).tab('show');
+  });
+
+  this.compiler_id = compiler_id;
+  this.compile_options_id = compile_options_id;
+
   $(this.compile_options_id + ' input').change(function() {
     if (self.compile_option_changed)
       self.compile_option_changed();
@@ -191,21 +210,22 @@ Compiler.prototype._compiler = function() {
 }
 
 Compiler.prototype.get_selected_compiler = function() {
-  return this.get_selected_compiler_element().val();
+  return this.get_selected_compiler_element().attr('data-compiler');
 }
 
 Compiler.prototype.get_selected_compiler_element = function() {
-  return $(this.compiler_id + ' > :enabled:eq(' + $(this.compiler_id)[0].selectedIndex + ')');
+  return $(this.compile_options_id + ' .active');
 }
 
 Compiler.prototype.set_compiler = function(compiler) {
-  this._compiler().val(compiler);
-  this._compiler().change();
+  var anchor = this._compiler().find('a[href="#' + COMPILER_NAME_TO_TAB_ID[compiler] + '"]');
+  if (anchor.length == 0)
+    anchor = this._compiler().find('a[href="#' + DEFAULT_COMPILER + '"]');
+  anchor.tab('show');
 }
 
 Compiler.prototype._compile_options = function() {
-  var compiler = this.get_selected_compiler();
-  return $(this.compile_options_id + ' div[data-compiler=' + to_id(compiler) + ']');
+  return this.get_selected_compiler_element();
 }
 
 Compiler.prototype.get_checked_compile_options = function() {
@@ -285,65 +305,6 @@ Compiler.prototype.deserialize = function(settings) {
   this.set_selected_compiler_option_raw(settings.compiler_option_raw);
   this.set_selected_runtime_option_raw(settings.runtime_option_raw);
 }
-
-$(function() {
-  jQuery.fn.toggleOption = function(show) {
-    jQuery(this).toggle(show);
-    if (show) {
-      if (jQuery(this).parent('span.toggleOption').length != 0)
-        jQuery(this).unwrap();
-    } else {
-      if (jQuery(this).parent('span.toggleOption').length == 0)
-        jQuery(this).wrap('<span class="toggleOption" style="display: none;" />');
-    }
-  };
-
-  $.cookie.json = true;
-
-  var matchedOption = function(option, searchText) {
-    var matched = function(str) {
-      return str.toLowerCase().indexOf(searchText.toLowerCase()) >= 0;
-    };
-    if (matched(option.attr('value'))) return true;
-    if (matched(option.attr('data-language'))) return true;
-    if (matched(option.attr('data-display-name'))) return true;
-    return false;
-  };
-  var changeCandidateList = function(searchText, excepted) {
-    var count = 0;
-    $('#compiler option').each(function() {
-      var option = $(this);
-      if (matchedOption(option, searchText) ||
-          excepted && option.attr('value') == excepted) {
-        option.toggleOption(true);
-        count += 1;
-      } else {
-        option.toggleOption(false);
-      }
-    });
-    $('#compiler').attr('size', count > 5 ? count : 5);
-    $('#compiler').change();
-
-    $.cookie('wandbox.compiler.search', { text: searchText }, { expires: 365, path: '/wandbox' });
-  };
-  $('#typeahead-search').keyup(function() {
-    changeCandidateList($(this).val());
-  });
-  $('#typeahead-search').change(function() {
-    changeCandidateList($(this).val());
-  });
-
-  var search = $.cookie('wandbox.compiler.search');
-  if (search) {
-    $('#typeahead-search').val(search.text);
-    changeCandidateList($('#typeahead-search').val(), JSON_CODE && JSON_CODE.compiler);
-  }
-
-  $('#typeahead-clear').click(function() {
-    $('#typeahead-search').val('');
-    $('#typeahead-search').change();
-  });
-});
 
 /* editor() */
 
@@ -754,12 +715,12 @@ ResultWindow.prototype.to_compiler_info = function(compiler) {
   var runtime_option_raw = compiler.get_selected_runtime_option_raw();
 
   var compiler_data = (function(compiler) {
-    var data = compiler.get_selected_compiler_element().html();
+    var data = compiler.get_selected_compiler_element().attr('data-full-name');
     return $('<div><p>' + data + '</p></div>');
   })(compiler);
 
   var compile_command_code = (function(compiler) {
-    var command = compiler.get_selected_compiler_element().html();
+    var command = compiler.get_selected_compiler_element().attr('data-full-name');
     var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
     var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
     var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
@@ -884,5 +845,8 @@ Stdin.prototype.get_stdin = function() {
   return this._stdin();
 }
 Stdin.prototype.set_stdin = function(value) {
+  if (value.length != 0) {
+    $('#wandbox-stdin-body').addClass('in');
+  }
   this._stdin(value);
 }

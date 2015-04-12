@@ -117,6 +117,20 @@ var EDITOR_MODE_MAPPING = {
   'Elixir': 'text/x-ruby',
   'Scala': 'text/x-scala',
 };
+var COMPILER_NAME_TO_TAB_ID = {
+  <% foreach info in compinfos %>
+    <% item %>
+      '<%= info.first %>': '<%= info.second.tab_id %>',
+    <% end item %>
+  <% end foreach %>
+};
+var LANGUAGE_NAME_TO_TAB_ID = {
+  <% foreach lang in langinfos %>
+    <% item %>
+      '<%= lang.first %>': '<%= lang.second.tab_id %>',
+    <% end item %>
+  <% end foreach %>
+};
 </script>
 
 <script src="<% url "static" %>/js/root.js"></script>
@@ -166,18 +180,10 @@ var EDITOR_MODE_MAPPING = {
     <% include editor() %>
     <div class="row">
       <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-12">
-            <p id="compiler_name"></p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <p id="compile_command"></p>
-          </div>
-        </div>
+        <p id="compile_command"></p>
       </div>
     </div>
+    <% include stdin() %>
     <div class="row">
       <div class="col-md-12">
         <a href="<% url "compile" %>" class="btn btn-default" id="compile">Run (or Ctrl+Enter)</a>
@@ -185,7 +191,6 @@ var EDITOR_MODE_MAPPING = {
       </div>
     </div>
     <% include result_container() %>
-    <% include stdin() %>
   </div>
 </div>
 <% end template %>
@@ -193,31 +198,74 @@ var EDITOR_MODE_MAPPING = {
 <% template compiler() %>
 <div class="row">
   <div class="col-md-12">
-    <label>choose compiler:</label>
-    <div class="input-group">
-      <input class="form-control" id="typeahead-search" type="text" placeholder="Search"></input>
-      <span class="input-group-btn">
-        <button class="btn btn-default" id="typeahead-clear" type="button">×</button>
-      </span>
+    <div id="wandbox-compiler" class="dropdown">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-language" data-toggle="dropdown" aria-expanded="true">
+        <span class="wandbox-current-compiler-text"></span>
+        <span class="caret"></span>
+      </button>
+      <div class="dropdown-menu wandbox-dropdown-area" role="menu" aria-labelledby="dropdown-language">
+        <div class="wandbox-dropdown-version"></div>
+        <div class="clearfix"></div>
+        <div class="wandbox-dropdown-detail-area">
+          <div class="tab-content">
+            <% foreach lang in langinfos %>
+              <% item %>
+                <div id="<%= lang.second.tab_id %>" role="tabpanel" class="tab-pane">
+                  <legend><%= lang.first %></legend>
+                  <ul>
+                    <% foreach info in lang.second.compilers %>
+                      <% item %>
+                        <li>
+                          <a
+                            class="wandbox-dropdown-listitem"
+                            href="#<%= info | ext lookup_compiler_tab_id %>"
+                            data-toggle="tab"
+                            data-display-name="<%= info | ext getstr("display-name") %> <%= info | ext getstr("version") %>"
+                            data-name="<%= info | ext getstr("name") %>"
+                          >
+                            <%= info | ext getstr("display-name") %> <%= info | ext getstr("version") %>
+                          </a>
+                        </li>
+                      <% end item %>
+                    <% end foreach %>
+                  </ul>
+                </div>
+              <% end item %>
+            <% end foreach %>
+          </div>
+        </div>
+        <div class="wandbox-dropdown-lang-area">
+          <legend>Languages</legend>
+          <ul>
+            <% foreach lang in vertical_langinfos %>
+              <% item %>
+                <li>
+                  <a href="#<%= lang->tab_id %>" data-toggle="tab"><%= lang->language %></a>
+                </li>
+              <% end item %>
+            <% end foreach %>
+          </ul>
+        </div>
+      </div>
     </div>
-    <select class="wandbox-select" size=<%= compiler_infos.array().size() %> id="compiler">
-      <% foreach info in compiler_infos.array() %>
-        <% item %>
-          <option value="<%= info | ext getstr("name") %>" data-command="<%= info | ext getstr("display-compile-command") %>" data-language="<%= info | ext getstr("language") %>" data-display-name="<%= info | ext getstr("display-name") %>">
-            [<%= info | ext getstr("language") %>] <%= info | ext getstr("display-name") %> <%= info | ext getstr("version") %>
-          </option>
-        <% end %>
-      <% end %>
-    </select>
   </div>
 </div>
-<div .row>
+<div class="row">
   <div class="col-md-12">
-    <div id="compile-options">
-      <% foreach info in compiler_infos.array() %>
+    <div id="wandbox-compile-options" class="tab-content">
+      <% foreach info in compinfos %>
         <% item %>
-          <div data-compiler="<%= info | ext getstr("name") %>">
-            <% c++ for (auto&& sw: info["switches"].array()) { %>
+          <div
+            id="<%= info.second.tab_id %>"
+            role="tabpanel"
+            class="tab-pane"
+            data-compiler="<%= info.first %>"
+            data-language="<%= info.second.info | ext getstr("language") %>"
+            data-display-name="<%= info.second.info | ext getstr("display-name") %>"
+            data-command="<%= info.second.info | ext getstr("display-compile-command") %>"
+            data-full-name="<%= info.second.info | ext make_full_name %>"
+          >
+            <% c++ for (auto&& sw: info.second.info["switches"].array()) { %>
               <% c++ content.sw = sw; %>
               <% if (sw["type"] == "single") %>
                 <div class="checkbox">
@@ -240,11 +288,11 @@ var EDITOR_MODE_MAPPING = {
                 </div>
               <% end %>
             <% c++ } %>
-            <% if (info["compiler-option-raw"].boolean()) %>
+            <% if (info.second.info["compiler-option-raw"].boolean()) %>
               <label>extra options:</label>
               <div class="option-raw compiler-option-raw"></div>
             <% end %>
-            <% if (info["runtime-option-raw"].boolean()) %>
+            <% if (info.second.info["runtime-option-raw"].boolean()) %>
               <label>extra options:</label>
               <div class="option-raw runtime-option-raw"></div>
             <% end %>
@@ -320,8 +368,18 @@ var EDITOR_MODE_MAPPING = {
 <% template stdin() %>
 <div class="row">
   <div class="col-md-10">
-    <label>input stdin:</label>
-    <div class="stdin" id="stdin"></div>
+    <div class="panel-group" role="tablist" id="wandbox-stdin-accordion" aria-multiselectable="true">
+      <div class="panel panel-default">
+        <a id="wandbox-stdin-button" data-toggle="collapse" data-parent="#wandbox-stdin-accordion" href="#wandbox-stdin-body" aria-expanded="true">
+          Stdin
+        </a>
+        <div id="wandbox-stdin-body" class="panel-collapse collapse">
+          <div class="panel-body">
+            <div class="stdin" id="stdin"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <% end template %>

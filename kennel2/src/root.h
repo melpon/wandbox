@@ -11,6 +11,42 @@ namespace content {
             permlink = "null";
         }
 
+        void set_compiler_infos(cppcms::json::value compiler_infos) {
+            this->compiler_infos = compiler_infos;
+            {
+                int n = 0;
+                for (auto&& info: compiler_infos.array()) {
+                    auto lang = info["language"].str();
+                    langinfos[lang].language = lang;
+                    langinfos[lang].compilers.push_back(info);
+                    langinfos[lang].tab_id = "language-tab-" + std::to_string(n);
+                    n++;
+                }
+            }
+            {
+                const int width = 2;
+                std::vector<language_info*> tmp_langinfos(langinfos.size());
+                std::transform(langinfos.begin(), langinfos.end(), tmp_langinfos.begin(), [](std::map<std::string, language_info>::value_type& v) {
+                    return &v.second;
+                });
+                vertical_langinfos.resize(langinfos.size());
+                int x = 0;
+                for (int i = 0; i < width; i++) {
+                    for (int n = i; n < (int)langinfos.size(); n += width) {
+                        vertical_langinfos[n] = tmp_langinfos[x++];
+                    }
+                }
+            }
+            {
+                int n = 0;
+                for (auto&& info: compiler_infos.array()) {
+                    auto name = info["name"].str();
+                    compinfos[name].info = info;
+                    compinfos[name].tab_id = "compiler-tab-" + std::to_string(n);
+                    n++;
+                }
+            }
+        }
         cppcms::json::value compiler_infos;
         cppcms::json::value sw; // loop variable
         cppcms::json::value opt; // loop variable
@@ -34,6 +70,27 @@ namespace content {
         }
         std::string twitter_title;
         std::string twitter_description;
+
+        struct language_info {
+            std::string language;
+            std::vector<cppcms::json::value> compilers;
+            std::string tab_id;
+        };
+        std::map<std::string, language_info> langinfos;
+        std::vector<language_info*> vertical_langinfos;
+        struct compiler_info {
+            cppcms::json::value info;
+            std::string tab_id;
+        };
+        std::map<std::string, compiler_info> compinfos;
+
+        std::string lookup_compiler_tab_id(cppcms::json::value& info) {
+            return compinfos[info["name"].str()].tab_id;
+        }
+
+        std::string make_full_name(cppcms::json::value& info) {
+            return "[" + info["language"].str() + "] " + info["display-name"].str() + " " + info["version"].str();
+        }
     };
 }
 

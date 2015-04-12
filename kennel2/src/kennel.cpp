@@ -108,7 +108,7 @@ public:
 
     void root() {
         content::root c;
-        c.compiler_infos = get_compiler_infos_or_cache();
+        c.set_compiler_infos(get_compiler_infos_or_cache());
         render("root", c);
     }
     static std::vector<protocol> make_protocols(const cppcms::json::value& value) {
@@ -220,7 +220,7 @@ public:
     }
     void get_permlink(std::string permlink_name) {
         content::root c;
-        c.compiler_infos = get_compiler_infos_or_cache();
+        c.set_compiler_infos(get_compiler_infos_or_cache());
 
         permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
@@ -370,7 +370,7 @@ public:
 
     void nojs_list() {
         content::root c;
-        c.compiler_infos = get_compiler_infos_or_cache();
+        c.set_compiler_infos(get_compiler_infos_or_cache());
         render("nojs_list", c);
     }
 
