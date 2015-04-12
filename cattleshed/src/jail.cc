@@ -199,6 +199,7 @@ namespace jail {
 				sigfillset(&sigs);
 				sigprocmask(SIG_UNBLOCK, &sigs, nullptr);
 			}
+			setsid();
 			if (argv[0]) execv(argv[0], argv);
 			else execl("/bin/sh", "/bin/sh", (void *)0);
 			exit_error("execve");
