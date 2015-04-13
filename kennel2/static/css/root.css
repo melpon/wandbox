@@ -296,7 +296,7 @@ footer {
 .wandbox-dropdown-detail-area {
   float: left;
   width: 150px;
-  overflow: scroll;
+  overflow: hidden;
   white-space: nowrap;
 }
 .wandbox-dropdown-detail-area-page {
