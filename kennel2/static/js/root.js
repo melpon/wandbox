@@ -331,6 +331,7 @@ function Editor(settings_id) {
 }
 
 Editor.prototype._to_editor = function(elem) {
+  var self = this;
   var codemirror = CodeMirror(elem[0], {
     lineNumbers: true,
     theme: 'user',
@@ -338,7 +339,7 @@ Editor.prototype._to_editor = function(elem) {
     extraKeys: {
       'Ctrl-Enter': function() {
         if (self.onrun)
-          self.onrun(editor);
+          self.onrun();
       },
       Tab: function(cm) {
         var cursor = cm.getCursor()['ch'];
@@ -670,8 +671,7 @@ ResultContainer.prototype._tab_content = function() {
 }
 
 ResultContainer.prototype._next_name = function() {
-  this.name += 1;
-  return this.name;
+  return this.name++;
 }
 
 ResultContainer.prototype._post_init = function(compiler, code, codes, name) {
