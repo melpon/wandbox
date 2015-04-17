@@ -186,8 +186,8 @@ var LANGUAGE_NAME_TO_TAB_ID = {
     <% include stdin() %>
     <div class="row">
       <div class="col-md-12">
-        <a href="<% url "compile" %>" class="btn btn-default" id="compile">Run (or Ctrl+Enter)</a>
-        <img src="<% url "static" %>/compiling.gif" alt="Compiling" id="compiling">
+        <a href="<% url "compile" %>" class="btn btn-default" id="wandbox-compile">Run (or Ctrl+Enter)</a>
+        <img src="<% url "static" %>/compiling.gif" alt="Compiling" id="wandbox-compiling">
       </div>
     </div>
     <% include result_container() %>
@@ -307,8 +307,29 @@ var LANGUAGE_NAME_TO_TAB_ID = {
 <% template editor() %>
 <div class="row">
   <div class="col-md-10">
-    <label>input code:</label>
-    <div id="editor"></div>
+    <div class="wandbox-editor">
+      <ul id="wandbox-editor-header" class="nav nav-tabs" role="tablist">
+        <li class="active">
+          <a id="wandbox-editor-default-tab" href="#wandbox-editor-default" role="tab" data-toggle="tab">
+            <i class="glyphicon glyphicon-file"></i>
+          </a>
+        </li>
+        <li>
+          <a id="wandbox-editor-add-tab" class="btn btn-default">
+            <i class="glyphicon glyphicon-plus"></i>
+          </a>
+        </li>
+      </ul>
+      <div class="clearfix"></div>
+      <div id="wandbox-editor-content" class="tab-content">
+        <div
+          id="wandbox-editor-default"
+          role="tabpanel"
+          class="tab-pane active"
+        >
+        </div>
+      </div>
+    </div>
   </div>
   <div class="col-md-2" id="editor-settings">
     <label>choose key binding:</label>

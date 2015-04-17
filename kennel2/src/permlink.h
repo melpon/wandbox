@@ -30,6 +30,17 @@ public:
             << cppdb::exec;
 
         sql <<
+            "CREATE TABLE IF NOT EXISTS codes ("
+            "  id                   INTEGER PRIMARY KEY,"
+            "  code_id              INTEGER NOT NULL REFERENCES code,"
+            "  \"order\"            INTEGER NOT NULL,"
+            "  file                 VARCHAR NOT NULL,"
+            "  code                 VARCHAR NOT NULL,"
+            "  CONSTRAINT unique_codes UNIQUE (code_id, \"order\")"
+            ")"
+            << cppdb::exec;
+
+        sql <<
             "CREATE TABLE IF NOT EXISTS compiler_info ("
             "  id                   INTEGER PRIMARY KEY,"
             "  code_id              INTEGER NOT NULL REFERENCES code,"
@@ -85,6 +96,23 @@ public:
 
         auto code_id = stat.last_insert_id();
         //std::clog << code_id << std::endl;
+
+        if (!code["codes"].is_undefined()) {
+            int order = 1;
+            stat = sql <<
+                "INSERT INTO codes (code_id, \"order\", file, code) "
+                "VALUES (?, ?, ?, ?)";
+            for (auto&& v: code["codes"].array()) {
+                stat
+                    << code_id
+                    << order
+                    << v["file"].str()
+                    << v["code"].str()
+                    << cppdb::exec;
+                stat.reset();
+                order += 1;
+            }
+        }
 
         std::stringstream ss;
         compiler_info.save(ss, cppcms::json::compact);
@@ -154,16 +182,32 @@ public:
         value["created-at"] = std::string(buf, size);
 
         r = sql <<
+            "SELECT file, code "
+            "FROM codes "
+            "WHERE code_id=? "
+            "ORDER BY \"order\""
+            << code_id;
+        {
+            int n = 0;
+            while (r.next()) {
+                value["codes"][n]["file"] = r.get<std::string>("file");
+                value["codes"][n]["code"] = r.get<std::string>("code");
+            }
+        }
+
+        r = sql <<
             "SELECT type, output "
             "FROM link_output "
             "WHERE link_id=? "
             "ORDER BY \"order\""
             << link_id;
-        int n = 0;
-        while (r.next()) {
-            value["outputs"][n]["type"] = r.get<std::string>("type");
-            value["outputs"][n]["output"] = r.get<std::string>("output");
-            n += 1;
+        {
+            int n = 0;
+            while (r.next()) {
+                value["outputs"][n]["type"] = r.get<std::string>("type");
+                value["outputs"][n]["output"] = r.get<std::string>("output");
+                n += 1;
+            }
         }
 
         // load compiler_info if exists.

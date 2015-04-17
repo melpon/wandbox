@@ -119,8 +119,15 @@ public:
             protocol{"RuntimeOptionRaw", value.get("runtime-option-raw", "")},
             protocol{"Source", value["code"].str()},
             protocol{"CompilerOption", value.get("options", "")},
-            protocol{"Control", "run"},
         };
+        const auto& codes = value.find("codes");
+        if (!codes.is_undefined()) {
+            for (const auto& code: codes.array()) {
+                protos.push_back(protocol{"SourceFileName", code["file"].str()});
+                protos.push_back(protocol{"Source", code["code"].str()});
+            }
+        }
+        protos.push_back(protocol{"Control", "run"});
         return protos;
     }
     static cppcms::json::value form_to_json(const cppcms::http::request::form_type& form) {
