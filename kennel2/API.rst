@@ -100,13 +100,15 @@ compiler [String]
   Used compiler name.
 code [String]
   Compiled code.
-options [String] (optional, default it a empty string)
+codes [Array of Object{"file":[String], "code":[String]}] (optional, default is an empty array)
+  Additional codes.
+options [String] (optional, default is an empty string)
   Used options for a compiler joined by comma.
-stdin [String] (optional, default is a empty string)
+stdin [String] (optional, default is an empty string)
   Stdin
-compiler-option-raw [String] (optional, default is a empty string)
+compiler-option-raw [String] (optional, default is an empty string)
   Compile-time any additional options joined by line-break.
-runtime-option-raw [String] (optional, default is a empty string)
+runtime-option-raw [String] (optional, default is an empty string)
   Run-time any additional options joined by line-break.
 save [Bool] (optional, default is false)
   Generate permanent link if true.
