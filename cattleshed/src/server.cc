@@ -481,14 +481,40 @@ namespace wandbox {
 			   target_compiler(target_compiler),
 			   semaphore(move(semaphore))
 		{
-			for (auto&& t: sources) this->sources.emplace_back(std::move(t.first), t.second);
-
 			while (unique_name.empty() || !workdir) try {
 				unique_name = mkdtemp("wandboxXXXXXX");
 				workdir = opendir(unique_name);
 			} catch (std::system_error &e) {
 				if (e.code().value() != ENOTDIR) throw;
 			}
+
+			aiocb->aio_fildes = -1;
+
+			char s[64];
+			time_t t = ::time(0);
+			struct tm l;
+			::localtime_r(&t, &l);
+			::strftime(s, 64, "%Y%m%d", &l);
+
+			std::clog << "[" << this->sock.get() << "]" << "create log directory '" << (config.system.storedir + "/" + s + "/" + unique_name) << "' [" << this << "]" << std::endl;
+			const auto logdir = mkdir_p_open_at({}, config.system.storedir + "/" + s + "/" + unique_name, 0700);
+			if (!logdir) {
+				std::clog << "1" << std::endl;
+			}
+
+			std::clog << "[" << this->sock.get() << "]" << "using temporary name '" << unique_name << "' [" << this << "]" << std::endl;
+			const auto savedir = mkdir_p_open_at(workdir, "store", 0700);
+			if (!savedir) {
+				std::clog << "1" << std::endl;
+			}
+
+			for (auto &&x: sources) {
+				this->sources.emplace_back(x.first, x.second, savedir);
+				this->sources.emplace_back(x.first, x.second, logdir);
+			}
+		}
+		~program_writer() noexcept {
+			if (aiocb && aiocb->aio_fildes != -1) ::close(aiocb->aio_fildes);
 		}
 		program_writer(const program_writer &) = default;
 		program_writer &operator =(const program_writer &) = default;
@@ -499,58 +525,44 @@ namespace wandbox {
 				while (!sources.empty()) {
 					current_source = std::move(sources.front());
 					sources.pop_front();
-					if (current_source.filename.empty()) {
-						current_source.filename = target_compiler.output_file;
+					if (current_source.name.empty()) {
+						current_source.name = target_compiler.output_file;
 					}
-					std::clog << "[" << sock.get() << "]" << "writing file '" << current_source.filename << "' [" << this << "]" << std::endl;
+					std::clog << "[" << sock.get() << "]" << "writing file '" << current_source.name << "' [" << this << "]" << std::endl;
 
 					{
 						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
 						while (true) {
-							aiocb->aio_fildes = recursive_create_open_at(::dirfd(workdir.get()), "store/" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
+							aiocb->aio_fildes = ::openat(dirfd(current_source.dir.get()), ("./" + current_source.name).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
 							if (aiocb->aio_fildes == -1) {
-								if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) yield sigs->async_wait(move(*this));
-								else yield break;
+								if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) {
+									yield {
+										PROTECT_FROM_MOVE(sigs);
+										sigs->async_wait(move(*this));
+									}
+								} else {
+									std::clog << "[" << sock.get() << "]" << "open failed '" << current_source.name.c_str() << "' [" << this << "]" << std::endl;
+									yield break;
+								}
 							} else {
 								break;
 							}
 						}
-						aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(current_source.source.c_str()));
-						aiocb->aio_nbytes = current_source.source.length();
+						aiocb->aio_buf = current_source.buf;
+						aiocb->aio_nbytes = current_source.len;
 						aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
 						aiocb->aio_sigevent.sigev_signo = SIGHUP;
 						::aio_write(aiocb.get());
 						do {
-							yield sigs->async_wait(move(*this));
+							yield {
+								PROTECT_FROM_MOVE(sigs);
+								sigs->async_wait(move(*this));
+							}
 						} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
 						::close(aiocb->aio_fildes);
-					} {
-						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
-						std::clog << "[" << sock.get() << "]" << "create log directory '" << unique_name << "' [" << this << "]" << std::endl;
-						{
-							auto d = opendir("/");
-							char s[64];
-							time_t t = ::time(0);
-							struct tm l;
-							::localtime_r(&t, &l);
-							::strftime(s, 64, "%Y%m%d", &l);
-							aiocb->aio_fildes = recursive_create_open_at(::dirfd(d.get()), "./" + config.system.storedir + "/" + s + "/" + unique_name + "/" + current_source.filename, O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0700, 0600);
-						}
-						if (aiocb->aio_fildes == -1) {
-							std::clog << "[" << sock.get() << "]" << "failed to write run log '" << unique_name << "' [" << this << "]" << std::endl;
-						} else {
-							aiocb->aio_buf = const_cast<volatile void *>(static_cast<const volatile void *>(current_source.source.c_str()));
-							aiocb->aio_nbytes = current_source.source.length();
-							aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
-							aiocb->aio_sigevent.sigev_signo = SIGHUP;
-							::aio_write(aiocb.get());
-							do {
-								yield sigs->async_wait(move(*this));
-							} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
-							::close(aiocb->aio_fildes);
-							std::clog << "[" << sock.get() << "]" << "write success '" << unique_name << "' [" << this << "]" << std::endl;
-						}
+						aiocb->aio_fildes = -1;
 					}
+					std::clog << "[" << sock.get() << "]" << "write success '" << current_source.name << "' [" << this << "]" << std::endl;
 				}
 				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir), move(target_compiler), move(semaphore))();
 			}
@@ -567,12 +579,20 @@ namespace wandbox {
 		std::shared_ptr<void> semaphore;
 
 		struct source_file_t {
-			std::string filename;
-			std::string source;
+			std::string name;
+			std::shared_ptr<char> source_shared;
+			char *buf;
+			std::size_t len;
+			std::shared_ptr<DIR> dir;
 			source_file_t() = default;
-			source_file_t(std::string filename, std::string source)
-				: filename(std::move(filename)),
-				  source(std::move(source)) {
+			source_file_t(std::string filename, const std::string &source, std::shared_ptr<DIR> dir)
+				: name(std::move(filename)),
+				  source_shared(),
+				  buf(),
+				  len(source.length()),
+				  dir(std::move(dir)) {
+				source_shared.reset(new char[len], [](char *p) { delete[] p; });
+				memcpy(buf = source_shared.get(), source.c_str(), len);
 			}
 			source_file_t(const source_file_t &) = default;
 			source_file_t &operator =(const source_file_t &) = default;
@@ -581,53 +601,6 @@ namespace wandbox {
 		};
 		std::deque<source_file_t> sources;
 		source_file_t current_source;
-
-	private:
-		static int recursive_create_open_at(int at, const std::string &filename, int flags, int dirmode, int filemode) {
-			// FIXME: must canonicalize invalid UTF-8 sequence in `filename'
-			if (filename[0] == '/') return -1;
-
-			std::vector<int> dirfds;
-			const auto closeall = [&dirfds]() {
-				for (int fd: dirfds) ::close(fd);
-				dirfds.clear();
-			};
-
-			std::vector<std::string> dirs;
-			boost::algorithm::split(dirs, filename, boost::is_any_of("/"));
-
-			if (dirs.empty()) return -1;
-
-			const auto targetfile = std::move(dirs.back());
-			dirs.pop_back();
-			errno = 0;
-			if (dirs.empty()) return ::openat(at, targetfile.c_str(), flags, filemode);
-
-			dirfds.reserve(dirs.size());
-
-			for (auto &&x: dirs) {
-				if (x == "") continue;
-				if (x == ".") continue;
-				if (x == "..") {
-					if (dirfds.empty()) return -1;
-					int fd = dirfds.back();
-					dirfds.pop_back();
-					::close(fd);
-				} else {
-					errno = 0;
-					::mkdirat(dirfds.empty() ? at : dirfds.back(), x.c_str(), dirmode);
-					int dirfd = ::openat(dirfds.empty() ? at : dirfds.back(), x.c_str(), O_DIRECTORY|O_PATH|O_RDWR);
-					if (dirfd == -1) return closeall(), -1;
-					dirfds.push_back(dirfd);
-				}
-			}
-
-			errno = 0;
-			int newfd = ::openat(dirfds.empty() ? at : dirfds.back(), targetfile.c_str(), flags, filemode);
-			closeall();
-			return newfd;
-		}
-
 	};
 
 	struct version_sender: private coroutine {
@@ -664,7 +637,10 @@ namespace wandbox {
 						c.fd_stdout.release();
 					}
 					do {
-						yield sigs->async_wait(move(*this));
+						yield {
+							PROTECT_FROM_MOVE(sigs);
+							sigs->async_wait(move(*this));
+						}
 						child->wait_nonblock();
 					} while (not child->finished());
 
@@ -689,6 +665,7 @@ namespace wandbox {
 				}
 				yield {
 					auto s = "[" + boost::algorithm::join(move(versions), ",") + "]";
+					PROTECT_FROM_MOVE(sockbuf);
 					sockbuf->async_write_command("VersionResult", move(s), move(*this));
 				}
 				std::clog << "[" << sock.get() << "]" << "finished [" << this << "]" << std::endl;
@@ -808,14 +785,6 @@ namespace wandbox {
 					throw;
 				}
 			}
-			try {
-				mkdir(config.system.storedir, 0700);
-			} catch (std::system_error &e) {
-				if (e.code().value() != EEXIST) {
-					std::clog << "failed to create storedir, check permission." << std::endl;
-					throw;
-				}
-			}
 			basedir = opendir(config.system.basedir);
 			chdir(basedir);
 		}
@@ -834,7 +803,7 @@ namespace wandbox {
 	};
 
 }
-int main(int argc, char **argv) {
+int main(int argc, char **argv) try {
 	using namespace wandbox;
 
 	::setlocale(LC_ALL, "C");
@@ -874,9 +843,23 @@ int main(int argc, char **argv) {
 			std::clog << "failed to read config file(s), check existence or syntax." << std::endl;
 			throw;
 		}
+
+		if (config.system.storedir[0] != '/') {
+			std::clog << "storedir must be absolute." << std::endl;
+			return 1;
+		}
+
+		if (config.system.basedir[0] != '/') {
+			std::clog << "basedir must be absolute." << std::endl;
+			return 1;
+		}
 	}
 	auto aio = std::make_shared<asio::io_service>();
 	listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);
 	s();
 	aio->run();
+	return 0;
+} catch (std::exception &e) {
+	std::clog << "fatal: " << e.what() << std::endl;
+	return -1;
 }

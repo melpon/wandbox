@@ -93,6 +93,53 @@ namespace wandbox {
 		return std::shared_ptr<DIR>(fdopendir(fd), &::closedir);
 	}
 
+	inline std::vector<std::string> split_path(const std::string &path) {
+		std::vector<std::string> ret;
+		auto sep = path.begin();
+		const auto end = path.end();
+		for (auto ite = path.begin(); ite != end; ++ite) {
+			if (*ite == '/') {
+				if (sep != ite) ret.emplace_back(sep, ite);
+				sep = ite;
+				++sep;
+				continue;
+			}
+			if (*ite == 0) throw_system_error(errno = ENOENT);
+		}
+		if (sep != end) ret.emplace_back(sep, end);
+		return ret;
+	}
+
+	inline std::shared_ptr<DIR> mkdir_p_open_at(const std::shared_ptr<DIR> &at, const std::string &path, ::mode_t mode) {
+		// FIXME: must canonicalize invalid UTF-8 sequence in `path'
+		if (path.empty()) throw_system_error(errno = ENOENT);
+
+		std::vector<std::shared_ptr<DIR> > dirfds;
+		const auto dirnames = split_path(path);
+
+		dirfds.reserve(dirnames.size()+1);
+		if (path[0] == '/') dirfds.emplace_back(opendir("/"));
+		else dirfds.push_back(at);
+
+		for (auto &&x: dirnames) {
+			if (x == "") continue;
+			if (x == ".") continue;
+			if (x == "..") {
+				if (dirfds.empty()) return at;
+				dirfds.pop_back();
+			} else {
+				try {
+					mkdirat(dirfds.back(), x, mode);
+				} catch (std::system_error &e) {
+					if (e.code().value() != EEXIST) throw;
+				}
+				dirfds.push_back(opendirat(dirfds.back(), x));
+			}
+		}
+
+		return move(dirfds.back());
+	}
+
 	inline std::string mkdtemp(const std::string &base) {
 		std::vector<char> buf(base.begin(), base.end());
 		buf.push_back(0);
