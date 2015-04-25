@@ -54,7 +54,11 @@ public:
         mapper().assign("nojs-list", "/nojs");
 
         dispatcher().assign("/?", &kennel::root, this);
-        mapper().assign("root", "");
+        if (srv.settings()["application"]["map_root"].str().empty()) {
+            mapper().assign("root", "/");
+        } else {
+            mapper().assign("root", "");
+        }
     }
 
     cppcms::json::value json_post_data() {
