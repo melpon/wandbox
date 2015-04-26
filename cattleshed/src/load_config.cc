@@ -175,6 +175,7 @@ namespace cfg {
 		using namespace detail;
 		compiler_set ret;
 		std::unordered_map<std::string, std::vector<std::string>> inherit_map;
+		std::unordered_multimap<std::string, compiler_trait> append_map;
 		for (auto &x: boost::get<cfg::array>(boost::get<cfg::object>(o).at("compilers"))) {
 			auto &y = boost::get<cfg::object>(x);
 			compiler_trait t;
@@ -202,9 +203,12 @@ namespace cfg {
 				}
 			}
 			for (auto &x: get_str_array(y, "initial-checked")) t.initial_checked.insert(std::move(x));
+			std::clog << "load compiler " << t.name << std::endl;
 			const auto inherits = get_str_array(y, "inherits");
 			if (!inherits.empty()) inherit_map[t.name] = inherits;
-			ret.push_back(t);
+			const auto appendto = get_str(y, "append-to");
+			if (appendto.empty()) ret.push_back(t);
+			else append_map.emplace(appendto, std::move(t));
 		}
 		while (!inherit_map.empty()) {
 			const auto ite = std::find_if(inherit_map.begin(), inherit_map.end(), [&](const std::pair<const std::string, std::vector<std::string>> &p) {
@@ -226,9 +230,23 @@ namespace cfg {
 				if (sub.display_compile_command.empty()) sub.display_compile_command = x.display_compile_command;
 				if (sub.jail_name.empty()) sub.jail_name = x.jail_name;
 				if (sub.switches.empty()) sub.switches = x.switches;
+				if (sub.local_switches.get<1>().empty()) sub.local_switches = x.local_switches;
 				ret.get<1>().replace(pos, sub);
 			}
 			inherit_map.erase(sub.name);
+		}
+		for (auto &&m: append_map) {
+			const auto ti = ret.get<1>().find(m.first);
+			if (ti == ret.get<1>().end()) continue;
+			auto t = *ti;
+			const auto &s = m.second;
+			t.compile_command.insert(t.compile_command.end(), s.compile_command.begin(), s.compile_command.end());
+			t.version_command.insert(t.version_command.end(), s.version_command.begin(), s.version_command.end());
+			t.run_command.insert(t.run_command.end(), s.run_command.begin(), s.run_command.end());
+			t.initial_checked.insert(s.initial_checked.begin(), s.initial_checked.end());
+			t.switches.insert(t.switches.end(), s.switches.begin(), s.switches.end());
+			t.local_switches.insert(t.local_switches.end(), s.local_switches.begin(), s.local_switches.end());
+			ret.get<1>().replace(ti, t);
 		}
 		return ret;
 	}
@@ -343,6 +361,7 @@ namespace cfg {
 	};
 
 	cfg::value read_single_config_file(const std::shared_ptr<DIR> &at, const std::string &cfg) {
+		std::clog << "reading " << cfg << std::endl;
 		namespace s = boost::spirit;
 		namespace qi = boost::spirit::qi;
 		typedef s::multi_pass<read_fd_iterator,

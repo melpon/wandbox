@@ -338,11 +338,13 @@ namespace wandbox {
 							auto ite = r->begin();
 							qi::parse(ite, r->end(), qi::as_string[+(qi::char_-','-'\n')] % ',', selected_switches);
 						}
-						for (const auto &sw: target_compiler.switches) {
-							if (selected_switches.count(sw) == 0) continue;
+						for (const auto &sw: selected_switches) {
 							auto t = map_multi_index_find<1>(target_compiler.local_switches, sw);
 							if (!t) t = map_find(config.switches, sw);
 							if (!t) continue;
+							std::clog << "[" << sock.get() << "]" << "using option " << sw << ':';
+							for (auto &&f: t->flags) std::clog << ' ' << f;
+							std::clog << std::endl;
 							const auto f = [t](std::vector<std::string> &args) {
 								if (t->insert_position == 0) {
 									args.insert(args.end(), t->flags.begin(), t->flags.end());
@@ -384,6 +386,11 @@ namespace wandbox {
 				while (!commands.empty()) {
 					current = move(commands.front());
 					commands.pop_front();
+					std::clog << "exec ";
+					for (auto &&s: current.arguments) {
+						std::clog << '[' << s << ']' << ' ';
+					}
+					std::clog << std::endl;
 					{
 						auto c = piped_spawn(workdir, current.arguments);
 
