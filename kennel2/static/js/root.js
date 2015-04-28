@@ -455,7 +455,7 @@ Editor.prototype._initialize = function() {
     self.addEditor(file_name, '');
   });
   $(document).on('click', '.wandbox-editor-name-tab > button', function(e) {
-    var li = $(this).parents('li').first();
+    var li = $(this).closest('li');
     if (li.hasClass('active')) {
       var next = li.next();
       var a = next.find('a');
@@ -465,7 +465,7 @@ Editor.prototype._initialize = function() {
         $('#wandbox-editor-default-tab').tab('show');
       }
     }
-    $($(this).parents('a').first().attr('href')).remove();
+    $($(this).closest('a').attr('href')).remove();
     li.remove();
   });
   $(document).on('click', 'li.active .wandbox-editor-name-tab > .wandbox-renamable', function(e) {
@@ -546,7 +546,7 @@ Editor.prototype.addEditor = function(file_name, code) {
   this.setValue(content, code || '');
   $('#wandbox-editor-content').append(content);
 
-  $('#wandbox-editor-add-tab').parents('li').first().before(li);
+  $('#wandbox-editor-add-tab').closest('li').before(li);
 
   this.setLanguage(this.getLanguage());
 }
