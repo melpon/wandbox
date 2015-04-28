@@ -163,6 +163,9 @@ function Compiler(compiler_id, compile_options_id) {
     $('.wandbox-dropdown-version').attr('title', $(e.target).attr('data-display-name'));
   });
   $('a.wandbox-dropdown-listitem').on('shown.bs.tab', function (e) {
+    // hide all listitem tabs without this tab
+    $(e.target).closest('.tab-content').find('.tab-pane:not(.active) ul > li').removeClass('active');
+
     $('.wandbox-current-compiler-text').text($(e.target).attr('data-display-name'));
     $('.wandbox-current-compiler-text').attr('title', $(e.target).attr('data-display-name'));
     // active language
