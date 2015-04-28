@@ -35,7 +35,7 @@ function update_compile_command(compiler) {
 }
 
 function save(key, value) {
-  $.cookie(key, value, { expires: 365, path: '/wandbox' });
+  $.cookie(key, value, { expires: 365, path: $('body').attr('data-webroot') });
 }
 
 $(function() {
