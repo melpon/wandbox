@@ -51,7 +51,17 @@ document says:
   make
   sudo make install
 
-\3. Install CppDB.
+\3. Install CppDB requirements.
+
+::
+
+  yum install sqlite-devel
+  or
+  apt-get install libsqlite3-dev
+
+NOTE: To be exact, CppDB is not required SQLite library. But, kennel require CppDB with SQLite finally.
+
+\4. Install CppDB.
 
 ::
 
@@ -62,7 +72,7 @@ document says:
   make
   make install
 
-\4. Install kennel.
+\5. Install kennel.
 
 kennel requires autoconf::
 
