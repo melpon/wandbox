@@ -11,7 +11,7 @@ function post_code(compiler, result_container) {
     if ($(this).find('.wandbox-renamable').length != 0) {
       file = $(this).find('.wandbox-renamable').text();
     } else {
-      file = $(this).find('.wandbox-renaming > input').attr('original-value');
+      file = $(this).find('.wandbox-renaming > input').attr('data-original-value');
     }
     var code_ = editor.getValue($($(this).attr('href')));
     return { 'file': file, 'code': code_ };
@@ -474,7 +474,7 @@ Editor.prototype._initialize = function() {
   $(document).on('click', 'li.active .wandbox-editor-name-tab > .wandbox-renamable', function(e) {
     var input = $('<input type="text">');
     input.attr('value', $(this).text());
-    input.attr('original-value', $(this).text());
+    input.attr('data-original-value', $(this).text());
     $(this).empty();
     $(this).append(input);
     $(this).removeClass('wandbox-renamable');
@@ -503,7 +503,7 @@ Editor.prototype._initialize = function() {
       var text = $(this).val();
       text = _normalize_path(text);
       if (text == null || text.length == 0) {
-        text = $(this).attr('original-value');
+        text = $(this).attr('data-original-value');
       }
 
       // check to already exists
@@ -511,7 +511,7 @@ Editor.prototype._initialize = function() {
         return $(this).text();
       }).get().indexOf(text);
       if (foundIndex != -1) {
-        text = $(this).attr('original-value');
+        text = $(this).attr('data-original-value');
       }
 
       var parent = $(this).parent();
