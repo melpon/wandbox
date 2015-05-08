@@ -389,3 +389,100 @@ footer {
 .wandbox-resultwindow-stdin > pre {
   background-color: #fff;
 }
+
+.ansi-black-fg {
+  color: #000;
+}
+.ansi-red-fg {
+  color: #b00;
+}
+.ansi-green-fg {
+  color: #0b0;
+}
+.ansi-yellow-fg {
+  color: #bb0;
+}
+.ansi-blue-fg {
+  color: #00b;
+}
+.ansi-magenta-fg {
+  color: #b0b;
+}
+.ansi-cyan-fg {
+  color: #0bb;
+}
+.ansi-white-fg {
+  color: #fff;
+}
+.ansi-bright-black-fg {
+  color: #555;
+}
+.ansi-bright-red-fg {
+  color: #f55;
+}
+.ansi-bright-green-fg {
+  color: #0f0;
+}
+.ansi-bright-yellow-fg {
+  color: #ff5;
+}
+.ansi-bright-blue-fg {
+  color: #55f;
+}
+.ansi-bright-magenta-fg {
+  color: #f5f;
+}
+.ansi-bright-cyan-fg {
+  color: #5ff;
+}
+.ansi-bright-white-fg {
+  color: #fff;
+}
+.ansi-black-bg {
+  background-color: #000;
+}
+.ansi-red-bg {
+  background-color: #b00;
+}
+.ansi-green-bg {
+  background-color: #0b0;
+}
+.ansi-yellow-bg {
+  background-color: #bb0;
+}
+.ansi-blue-bg {
+  background-color: #00b;
+}
+.ansi-magenta-bg {
+  background-color: #b0b;
+}
+.ansi-cyan-bg {
+  background-color: #0bb;
+}
+.ansi-white-bg {
+  background-color: #fff;
+}
+.ansi-bright-black-bg {
+  background-color: #555;
+}
+.ansi-bright-red-bg {
+  background-color: #f55;
+}
+.ansi-bright-green-bg {
+  background-color: #0f0;
+}
+.ansi-bright-yellow-bg {
+  background-color: #ff5;
+}
+.ansi-bright-blue-bg {
+  background-color: #55f;
+}
+.ansi-bright-magenta-bg {
+  background-color: #f5f;
+}
+.ansi-bright-cyan-bg {
+  background-color: #5ff;
+}
+.ansi-bright-white-bg {
+  background-color: #fff;
+}

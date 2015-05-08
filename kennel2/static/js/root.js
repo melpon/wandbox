@@ -984,7 +984,7 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
     src.close();
 
     var outputs = self._output_window().find('pre').map(function(n,e) {
-        return { 'type': $(e).attr('data-type'), 'output': $(e).text() };
+        return { 'type': $(e).attr('data-type'), 'output': $(e).attr('data-text') };
     });
     self.permlink(compiler_info, code, codes, stdin, outputs);
 
@@ -1003,18 +1003,25 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
              data.type == "StdOut" ||
              data.type == "StdErr";
     };
-    if (is_message(data.type) &&
-        preview_paragraph &&
-        preview_paragraph.hasClass(data.type)) {
-      var p = preview_paragraph;
-      p.text(p.text() + data.message)
-    } else {
-      var p = $('<pre>').addClass(data.type)
-                        .attr('data-type', data.type)
-                        .text(data.message)
-                        .appendTo(output);
-      preview_paragraph = p;
-    }
+    var p =
+        (is_message(data.type) &&
+         preview_paragraph &&
+         preview_paragraph.hasClass(data.type))
+            ? preview_paragraph
+            : $('<pre>').addClass(data.type).attr('data-type', data.type).attr('data-text', '').appendTo(output);
+    p.attr('data-text', p.attr('data-text') + data.message);
+    p.html(
+      ansi_up.ansi_to_html(
+        ansi_up.escape_for_html(
+          p.attr('data-text')
+        ),
+        {
+          'use_classes': true
+        }
+      )
+    );
+    preview_paragraph = p;
+
     output[0].scrollTop = output[0].scrollHeight;
 
     if (data.type == 'Control' && data.message == 'Finish') {
@@ -1036,7 +1043,14 @@ ResultWindow.prototype.set_code = function(compiler, code, codes, stdin, outputs
     var output = e.output;
     $('<pre>').addClass(type)
               .attr('data-type', type)
-              .text(output)
+              .html(
+                ansi_up.ansi_to_html(
+                  ansi_up.escape_for_html(output),
+                  {
+                    'use_classes': true
+                  }
+                )
+              )
               .appendTo(self._output_window());
   });
 }
