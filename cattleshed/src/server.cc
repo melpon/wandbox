@@ -392,7 +392,7 @@ namespace wandbox {
 					}
 					std::clog << std::endl;
 					{
-						auto c = piped_spawn(workdir, current.arguments);
+						auto c = pty_spawn(workdir, current.arguments);
 
 						pipes = {
 							std::make_shared<input_forwarder>(aio, move(c.fd_stdin), received[current.stdin_command]),
@@ -640,7 +640,7 @@ namespace wandbox {
 					commands.pop_front();
 					if (current.version_command.empty() || not current.displayable) continue;
 					{
-						auto c = piped_spawn(opendir("/"), current.version_command);
+						auto c = pty_spawn(opendir("/"), current.version_command);
 						child = std::make_shared<unique_child_pid>(move(c.pid));
 						pipe_stdout = std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdout.get());
 						c.fd_stdout.release();
