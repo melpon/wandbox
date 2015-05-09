@@ -134,7 +134,7 @@ namespace jail {
 		close(static_cast<proc_arg_t *>(arg_)->pipefd[0]);
 		const auto argv = static_cast<proc_arg_t *>(arg_)->argv;
 
-		// activet loopback interface
+		// activate loopback interface
 		{
 			ifreq ifr;
 			strncpy(ifr.ifr_name, "lo", IFNAMSIZ);
@@ -214,6 +214,7 @@ namespace jail {
 	static const int stacksize = 4096;
 	int main(int argc, char **argv) {
 		prctl(PR_SET_PDEATHSIG, SIGKILL);
+		if (kill(getppid(), 0) < 0) raise(SIGKILL);
 
 		char stack[stacksize];
 		proc_arg_t args = { ".", "/", {}, {}, { -1, -1 }, nullptr };
