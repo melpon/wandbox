@@ -425,11 +425,19 @@ Editor.prototype._initialize = function() {
   });
 
   $(this.settings_id).find('input.expand-editor').change(function(e) {
+    var editor = $('.wandbox-smart-editor');
     if ($(e.target).prop('checked')) {
-      $('.wandbox-smart-editor').addClass('wandbox-expand');
+      editor.addClass('wandbox-expand');
     } else {
-      $('.wandbox-smart-editor').removeClass('wandbox-expand');
+      editor.removeClass('wandbox-expand');
     }
+
+    // send refresh signal to update scrollbar state
+    var code_mirror = editor.data('editor');
+    if (code_mirror) {
+      code_mirror.refresh();
+    }
+
     if (self.editor_changed)
       self.editor_changed();
   });
