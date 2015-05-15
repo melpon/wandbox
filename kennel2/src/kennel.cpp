@@ -26,7 +26,6 @@ namespace cppcms {
 }
 
 class kennel : public cppcms::application {
-    booster::aio::deadline_timer update_timer;
 public:
     kennel(cppcms::service &srv) : cppcms::application(srv) {
         dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/)*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 4);
@@ -76,17 +75,14 @@ public:
         if (!cache().fetch_data("compiler_infos", json)) {
             if (!cache().fetch_data("compiler_infos_persist", json)) {
                 json = get_compiler_infos();
-                cache().store_data("compiler_infos", json, 10);
+                cache().store_data("compiler_infos", json, 600);
                 cache().store_data("compiler_infos_persist", json, -1);
             } else {
-                cache().store_data("compiler_infos", json, 10);
+                cache().store_data("compiler_infos", json, 600);
 
-                update_timer.set_io_service(service().get_io_service());
-                update_timer.expires_from_now(booster::ptime::seconds(1));
                 booster::intrusive_ptr<kennel> self(this);
-                update_timer.async_wait([self](const booster::system::error_code&) {
-                    auto json = self->get_compiler_infos();
-                    self->cache().store_data("compiler_infos", json, 10);
+                get_compiler_infos_async([self](cppcms::json::value& json) {
+                    self->cache().store_data("compiler_infos", json, 600);
                     self->cache().store_data("compiler_infos_persist", json, -1);
                 });
             }
@@ -108,6 +104,21 @@ public:
         value.load(ss, true, nullptr);
         //value.save(std::clog, cppcms::json::readable);
         return value;
+    }
+    template<class F>
+    void get_compiler_infos_async(const F& callback) {
+        std::vector<protocol> protos = {
+            protocol{"Version", ""},
+        };
+        send_command_async(service(), protos, [callback](const booster::system::error_code& e, const protocol& proto) {
+            if (e)
+                return (void)(std::clog << e.message() << std::endl);
+            std::stringstream ss(proto.contents);
+            cppcms::json::value value;
+            value.load(ss, true, nullptr);
+            //value.save(std::clog, cppcms::json::readable);
+            callback(value);
+        }, 1);
     }
 
     void root() {
