@@ -2820,6 +2820,7 @@
                 "prog.erl"
             ], 
             "display-compile-command": "escript prog.erl", 
+            "jail-name": "erlangvm", 
             "display-name": "erlang HEAD", 
             "runtime-option-raw": true
         }, 
@@ -2840,6 +2841,7 @@
                 "prog.erl"
             ], 
             "display-compile-command": "escript prog.erl", 
+            "jail-name": "erlangvm", 
             "display-name": "erlang maint", 
             "runtime-option-raw": true
         }, 
@@ -2859,6 +2861,7 @@
                 "prog.ex"
             ], 
             "display-compile-command": "elixir prog.ex", 
+            "jail-name": "erlangvm", 
             "display-name": "Elixir HEAD", 
             "runtime-option-raw": true
         }, 
