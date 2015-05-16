@@ -1059,6 +1059,36 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_rust(self):
+        NAMES = [
+           ("rust-head", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"Rust HEAD",
+                },
+           }),
+           ("rust-1.0.0", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"Rust",
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.rs",
+            "run-command":["./prog"],
+            "display-compile-command":"rustc prog.rs",
+            "language":"Rust",
+            "runtime-option-raw":True,
+            "compile-command":["/usr/local/{name}/bin/run-rustc.sh", "prog.rs"],
+            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-c",
@@ -1148,17 +1178,6 @@ class Compilers(object):
 
     def make_default2(self):
         COMPILERS = [{
-            "name":"rust-head",
-            "displayable":True,
-            "output-file":"prog.rs",
-            "run-command":["./prog"],
-            "display-name":"Rust HEAD",
-            "display-compile-command":"rustc prog.rs",
-            "language":"Rust",
-            "runtime-option-raw":True,
-            "compile-command":["/usr/local/rust-head/bin/run-rustc.sh", "prog.rs"],
-            "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/rust-head/lib:$LD_LIBRARY_PATH /usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"],
-        },{
             "name":"bash",
             "displayable":True,
             "output-file":"prog.sh",
@@ -1250,6 +1269,7 @@ class Compilers(object):
             self.make_sqlite() +
             self.make_scala() +
             self.make_lua() +
+            self.make_rust() +
             self.make_default2()
         )
 

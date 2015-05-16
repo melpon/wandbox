@@ -3142,10 +3142,6 @@
             "runtime-option-raw": true
         }, 
         {
-            "run-command": [
-                "./prog"
-            ], 
-            "display-compile-command": "rustc prog.rs", 
             "compile-command": [
                 "/usr/local/rust-head/bin/run-rustc.sh", 
                 "prog.rs"
@@ -3153,13 +3149,38 @@
             "name": "rust-head", 
             "language": "Rust", 
             "output-file": "prog.rs", 
-            "display-name": "Rust HEAD", 
+            "displayable": true, 
             "version-command": [
                 "/bin/sh", 
                 "-c", 
-                "LD_LIBRARY_PATH=/usr/local/rust-head/lib:$LD_LIBRARY_PATH /usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"
+                "/usr/local/rust-head/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"
             ], 
+            "run-command": [
+                "./prog"
+            ], 
+            "display-compile-command": "rustc prog.rs", 
+            "display-name": "Rust HEAD", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": [
+                "/usr/local/rust-1.0.0/bin/run-rustc.sh", 
+                "prog.rs"
+            ], 
+            "name": "rust-1.0.0", 
+            "language": "Rust", 
+            "output-file": "prog.rs", 
             "displayable": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/rust-1.0.0/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"
+            ], 
+            "run-command": [
+                "./prog"
+            ], 
+            "display-compile-command": "rustc prog.rs", 
+            "display-name": "Rust", 
             "runtime-option-raw": true
         }, 
         {
