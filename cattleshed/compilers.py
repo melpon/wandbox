@@ -1091,6 +1091,28 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_vim(self):
+        NAMES = [
+           ("vim-7.4.729", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "output-file":"prog.vim",
+            "run-command":["/usr/local/{name}/bin/vim", "-X", "-N", "-u", "NONE", "-i", "NONE", "-V1", "-e", "--cmd", "source prog.vim | qall!"],
+            "display-compile-command":"vim -X -N -u NONE -i NONE -V1 -e --cmd 'source proc.vim | qall!'",
+            "language":"Vim script",
+            "runtime-option-raw":True,
+            "compile-command":["/bin/true"],
+            "version-command":["/bin/echo", "vim 7.4.729"],
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-c",
@@ -1272,6 +1294,7 @@ class Compilers(object):
             self.make_scala() +
             self.make_lua() +
             self.make_rust() +
+            self.make_vim() +
             self.make_default2()
         )
 

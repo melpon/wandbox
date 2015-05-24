@@ -3187,6 +3187,34 @@
             "runtime-option-raw": true
         }, 
         {
+            "compile-command": [
+                "/bin/true"
+            ], 
+            "name": "vim-7.4.729", 
+            "language": "Vim script", 
+            "output-file": "prog.vim", 
+            "displayable": true, 
+            "version-command": [
+                "/bin/echo", 
+                "vim 7.4.729"
+            ], 
+            "run-command": [
+                "/usr/local/vim-7.4.729/bin/vim", 
+                "-X", 
+                "-N", 
+                "-u", 
+                "NONE", 
+                "-i", 
+                "NONE", 
+                "-V1", 
+                "-e", 
+                "--cmd", 
+                "source prog.vim | qall!"
+            ], 
+            "display-compile-command": "vim -X -N -u NONE -i NONE -V1 -e --cmd 'source proc.vim | qall!'", 
+            "runtime-option-raw": true
+        }, 
+        {
             "run-command": [
                 "/bin/bash", 
                 "prog.sh"
