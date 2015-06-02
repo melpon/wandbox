@@ -3039,8 +3039,9 @@
         }, 
         {
             "compile-command": [
-                "/usr/local/scala-2.12.x/bin/scalac", 
-                "prog.scala"
+                "/bin/sh", 
+                "-c", 
+                "JAVA_HOME=/usr/local/java8 /usr/local/scala-2.12.x/bin/scalac prog.scala"
             ], 
             "name": "scala-2.12.x", 
             "language": "Scala", 
@@ -3049,7 +3050,7 @@
             "version-command": [
                 "/bin/sh", 
                 "-c", 
-                "/usr/local/scala-2.12.x/bin/scala -version 2>&1 | cut -d' ' -f5"
+                "JAVA_HOME=/usr/local/java8 /usr/local/scala-2.12.x/bin/scala -version 2>&1 | cut -d' ' -f5"
             ], 
             "run-command": [
                 "/bin/bash", 

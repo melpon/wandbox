@@ -1001,6 +1001,8 @@ class Compilers(object):
                 },
                 "after": {
                     "display-name":"scala-2.12.x HEAD",
+                    "compile-command":["/bin/sh", "-c", "JAVA_HOME=/usr/local/java8 /usr/local/scala-2.12.x/bin/scalac prog.scala"],
+                    "version-command":["/bin/sh", "-c", "JAVA_HOME=/usr/local/java8 /usr/local/scala-2.12.x/bin/scala -version 2>&1 | cut -d' ' -f5"],
                 },
            }),
            ("scala-2.11.x", {
