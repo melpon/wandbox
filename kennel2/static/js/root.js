@@ -354,7 +354,90 @@ Editor.prototype._to_editor = function(elem) {
       },
     },
   });
+  codemirror.on("change", function(cm, obj) { self._text_changed(cm, obj); });
   elem.data('editor', codemirror);
+}
+
+Editor.prototype._text_changed = function(cm, obj) {
+  var self = this;
+  if (this._reading) {
+    this._reserved = true;
+    return;
+  }
+  this._reading = true;
+  var compiler = 'clang-head';
+  var code = this.getValue($('#wandbox-editor-default'), false);
+  var stdin = (new Stdin('#stdin')).get_stdin();
+  var data = {
+    compiler: compiler,
+    code: code,
+    stdin: stdin,
+  };
+  $.ajax({
+    type: 'POST',
+    url: 'http://melpon.org/wandbox/test/api/compile.json',
+    data: JSON.stringify(data),
+    processData: false,
+    dataType: 'json',
+    contentType: 'application/json',
+    success: function(data) {
+      if (self._widgets === undefined)
+        self._widgets = []
+
+      for (var i = 0; i < self._widgets.length; i++) {
+        cm.removeLineWidget(self._widgets[i]);
+      }
+
+      if (!data.compiler_error) {
+        return;
+      }
+
+      //prog.cc:1:2: error: invalid preprocessing directive #includ
+      var lines = data.compiler_error.split('\n');
+      var infos = [];
+      var cur = null;
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (cur == null) {
+          if (line.startsWith('prog.cc')) {
+            var xs = line.split(':');
+            cur = {};
+            cur['file'] = xs[0];
+            cur['line'] = parseInt(xs[1]);
+            cur['summary'] = xs.slice(3).join(':');
+            cur['description'] = '';
+          }
+        } else {
+          if (!line.startsWith('prog.cc')) {
+            infos.push(cur);
+            cur = null;
+          } else {
+            cur['description'] += line + '\n';
+          }
+        }
+      }
+      if (cur != null) {
+        infos.push(cur);
+      }
+
+      for (var i = 0; i < infos.length; i++) {
+        var info = infos[i];
+        var elem = $('<div>').text(info['summary']);
+        elem.addClass('wandbox-editor-line-error');
+        self._widgets.push(cm.addLineWidget(info['line'] - 1, elem[0], {}));
+      }
+      cm.refresh();
+    },
+    error: function() {
+    },
+    complete: function() {
+      self._reading = false;
+      if (self._reserved) {
+        self._reserved = false;
+        self._text_changed(cm, obj);
+      }
+    },
+  });
 }
 
 Editor.prototype._add_editor = function(elem, legacyVisible) {

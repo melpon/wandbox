@@ -320,7 +320,7 @@ public:
         }
 
         auto value = json_post_data();
-        api_compile_internal(json_post_data());
+        api_compile_internal(value);
     }
     void api_compile_internal(cppcms::json::value value) {
         auto compiler = value["compiler"].str();
