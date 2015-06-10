@@ -517,10 +517,39 @@ namespace wandbox {
 				throw_system_error(errno);
 			}
 
+			std::unordered_multimap<std::string, std::shared_ptr<DIR>> dirs;
+			dirs.emplace(std::string(), savedir);
+			dirs.emplace(std::string(), logdir);
 			for (auto &&x: sources) {
-				this->sources.emplace_back(x.first, x.second, savedir);
-				this->sources.emplace_back(x.first, x.second, logdir);
+				std::clog << "[" << this->sock.get() << "]" << "registering file '" << x.first << "' [" << this << "]" << std::endl;
+				if (x.first.empty()) {
+					this->sources.emplace_back(this->target_compiler.output_file, x.second, savedir);
+					this->sources.emplace_back(this->target_compiler.output_file, x.second, logdir);
+				} else {
+					auto tree = split_path_tree(x.first);
+					if (tree.empty()) continue;
+					tree.pop_back();
+
+					for (size_t n = 0; n < tree.size(); ++n) {
+						const auto ite = dirs.find(tree[n]);
+						if (ite != dirs.end()) continue;
+
+						std::clog << "[" << this->sock.get() << "]" << "create source subdirectory '" << tree[n] << "' [" << this << "]" << std::endl;
+						const auto dr = dirs.equal_range(n == 0 ? "" : tree[n-1]);
+						const auto dn = n == 0 ? tree[n] : tree[n].substr(tree[n-1].length()+1);
+						for (auto pd = dr.first; pd != dr.second; ++pd) {
+							dirs.emplace(tree[n], (mkdirat(pd->second, dn, 0700), opendirat(pd->second, dn)));
+						}
+					}
+
+					const auto filename = x.first.substr(x.first.find_last_of('/')+1);
+					const auto dr = dirs.equal_range(tree.empty() ? "" : tree.back());
+					for (auto pd = dr.first; pd != dr.second; ++pd) {
+						this->sources.emplace_back(filename, x.second, pd->second);
+					}
+				}
 			}
+			std::clog << "[" << this->sock.get() << "]" << " ready." << std::endl;
 		}
 		~program_writer() noexcept {
 			if (aiocb && aiocb->aio_fildes != -1) ::close(aiocb->aio_fildes);
@@ -534,9 +563,6 @@ namespace wandbox {
 				while (!sources.empty()) {
 					current_source = std::move(sources.front());
 					sources.pop_front();
-					if (current_source.name.empty()) {
-						current_source.name = target_compiler.output_file;
-					}
 					std::clog << "[" << sock.get() << "]" << "writing file '" << current_source.name << "' [" << this << "]" << std::endl;
 
 					{
