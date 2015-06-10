@@ -506,13 +506,15 @@ namespace wandbox {
 			std::clog << "[" << this->sock.get() << "]" << "create log directory '" << (config.system.storedir + "/" + s + "/" + unique_name) << "' [" << this << "]" << std::endl;
 			const auto logdir = mkdir_p_open_at({}, config.system.storedir + "/" + s + "/" + unique_name, 0700);
 			if (!logdir) {
-				std::clog << "1" << std::endl;
+				std::clog << "[" << this->sock.get() << "]" << "failed to create log directory '" << (config.system.storedir + "/" + s + "/" + unique_name) << "' [" << this << "]" << std::endl;
+				throw_system_error(errno);
 			}
 
 			std::clog << "[" << this->sock.get() << "]" << "using temporary name '" << unique_name << "' [" << this << "]" << std::endl;
 			const auto savedir = mkdir_p_open_at(workdir, "store", 0700);
 			if (!savedir) {
-				std::clog << "1" << std::endl;
+				std::clog << "[" << this->sock.get() << "]" << "failed to create working directory '" << unique_name << "' [" << this << "]" << std::endl;
+				throw_system_error(errno);
 			}
 
 			for (auto &&x: sources) {
