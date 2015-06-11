@@ -18,6 +18,7 @@
 #include <boost/optional.hpp>
 #include <boost/program_options.hpp>
 #include <boost/system/system_error.hpp>
+#include <boost/range/adaptor/map.hpp>
 
 #include <time.h>
 #include <locale.h>
@@ -531,21 +532,19 @@ namespace wandbox {
 					tree.pop_back();
 
 					for (size_t n = 0; n < tree.size(); ++n) {
-						const auto ite = dirs.find(tree[n]);
-						if (ite != dirs.end()) continue;
+						if (dirs.find(tree[n]) != dirs.end()) continue;
 
 						std::clog << "[" << this->sock.get() << "]" << "create source subdirectory '" << tree[n] << "' [" << this << "]" << std::endl;
-						const auto dr = dirs.equal_range(n == 0 ? "" : tree[n-1]);
-						const auto dn = n == 0 ? tree[n] : tree[n].substr(tree[n-1].length()+1);
-						for (auto pd = dr.first; pd != dr.second; ++pd) {
-							dirs.emplace(tree[n], (mkdirat(pd->second, dn, 0700), opendirat(pd->second, dn)));
+						const auto parents = dirs.equal_range(n == 0 ? "" : tree[n-1]) | boost::adaptors::map_values;
+						const auto dirname = n == 0 ? tree[n] : tree[n].substr(tree[n-1].length()+1);
+						for (auto &&p : std::vector<std::shared_ptr<DIR>>(parents.begin(), parents.end())) {
+							dirs.emplace(tree[n], (mkdirat(p, dirname, 0700), opendirat(p, dirname)));
 						}
 					}
 
 					const auto filename = x.first.substr(x.first.find_last_of('/')+1);
-					const auto dr = dirs.equal_range(tree.empty() ? "" : tree.back());
-					for (auto pd = dr.first; pd != dr.second; ++pd) {
-						this->sources.emplace_back(filename, x.second, pd->second);
+					for (auto &p: dirs.equal_range(tree.empty() ? "" : tree.back()) | boost::adaptors::map_values) {
+						this->sources.emplace_back(filename, x.second, p);
 					}
 				}
 			}
