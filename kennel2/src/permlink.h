@@ -192,6 +192,7 @@ public:
             while (r.next()) {
                 value["codes"][n]["file"] = r.get<std::string>("file");
                 value["codes"][n]["code"] = r.get<std::string>("code");
+                n += 1;
             }
         }
 
