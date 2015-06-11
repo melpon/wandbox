@@ -524,8 +524,9 @@ namespace wandbox {
 			for (auto &&x: sources) {
 				std::clog << "[" << this->sock.get() << "]" << "registering file '" << x.first << "' [" << this << "]" << std::endl;
 				if (x.first.empty()) {
-					this->sources.emplace_back(this->target_compiler.output_file, x.second, savedir);
-					this->sources.emplace_back(this->target_compiler.output_file, x.second, logdir);
+					const source_file_t filebase(this->target_compiler.output_file, x.second, nullptr);
+					this->sources.emplace_back(filebase, savedir);
+					this->sources.emplace_back(filebase, logdir);
 				} else {
 					auto tree = split_path_tree(x.first);
 					if (tree.empty()) continue;
@@ -543,8 +544,9 @@ namespace wandbox {
 					}
 
 					const auto filename = x.first.substr(x.first.find_last_of('/')+1);
+					const source_file_t filebase(filename, x.second, nullptr);
 					for (auto &p: dirs.equal_range(tree.empty() ? "" : tree.back()) | boost::adaptors::map_values) {
-						this->sources.emplace_back(filename, x.second, p);
+						this->sources.emplace_back(filebase, p);
 					}
 				}
 			}
@@ -560,30 +562,25 @@ namespace wandbox {
 		void operator ()(error_code = error_code(), size_t = 0) {
 			reenter (this) {
 				while (!sources.empty()) {
-					current_source = std::move(sources.front());
-					sources.pop_front();
-					std::clog << "[" << sock.get() << "]" << "writing file '" << current_source.name << "' [" << this << "]" << std::endl;
+					std::clog << "[" << sock.get() << "]" << "writing file '" << sources.front().name << "' [" << this << "]" << std::endl;
 
 					{
 						::memset(aiocb.get(), 0, sizeof(*aiocb.get()));
 						while (true) {
-							aiocb->aio_fildes = ::openat(dirfd(current_source.dir.get()), ("./" + current_source.name).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
-							if (aiocb->aio_fildes == -1) {
-								if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) {
-									yield {
-										PROTECT_FROM_MOVE(sigs);
-										sigs->async_wait(move(*this));
-									}
-								} else {
-									std::clog << "[" << sock.get() << "]" << "open failed '" << current_source.name.c_str() << "' [" << this << "]" << std::endl;
-									yield break;
+							aiocb->aio_fildes = ::openat(dirfd(sources.front().dir.get()), ("./" + sources.front().name).c_str(), O_WRONLY|O_CLOEXEC|O_CREAT|O_TRUNC|O_EXCL|O_NOATIME, 0600);
+							if (aiocb->aio_fildes >= 0) break;
+							if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) {
+								yield {
+									PROTECT_FROM_MOVE(sigs);
+									sigs->async_wait(move(*this));
 								}
 							} else {
-								break;
+								std::clog << "[" << sock.get() << "]" << "open failed '" << sources.front().name.c_str() << "' [" << this << "]" << std::endl;
+								yield break;
 							}
 						}
-						aiocb->aio_buf = current_source.buf;
-						aiocb->aio_nbytes = current_source.len;
+						aiocb->aio_buf = sources.front().buf;
+						aiocb->aio_nbytes = sources.front().len;
 						aiocb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
 						aiocb->aio_sigevent.sigev_signo = SIGHUP;
 						::aio_write(aiocb.get());
@@ -595,8 +592,10 @@ namespace wandbox {
 						} while (::aio_error(aiocb.get()) == EINPROGRESS) ;
 						::close(aiocb->aio_fildes);
 						aiocb->aio_fildes = -1;
+
+						std::clog << "[" << sock.get() << "]" << "write success '" << sources.front().name << "' [" << this << "]" << std::endl;
+						sources.pop_front();
 					}
-					std::clog << "[" << sock.get() << "]" << "write success '" << current_source.name << "' [" << this << "]" << std::endl;
 				}
 				return program_runner(aio, move(sock), move(received), move(sigs), move(workdir), move(target_compiler), move(semaphore))();
 			}
@@ -628,13 +627,18 @@ namespace wandbox {
 				source_shared.reset(new char[len], [](char *p) { delete[] p; });
 				memcpy(buf = source_shared.get(), source.c_str(), len);
 			}
+			source_file_t(const source_file_t &other, std::shared_ptr<DIR> dir)
+				: name(other.name),
+				  source_shared(other.source_shared),
+				  buf(other.buf),
+				  len(other.len),
+				  dir(dir) { }
 			source_file_t(const source_file_t &) = default;
 			source_file_t &operator =(const source_file_t &) = default;
 			source_file_t(source_file_t &&) = default;
 			source_file_t &operator =(source_file_t &&) = default;
 		};
 		std::deque<source_file_t> sources;
-		source_file_t current_source;
 	};
 
 	struct version_sender: private coroutine {
