@@ -93,13 +93,24 @@ namespace wandbox {
 		return std::shared_ptr<DIR>(fdopendir(fd), &::closedir);
 	}
 
-	inline std::vector<std::string> split_path(const std::string &path) {
+	inline std::vector<std::string> split_path_impl(const std::string &path, bool tree) {
 		std::vector<std::string> ret;
 		auto sep = path.begin();
 		const auto end = path.end();
 		for (auto ite = path.begin(); ite != end; ++ite) {
 			if (*ite == '/') {
-				if (sep != ite) ret.emplace_back(sep, ite);
+				std::string s(sep, ite);
+				if (!s.empty() && s != ".") {
+					if (s == "..") {
+						if (!ret.empty()) ret.pop_back();
+					} else {
+						if (tree && !ret.empty()) {
+							ret.emplace_back(ret.back() + "/" + s);
+						} else {
+							ret.emplace_back(std::move(s));
+						}
+					}
+				}
 				sep = ite;
 				++sep;
 				continue;
@@ -108,6 +119,14 @@ namespace wandbox {
 		}
 		if (sep != end) ret.emplace_back(sep, end);
 		return ret;
+	}
+
+	inline std::vector<std::string> split_path(const std::string &path) {
+		return split_path_impl(path, false);
+	}
+
+	inline std::vector<std::string> split_path_tree(const std::string &path) {
+		return split_path_impl(path, true);
 	}
 
 	inline std::shared_ptr<DIR> mkdir_p_open_at(const std::shared_ptr<DIR> &at, const std::string &path, ::mode_t mode) {
