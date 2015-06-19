@@ -181,9 +181,16 @@ public:
     }
     void compile() {
         if (request().request_method() != "POST") {
-            response().status(404);
+            response().status(405);
+            response().allow("POST");
             return;
         }
+
+        if (request().content_type_parsed().media_type() != "application/json") {
+            response().status(400);
+            return;
+        }
+
         auto value = json_post_data();
         auto protos = make_protocols(value);
 
@@ -213,7 +220,8 @@ public:
     }
     void post_permlink() {
         if (request().request_method() != "POST") {
-            response().status(404);
+            response().status(405);
+            response().allow("POST");
             return;
         }
         auto value = json_post_data();
@@ -315,7 +323,13 @@ public:
     }
     void api_compile() {
         if (request().request_method() != "POST") {
-            response().status(404);
+            response().status(405);
+            response().allow("POST");
+            return;
+        }
+
+        if (request().content_type_parsed().media_type() != "application/json") {
+            response().status(400);
             return;
         }
 
@@ -414,13 +428,14 @@ public:
     }
     void nojs_compile(std::string compiler) {
         if (request().request_method() != "POST") {
-            response().status(404);
+            response().status(405);
+            response().allow("POST");
             return;
         }
 
         auto json = form_to_json(request().post());
         if (json["compiler"].str() != compiler) {
-            response().status(405);
+            response().status(400);
             return;
         }
         api_compile_internal(json);
