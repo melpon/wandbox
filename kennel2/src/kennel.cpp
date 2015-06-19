@@ -185,12 +185,6 @@ public:
             response().allow("POST");
             return;
         }
-
-        if (request().content_type_parsed().media_type() != "application/json") {
-            response().status(400);
-            return;
-        }
-
         auto value = json_post_data();
         auto protos = make_protocols(value);
 
@@ -325,11 +319,6 @@ public:
         if (request().request_method() != "POST") {
             response().status(405);
             response().allow("POST");
-            return;
-        }
-
-        if (request().content_type_parsed().media_type() != "application/json") {
-            response().status(400);
             return;
         }
 
