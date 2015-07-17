@@ -1118,8 +1118,8 @@
                 "gnu++98", 
                 "c++11", 
                 "gnu++11", 
-                "c++1y", 
-                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
                 "c++1z", 
                 "gnu++1z", 
                 "cpp-no-pedantic", 
@@ -1152,6 +1152,64 @@
                 "/bin/sh", 
                 "-c", 
                 "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "boost-1.56", 
+                "boost-1.57", 
+                "boost-1.58", 
+                "sprout", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-5.2.0/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-5.2.0/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-5.2.0", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1z", 
+                "boost-1.58", 
+                "sprout", 
+                "cpp-no-pedantic"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-5.2.0/bin/g++", 
+                "-dumpversion"
             ]
         }, 
         {

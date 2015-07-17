@@ -297,7 +297,14 @@ class Compilers(object):
                 "after": {
                     "display-name":"gcc HEAD",
                     "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "initial-checked":["warning", "gnu++1z", "boost-1.58", "sprout", "cpp-no-pedantic"],
+                },
+            }),
+            ("gcc-5.2.0", {
+                "params": {},
+                "after": {
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.58", "sprout", "cpp-no-pedantic"],
                 },
             }),
