@@ -343,7 +343,7 @@ footer {
 }
 
 .wandbox-editor .nav {
-  margin-left: 28px;
+  margin-left: 29px;
 }
 #wandbox-editor-default-tab {
   padding: 4px 8px;
@@ -354,6 +354,11 @@ footer {
   padding-bottom: 4px;
   padding-left: 8px;
   padding-right: 0px;
+}
+#wandbox-editor-header {
+  min-height: 31px;
+  max-height: 40px;
+  overflow-y: auto;
 }
 .wandbox-editor-name-tab > button {
   font-size: 12px;
