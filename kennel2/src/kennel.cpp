@@ -28,6 +28,8 @@ namespace cppcms {
 class kennel : public cppcms::application {
 public:
     kennel(cppcms::service &srv) : cppcms::application(srv) {
+        // static file serving is for debugging
+        // use Apache, nginx and so on in production
         dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/)*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 4);
         dispatcher().assign("/static/(js/jquery.cookie.(js))", &kennel::serve_file, this, 1, 2);
         dispatcher().assign("/static/(js/jquery.url.(js))", &kennel::serve_file, this, 1, 2);
@@ -121,7 +123,46 @@ public:
         }, 1);
     }
 
+    bool ensure_method_get() {
+        if (request().request_method() == "HEAD") {
+            return true;
+        }
+        if (request().request_method() == "GET") {
+            return true;
+        }
+
+        if (request().request_method() == "OPTIONS") {
+            response().status(200);
+            response().allow("OPTIONS, GET, HEAD");
+            return false;
+        } else {
+            response().status(405);
+            response().allow("OPTIONS, GET, HEAD");
+            return false;
+        }
+    }
+
+    bool ensure_method_post() {
+        if (request().request_method() == "POST") {
+            return true;
+        }
+
+        if (request().request_method() == "OPTIONS") {
+            response().status(200);
+            response().allow("OPTIONS, POST");
+            return false;
+        } else {
+            response().status(405);
+            response().allow("OPTIONS, POST");
+            return false;
+        }
+    }
+
     void root() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
         content::root c;
         c.set_compiler_infos(get_compiler_infos_or_cache());
         render("root", c);
@@ -180,11 +221,10 @@ public:
         return result;
     }
     void compile() {
-        if (request().request_method() != "POST") {
-            response().status(405);
-            response().allow("POST");
+        if (!ensure_method_post()) {
             return;
         }
+
         auto value = json_post_data();
         auto protos = make_protocols(value);
 
@@ -213,11 +253,10 @@ public:
         return name;
     }
     void post_permlink() {
-        if (request().request_method() != "POST") {
-            response().status(405);
-            response().allow("POST");
+        if (!ensure_method_post()) {
             return;
         }
+
         auto value = json_post_data();
 
         auto compiler_infos = get_compiler_infos_or_cache();
@@ -243,6 +282,10 @@ public:
         result.save(response().out(), cppcms::json::compact);
     }
     void get_permlink(std::string permlink_name) {
+        if (!ensure_method_get()) {
+            return;
+        }
+
         content::root c;
         c.set_compiler_infos(get_compiler_infos_or_cache());
 
@@ -282,6 +325,10 @@ public:
     }
 
     void api_list() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
         get_compiler_infos_or_cache().save(response().out(), cppcms::json::compact);
@@ -316,9 +363,7 @@ public:
         }
     }
     void api_compile() {
-        if (request().request_method() != "POST") {
-            response().status(405);
-            response().allow("POST");
+        if (!ensure_method_post()) {
             return;
         }
 
@@ -376,6 +421,10 @@ public:
         result.save(response().out(), cppcms::json::readable);
     }
     void api_permlink(std::string permlink_name) {
+        if (!ensure_method_get()) {
+            return;
+        }
+
         permlink pl(service());
         auto value = pl.get_permlink(permlink_name);
         cppcms::json::value outputs;
@@ -394,12 +443,20 @@ public:
     }
 
     void nojs_list() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
         content::root c;
         c.set_compiler_infos(get_compiler_infos_or_cache());
         render("nojs_list", c);
     }
 
     void nojs_root(std::string compiler) {
+        if (!ensure_method_get()) {
+            return;
+        }
+
         auto compiler_infos = get_compiler_infos_or_cache();
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
@@ -416,9 +473,7 @@ public:
         render("nojs_root", c);
     }
     void nojs_compile(std::string compiler) {
-        if (request().request_method() != "POST") {
-            response().status(405);
-            response().allow("POST");
+        if (!ensure_method_post()) {
             return;
         }
 
