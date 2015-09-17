@@ -742,6 +742,20 @@ class Compilers(object):
                     "display-name":"python2.7 HEAD",
                 },
            }),
+           ("python-3.5.0", {
+                "params": {
+                    "bin": "python3",
+                },
+                "after": {
+                },
+           }),
+           ("python-3.4.3", {
+                "params": {
+                    "bin": "python3",
+                },
+                "after": {
+                },
+           }),
            ("python-3.3.2", {
                 "params": {
                     "bin": "python3",

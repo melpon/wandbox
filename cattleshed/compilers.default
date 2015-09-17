@@ -2844,6 +2844,44 @@
         }, 
         {
             "compile-command": "/bin/true", 
+            "name": "python-3.5.0", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-3.5.0/bin/python3", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-3.5.0/bin/python3", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "python-3.4.3", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-3.4.3/bin/python3", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-3.4.3/bin/python3", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
             "name": "python-3.3.2", 
             "language": "Python", 
             "output-file": "prog.py", 
