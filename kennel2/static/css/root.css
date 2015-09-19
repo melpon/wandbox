@@ -163,6 +163,8 @@ footer {
 .cm-s-user span.cm-builtin { color: #077; }
 .cm-s-user span.cm-special { color: #0cc; }
 .cm-s-user span.cm-variable { color: black; }
+.cm-s-user span.cm-variable-2 { color: #11f; }
+.cm-s-user span.cm-variable-3 { color: #11f; }
 .cm-s-user span.cm-number { color: #f33; }
 .cm-s-neat span.cm-atom { color: #f33; }
 .cm-s-user span.cm-meta {color: #c62;}
