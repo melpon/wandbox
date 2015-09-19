@@ -220,6 +220,14 @@ public:
         }
         return result;
     }
+    static void set_twitter_if_info_exists(content::root& c, const cppcms::json::value& info, std::string code) {
+        if (!info.is_undefined()) {
+            std::string title = "[" + info["language"].str() + "] " + info["display-name"].str() + " " + info["version"].str();
+            std::string description = std::move(code);
+            c.set_twitter(std::move(title), std::move(description));
+        }
+    }
+
     void compile() {
         if (!ensure_method_post()) {
             return;
@@ -297,11 +305,7 @@ public:
         c.permlink = ss.str();
 
         auto info = result["compiler-info"];
-        if (!info.is_undefined()) {
-            std::string title = "[" + info["language"].str() + "] " + info["display-name"].str() + " " + info["version"].str();
-            std::string description = result["code"].str();
-            c.set_twitter(std::move(title), std::move(description));
-        }
+        set_twitter_if_info_exists(c, info, result["code"].str());
 
         render("root", c);
     }
@@ -367,10 +371,13 @@ public:
             return;
         }
 
-        auto value = json_post_data();
-        api_compile_internal(json_post_data());
+        auto result = api_compile_internal(json_post_data());
+
+        response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
+        result.save(response().out(), cppcms::json::readable);
     }
-    void api_compile_internal(cppcms::json::value value) {
+    cppcms::json::value api_compile_internal(cppcms::json::value value) {
         auto compiler = value["compiler"].str();
         auto save = value.get("save", false);
         auto protos = make_protocols(value);
@@ -382,8 +389,7 @@ public:
             });
         // error if the compiler is not found
         if (it == compiler_infos.array().end()) {
-            response().status(400);
-            return;
+            throw std::exception();
         }
 
         cppcms::json::value result;
@@ -416,9 +422,8 @@ public:
             auto root = settings["map_root"].str();
             result["url"] = scheme + "://" + domain + root + "/permlink/" + permlink_name;
         }
-        response().content_type("application/json");
-        response().set_header("Access-Control-Allow-Origin", "*");
-        result.save(response().out(), cppcms::json::readable);
+
+        return result;
     }
     void api_permlink(std::string permlink_name) {
         if (!ensure_method_get()) {
@@ -482,7 +487,10 @@ public:
             response().status(400);
             return;
         }
-        api_compile_internal(json);
+        auto result = api_compile_internal(std::move(json));
+
+        response().content_type("application/json");
+        result.save(response().out(), cppcms::json::readable);
     }
 };
 
