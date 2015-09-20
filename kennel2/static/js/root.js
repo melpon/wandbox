@@ -72,7 +72,9 @@ $(function() {
   };
 
   // create compiler
-  var compiler = new Compiler('#wandbox-compiler', '#wandbox-compile-options');
+  var compiler = new Compiler('#wandbox-compiler', '#wandbox-compile-options', function() {
+    post_code(compiler, result_container);
+  });
   compiler.compiler_changed = function() {
     if (!USING_PERMLINK)
       save('wandbox.compiler.current', compiler.serialize_current());
@@ -98,7 +100,9 @@ $(function() {
     update_compile_command(compiler);
   };
 
-  var stdin = new Stdin('#stdin');
+  var stdin = new Stdin('#stdin', function() {
+    post_code(compiler, result_container);
+  });
 
   // deserialize if settings is stored in the cookie.
   var compiler_settings = $.cookie('wandbox.compiler.current');
@@ -151,7 +155,7 @@ function to_id(id) {
   return id.replace(/\./g, "\\.");
 }
 
-function Compiler(compiler_id, compile_options_id) {
+function Compiler(compiler_id, compile_options_id, ctrl_enter) {
   var self = this;
   $('.wandbox-dropdown-area').click(function (e) {
     if (!$(e.target).hasClass('wandbox-dropdown-listitem')) {
@@ -203,6 +207,9 @@ function Compiler(compiler_id, compile_options_id) {
        var editor = CodeMirror(e, {
          viewportMargin: Infinity,
          smartIndent: false,
+         extraKeys: {
+           'Ctrl-Enter': ctrl_enter,
+         },
        });
        $(e).data('editor', editor);
     });
@@ -1043,7 +1050,7 @@ ResultWindow.prototype.set_code = function(compiler, code, codes, stdin, outputs
 
 /* Stdin */
 
-function Stdin(stdin_id) {
+function Stdin(stdin_id, ctrl_enter) {
   this.stdin_id = stdin_id;
 
   var init_editor = function(es) {
@@ -1054,6 +1061,9 @@ function Stdin(stdin_id) {
        var editor = CodeMirror(e, {
          viewportMargin: Infinity,
          smartIndent: false,
+         extraKeys: {
+           'Ctrl-Enter': ctrl_enter,
+         },
        });
        $(e).data('editor', editor);
     });
