@@ -45,7 +45,7 @@ namespace content {
             this->permlink = std::move(permlink);
 
             auto str = permlink["options"].str();
-            split(str, ',', [&options](const std::string& str) { options.insert(str); });
+            split(str, ',', [this](const std::string& str) { options.insert(str); });
         }
         std::string code() const {
             return permlink.is_undefined() ? "" : permlink["code"].str();
