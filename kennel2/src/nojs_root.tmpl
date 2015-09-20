@@ -18,7 +18,12 @@
 
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <% if (!content.twitter_title.empty()) %>
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content="<%= twitter_title %>" />
+      <meta name="twitter:description" content="<%= twitter_description %>" />
+    <% end if %>
+
   </head>
   <body>
     <form action="<% url "nojs-compile" using compiler_info | ext getstr("name") %>" method="POST">
@@ -29,13 +34,13 @@
       <p><label>display-name:</label> <%= compiler_info | ext getstr("display-name") %></p>
       <input type="hidden" name="compiler" value="<%= compiler_info | ext getstr("name") %>"></input>
       <p>source code:</p>
-      <p><textarea name="code" rows="10" cols="78"></textarea></p>
+      <p><textarea name="code" rows="10" cols="78"><%= code() %></textarea></p>
       <% c++ for (auto&& sw: content.compiler_info["switches"].array()) { %>
         <p>
           <% c++ content.sw = sw; %>
           <% if (sw["type"] == "single") %>
             <label>
-              <input name="checkbox-<%= sw | ext getstr("name") %>" type="checkbox" value="<%= sw | ext getstr("name") %>" <% if (sw["default"].boolean()) %>checked<% end %>>
+              <input name="checkbox-<%= sw | ext getstr("name") %>" type="checkbox" value="<%= sw | ext getstr("name") %>" <% if (content.has_checkbox_option(sw)) %>checked<% end if %>>
                 <%= sw | ext getstr("display-name") %>
               </input>
             </label>
@@ -43,7 +48,7 @@
               <select name="select-<%= sw | ext getstr("default") %>">
                 <% c++ for (auto&& opt: sw["options"].array()) { %>
                   <% c++ content.opt = opt; %>
-                  <option name="compile-option-groups-#{groupName}" value="<%= opt | ext getstr("name") %>" <% if (opt["name"].str() == sw["default"].str()) %>selected<% end %>>
+                  <option name="compile-option-groups-#{groupName}" value="<%= opt | ext getstr("name") %>" <% if (content.has_select_option(sw, opt)) %>selected<% end if %>>
                     <%= opt | ext getstr("display-name") %>
                   </option>
                 <% c++ } %>
@@ -54,16 +59,29 @@
       <% c++ } %>
       <% if (content.compiler_info["compiler-option-raw"].boolean()) %>
         <p><label>extra options:</label></p>
-        <p><textarea name="compiler-option-raw" rows="3" cols="20"></textarea></p>
-      <% end %>
+        <p><textarea name="compiler-option-raw" rows="3" cols="20"><%= compiler_option_raw() %></textarea></p>
+      <% end if %>
       <% if (content.compiler_info["runtime-option-raw"].boolean()) %>
         <p><label>extra options:</label></p>
-        <p><textarea name="runtime-option-raw" rows="3" cols="20"></textarea></p>
-      <% end %>
+        <p><textarea name="runtime-option-raw" rows="3" cols="20"><%= runtime_option_raw() %></textarea></p>
+      <% end if %>
       <p><label>stdin:</label></p>
-      <p><textarea name="stdin" rows="3" cols="20"></textarea></p>
+      <p><textarea name="stdin" rows="3" cols="20"><%= stdin() %></textarea></p>
+      <p><input name="save" type="checkbox" value="save">Save</input>
       <p><input type="submit" value="Run"></input></p>
     </form>
+    <% if (!content.compiler_message().empty()) %>
+      <div>
+        <label>compiler output:</label>
+        <pre><%= compiler_message() %></pre>
+      </div>
+    <% end if %>
+    <% if (!content.program_message().empty()) %>
+      <div>
+        <label>program output:</label>
+        <pre><%= program_message() %></pre>
+      </div>
+    <% end if %>
   </body>
 </html>
 <% end template %>

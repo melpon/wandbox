@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <random>
 #include <algorithm>
 #include "libs.h"
@@ -47,8 +48,10 @@ public:
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
         dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
 
-        dispatcher().assign("/nojs/(.+)/compile/?", &kennel::nojs_compile, this, 1);
+        dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this, 1);
         mapper().assign("nojs-compile", "/nojs/{1}/compile");
+        dispatcher().assign("/nojs/(.+?)/permlink/([a-zA-Z0-9]+)/?", &kennel::nojs_get_permlink, this, 1, 2);
+        mapper().assign("nojs-get-permlink", "/nojs/{1}/permlink/{2}");
         dispatcher().assign("/nojs/([a-zA-Z0-9_\\-\\.]+)/?", &kennel::nojs_root, this, 1);
         mapper().assign("nojs-root", "/nojs/{1}");
         dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
@@ -218,9 +221,15 @@ public:
         if (not options.empty()) {
             result["options"] = join(options, ",");
         }
+        {
+            auto it = form.find("save");
+            if (it != form.end())
+                result["save"] = true;
+        }
         return result;
     }
-    static void set_twitter_if_info_exists(content::root& c, const cppcms::json::value& info, std::string code) {
+    template<class Content>
+    static void set_twitter_if_info_exists(Content& c, const cppcms::json::value& info, std::string code) {
         if (!info.is_undefined()) {
             std::string title = "[" + info["language"].str() + "] " + info["display-name"].str() + " " + info["version"].str();
             std::string description = std::move(code);
@@ -487,10 +496,60 @@ public:
             response().status(400);
             return;
         }
-        auto result = api_compile_internal(std::move(json));
+        auto result = api_compile_internal(json);
 
-        response().content_type("application/json");
-        result.save(response().out(), cppcms::json::readable);
+        if (json.get("save", false)) {
+            std::stringstream ss;
+            mapper().map(ss, "nojs-get-permlink", json["compiler"].str(), result["permlink"].str());
+            response().set_redirect_header(ss.str());
+        } else {
+            content::nojs_root c;
+
+            auto compiler_infos = get_compiler_infos_or_cache();
+            // find compiler info.
+            auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
+                [&compiler](cppcms::json::value& v) {
+                    return v["name"].str() == compiler;
+                });
+            // error if the compiler is not found
+            if (it == compiler_infos.array().end()) {
+                response().status(400);
+                return;
+            }
+            c.compiler_info = *it;
+            json["compiler_message"] = result["compiler_message"];
+            json["program_message"] = result["program_message"];
+            c.set_permlink(json);
+            render("nojs_root", c);
+        }
+    }
+    void nojs_get_permlink(std::string compiler, std::string permlink_name) {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        content::nojs_root c;
+
+        permlink pl(service());
+        auto result = pl.get_permlink(permlink_name);
+
+        for (auto&& output: result["outputs"].array()) {
+            update_compile_result(result, protocol{output["type"].str(), output["output"].str()});
+        }
+        result.object().erase("outputs");
+
+        auto info = result["compiler-info"];
+        c.compiler_info = info;
+        set_twitter_if_info_exists(c, info, result["code"].str());
+
+        if (!info.is_undefined() && info["name"].str() != compiler) {
+            response().status(400);
+            return;
+        }
+
+        c.set_permlink(std::move(result));
+
+        render("nojs_root", c);
     }
 };
 
