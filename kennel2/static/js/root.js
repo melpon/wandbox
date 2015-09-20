@@ -172,11 +172,14 @@ function Compiler(compiler_id, compile_options_id, ctrl_enter) {
 
     $('.wandbox-current-compiler-text').text($(e.target).attr('data-display-name'));
     $('.wandbox-current-compiler-text').attr('title', $(e.target).attr('data-display-name'));
+
     // active language
     var lang = $($(e.target).attr('href')).attr('data-language');
     var tab_id = LANGUAGE_NAME_TO_TAB_ID[lang];
     var $lang = $('.wandbox-dropdown-lang-area a[href="#' + tab_id + '"]');
     $lang.tab('show');
+
+    $('.wandbox-current-compiler-language').text(lang);
 
     if (self.compiler_changed)
       self.compiler_changed();
