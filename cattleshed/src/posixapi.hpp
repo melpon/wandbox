@@ -275,5 +275,52 @@ namespace wandbox {
 			std::terminate();
 		}
 	}
+
+	inline std::deque<unique_fd> preparepty() {
+		unique_fd ptfd_s(posix_openpt(O_RDWR|O_NOCTTY));
+		if (!ptfd_s || grantpt(ptfd_s.get()) < 0 || unlockpt(ptfd_s.get()) < 0) return {};
+
+		char *ptsname_s = ptsname(ptfd_s.get());
+		if (!ptsname_s) return {};
+
+		unique_fd ptsfd_s(open(ptsname_s, O_NOCTTY|O_RDWR));
+		if (!ptsfd_s) return {};
+
+
+		unique_fd ptfd_e(posix_openpt(O_RDWR|O_NOCTTY));
+		if (!ptfd_e || grantpt(ptfd_e.get()) < 0 || unlockpt(ptfd_e.get()) < 0) return {};
+
+		char *ptsname_e = ptsname(ptfd_e.get());
+		if (!ptsname_e) return {};
+
+		unique_fd ptsfd_e(open(ptsname_e, O_NOCTTY|O_RDWR));
+		if (!ptsfd_e) return {};
+
+		std::deque<unique_fd> ret;
+		ret.emplace_back(std::move(ptfd_s));
+		ret.emplace_back(std::move(ptsfd_s));
+		ret.emplace_back(std::move(ptfd_e));
+		ret.emplace_back(std::move(ptsfd_e));
+
+		return ret;
+	}
+
+	inline child_process pty_spawn(const std::shared_ptr<DIR> &workdir, const std::vector<std::string> &argv) {
+		auto pt = preparepty();
+		if (pt.empty()) return piped_spawn(workdir, argv);
+		if (const auto pid = fork()) {
+			unique_fd f(dup(pt[0].get()));
+			return { unique_child_pid(pid), std::move(pt[0]), std::move(f), std::move(pt[2]) };
+		} else try {
+			chdir(workdir);
+			dup2(pt[1], 0);
+			dup2(pt[1], 1);
+			dup2(pt[3], 2);
+			pt.clear();
+			execv(argv);
+		} catch (...) {
+			std::terminate();
+		}
+	}
 }
 #endif
