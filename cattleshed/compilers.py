@@ -455,6 +455,8 @@ class Compilers(object):
                     "compile-command":[
                         "/usr/local/llvm-3.7/bin/run-clang++.sh",
                         "-oprog.exe",
+                        "-fansi-escape-codes",
+                        "-fcolor-diagnostics",
                         "-stdlib=libc++",
                         "-I/usr/local/libcxx-3.7/include/c++/v1",
                         "-L/usr/local/libcxx-3.7/lib",
@@ -478,6 +480,8 @@ class Compilers(object):
                     "compile-command":[
                         "/usr/local/llvm-3.6/bin/run-clang++.sh",
                         "-oprog.exe",
+                        "-fansi-escape-codes",
+                        "-fcolor-diagnostics",
                         "-stdlib=libc++",
                         "-I/usr/local/libcxx-3.6/include/c++/v1",
                         "-L/usr/local/libcxx-3.6/lib",
@@ -501,6 +505,8 @@ class Compilers(object):
                     "compile-command":[
                         "/usr/local/llvm-3.5/bin/run-clang++.sh",
                         "-oprog.exe",
+                        "-fansi-escape-codes",
+                        "-fcolor-diagnostics",
                         "-stdlib=libc++",
                         "-I/usr/local/libcxx-3.5/include/c++/v1",
                         "-L/usr/local/libcxx-3.5/lib",
@@ -580,6 +586,8 @@ class Compilers(object):
            "compile-command":[
                "/usr/local/{llvm}/bin/clang++",
                "-oprog.exe",
+               "-fansi-escape-codes",
+               "-fcolor-diagnostics",
                "-stdlib=libc++",
                "-I/usr/local/{libcxx}/include/c++/v1",
                "-L/usr/local/{libcxx}/lib",

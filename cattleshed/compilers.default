@@ -1975,6 +1975,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.7/bin/run-clang++.sh", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.7/include/c++/v1", 
                 "-L/usr/local/libcxx-3.7/lib", 
@@ -2040,6 +2042,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.6/bin/run-clang++.sh", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.6/include/c++/v1", 
                 "-L/usr/local/libcxx-3.6/lib", 
@@ -2105,6 +2109,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.5/bin/run-clang++.sh", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.5/include/c++/v1", 
                 "-L/usr/local/libcxx-3.5/lib", 
@@ -2168,6 +2174,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.4/bin/clang++", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.4/include/c++/v1", 
                 "-L/usr/local/libcxx-3.4/lib", 
@@ -2231,6 +2239,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.3/bin/clang++", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.3/include/c++/v1", 
                 "-L/usr/local/libcxx-3.3/lib", 
@@ -2294,6 +2304,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.2/bin/clang++", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.0/include/c++/v1", 
                 "-L/usr/local/libcxx-3.0/lib", 
@@ -2353,6 +2365,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.1/bin/clang++", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.0/include/c++/v1", 
                 "-L/usr/local/libcxx-3.0/lib", 
@@ -2411,6 +2425,8 @@
             "compile-command": [
                 "/usr/local/llvm-3.0/bin/clang++", 
                 "-oprog.exe", 
+                "-fansi-escape-codes", 
+                "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
                 "-I/usr/local/libcxx-3.0/include/c++/v1", 
                 "-L/usr/local/libcxx-3.0/lib", 
