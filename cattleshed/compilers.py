@@ -430,6 +430,8 @@ class Compilers(object):
                     "compile-command":[
                         "/usr/local/llvm-head/bin/run-clang++.sh",
                         "-oprog.exe",
+                        "-fansi-escape-codes",
+                        "-fcolor-diagnostics",
                         "-stdlib=libc++",
                         "-I/usr/local/libcxx-head/include/c++/v1",
                         "-L/usr/local/libcxx-head/lib",
