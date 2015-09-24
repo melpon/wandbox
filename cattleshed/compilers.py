@@ -195,6 +195,11 @@ class Switches(object):
                 "display-name":"Sprout",
                 "display-flags":"-I/usr/local/sprout",
             },
+            "msgpack":{
+                "flags":["-I/usr/local/msgpack-head/include"],
+                "display-name":"MessagePack",
+                "display-flags":"-I/usr/local/msgpack/include",
+            },
             "warning":{
                 "flags":["-Wall", "-Wextra"],
                 "display-name":"Warnings",
@@ -302,70 +307,70 @@ class Compilers(object):
                 "after": {
                     "display-name":"gcc HEAD",
                     "version-command":["/bin/sh", "-c", "/usr/local/gcc-head/bin/g++ --version | head -1 | cut -d' ' -f3-"],
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-5.2.0", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-5.1.0", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-4.9.2", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-4.9.1", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-4.9.0", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-4.8.2", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-4.8.1", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-4.7.3", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++11", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
             ("gcc-4.6.4", {
                 "params": {},
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++0x", "gnu++0x"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++0x", "gnu++0x"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++0x", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
             }),
@@ -425,7 +430,7 @@ class Compilers(object):
                 },
                 "after": {
                     "display-name":"clang HEAD",
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.59", "sprout", "cpp-no-pedantic"],
                     "compile-command":[
                         "/usr/local/llvm-head/bin/run-clang++.sh",
@@ -450,7 +455,7 @@ class Compilers(object):
                     "libcxx": "libcxx-3.7",
                 },
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.59", "sprout", "cpp-no-pedantic"],
                     "compile-command":[
                         "/usr/local/llvm-3.7/bin/run-clang++.sh",
@@ -475,7 +480,7 @@ class Compilers(object):
                     "libcxx": "libcxx-3.6",
                 },
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.59", "sprout", "cpp-no-pedantic"],
                     "compile-command":[
                         "/usr/local/llvm-3.6/bin/run-clang++.sh",
@@ -500,7 +505,7 @@ class Compilers(object):
                     "libcxx": "libcxx-3.5",
                 },
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++14", "gnu++14", "c++1z", "gnu++1z"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1z", "boost-1.59", "sprout", "cpp-no-pedantic"],
                     "compile-command":[
                         "/usr/local/llvm-3.5/bin/run-clang++.sh",
@@ -525,7 +530,7 @@ class Compilers(object):
                     "libcxx": "libcxx-3.4",
                 },
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
                 "lsupc++": True,
@@ -536,7 +541,7 @@ class Compilers(object):
                     "libcxx": "libcxx-3.3",
                 },
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
                 "lsupc++": True,
@@ -547,7 +552,7 @@ class Compilers(object):
                     "libcxx": "libcxx-3.0",
                 },
                 "after": {
-                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
                     "initial-checked":["warning", "gnu++1y", "boost-1.59", "sprout", "cpp-no-pedantic"],
                 },
                 "lsupc++": False,
