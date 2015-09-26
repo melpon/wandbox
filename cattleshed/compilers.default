@@ -3137,6 +3137,48 @@
         }, 
         {
             "compile-command": "/bin/true", 
+            "name": "erlang-18.1", 
+            "language": "Erlang", 
+            "output-file": "prog.erl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/erlang-18.1/bin/erl", 
+                "-eval", 
+                "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", 
+                "-noshell"
+            ], 
+            "run-command": [
+                "/usr/local/erlang-18.1/bin/escript", 
+                "prog.erl"
+            ], 
+            "display-compile-command": "escript prog.erl", 
+            "jail-name": "erlangvm", 
+            "display-name": "erlang", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
+            "name": "erlang-17.0", 
+            "language": "Erlang", 
+            "output-file": "prog.erl", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/erlang-17.0/bin/erl", 
+                "-eval", 
+                "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", 
+                "-noshell"
+            ], 
+            "run-command": [
+                "/usr/local/erlang-17.0/bin/escript", 
+                "prog.erl"
+            ], 
+            "display-compile-command": "escript prog.erl", 
+            "jail-name": "erlangvm", 
+            "display-name": "erlang", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
             "name": "elixir-head", 
             "language": "Elixir", 
             "output-file": "prog.ex", 

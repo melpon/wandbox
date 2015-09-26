@@ -905,6 +905,20 @@ class Compilers(object):
                     "display-name": "erlang maint",
                 },
            }),
+           ("erlang-18.1", {
+                "params": {
+                },
+                "after": {
+                    "display-name": "erlang",
+                },
+           }),
+           ("erlang-17.0", {
+                "params": {
+                },
+                "after": {
+                    "display-name": "erlang",
+                },
+           }),
         ]
         FORMATS = {
             "displayable":True,
