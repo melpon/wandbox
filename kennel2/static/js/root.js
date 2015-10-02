@@ -1,12 +1,7 @@
 /* main() */
 
-function post_code(compiler, result_container) {
-  $('#wandbox-compile').hide();
-  $('#wandbox-compiling').show();
-
-  var editor = new Editor('#editor-settings');
-  var code = editor.getValue($('#wandbox-editor-default'));
-  var codes = $('#wandbox-editor-header > li > a.wandbox-editor-name-tab').map(function() {
+function get_codes(editor) {
+  return $('#wandbox-editor-header > li > a.wandbox-editor-name-tab').map(function() {
     var file = '';
     if ($(this).find('.wandbox-renamable').length != 0) {
       file = $(this).find('.wandbox-renamable').text();
@@ -16,6 +11,14 @@ function post_code(compiler, result_container) {
     var code_ = editor.getValue($($(this).attr('href')));
     return { 'file': file, 'code': code_ };
   }).get();
+}
+function post_code(compiler, result_container) {
+  $('#wandbox-compile').hide();
+  $('#wandbox-compiling').show();
+
+  var editor = new Editor('#editor-settings');
+  var code = editor.getValue($('#wandbox-editor-default'));
+  var codes = get_codes(editor);
   var stdin = new Stdin('#stdin');
 
   result_container.post_code(compiler, code, codes, stdin.get_stdin());
@@ -47,9 +50,8 @@ $(function() {
     $('#wandbox-compiling').hide();
   };
   result_container.result_changed = function() {
-    if (!USING_PERMLINK)
-      save('wandbox.result_container', result_container.serialize());
   }
+
 
   $('#wandbox-compile').click(function(event) {
     event.preventDefault();
@@ -62,8 +64,6 @@ $(function() {
     post_code(compiler, result_container);
   };
   editor.editor_changed = function() {
-    if (!USING_PERMLINK)
-      save('wandbox.editor', editor.serialize());
     if (editor.is_legacy()) {
       $('#wandbox-compile').text('Run');
     } else {
@@ -76,27 +76,18 @@ $(function() {
     post_code(compiler, result_container);
   });
   compiler.compiler_changed = function() {
-    if (!USING_PERMLINK)
-      save('wandbox.compiler.current', compiler.serialize_current());
-
     update_compile_command(compiler);
 
     var lang = compiler.get_selected_compiler_element().attr('data-language');
     editor.setLanguage(lang);
   };
   compiler.compile_option_changed = function() {
-    if (!USING_PERMLINK)
-      save('wandbox.compiler.current', compiler.serialize_current());
-
     update_compile_command(compiler);
   };
   compiler.raw_keyup = function() {
     update_compile_command(compiler);
   };
   compiler.raw_changed = function() {
-    if (!USING_PERMLINK)
-      save('wandbox.compiler.current', compiler.serialize_current());
-
     update_compile_command(compiler);
   };
 
@@ -117,6 +108,17 @@ $(function() {
   } else {
     // select default compiler
     compiler.set_compiler(DEFAULT_COMPILER);
+  }
+  // restore editing code
+  if (!USING_PERMLINK) {
+    var editor_code = $.cookie('wandbox.editor.code');
+    if (editor_code) {
+      editor.setValue($('#wandbox-editor-default'), editor_code);
+    }
+    var editor_codes = $.cookie('wandbox.editor.codes');
+    for (var i = 0; i < (editor_codes || []).length; i++) {
+      editor.addEditor(editor_codes[i]['file'], editor_codes[i]['code']);
+    }
   }
 
   // expand window if using permlink
@@ -145,6 +147,16 @@ $(function() {
   }
 
   update_compile_command(compiler);
+
+  $(window).unload(function() {
+    if (!USING_PERMLINK) {
+      save('wandbox.result_container', result_container.serialize());
+      save('wandbox.compiler.current', compiler.serialize_current());
+      save('wandbox.editor', editor.serialize());
+      save('wandbox.editor.code', editor.getValue($('#wandbox-editor-default')));
+      save('wandbox.editor.codes', get_codes(editor));
+    }
+  });
 
   editor.focus_default();
 });
