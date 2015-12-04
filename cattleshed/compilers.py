@@ -1208,7 +1208,7 @@ class Compilers(object):
             "output-file":"prog.swift",
             "compiler-option-raw":True,
             "compile-command":["/usr/local/{name}/bin/run-swift.sh", "/usr/local/{name}/bin/swiftc", "prog.swift"],
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/run-swift.sh", "/usr/local/{name}/bin/swiftc --version | head -1 | cut -d' ' -f3"],
+            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/run-swift.sh /usr/local/{name}/bin/swiftc --version | head -1 | cut -d' ' -f3"],
             "display-name":"swift",
             "display-compile-command":"swiftc prog.swift",
             "run-command":["/usr/local/{name}/bin/run-swift.sh", "./prog"]
