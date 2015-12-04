@@ -3548,6 +3548,29 @@
             "runtime-option-raw": true
         }, 
         {
+            "compile-command": [
+                "/usr/local/swift-2.2/bin/run-swift.sh", 
+                "/usr/local/swift-2.2/bin/swiftc", 
+                "prog.swift"
+            ], 
+            "name": "swift-2.2", 
+            "language": "Swift", 
+            "output-file": "prog.swift", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": [
+                "/usr/local/swift-2.2/bin/run-swift.sh", 
+                "./prog"
+            ], 
+            "display-compile-command": "swiftc prog.swift", 
+            "display-name": "swift", 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/swift-2.2/bin/swiftc --version | head -1 | cut -d' ' -f3"
+            ]
+        }, 
+        {
             "run-command": [
                 "/bin/bash", 
                 "prog.sh"
