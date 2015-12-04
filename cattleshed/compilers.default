@@ -3567,6 +3567,7 @@
             "version-command": [
                 "/bin/sh", 
                 "-c", 
+                "/usr/local/swift-2.2/bin/run-swift.sh", 
                 "/usr/local/swift-2.2/bin/swiftc --version | head -1 | cut -d' ' -f3"
             ]
         }, 
