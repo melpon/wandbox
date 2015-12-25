@@ -2959,6 +2959,25 @@
         }, 
         {
             "compile-command": "/bin/true", 
+            "name": "python-3.5.1", 
+            "language": "Python", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "version-command": [
+                "/usr/local/python-3.5.1/bin/python3", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "run-command": [
+                "/usr/local/python-3.5.1/bin/python3", 
+                "prog.py"
+            ], 
+            "display-compile-command": "python prog.py", 
+            "display-name": "python", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": "/bin/true", 
             "name": "python-3.5.0", 
             "language": "Python", 
             "output-file": "prog.py", 
@@ -3747,6 +3766,30 @@
             "run-command": [
                 "/bin/bash", 
                 "/usr/local/java-run/bin/run.sh"
+            ]
+        }, 
+        {
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/java8/bin/java -version 2>&1 | head -n1"
+            ], 
+            "switches": [], 
+            "display-compile-command": "javac prog.java", 
+            "jail-name": "jvm", 
+            "display-name": "Java8 OpenJDK", 
+            "compile-command": [
+                "/usr/local/java8/bin/javac", 
+                "prog.java"
+            ], 
+            "name": "java8-openjdk", 
+            "language": "Java", 
+            "output-file": "prog.java", 
+            "displayable": true, 
+            "run-command": [
+                "/bin/bash", 
+                "/usr/local/java-run/bin/run8.sh"
             ]
         }, 
         {

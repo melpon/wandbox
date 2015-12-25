@@ -762,6 +762,13 @@ class Compilers(object):
                     "display-name":"python2.7 HEAD",
                 },
            }),
+           ("python-3.5.1", {
+                "params": {
+                    "bin": "python3",
+                },
+                "after": {
+                },
+           }),
            ("python-3.5.0", {
                 "params": {
                     "bin": "python3",
@@ -1366,6 +1373,19 @@ class Compilers(object):
             "compile-command":["/usr/bin/javac", "prog.java"],
             "run-command":["/bin/bash", "/usr/local/java-run/bin/run.sh"],
             "version-command":["/bin/sh", "-c", "/usr/bin/java -version 2>&1 | head -n1"],
+            "switches":[],
+        },{
+            "name":"java8-openjdk",
+            "displayable":True,
+            "output-file":"prog.java",
+            "display-name":"Java8 OpenJDK",
+            "display-compile-command":"javac prog.java",
+            "jail-name":"jvm",
+            "language":"Java",
+            "compiler-option-raw":True,
+            "compile-command":["/usr/local/java8/bin/javac", "prog.java"],
+            "run-command":["/bin/bash", "/usr/local/java-run/bin/run8.sh"],
+            "version-command":["/bin/sh", "-c", "/usr/local/java8/bin/java -version 2>&1 | head -n1"],
             "switches":[],
         },{
             "name":"groovy-2.2.1",
