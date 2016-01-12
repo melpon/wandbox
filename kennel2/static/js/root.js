@@ -276,7 +276,7 @@ Compiler.prototype._selected_option_raw = function(cls, value) {
   var e = options.find(cls);
   if (e.size() == 0)
     return undefined;
-  return value ? e.data('editor').setValue(value) : e.data('editor').getValue();
+  return value !== undefined ? e.data('editor').setValue(value) : e.data('editor').getValue();
 }
 
 Compiler.prototype.get_selected_compiler_option_raw = function() {
