@@ -1234,6 +1234,37 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
+    def make_dmd(self):
+        NAMES = [
+            ("dmd-head", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"dmd HEAD",
+                },
+            }),
+            ("dmd-2.069.2", {
+                "params": {
+                },
+                "after": {
+                },
+            }),
+        ]
+        FORMATS = {
+            "displayable":True,
+            "language":"D",
+            "output-file":"prog.d",
+            "compiler-option-raw":True,
+            "compile-command":["/usr/local/{name}/linux/bin64/dmd", "prog.d", "-ofprog.exe"],
+            "version-command":["/bin/sh", "-c", "/usr/local/{name}/linux/bin64/dmd --version | head -1 | cut -d' ' -f4"],
+            "initial-checked":[],
+            "display-name":"dmd",
+            "display-compile-command":"dmd prog.d -ofprog.exe",
+            "run-command":["prog.exe"]
+        }
+        compilers = self.make_common(NAMES, FORMATS)
+        return compilers
+
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-c",
@@ -1412,6 +1443,7 @@ class Compilers(object):
         return (
             self.make_gcc() +
             self.make_clang() +
+            self.make_dmd() +
             self.make_default1() +
             self.make_ghc() +
             self.make_mono() +
