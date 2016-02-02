@@ -38,11 +38,16 @@ function update_compile_command(compiler) {
 }
 
 function save(key, value) {
-  $.cookie(key, value, { expires: 365, path: $('body').attr('data-webroot') });
+  // $.cookie(key, value, { expires: 365, path: $('body').attr('data-webroot') });
+  localStorage.setItem(key, JSON.stringify(value));
+}
+function load(key) {
+  // return $.cookie(key);
+  return JSON.parse(localStorage.getItem(key));
 }
 
 $(function() {
-  $.cookie.json = true;
+  // $.cookie.json = true;
 
   var result_container = new ResultContainer('#result-container', '#result-container-settings')
   result_container.onfinish = function() {
@@ -95,14 +100,14 @@ $(function() {
     post_code(compiler, result_container);
   });
 
-  // deserialize if settings is stored in the cookie.
-  var compiler_settings = $.cookie('wandbox.compiler.current');
+  // deserialize if settings is stored in the local storage.
+  var compiler_settings = load('wandbox.compiler.current');
   if (compiler_settings) {
     compiler.deserialize(compiler_settings);
-    var editor_settings = $.cookie('wandbox.editor');
+    var editor_settings = load('wandbox.editor');
     if (editor_settings)
       editor.deserialize(editor_settings);
-    var result_container_settings = $.cookie('wandbox.result_container');
+    var result_container_settings = load('wandbox.result_container');
     if (result_container_settings)
       result_container.deserialize(result_container_settings);
   } else {
@@ -111,11 +116,11 @@ $(function() {
   }
   // restore editing code
   if (!USING_PERMLINK) {
-    var editor_code = $.cookie('wandbox.editor.code');
+    var editor_code = load('wandbox.editor.code');
     if (editor_code) {
       editor.setValue($('#wandbox-editor-default'), editor_code);
     }
-    var editor_codes = $.cookie('wandbox.editor.codes');
+    var editor_codes = load('wandbox.editor.codes');
     for (var i = 0; i < (editor_codes || []).length; i++) {
       editor.addEditor(editor_codes[i]['file'], editor_codes[i]['code']);
     }
