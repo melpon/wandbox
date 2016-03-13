@@ -3735,6 +3735,27 @@
         }, 
         {
             "compile-command": [
+                "/usr/local/rust-1.7.0/bin/rustc", 
+                "prog.rs"
+            ], 
+            "name": "rust-1.7.0", 
+            "language": "Rust", 
+            "output-file": "prog.rs", 
+            "displayable": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/local/rust-1.7.0/bin/rustc --version | head -1 | cut -d' ' -f2-"
+            ], 
+            "run-command": [
+                "./prog"
+            ], 
+            "display-compile-command": "rustc prog.rs", 
+            "display-name": "Rust", 
+            "runtime-option-raw": true
+        }, 
+        {
+            "compile-command": [
                 "/usr/local/rust-1.0.0/bin/run-rustc.sh", 
                 "prog.rs"
             ], 

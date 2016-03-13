@@ -1193,6 +1193,15 @@ class Compilers(object):
                     "display-name":"Rust HEAD",
                 },
            }),
+           ("rust-1.7.0", {
+                "params": {
+                },
+                "after": {
+                    "display-name":"Rust",
+                    "compile-command":["/usr/local/rust-1.7.0/bin/rustc", "prog.rs"],
+                    "version-command":["/bin/sh", "-c", "/usr/local/rust-1.7.0/bin/rustc --version | head -1 | cut -d' ' -f2-"],
+                },
+           }),
            ("rust-1.0.0", {
                 "params": {
                 },
