@@ -1236,12 +1236,14 @@ class Compilers(object):
                 "params": {
                 },
                 "after": {
+                    "version-command":["/bin/echo", "vim 7.4.1714"],
                 },
            }),
            ("vim-7.4.729", {
                 "params": {
                 },
                 "after": {
+                    "version-command":["/bin/echo", "vim 7.4.729"],
                 },
            }),
         ]
@@ -1253,7 +1255,6 @@ class Compilers(object):
             "language":"Vim script",
             "runtime-option-raw":True,
             "compile-command":["/bin/true"],
-            "version-command":["/bin/echo", "vim 7.4.729"],
         }
         compilers = self.make_common(NAMES, FORMATS)
         return compilers

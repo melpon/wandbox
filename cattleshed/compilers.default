@@ -3845,7 +3845,7 @@
             "displayable": true, 
             "version-command": [
                 "/bin/echo", 
-                "vim 7.4.729"
+                "vim 7.4.1714"
             ], 
             "run-command": [
                 "/usr/local/vim-7.4.1714/bin/vim", 
