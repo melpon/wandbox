@@ -1232,6 +1232,12 @@ class Compilers(object):
 
     def make_vim(self):
         NAMES = [
+           ("vim-7.4.1714", {
+                "params": {
+                },
+                "after": {
+                },
+           }),
            ("vim-7.4.729", {
                 "params": {
                 },
