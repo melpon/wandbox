@@ -3657,7 +3657,7 @@
             "version-command": [
                 "/bin/bash", 
                 "-c", 
-                "PATH=/usr/local/erlang-head/bin:$PATH /usr/local/elixir-head/bin/elixir --version | cut -d' ' -f2"
+                "PATH=/usr/local/erlang-18.1/bin:$PATH /usr/local/elixir-head/bin/elixir --version | cut -d' ' -f2 | tail -n 1"
             ], 
             "run-command": [
                 "/usr/local/elixir-head/bin/run.sh", 

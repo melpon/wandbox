@@ -1024,7 +1024,7 @@ class Compilers(object):
             "jail-name": "erlangvm",
             "runtime-option-raw":True,
             "compile-command":"/bin/true",
-            "version-command":["/bin/bash", "-c", "PATH=/usr/local/erlang-head/bin:$PATH /usr/local/{name}/bin/elixir --version | cut -d' ' -f2"],
+            "version-command":["/bin/bash", "-c", "PATH=/usr/local/erlang-18.1/bin:$PATH /usr/local/{name}/bin/elixir --version | cut -d' ' -f2 | tail -n 1"],
         }
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
