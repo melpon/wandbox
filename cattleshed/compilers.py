@@ -344,6 +344,13 @@ class Compilers(object):
                     "initial-checked":["warning", "gnu++1z", "boost-1.60", "cpp-no-pedantic"],
                 },
             }),
+            ("gcc-4.9.3", {
+                "params": {},
+                "after": {
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "initial-checked":["warning", "gnu++1y", "boost-1.60", "cpp-no-pedantic"],
+                },
+            }),
             ("gcc-4.9.2", {
                 "params": {},
                 "after": {
@@ -359,6 +366,13 @@ class Compilers(object):
                 },
             }),
             ("gcc-4.9.0", {
+                "params": {},
+                "after": {
+                    "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,
+                    "initial-checked":["warning", "gnu++1y", "boost-1.60", "cpp-no-pedantic"],
+                },
+            }),
+            ("gcc-4.8.5", {
                 "params": {},
                 "after": {
                     "switches": SWITCHES_DEFAULT + SWITCHES_BOOST + ["sprout", "msgpack", "c++98", "gnu++98", "c++11", "gnu++11", "c++1y", "gnu++1y"] + SWITCHES_PEDANTIC,

@@ -1572,6 +1572,64 @@
                 "cpp-pedantic-errors"
             ], 
             "compile-command": [
+                "/usr/local/gcc-4.9.3/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.9.3/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.9.3", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.60", 
+                "cpp-no-pedantic"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.9.3/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "boost-1.56", 
+                "boost-1.57", 
+                "boost-1.58", 
+                "boost-1.59", 
+                "boost-1.60", 
+                "sprout", 
+                "msgpack", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
+            ], 
+            "compile-command": [
                 "/usr/local/gcc-4.9.2/bin/g++", 
                 "-oprog.exe", 
                 "-Wl,-rpath,/usr/local/gcc-4.9.2/lib64", 
@@ -1710,6 +1768,64 @@
             "display-name": "gcc", 
             "version-command": [
                 "/usr/local/gcc-4.9.0/bin/g++", 
+                "-dumpversion"
+            ]
+        }, 
+        {
+            "switches": [
+                "warning", 
+                "optimize", 
+                "cpp-verbose", 
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "boost-1.56", 
+                "boost-1.57", 
+                "boost-1.58", 
+                "boost-1.59", 
+                "boost-1.60", 
+                "sprout", 
+                "msgpack", 
+                "c++98", 
+                "gnu++98", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y", 
+                "cpp-no-pedantic", 
+                "cpp-pedantic", 
+                "cpp-pedantic-errors"
+            ], 
+            "compile-command": [
+                "/usr/local/gcc-4.8.5/bin/g++", 
+                "-oprog.exe", 
+                "-Wl,-rpath,/usr/local/gcc-4.8.5/lib64", 
+                "-lpthread", 
+                "prog.cc"
+            ], 
+            "name": "gcc-4.8.5", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "displayable": true, 
+            "run-command": "./prog.exe", 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "gnu++1y", 
+                "boost-1.60", 
+                "cpp-no-pedantic"
+            ], 
+            "display-name": "gcc", 
+            "version-command": [
+                "/usr/local/gcc-4.8.5/bin/g++", 
                 "-dumpversion"
             ]
         }, 
