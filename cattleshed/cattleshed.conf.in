@@ -1,9 +1,9 @@
 {
  "system":{
-  "listen-port":2013,
+  "listen-port":2012,
   "max-connections":32,
-  "basedir":"/tmp/wandbox-test",
-  "storedir":"/tmp/wandbox-test/ran",
+  "basedir":"/tmp/wandbox",
+  "storedir":"/var/log/wandbox/ran",
  },
  "jail":{
   "":{
