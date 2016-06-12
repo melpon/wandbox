@@ -3161,6 +3161,7 @@
             "initial-checked": [
                 "haskell-warning"
             ], 
+            "jail-name": "ghc", 
             "displayable": true, 
             "display-name": "ghc HEAD"
         }, 

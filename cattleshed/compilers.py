@@ -682,6 +682,7 @@ class Compilers(object):
                 },
                 "after": {
                     "display-name":"ghc HEAD",
+                    "jail-name": "ghc",
                 },
             }),
             ("ghc-7.10.3", {
