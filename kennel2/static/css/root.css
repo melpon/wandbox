@@ -187,6 +187,18 @@ footer {
   overflow-x: auto;
 }
 
+.wandbox-hidden-runtime-option-raw {
+  display: none;
+}
+.wandbox-shown-runtime-option-raw {
+  margin-top: 10px;
+  height: 13px;
+  border-radius: 5px;
+  background-color: #ddd;
+}
+
+
+
 /* stdin() */
 
 .stdin .CodeMirror {

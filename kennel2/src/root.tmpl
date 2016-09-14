@@ -286,6 +286,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
             data-display-name="<%= info.second.info | ext getstr("display-name") %>"
             data-command="<%= info.second.info | ext getstr("display-compile-command") %>"
             data-full-name="<%= info.second.info | ext make_full_name %>"
+            data-options-raw="<% if (info.second.info["compiler-option-raw"].boolean()) %>compiler<% else %>runtime<% end %>"
           >
             <% c++ for (auto&& sw: info.second.info["switches"].array()) { %>
               <% c++ content.sw = sw; %>
@@ -311,12 +312,19 @@ var LANGUAGE_NAME_TO_TAB_ID = {
               <% end %>
             <% c++ } %>
             <% if (info.second.info["compiler-option-raw"].boolean()) %>
-              <label>extra options:</label>
+              <label>Compiler options:</label>
               <div class="option-raw compiler-option-raw"></div>
             <% end %>
             <% if (info.second.info["runtime-option-raw"].boolean()) %>
-              <label>extra options:</label>
+              <label>Runtime options:</label>
               <div class="option-raw runtime-option-raw"></div>
+            <% else %>
+              <span class="wandbox-hidden-runtime-option-raw">
+                <label>Runtime options:</label>
+                <div class="option-raw runtime-option-raw"></div>
+              </span>
+              <div class="wandbox-shown-runtime-option-raw">
+              </div>
             <% end %>
           </div>
         <% end %>

@@ -30,10 +30,11 @@ function update_compile_command(compiler) {
   var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
   var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
   var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
+  var options_arguments = compiler.get_selected_compiler_element().attr('data-options-raw') == 'compiler' ? compiler_options_arguments : runtime_options_arguments;
 
   $('#compiler_name').text(compiler_name);
 
-  var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + compiler_options_arguments.join(' ') + runtime_options_arguments.join(' ');
+  var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + options_arguments.join(' ');
   $('#compile_command').html($('<code>').text(compile_command));
 }
 
@@ -163,6 +164,10 @@ $(function() {
     }
   });
 
+  $(document).on('click', '.wandbox-shown-runtime-option-raw', function (e) {
+    $(this).hide();
+    $(this).parent().find('.wandbox-hidden-runtime-option-raw').show();
+  });
   editor.focus_default();
 });
 
@@ -346,6 +351,11 @@ Compiler.prototype.deserialize = function(settings) {
       elem.parent().val(val);
   });
   this.set_selected_compiler_option_raw(settings.compiler_option_raw);
+
+  if (settings.runtime_option_raw) {
+    this._compile_options().find('.wandbox-shown-runtime-option-raw').hide();
+    this._compile_options().find('.wandbox-hidden-runtime-option-raw').show();
+  }
   this.set_selected_runtime_option_raw(settings.runtime_option_raw);
 }
 
@@ -973,8 +983,9 @@ ResultWindow.prototype.to_compiler_info = function(compiler) {
     var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
     var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
     var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
+    var options_arguments = compiler.get_selected_compiler_element().attr('data-options-raw') == 'compiler' ? compiler_options_arguments : runtime_options_arguments;
 
-    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + compiler_options_arguments.join(' ') + runtime_options_arguments.join(' ');
+    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + options_arguments.join(' ');
     return $('<code>' + compile_command + '</code>');
   })(compiler);
 
