@@ -21,11 +21,15 @@ public:
     eventsource(booster::shared_ptr<cppcms::http::context> context) : context(context) { }
 
     eventsource() = default;
-    ~eventsource() = default;
-    eventsource(const eventsource&) = default;
-    //eventsource(eventsource&&) = default;
-    eventsource& operator=(const eventsource&) = default;
-    //eventsource& operator=(eventsource&&) = default;
+    ~eventsource() {
+        try {
+            close();
+        } catch (...) { }
+    }
+    //eventsource(const eventsource&) = default;
+    eventsource(eventsource&&) = default;
+    //eventsource& operator=(const eventsource&) = default;
+    eventsource& operator=(eventsource&&) = default;
 
     void send(const std::string& name, const std::string& contents, bool flush) const {
         std::string buf;

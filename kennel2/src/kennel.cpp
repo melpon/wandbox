@@ -245,12 +245,12 @@ public:
         auto value = json_post_data();
         auto protos = make_protocols(value);
 
-        auto es = eventsource(release_context());
-        es.send_header();
+        auto es = booster::shared_ptr<eventsource>(new eventsource(release_context()));
+        es->send_header();
         send_command_async(service(), protos, [es](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::clog << e.message() << std::endl);
-            es.send_data(proto.command + ":" + proto.contents, true);
+            es->send_data(proto.command + ":" + proto.contents, true);
             //std::clog << proto.command << ":" << proto.contents << std::endl;
         });
     }
