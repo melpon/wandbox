@@ -503,28 +503,12 @@
             ], 
             "display-flags": "-I/usr/local/boost-1.57.0/include"
         }, 
-        "c++1y": {
-            "conflicts": [
-                "c89", 
-                "c99", 
-                "c11", 
-                "c++98", 
-                "gnu++98", 
-                "c++0x", 
-                "gnu++0x", 
-                "c++11", 
-                "gnu++11", 
-                "c++1y", 
-                "gnu++1y", 
-                "c++14", 
-                "gnu++14", 
-                "c++1z", 
-                "gnu++1z"
-            ], 
-            "display-name": "C++1y", 
+        "spirit-x3": {
+            "display-name": "Spirit X3", 
             "flags": [
-                "-std=c++1y"
-            ]
+                "-I/usr/local/spirit_x3/include"
+            ], 
+            "display-flags": "-I/usr/local/spirit_x3/include"
         }, 
         "gnu++98": {
             "conflicts": [
@@ -689,6 +673,29 @@
             "display-name": "C99", 
             "flags": [
                 "-std=c99"
+            ]
+        }, 
+        "c++1y": {
+            "conflicts": [
+                "c89", 
+                "c99", 
+                "c11", 
+                "c++98", 
+                "gnu++98", 
+                "c++0x", 
+                "gnu++0x", 
+                "c++11", 
+                "gnu++11", 
+                "c++1y", 
+                "gnu++1y", 
+                "c++14", 
+                "gnu++14", 
+                "c++1z", 
+                "gnu++1z"
+            ], 
+            "display-name": "C++1y", 
+            "flags": [
+                "-std=c++1y"
             ]
         }, 
         "boost-nothing-header": {
@@ -1314,6 +1321,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1376,6 +1384,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1437,6 +1446,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1498,6 +1508,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1559,6 +1570,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1620,6 +1632,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1679,6 +1692,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1738,6 +1752,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1797,6 +1812,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1856,6 +1872,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1915,6 +1932,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -1974,6 +1992,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2289,6 +2308,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2358,6 +2378,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2427,6 +2448,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2496,6 +2518,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2565,6 +2588,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2634,6 +2658,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2701,6 +2726,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 
@@ -2768,6 +2794,7 @@
                 "warning", 
                 "optimize", 
                 "cpp-verbose", 
+                "spirit-x3", 
                 "boost-nothing", 
                 "boost-1.47", 
                 "boost-1.48", 

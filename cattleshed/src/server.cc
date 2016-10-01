@@ -334,7 +334,7 @@ namespace wandbox {
 					auto progargs = target_compiler.run_command;
 
 					if (const auto r = map_find(received, "CompilerOption")) {
-						std::unordered_set<std::string> selected_switches;
+						std::vector<std::string> selected_switches;
 						{
 							auto ite = r->begin();
 							qi::parse(ite, r->end(), qi::as_string[+(qi::char_-','-'\n')] % ',', selected_switches);
