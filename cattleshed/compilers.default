@@ -63,7 +63,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.49.0", 
             "flags": [
@@ -114,7 +115,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.48.0", 
             "flags": [
@@ -165,7 +167,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.61.0", 
             "flags": [
@@ -330,7 +333,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.47.0", 
             "flags": [
@@ -393,7 +397,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Don't Use Boost", 
             "flags": [], 
@@ -464,7 +469,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.57.0", 
             "flags": [
@@ -718,7 +724,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.58.0", 
             "flags": [
@@ -774,7 +781,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.59.0", 
             "flags": [
@@ -830,7 +838,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.52.0", 
             "flags": [
@@ -882,7 +891,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.53.0", 
             "flags": [
@@ -935,7 +945,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.50.0", 
             "flags": [
@@ -986,7 +997,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.51.0", 
             "flags": [
@@ -1038,7 +1050,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.56.0", 
             "flags": [
@@ -1101,7 +1114,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.54.0", 
             "flags": [
@@ -1157,7 +1171,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.55.0", 
             "flags": [
@@ -1201,6 +1216,63 @@
             "runtime": true, 
             "flags": "-M5.18.0", 
             "insert-position": 1
+        }, 
+        "boost-1.62": {
+            "conflicts": [
+                "boost-nothing", 
+                "boost-1.47", 
+                "boost-1.48", 
+                "boost-1.49", 
+                "boost-1.50", 
+                "boost-1.51", 
+                "boost-1.52", 
+                "boost-1.53", 
+                "boost-1.54", 
+                "boost-1.55", 
+                "boost-1.56", 
+                "boost-1.57", 
+                "boost-1.58", 
+                "boost-1.59", 
+                "boost-1.60", 
+                "boost-1.61", 
+                "boost-1.62"
+            ], 
+            "display-name": "Boost 1.62.0", 
+            "flags": [
+                "-I/usr/local/boost-1.62.0/include", 
+                "-L/usr/local/boost-1.62.0/lib", 
+                "-Wl,-rpath,/usr/local/boost-1.62.0/lib", 
+                "-lboost_wserialization", 
+                "-lboost_math_tr1f", 
+                "-lboost_math_c99l", 
+                "-lboost_math_tr1", 
+                "-lboost_locale", 
+                "-lboost_wave", 
+                "-lboost_regex", 
+                "-lboost_prg_exec_monitor", 
+                "-lboost_atomic", 
+                "-lboost_signals", 
+                "-lboost_math_c99f", 
+                "-lboost_context", 
+                "-lboost_program_options", 
+                "-lboost_coroutine", 
+                "-lboost_serialization", 
+                "-lboost_filesystem", 
+                "-lboost_system", 
+                "-lboost_timer", 
+                "-lboost_log_setup", 
+                "-lboost_random", 
+                "-lboost_chrono", 
+                "-lboost_exception", 
+                "-lboost_iostreams", 
+                "-lboost_thread", 
+                "-lboost_date_time", 
+                "-lboost_math_c99", 
+                "-lboost_math_tr1l", 
+                "-lboost_graph", 
+                "-lboost_log"
+            ], 
+            "display-flags": "-I/usr/local/boost-1.62.0/include"
         }, 
         "haskell-warning": {
             "display-name": "Warnings", 
@@ -1256,7 +1328,8 @@
                 "boost-1.58", 
                 "boost-1.59", 
                 "boost-1.60", 
-                "boost-1.61"
+                "boost-1.61", 
+                "boost-1.62"
             ], 
             "display-name": "Boost 1.60.0", 
             "flags": [
@@ -1330,6 +1403,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1362,7 +1436,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc HEAD", 
@@ -1393,6 +1467,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1425,7 +1500,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1455,6 +1530,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1487,7 +1563,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1517,6 +1593,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1549,7 +1626,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1579,6 +1656,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1611,7 +1689,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1641,6 +1719,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1671,7 +1750,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1701,6 +1780,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1731,7 +1811,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1761,6 +1841,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1791,7 +1872,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1821,6 +1902,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1851,7 +1933,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1881,6 +1963,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1911,7 +1994,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -1941,6 +2024,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -1971,7 +2055,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -2001,6 +2085,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2031,7 +2116,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -2061,6 +2146,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2089,7 +2175,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++11", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -2119,6 +2205,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2147,7 +2234,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++0x", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -2177,6 +2264,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "c++98", 
                 "gnu++98", 
                 "c++0x", 
@@ -2203,7 +2291,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++0x", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -2233,6 +2321,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "c++98", 
                 "gnu++98", 
                 "c++0x", 
@@ -2256,7 +2345,7 @@
             "initial-checked": [
                 "oldgcc-warning", 
                 "gnu++0x", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "gcc", 
@@ -2322,6 +2411,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2361,7 +2451,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang HEAD", 
@@ -2392,6 +2482,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2431,7 +2522,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2462,6 +2553,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2501,7 +2593,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2532,6 +2624,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2571,7 +2664,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2602,6 +2695,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2641,7 +2735,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1z", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2672,6 +2766,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2709,7 +2804,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2740,6 +2835,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2777,7 +2873,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2808,6 +2904,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "sprout", 
                 "msgpack", 
                 "c++98", 
@@ -2844,7 +2941,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++1y", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2875,6 +2972,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "c++98", 
                 "gnu++98", 
                 "c++11", 
@@ -2907,7 +3005,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++11", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
@@ -2938,6 +3036,7 @@
                 "boost-1.59", 
                 "boost-1.60", 
                 "boost-1.61", 
+                "boost-1.62", 
                 "c++98", 
                 "gnu++98", 
                 "c++11", 
@@ -2970,7 +3069,7 @@
             "initial-checked": [
                 "warning", 
                 "gnu++11", 
-                "boost-1.61", 
+                "boost-1.62", 
                 "cpp-no-pedantic"
             ], 
             "display-name": "clang", 
