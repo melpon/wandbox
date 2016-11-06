@@ -1424,6 +1424,7 @@
                 "-Wl,-rpath,/usr/local/gcc-head/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-head", 
@@ -1488,6 +1489,7 @@
                 "-Wl,-rpath,/usr/local/gcc-6.1.0/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-6.1.0", 
@@ -1551,6 +1553,7 @@
                 "-Wl,-rpath,/usr/local/gcc-5.3.0/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-5.3.0", 
@@ -1614,6 +1617,7 @@
                 "-Wl,-rpath,/usr/local/gcc-5.2.0/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-5.2.0", 
@@ -1677,6 +1681,7 @@
                 "-Wl,-rpath,/usr/local/gcc-5.1.0/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-5.1.0", 
@@ -1738,6 +1743,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.9.3/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.9.3", 
@@ -1799,6 +1805,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.9.2/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.9.2", 
@@ -1860,6 +1867,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.9.1/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.9.1", 
@@ -1921,6 +1929,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.9.0/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.9.0", 
@@ -1982,6 +1991,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.8.5/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.8.5", 
@@ -2043,6 +2053,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.8.2/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.8.2", 
@@ -2104,6 +2115,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.8.1/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.8.1", 
@@ -2163,6 +2175,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.7.3/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.7.3", 
@@ -2222,6 +2235,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.6.4/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.6.4", 
@@ -2279,6 +2293,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.5.4/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.5.4", 
@@ -2333,6 +2348,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.4.7/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.4.7", 
@@ -2370,6 +2386,7 @@
                 "-Wl,-rpath,/usr/local/gcc-4.3.6/lib64", 
                 "-lpthread", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "prog.cc"
             ], 
             "name": "gcc-4.3.6", 
@@ -2435,6 +2452,7 @@
                 "-I/usr/local/libcxx-head/include/c++/v1", 
                 "-L/usr/local/libcxx-head/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-head/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2506,6 +2524,7 @@
                 "-I/usr/local/libcxx-3.8/include/c++/v1", 
                 "-L/usr/local/libcxx-3.8/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.8/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2577,6 +2596,7 @@
                 "-I/usr/local/libcxx-3.7/include/c++/v1", 
                 "-L/usr/local/libcxx-3.7/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.7/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2648,6 +2668,7 @@
                 "-I/usr/local/libcxx-3.6/include/c++/v1", 
                 "-L/usr/local/libcxx-3.6/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.6/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2719,6 +2740,7 @@
                 "-I/usr/local/libcxx-3.5/include/c++/v1", 
                 "-L/usr/local/libcxx-3.5/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.5/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2788,6 +2810,7 @@
                 "-I/usr/local/libcxx-3.4/include/c++/v1", 
                 "-L/usr/local/libcxx-3.4/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.4/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2857,6 +2880,7 @@
                 "-I/usr/local/libcxx-3.3/include/c++/v1", 
                 "-L/usr/local/libcxx-3.3/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.3/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2926,6 +2950,7 @@
                 "-I/usr/local/libcxx-3.0/include/c++/v1", 
                 "-L/usr/local/libcxx-3.0/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.0/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -2990,6 +3015,7 @@
                 "-I/usr/local/libcxx-3.0/include/c++/v1", 
                 "-L/usr/local/libcxx-3.0/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.0/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
@@ -3054,6 +3080,7 @@
                 "-I/usr/local/libcxx-3.0/include/c++/v1", 
                 "-L/usr/local/libcxx-3.0/lib", 
                 "-I/usr/local/boost-sml/include", 
+                "-I/usr/local/range-v3/include", 
                 "-Wl,-rpath,/usr/local/libcxx-3.0/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
