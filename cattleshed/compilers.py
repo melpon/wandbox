@@ -483,18 +483,18 @@ class Compilers(object):
                         "-fansi-escape-codes",
                         "-fcolor-diagnostics",
                         "-stdlib=libc++",
-                        "-I/usr/local/libcxx-head/include/c++/v1",
-                        "-L/usr/local/libcxx-head/lib",
+                        "-I/usr/local/llvm-head/include/c++/v1",
+                        "-L/usr/local/llvm-head/lib",
                         "-I/usr/local/boost-sml/include",
                         "-I/usr/local/range-v3/include",
-                        "-Wl,-rpath,/usr/local/libcxx-head/lib",
+                        "-Wl,-rpath,/usr/local/llvm-head/lib",
                         "-nostdinc++",
                         "-lpthread",
                         "prog.cc"
                     ],
-                    "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
+                    "version-command":["/bin/sh", "-c", "LD_LIBRARY_PATH=/usr/local/gcc-5.2.0/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"],
                 },
-                "lsupc++": True,
+                "lsupc++": False,
             }),
             ("clang-3.8", {
                 "params": {

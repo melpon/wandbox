@@ -670,6 +670,7 @@ namespace wandbox {
 					if (current.version_command.empty() || not current.displayable) continue;
 					{
 						auto c = piped_spawn(opendir("/"), current.version_command);
+						std::clog << "[" << sock.get() << "]" << "run [" << boost::algorithm::join(move(current.version_command), ", ") << "]" << std::endl;
 						child = std::make_shared<unique_child_pid>(move(c.pid));
 						pipe_stdout = std::make_shared<asio::posix::stream_descriptor>(*aio, c.fd_stdout.get());
 						c.fd_stdout.release();
@@ -684,6 +685,7 @@ namespace wandbox {
 
 					{
 						int st = child->wait_nonblock();
+						std::cout << "[" << sock.get() << "]" << "WIFEXITED(st): " << WIFEXITED(st) << ", WEXITSTATUS(st): " << WEXITSTATUS(st) << std::endl;
 						if (!WIFEXITED(st) || (WEXITSTATUS(st) != 0)) continue;
 					}
 
@@ -698,6 +700,7 @@ namespace wandbox {
 						std::istream is(buf.get());
 						std::string ver;
 						if (!getline(is, ver)) continue;
+						std::cout << "[" << sock.get() << "]" << "add version: " << ver << std::endl;
 						versions.emplace_back(generate_displaying_compiler_config(move(current), ver, config.switches));
 					}
 				}

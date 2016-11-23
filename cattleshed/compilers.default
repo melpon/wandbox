@@ -2449,15 +2449,14 @@
                 "-fansi-escape-codes", 
                 "-fcolor-diagnostics", 
                 "-stdlib=libc++", 
-                "-I/usr/local/libcxx-head/include/c++/v1", 
-                "-L/usr/local/libcxx-head/lib", 
+                "-I/usr/local/llvm-head/include/c++/v1", 
+                "-L/usr/local/llvm-head/lib", 
                 "-I/usr/local/boost-sml/include", 
                 "-I/usr/local/range-v3/include", 
-                "-Wl,-rpath,/usr/local/libcxx-head/lib", 
+                "-Wl,-rpath,/usr/local/llvm-head/lib", 
                 "-nostdinc++", 
                 "-lpthread", 
-                "prog.cc", 
-                "-lsupc++"
+                "prog.cc"
             ], 
             "name": "clang-head", 
             "language": "C++", 
@@ -2476,7 +2475,7 @@
             "version-command": [
                 "/bin/sh", 
                 "-c", 
-                "LD_LIBRARY_PATH=/usr/local/gcc-4.8.2/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"
+                "LD_LIBRARY_PATH=/usr/local/gcc-5.2.0/lib64 /usr/local/llvm-head/bin/clang++ --version | head -1 | cut -d' ' -f3-"
             ]
         }, 
         {
