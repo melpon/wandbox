@@ -137,6 +137,7 @@ public:
         if (request().request_method() == "OPTIONS") {
             response().status(200);
             response().allow("OPTIONS, GET, HEAD");
+            response().set_header("Access-Control-Allow-Origin", "*");
             return false;
         } else {
             response().status(405);
@@ -153,6 +154,7 @@ public:
         if (request().request_method() == "OPTIONS") {
             response().status(200);
             response().allow("OPTIONS, POST");
+            response().set_header("Access-Control-Allow-Origin", "*");
             return false;
         } else {
             response().status(405);
