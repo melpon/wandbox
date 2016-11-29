@@ -138,6 +138,9 @@ public:
             response().status(200);
             response().allow("OPTIONS, GET, HEAD");
             response().set_header("Access-Control-Allow-Origin", "*");
+            auto headers = request().getenv("HTTP_ACCESS_CONTROL_REQUEST_HEADERS");
+            if (!headers.empty())
+                response().set_header("Access-Control-Allow-Headers", headers);
             return false;
         } else {
             response().status(405);
@@ -155,6 +158,11 @@ public:
             response().status(200);
             response().allow("OPTIONS, POST");
             response().set_header("Access-Control-Allow-Origin", "*");
+            //for (auto it = request().getenv().begin(); it != request().getenv().end(); ++it)
+            //    std::cout << it->first << ": " << it->second << std::endl;
+            auto headers = request().getenv("HTTP_ACCESS_CONTROL_REQUEST_HEADERS");
+            if (!headers.empty())
+                response().set_header("Access-Control-Allow-Headers", headers);
             return false;
         } else {
             response().status(405);
