@@ -20,7 +20,7 @@ AC_ARG_WITH(boost-lib,
 [AS_HELP_STRING([--with-boost-lib=PATH],
                 [specify directory for the installed Boost library])])
 
-boostlibnames="-lboost_system -lboost_program_options"
+boostlibnames="-Wl,-Bstatic -lboost_system -lboost_program_options -Wl,-Bdynamic"
 if test "x$with_boost" != x; then
   boostrpath="-Wl,-rpath,$with_boost/lib"
   boostlibs="-L$with_boost/lib"
