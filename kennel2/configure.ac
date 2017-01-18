@@ -55,7 +55,7 @@ AC_ARG_WITH(cppdb-lib,
 [AS_HELP_STRING([--with-cppdb-lib=PATH],
                 [specify directory for the installed CppCMS library])])
 
-cppdblibnames="-lcppdb -lcppdb_sqlite3"
+cppdblibnames="-Wl,-Bstatic -lcppdb -Wl,-Bdynamic"
 if test "x$with_cppdb" != x; then
   cppdbrpath="-Wl,-rpath,$with_cppdb/lib"
   cppdblibs="-L$with_cppdb/lib"
@@ -77,7 +77,7 @@ AC_CHECK_LIB([dl], [dlopen], [], [AC_MSG_ERROR([missing dl function])])
 
 CXXFLAGS="$CXXFLAGS $cppcmsinc $cppdbinc"
 CRYPT="-lgcrypt"
-DEFAULT_LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -lpcre -lpthread -lsqlite3 -lz -ldl"
+DEFAULT_LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -Wl,-Bstatic -lsqlite3 -Wl,-Bdynamic -lpcre -lz -lpthread -ldl"
 LIBS="$DEFAULT_LIBS"
 LDFLAGS="$LDFLAGS $cppcmsrpath $cppdbrpath"
 
@@ -145,7 +145,7 @@ AC_TRY_LINK(
     cppcms::crypto::key key;
    ],
    [AC_MSG_RESULT([yes])],
-   [AC_MSG_RESULT([no]); AC_MSG_ERROR([mising gcrypt or OpenSSL library])])])
+   [AC_MSG_RESULT([no]); AC_MSG_ERROR([missing gcrypt or OpenSSL library])])])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

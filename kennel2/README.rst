@@ -68,7 +68,7 @@ NOTE: To be exact, CppDB is not required SQLite library. But, kennel require Cpp
   git clone https://github.com/melpon/cppdb.git
   mkdir cppdb_build
   cd cppdb_build
-  cmake ../cppdb/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/path/to/install -DDISABLE_MYSQL=ON -DDISABLE_PQ=ON -DDISABLE_ODBC=ON
+  cmake ../cppdb/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/path/to/install -DSQLITE_BACKEND_INTERNAL=ON -DDISABLE_MYSQL=ON -DDISABLE_PQ=ON -DDISABLE_ODBC=ON
   make
   make install
 
