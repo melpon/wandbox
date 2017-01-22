@@ -603,7 +603,7 @@ int main(int argc, char** argv) try {
     permlink pl(service);
     pl.init();
 
-    std::cout << "start get_compiler_infos()" << std::endl;
+    std::clog << "start get_compiler_infos()" << std::endl;
     cppcms::json::value json = kennel::get_compiler_infos(service);
     kennel::default_compiler_infos() = json;
     std::clog << "finish get_compiler_infos()" << std::endl;
