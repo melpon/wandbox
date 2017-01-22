@@ -65,6 +65,7 @@ public:
         }
     }
 
+private:
     cppcms::json::value json_post_data() {
         auto p = request().raw_post_data();
         std::stringbuf sb(std::ios_base::in);
@@ -79,7 +80,7 @@ public:
         cppcms::json::value json;
         if (!cache().fetch_data("compiler_infos", json)) {
             if (!cache().fetch_data("compiler_infos_persist", json)) {
-                json = get_compiler_infos();
+                json = default_compiler_infos();
                 cache().store_data("compiler_infos", json, 600);
                 cache().store_data("compiler_infos_persist", json, -1);
             } else {
@@ -94,12 +95,18 @@ public:
         }
         return json;
     }
-    cppcms::json::value get_compiler_infos() {
+
+public:
+    static cppcms::json::value& default_compiler_infos() {
+        static cppcms::json::value value;
+        return value;
+    }
+    static cppcms::json::value get_compiler_infos(cppcms::service& service) {
         std::vector<protocol> protos = {
             protocol{"Version", ""},
         };
         std::string json;
-        send_command(service(), protos, [&json](const booster::system::error_code& e, const protocol& proto) {
+        send_command(service, protos, [&json](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::clog << e.message() << std::endl);
             json = proto.contents;
@@ -109,6 +116,11 @@ public:
         value.load(ss, true, nullptr);
         //value.save(std::clog, cppcms::json::readable);
         return value;
+    }
+
+private:
+    cppcms::json::value get_compiler_infos() {
+      return get_compiler_infos(service());
     }
     template<class F>
     void get_compiler_infos_async(const F& callback) {
@@ -590,6 +602,11 @@ int main(int argc, char** argv) try {
 
     permlink pl(service);
     pl.init();
+
+    std::cout << "start get_compiler_infos()" << std::endl;
+    cppcms::json::value json = kennel::get_compiler_infos(service);
+    kennel::default_compiler_infos() = json;
+    std::clog << "finish get_compiler_infos()" << std::endl;
 
     service.applications_pool().mount(
         cppcms::applications_factory<kennel_root>()
