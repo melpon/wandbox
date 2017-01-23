@@ -87,7 +87,8 @@ private:
                 cache().store_data("compiler_infos", json, 600);
 
                 booster::intrusive_ptr<kennel> self(this);
-                get_compiler_infos_async([self](cppcms::json::value& json) {
+                get_compiler_infos_async([self](std::vector<cppcms::json::value>& jsons) {
+                    auto json = self->merge_compiler_infos(jsons);
                     self->cache().store_data("compiler_infos", json, 600);
                     self->cache().store_data("compiler_infos_persist", json, -1);
                 });
@@ -101,41 +102,86 @@ public:
         static cppcms::json::value value;
         return value;
     }
-    static cppcms::json::value get_compiler_infos(cppcms::service& service) {
+    static std::vector<cppcms::json::value> get_compiler_infos(cppcms::service& service) {
         std::vector<protocol> protos = {
             protocol{"Version", ""},
         };
-        std::string json;
-        send_command(service, protos, [&json](const booster::system::error_code& e, const protocol& proto) {
-            if (e)
-                return (void)(std::clog << e.message() << std::endl);
-            json = proto.contents;
-        }, 1);
-        std::stringstream ss(json);
-        cppcms::json::value value;
-        value.load(ss, true, nullptr);
-        //value.save(std::clog, cppcms::json::readable);
-        return value;
+        std::vector<cppcms::json::value> values;
+        auto size = service.settings()["application"]["cattleshed"].array().size();
+
+        for (auto i = 0; i < static_cast<int>(size); i++) {
+            std::string json;
+            send_command(service, i, protos, [&json](const booster::system::error_code& e, const protocol& proto) {
+                if (e)
+                    return (void)(std::clog << e.message() << std::endl);
+                json = proto.contents;
+            }, 1);
+            std::stringstream ss(json);
+            cppcms::json::value value;
+            value.load(ss, true, nullptr);
+            //value.save(std::clog, cppcms::json::readable);
+            values.push_back(value);
+        }
+        return values;
+    }
+    static cppcms::json::value merge_compiler_infos(const std::vector<cppcms::json::value>& infos) {
+        std::vector<cppcms::json::value> results;
+        for (auto i = 0; i < static_cast<int>(infos.size()); i++) {
+            for (const auto& info: infos[i].array()) {
+                auto name = info["name"];
+                auto it = std::find_if(results.begin(), results.end(), [name](cppcms::json::value& v) { return v["name"] == name; });
+
+                if (it != results.end()) {
+                    // update
+                    *it = info;
+                    (*it)["provider"].number(i);
+                } else {
+                    // new
+                    cppcms::json::value value = info;
+                    value.object()["provider"].number(i);
+                    results.push_back(std::move(value));
+                }
+            }
+        }
+        cppcms::json::value r;
+        r.array(results);
+        return r;
     }
 
 private:
-    cppcms::json::value get_compiler_infos() {
-      return get_compiler_infos(service());
+    std::vector<cppcms::json::value> get_compiler_infos() {
+        return get_compiler_infos(service());
     }
     template<class F>
     void get_compiler_infos_async(const F& callback) {
         std::vector<protocol> protos = {
             protocol{"Version", ""},
         };
-        send_command_async(service(), protos, [callback](const booster::system::error_code& e, const protocol& proto) {
-            if (e)
-                return (void)(std::clog << e.message() << std::endl);
-            std::stringstream ss(proto.contents);
-            cppcms::json::value value;
-            value.load(ss, true, nullptr);
-            //value.save(std::clog, cppcms::json::readable);
-            callback(value);
-        }, 1);
+        typedef booster::shared_ptr<cppcms::json::value> json_ptr;
+        typedef booster::shared_ptr<std::vector<booster::shared_ptr<cppcms::json::value>>> result_type;
+        auto results = result_type(new result_type::value_type());
+        auto size = service().settings()["application"]["cattleshed"].array().size();
+        results->resize(size);
+
+        for (auto i = 0; i < static_cast<int>(size); i++) {
+            send_command_async(service(), i, protos, [callback, results, i](const booster::system::error_code& e, const protocol& proto) {
+                if (e)
+                    return (void)(std::clog << e.message() << std::endl);
+                std::stringstream ss(proto.contents);
+                json_ptr value(new cppcms::json::value());
+                value->load(ss, true, nullptr);
+                //value->save(std::clog, cppcms::json::readable);
+                (*results)[i] = value;
+                auto completed = std::all_of(results->begin(), results->end(), [](const json_ptr& v) { return v; });
+                if (completed) {
+                    std::vector<cppcms::json::value> jsons(results->size());
+                    for (auto i = 0; i < static_cast<int>(jsons.size()); i++) {
+                        jsons[i] = std::move(*(*results)[i]);
+                    }
+                    callback(jsons);
+                }
+            }, 1);
+        }
     }
 
     bool ensure_method_get() {
@@ -266,10 +312,22 @@ private:
 
         auto value = json_post_data();
         auto protos = make_protocols(value);
+        auto compiler = value["compiler"].str();
+        auto compiler_infos = get_compiler_infos_or_cache();
+        // find compiler info.
+        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
+            [&compiler](cppcms::json::value& v) {
+                return v["name"].str() == compiler;
+            });
+        // error if the compiler is not found
+        if (it == compiler_infos.array().end()) {
+            throw std::exception();
+        }
+        auto index = static_cast<std::size_t>((*it)["provider"].number());
 
         auto es = booster::shared_ptr<eventsource>(new eventsource(release_context()));
         es->send_header();
-        send_command_async(service(), protos, [es](const booster::system::error_code& e, const protocol& proto) {
+        send_command_async(service(), index, protos, [es](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::clog << e.message() << std::endl);
             es->send_data(proto.command + ":" + proto.contents, true);
@@ -422,11 +480,12 @@ private:
         if (it == compiler_infos.array().end()) {
             throw std::exception();
         }
+        auto index = (*it)["provider"].number();
 
         cppcms::json::value result;
         cppcms::json::value outputs;
         outputs.array({});
-        send_command(service(), protos, [this, &result, &outputs, save](const booster::system::error_code& e, const protocol& proto) {
+        send_command(service(), index, protos, [this, &result, &outputs, save](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::clog << e.message() << std::endl);
 
@@ -604,7 +663,8 @@ int main(int argc, char** argv) try {
     pl.init();
 
     std::clog << "start get_compiler_infos()" << std::endl;
-    cppcms::json::value json = kennel::get_compiler_infos(service);
+    auto jsons = kennel::get_compiler_infos(service);
+    auto json = kennel::merge_compiler_infos(jsons);
     kennel::default_compiler_infos() = json;
     std::clog << "finish get_compiler_infos()" << std::endl;
 

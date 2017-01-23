@@ -230,18 +230,18 @@ void send_command_async(booster::aio::io_service& service, booster::aio::endpoin
 }
 
 template<class F>
-void send_command(cppcms::service& srv, std::vector<protocol> protos, F f, int max_line = 0) {
-    auto host = srv.settings()["application"]["cattleshed"]["host"].str();
-    auto port = (int)srv.settings()["application"]["cattleshed"]["port"].number();
+void send_command(cppcms::service& srv, std::size_t n, std::vector<protocol> protos, F f, int max_line = 0) {
+    auto host = srv.settings()["application"]["cattleshed"][n]["host"].str();
+    auto port = (int)srv.settings()["application"]["cattleshed"][n]["port"].number();
     booster::aio::endpoint ep(host, port);
 
     send_command(srv.get_io_service(), ep, protos, f, max_line);
 }
 
 template<class F>
-void send_command_async(cppcms::service& srv, std::vector<protocol> protos, F f, int max_line = 0) {
-    auto host = srv.settings()["application"]["cattleshed"]["host"].str();
-    auto port = (int)srv.settings()["application"]["cattleshed"]["port"].number();
+void send_command_async(cppcms::service& srv, std::size_t n, std::vector<protocol> protos, F f, int max_line = 0) {
+    auto host = srv.settings()["application"]["cattleshed"][n]["host"].str();
+    auto port = (int)srv.settings()["application"]["cattleshed"][n]["port"].number();
     booster::aio::endpoint ep(host, port);
 
     send_command_async(srv.get_io_service(), ep, protos, f, max_line);

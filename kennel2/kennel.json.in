@@ -6,9 +6,9 @@
     , "map_root": "/wandbox"
     , "dispatch_root": ""
     , "cattleshed":
-        { "host" : "127.0.0.1"
-        , "port" : 2012
-        }
+        [{ "host" : "127.0.0.1"
+         , "port" : 2012
+         }]
     }
 , "service" :
     { "api" : "http"
