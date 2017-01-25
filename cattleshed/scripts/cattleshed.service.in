@@ -1,0 +1,13 @@
+[Unit]
+Description=Backend of Sandbox Compiler
+
+[Service]
+Type=forking
+User=cattleshed
+Group=cattleshed
+WorkingDirectory=@prefix@
+Restart=on-failure
+ExecStart=@bindir@/cattleshed -c @sysconfdir@/cattleshed.conf -c /opt/wandbox/conf/compilers.default --syslog /var/log/cattleshed.log
+
+[Install]
+WantedBy=multi-user.target
