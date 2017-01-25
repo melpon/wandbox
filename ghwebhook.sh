@@ -12,7 +12,7 @@ git submodule update -i
 cd cattleshed
 git clean -xfdq .
 autoreconf -i
-CC=/usr/local/gcc-4.8.2/bin/gcc CXX="/usr/local/gcc-4.8.2/bin/g++ -static-libstdc++ -static-libgcc" ./configure --prefix=/usr/local/cattleshed --with-boost=/usr/local/boost-1.57.0
+CC=/usr/local/gcc-4.8.2/bin/gcc CXX="/usr/local/gcc-4.8.2/bin/g++ -static-libstdc++ -static-libgcc" ./configure --prefix=/usr/local/cattleshed --with-boost=/usr/local/boost/boost-1.57.0/gcc-4.8.2
 make
 echo "exec /usr/local/cattleshed/bin/cattleshed --syslog" > runserver.sh
 cd ../
