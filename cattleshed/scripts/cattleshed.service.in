@@ -2,7 +2,7 @@
 Description=Backend of Sandbox Compiler
 
 [Service]
-Type=forking
+Type=simple
 User=cattleshed
 Group=cattleshed
 WorkingDirectory=@prefix@
