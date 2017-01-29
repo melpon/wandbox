@@ -855,23 +855,6 @@ class Compilers(object):
             "display-compile-command":"gdc prog.d",
             "language":"D",
             "output-file":"prog.d"
-        },{
-            "name": "rill-head",
-            "displayable": True,
-            "display-name": "Rill HEAD",
-            "compile-command": [
-                "/bin/bash",
-                "/usr/local/rill-head/bin/run_rill.sh",
-                "prog.rill",
-                "-o",
-                "prog.exe"
-            ],
-            "compiler-option-raw": True,
-            "version-command": ["/bin/cat", "/usr/local/rill-head/bin/version"],
-            "run-command": "./prog.exe",
-            "display-compile-command": "rillc prog.rill",
-            "language": "Rill",
-            "output-file": "prog.rill",
         }]
         return COMPILERS
 
