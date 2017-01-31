@@ -11,23 +11,6 @@ class Switches(object):
         conflicts = [p[0] for p in pairs]
         return [(p[0], merge(p[1], { "conflicts": conflicts })) for p in pairs]
 
-    def make_cxx(self):
-        pairs = [
-            ("c89", {
-                "flags":["-std=c89"],
-                "display-name":"C89",
-            }),
-            ("c99", {
-                "flags":["-std=c99"],
-                "display-name":"C99",
-            }),
-            ("c11", {
-                "flags":["-std=c11"],
-                "display-name":"C11",
-            }),
-        ]
-        return self.resolve_conflicts(pairs)
-
     def make_boost_header(self):
         pairs = [
             ("boost-nothing-header", {
@@ -47,17 +30,9 @@ class Switches(object):
 
     def make_default(self):
         return {
-            "warning":{
-                "flags":["-Wall", "-Wextra"],
-                "display-name":"Warnings",
-            },
             "haskell-warning":{
                 "flags":"-Wall",
                 "display-name":"Warnings",
-            },
-            "optimize":{
-                "flags":["-O2", "-march=native"],
-                "display-name":"Optimization",
             },
             "haskell-optimize":{
                 "flags":"-O2",
@@ -66,10 +41,6 @@ class Switches(object):
             "mono-optimize":{
                 "flags":"-optimize",
                 "display-name":"Optimization",
-            },
-            "cpp-verbose":{
-                "flags":["-v"],
-                "display-name":"Verbose",
             },
             "cpp-p":{
                 "flags":["-P"],
@@ -103,8 +74,7 @@ class Switches(object):
     def make(self):
         return merge(
             self.make_default(),
-            self.make_boost_header(),
-            self.make_cxx())
+            self.make_boost_header())
 
 class Compilers(object):
     def resolve_format(self, formats, **kwargs):
@@ -790,43 +760,6 @@ class Compilers(object):
 
     def make_default1(self):
         COMPILERS = [{
-            "name":"gcc-4.8.2-c",
-            "displayable":True,
-            "display-name":"gcc",
-            "display-compile-command":"gcc prog.c",
-            "language":"C",
-            "compiler-option-raw":True,
-            "compile-command":[
-                "/usr/local/gcc-4.8.2/bin/gcc",
-                "-oprog.exe",
-                "-Wl,-rpath,/usr/local/gcc-4.8.2/lib64",
-                "-lpthread",
-                "prog.c"
-            ],
-            "version-command":["/usr/local/gcc-4.8.2/bin/gcc", "-dumpversion"],
-            "switches":["warning", "optimize", "cpp-verbose", "c89", "c99", "c11"],
-            "initial-checked":["warning", "c11"],
-            "output-file":"prog.c",
-            "run-command":"./prog.exe"
-        },{
-            "name":"clang-3.3-c",
-            "displayable":True,
-            "display-name":"clang",
-            "display-compile-command":"clang prog.c",
-            "language":"C",
-            "compiler-option-raw":True,
-            "compile-command":[
-                "/usr/local/llvm-3.3/bin/clang",
-                "-oprog.exe",
-                "-lpthread",
-                "prog.c"
-            ],
-            "version-command":["/bin/sh", "-c", "/usr/local/llvm-3.3/bin/clang --version | head -1 | cut -d' ' -f3-"],
-            "switches":["warning", "optimize", "cpp-verbose", "c89", "c99", "c11"],
-            "initial-checked":["warning", "c11"],
-            "output-file":"prog.c",
-            "run-command":"./prog.exe"
-        },{
             "name":"gcc-4.8.2-pp",
             "displayable":True,
             "display-name":"gcc",

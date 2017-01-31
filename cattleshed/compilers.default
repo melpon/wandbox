@@ -1,17 +1,17 @@
 {
     "switches": {
-        "perl5.18.0": {
-            "display-name": "-M5.18.0", 
-            "runtime": true, 
-            "flags": "-M5.18.0", 
-            "insert-position": 1
-        }, 
         "cpp-p": {
             "display-name": "-P", 
             "runtime": true, 
             "flags": [
                 "-P"
             ]
+        }, 
+        "perl5.18.0": {
+            "display-name": "-M5.18.0", 
+            "runtime": true, 
+            "flags": "-M5.18.0", 
+            "insert-position": 1
         }, 
         "haskell-warning": {
             "display-name": "Warnings", 
@@ -24,17 +24,6 @@
                 "--harmony"
             ], 
             "insert-position": 1
-        }, 
-        "c99": {
-            "conflicts": [
-                "c89", 
-                "c99", 
-                "c11"
-            ], 
-            "display-name": "C99", 
-            "flags": [
-                "-std=c99"
-            ]
         }, 
         "delphi-mode": {
             "display-name": "Delphi 7 mode", 
@@ -56,12 +45,6 @@
             "flags": [], 
             "display-flags": ""
         }, 
-        "cpp-verbose": {
-            "display-name": "Verbose", 
-            "flags": [
-                "-v"
-            ]
-        }, 
         "coffee-compile-only": {
             "display-name": "Compile Only", 
             "runtime": true, 
@@ -74,35 +57,6 @@
             "display-name": "Optimization", 
             "flags": "-optimize"
         }, 
-        "warning": {
-            "display-name": "Warnings", 
-            "flags": [
-                "-Wall", 
-                "-Wextra"
-            ]
-        }, 
-        "c89": {
-            "conflicts": [
-                "c89", 
-                "c99", 
-                "c11"
-            ], 
-            "display-name": "C89", 
-            "flags": [
-                "-std=c89"
-            ]
-        }, 
-        "c11": {
-            "conflicts": [
-                "c89", 
-                "c99", 
-                "c11"
-            ], 
-            "display-name": "C11", 
-            "flags": [
-                "-std=c11"
-            ]
-        }, 
         "boost-1.55-header": {
             "conflicts": [
                 "boost-nothing-header", 
@@ -114,13 +68,6 @@
                 "-I/usr/local/boost-1.55.0/include"
             ], 
             "display-flags": "-I/usr/local/boost-1.55.0/include"
-        }, 
-        "optimize": {
-            "display-name": "Optimization", 
-            "flags": [
-                "-O2", 
-                "-march=native"
-            ]
         }
     }, 
     "compilers": [
@@ -169,72 +116,6 @@
                 "-c", 
                 "/usr/local/dmd-2.069.2/linux/bin64/dmd --version | head -1 | cut -d' ' -f4"
             ]
-        }, 
-        {
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/usr/local/gcc-4.8.2/bin/gcc", 
-                "-dumpversion"
-            ], 
-            "switches": [
-                "warning", 
-                "optimize", 
-                "cpp-verbose", 
-                "c89", 
-                "c99", 
-                "c11"
-            ], 
-            "display-compile-command": "gcc prog.c", 
-            "initial-checked": [
-                "warning", 
-                "c11"
-            ], 
-            "display-name": "gcc", 
-            "compile-command": [
-                "/usr/local/gcc-4.8.2/bin/gcc", 
-                "-oprog.exe", 
-                "-Wl,-rpath,/usr/local/gcc-4.8.2/lib64", 
-                "-lpthread", 
-                "prog.c"
-            ], 
-            "name": "gcc-4.8.2-c", 
-            "language": "C", 
-            "output-file": "prog.c", 
-            "displayable": true, 
-            "run-command": "./prog.exe"
-        }, 
-        {
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/llvm-3.3/bin/clang --version | head -1 | cut -d' ' -f3-"
-            ], 
-            "switches": [
-                "warning", 
-                "optimize", 
-                "cpp-verbose", 
-                "c89", 
-                "c99", 
-                "c11"
-            ], 
-            "display-compile-command": "clang prog.c", 
-            "initial-checked": [
-                "warning", 
-                "c11"
-            ], 
-            "display-name": "clang", 
-            "compile-command": [
-                "/usr/local/llvm-3.3/bin/clang", 
-                "-oprog.exe", 
-                "-lpthread", 
-                "prog.c"
-            ], 
-            "name": "clang-3.3-c", 
-            "language": "C", 
-            "output-file": "prog.c", 
-            "displayable": true, 
-            "run-command": "./prog.exe"
         }, 
         {
             "version-command": [
