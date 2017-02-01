@@ -384,51 +384,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_erlang(self):
-        NAMES = [
-           ("erlang-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name": "erlang HEAD",
-                },
-           }),
-           ("erlang-maint", {
-                "params": {
-                },
-                "after": {
-                    "display-name": "erlang maint",
-                },
-           }),
-           ("erlang-18.1", {
-                "params": {
-                },
-                "after": {
-                    "display-name": "erlang",
-                },
-           }),
-           ("erlang-17.0", {
-                "params": {
-                },
-                "after": {
-                    "display-name": "erlang",
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.erl",
-            "run-command":["/usr/local/{name}/bin/escript", "prog.erl"],
-            "display-compile-command":"escript prog.erl",
-            "language":"Erlang",
-            "jail-name": "erlangvm",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/usr/local/{name}/bin/erl", "-eval", "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt().", "-noshell"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_elixir(self):
         NAMES = [
            ("elixir-head", {
@@ -888,7 +843,6 @@ class Compilers(object):
             self.make_python() +
             self.make_ruby() +
             self.make_php() +
-            self.make_erlang() +
             self.make_elixir() +
             self.make_node() +
             self.make_spidermonkey() +
