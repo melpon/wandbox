@@ -384,30 +384,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_elixir(self):
-        NAMES = [
-           ("elixir-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name": "Elixir HEAD",
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.ex",
-            "run-command":["/usr/local/{name}/bin/run.sh", "prog.ex"],
-            "display-compile-command":"elixir prog.ex",
-            "language":"Elixir",
-            "jail-name": "erlangvm",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/bin/bash", "-c", "PATH=/usr/local/erlang-18.1/bin:$PATH /usr/local/{name}/bin/elixir --version | cut -d' ' -f2 | tail -n 1"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_node(self):
         NAMES = [
            ("node-head", {
@@ -843,7 +819,6 @@ class Compilers(object):
             self.make_python() +
             self.make_ruby() +
             self.make_php() +
-            self.make_elixir() +
             self.make_node() +
             self.make_spidermonkey() +
             self.make_coffee_script() +

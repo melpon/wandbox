@@ -640,26 +640,6 @@
             "runtime-option-raw": true
         }, 
         {
-            "compile-command": "/bin/true", 
-            "name": "elixir-head", 
-            "language": "Elixir", 
-            "output-file": "prog.ex", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/bash", 
-                "-c", 
-                "PATH=/usr/local/erlang-18.1/bin:$PATH /usr/local/elixir-head/bin/elixir --version | cut -d' ' -f2 | tail -n 1"
-            ], 
-            "run-command": [
-                "/usr/local/elixir-head/bin/run.sh", 
-                "prog.ex"
-            ], 
-            "display-compile-command": "elixir prog.ex", 
-            "jail-name": "erlangvm", 
-            "display-name": "Elixir HEAD", 
-            "runtime-option-raw": true
-        }, 
-        {
             "switches": [
                 "node-harmony"
             ], 
