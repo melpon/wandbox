@@ -30,14 +30,6 @@ class Switches(object):
 
     def make_default(self):
         return {
-            "haskell-warning":{
-                "flags":"-Wall",
-                "display-name":"Warnings",
-            },
-            "haskell-optimize":{
-                "flags":"-O2",
-                "display-name":"Optimization",
-            },
             "mono-optimize":{
                 "flags":"-optimize",
                 "display-name":"Optimization",
@@ -106,51 +98,6 @@ class Compilers(object):
             after[name[0]],
         ) for name in names]
 
-        return compilers
-
-    def make_ghc(self):
-        NAMES = [
-            ("ghc-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name":"ghc HEAD",
-                    "jail-name": "ghc",
-                },
-            }),
-            ("ghc-7.10.3", {
-                "params": {
-                },
-                "after": {
-                },
-            }),
-            ("ghc-7.8.3", {
-                "params": {
-                },
-                "after": {
-                },
-            }),
-            ("ghc-7.6.3", {
-                "params": {
-                },
-                "after": {
-                },
-            }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "language":"Haskell",
-            "output-file":"prog.hs",
-            "compiler-option-raw":True,
-            "compile-command":["/usr/local/{name}/bin/ghc", "-o", "prog.exe", "prog.hs"],
-            "version-command":["/usr/local/{name}/bin/ghc", "--numeric-version"],
-            "switches":["haskell-warning", "haskell-optimize"],
-            "initial-checked":["haskell-warning"],
-            "display-name":"ghc",
-            "display-compile-command":"ghc prog.hs",
-            "run-command":["./prog.exe"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
     def make_mono(self):
@@ -813,7 +760,6 @@ class Compilers(object):
         return (
             self.make_dmd() +
             self.make_default1() +
-            self.make_ghc() +
             self.make_mono() +
             self.make_perl() +
             self.make_python() +

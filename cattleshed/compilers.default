@@ -1,50 +1,5 @@
 {
     "switches": {
-        "cpp-p": {
-            "display-name": "-P", 
-            "runtime": true, 
-            "flags": [
-                "-P"
-            ]
-        }, 
-        "perl5.18.0": {
-            "display-name": "-M5.18.0", 
-            "runtime": true, 
-            "flags": "-M5.18.0", 
-            "insert-position": 1
-        }, 
-        "haskell-warning": {
-            "display-name": "Warnings", 
-            "flags": "-Wall"
-        }, 
-        "node-harmony": {
-            "display-name": "--harmony", 
-            "runtime": true, 
-            "flags": [
-                "--harmony"
-            ], 
-            "insert-position": 1
-        }, 
-        "delphi-mode": {
-            "display-name": "Delphi 7 mode", 
-            "flags": [
-                "-Mdelphi"
-            ]
-        }, 
-        "haskell-optimize": {
-            "display-name": "Optimization", 
-            "flags": "-O2"
-        }, 
-        "boost-nothing-header": {
-            "conflicts": [
-                "boost-nothing-header", 
-                "boost-1.55-header"
-            ], 
-            "display-name": "Don't Use Boost", 
-            "runtime": true, 
-            "flags": [], 
-            "display-flags": ""
-        }, 
         "coffee-compile-only": {
             "display-name": "Compile Only", 
             "runtime": true, 
@@ -53,9 +8,30 @@
             ], 
             "insert-position": 2
         }, 
+        "cpp-p": {
+            "display-name": "-P", 
+            "runtime": true, 
+            "flags": [
+                "-P"
+            ]
+        }, 
         "mono-optimize": {
             "display-name": "Optimization", 
             "flags": "-optimize"
+        }, 
+        "delphi-mode": {
+            "display-name": "Delphi 7 mode", 
+            "flags": [
+                "-Mdelphi"
+            ]
+        }, 
+        "node-harmony": {
+            "display-name": "--harmony", 
+            "runtime": true, 
+            "flags": [
+                "--harmony"
+            ], 
+            "insert-position": 1
         }, 
         "boost-1.55-header": {
             "conflicts": [
@@ -68,6 +44,22 @@
                 "-I/usr/local/boost-1.55.0/include"
             ], 
             "display-flags": "-I/usr/local/boost-1.55.0/include"
+        }, 
+        "boost-nothing-header": {
+            "conflicts": [
+                "boost-nothing-header", 
+                "boost-1.55-header"
+            ], 
+            "display-name": "Don't Use Boost", 
+            "runtime": true, 
+            "flags": [], 
+            "display-flags": ""
+        }, 
+        "perl5.18.0": {
+            "display-name": "-M5.18.0", 
+            "runtime": true, 
+            "flags": "-M5.18.0", 
+            "insert-position": 1
         }
     }, 
     "compilers": [
@@ -165,123 +157,6 @@
             ], 
             "displayable": true, 
             "compiler-option-raw": true
-        }, 
-        {
-            "switches": [
-                "haskell-warning", 
-                "haskell-optimize"
-            ], 
-            "compile-command": [
-                "/usr/local/ghc-head/bin/ghc", 
-                "-o", 
-                "prog.exe", 
-                "prog.hs"
-            ], 
-            "name": "ghc-head", 
-            "language": "Haskell", 
-            "output-file": "prog.hs", 
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/usr/local/ghc-head/bin/ghc", 
-                "--numeric-version"
-            ], 
-            "run-command": [
-                "./prog.exe"
-            ], 
-            "display-compile-command": "ghc prog.hs", 
-            "initial-checked": [
-                "haskell-warning"
-            ], 
-            "jail-name": "ghc", 
-            "displayable": true, 
-            "display-name": "ghc HEAD"
-        }, 
-        {
-            "switches": [
-                "haskell-warning", 
-                "haskell-optimize"
-            ], 
-            "compile-command": [
-                "/usr/local/ghc-7.10.3/bin/ghc", 
-                "-o", 
-                "prog.exe", 
-                "prog.hs"
-            ], 
-            "name": "ghc-7.10.3", 
-            "language": "Haskell", 
-            "output-file": "prog.hs", 
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/usr/local/ghc-7.10.3/bin/ghc", 
-                "--numeric-version"
-            ], 
-            "run-command": [
-                "./prog.exe"
-            ], 
-            "display-compile-command": "ghc prog.hs", 
-            "initial-checked": [
-                "haskell-warning"
-            ], 
-            "displayable": true, 
-            "display-name": "ghc"
-        }, 
-        {
-            "switches": [
-                "haskell-warning", 
-                "haskell-optimize"
-            ], 
-            "compile-command": [
-                "/usr/local/ghc-7.8.3/bin/ghc", 
-                "-o", 
-                "prog.exe", 
-                "prog.hs"
-            ], 
-            "name": "ghc-7.8.3", 
-            "language": "Haskell", 
-            "output-file": "prog.hs", 
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/usr/local/ghc-7.8.3/bin/ghc", 
-                "--numeric-version"
-            ], 
-            "run-command": [
-                "./prog.exe"
-            ], 
-            "display-compile-command": "ghc prog.hs", 
-            "initial-checked": [
-                "haskell-warning"
-            ], 
-            "displayable": true, 
-            "display-name": "ghc"
-        }, 
-        {
-            "switches": [
-                "haskell-warning", 
-                "haskell-optimize"
-            ], 
-            "compile-command": [
-                "/usr/local/ghc-7.6.3/bin/ghc", 
-                "-o", 
-                "prog.exe", 
-                "prog.hs"
-            ], 
-            "name": "ghc-7.6.3", 
-            "language": "Haskell", 
-            "output-file": "prog.hs", 
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/usr/local/ghc-7.6.3/bin/ghc", 
-                "--numeric-version"
-            ], 
-            "run-command": [
-                "./prog.exe"
-            ], 
-            "display-compile-command": "ghc prog.hs", 
-            "initial-checked": [
-                "haskell-warning"
-            ], 
-            "displayable": true, 
-            "display-name": "ghc"
         }, 
         {
             "compile-command": [
