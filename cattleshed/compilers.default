@@ -64,52 +64,6 @@
     }, 
     "compilers": [
         {
-            "compile-command": [
-                "/usr/local/dmd-head/linux/bin64/dmd", 
-                "prog.d", 
-                "-ofprog.exe"
-            ], 
-            "name": "dmd-head", 
-            "language": "D", 
-            "output-file": "prog.d", 
-            "compiler-option-raw": true, 
-            "displayable": true, 
-            "run-command": [
-                "prog.exe"
-            ], 
-            "display-compile-command": "dmd prog.d -ofprog.exe", 
-            "initial-checked": [], 
-            "display-name": "dmd HEAD", 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/dmd-head/linux/bin64/dmd --version | head -1 | cut -d' ' -f4"
-            ]
-        }, 
-        {
-            "compile-command": [
-                "/usr/local/dmd-2.069.2/linux/bin64/dmd", 
-                "prog.d", 
-                "-ofprog.exe"
-            ], 
-            "name": "dmd-2.069.2", 
-            "language": "D", 
-            "output-file": "prog.d", 
-            "compiler-option-raw": true, 
-            "displayable": true, 
-            "run-command": [
-                "prog.exe"
-            ], 
-            "display-compile-command": "dmd prog.d -ofprog.exe", 
-            "initial-checked": [], 
-            "display-name": "dmd", 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/dmd-2.069.2/linux/bin64/dmd --version | head -1 | cut -d' ' -f4"
-            ]
-        }, 
-        {
             "version-command": [
                 "/usr/local/gcc-4.8.2/bin/gcc", 
                 "-dumpversion"
@@ -136,27 +90,6 @@
                 "-E", 
                 "prog.cpp"
             ]
-        }, 
-        {
-            "run-command": "./prog.exe", 
-            "display-compile-command": "gdc prog.d", 
-            "compile-command": [
-                "/usr/local/gdc-head/bin/gdc", 
-                "-oprog.exe", 
-                "-Wl,-rpath,/usr/local/gdc-head/lib64", 
-                "prog.d"
-            ], 
-            "name": "gdc-head", 
-            "language": "D", 
-            "output-file": "prog.d", 
-            "display-name": "gdc HEAD", 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/gdc-head/bin/gdc --version | head -1 | cut -d' ' -f3-"
-            ], 
-            "displayable": true, 
-            "compiler-option-raw": true
         }, 
         {
             "compile-command": [

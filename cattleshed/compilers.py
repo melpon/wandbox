@@ -605,37 +605,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_dmd(self):
-        NAMES = [
-            ("dmd-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name":"dmd HEAD",
-                },
-            }),
-            ("dmd-2.069.2", {
-                "params": {
-                },
-                "after": {
-                },
-            }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "language":"D",
-            "output-file":"prog.d",
-            "compiler-option-raw":True,
-            "compile-command":["/usr/local/{name}/linux/bin64/dmd", "prog.d", "-ofprog.exe"],
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/linux/bin64/dmd --version | head -1 | cut -d' ' -f4"],
-            "initial-checked":[],
-            "display-name":"dmd",
-            "display-compile-command":"dmd prog.d -ofprog.exe",
-            "run-command":["prog.exe"]
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-pp",
@@ -650,22 +619,6 @@ class Compilers(object):
             "version-command":["/usr/local/gcc-4.8.2/bin/gcc", "-dumpversion"],
             "switches":["cpp-p", "boost-nothing-header", "boost-1.55-header"],
             "initial-checked":["cpp-p", "boost-1.55-header"],
-        },{
-            "name":"gdc-head",
-            "displayable":True,
-            "display-name":"gdc HEAD",
-            "compile-command":[
-                "/usr/local/gdc-head/bin/gdc",
-                "-oprog.exe",
-                "-Wl,-rpath,/usr/local/gdc-head/lib64",
-                "prog.d"
-            ],
-            "compiler-option-raw":True,
-            "version-command":["/bin/sh", "-c", "/usr/local/gdc-head/bin/gdc --version | head -1 | cut -d' ' -f3-"],
-            "run-command":"./prog.exe",
-            "display-compile-command":"gdc prog.d",
-            "language":"D",
-            "output-file":"prog.d"
         }]
         return COMPILERS
 
@@ -758,7 +711,6 @@ class Compilers(object):
 
     def make(self):
         return (
-            self.make_dmd() +
             self.make_default1() +
             self.make_mono() +
             self.make_perl() +
