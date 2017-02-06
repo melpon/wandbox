@@ -952,54 +952,6 @@
             ]
         }, 
         {
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/bin/java -version 2>&1 | head -n1"
-            ], 
-            "switches": [], 
-            "display-compile-command": "javac prog.java", 
-            "jail-name": "jvm", 
-            "display-name": "Java7 OpenJDK", 
-            "compile-command": [
-                "/usr/bin/javac", 
-                "prog.java"
-            ], 
-            "name": "java7-openjdk", 
-            "language": "Java", 
-            "output-file": "prog.java", 
-            "displayable": true, 
-            "run-command": [
-                "/bin/bash", 
-                "/usr/local/java-run/bin/run.sh"
-            ]
-        }, 
-        {
-            "compiler-option-raw": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/java8/bin/java -version 2>&1 | head -n1"
-            ], 
-            "switches": [], 
-            "display-compile-command": "javac prog.java", 
-            "jail-name": "jvm", 
-            "display-name": "Java8 OpenJDK", 
-            "compile-command": [
-                "/usr/local/java8/bin/javac", 
-                "prog.java"
-            ], 
-            "name": "java8-openjdk", 
-            "language": "Java", 
-            "output-file": "prog.java", 
-            "displayable": true, 
-            "run-command": [
-                "/bin/bash", 
-                "/usr/local/java-run/bin/run8.sh"
-            ]
-        }, 
-        {
             "version-command": [
                 "/bin/sh", 
                 "-c", 
