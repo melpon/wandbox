@@ -514,45 +514,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_rust(self):
-        NAMES = [
-           ("rust-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name":"Rust HEAD",
-                },
-           }),
-           ("rust-1.7.0", {
-                "params": {
-                },
-                "after": {
-                    "display-name":"Rust",
-                    "compile-command":["/usr/local/rust-1.7.0/bin/rustc", "prog.rs"],
-                    "version-command":["/bin/sh", "-c", "/usr/local/rust-1.7.0/bin/rustc --version | head -1 | cut -d' ' -f2-"],
-                },
-           }),
-           ("rust-1.0.0", {
-                "params": {
-                },
-                "after": {
-                    "display-name":"Rust",
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.rs",
-            "run-command":["./prog"],
-            "display-compile-command":"rustc prog.rs",
-            "language":"Rust",
-            "runtime-option-raw":True,
-            "compile-command":["/usr/local/{name}/bin/run-rustc.sh", "prog.rs"],
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/run-rustc.sh --version | head -1 | cut -d' ' -f2-"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_vim(self):
         NAMES = [
            ("vim-7.4.1714", {
@@ -697,7 +658,6 @@ class Compilers(object):
             self.make_sqlite() +
             self.make_scala() +
             self.make_lua() +
-            self.make_rust() +
             self.make_vim() +
             self.make_swift() +
             self.make_default2()
