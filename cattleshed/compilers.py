@@ -176,57 +176,6 @@ class Compilers(object):
 
     def make_python(self):
         NAMES = [
-           ("python-head", {
-                "params": {
-                    "bin": "python3",
-                },
-                "after": {
-                    "display-name":"python HEAD",
-                },
-           }),
-           ("python-2.7-head", {
-                "params": {
-                    "bin": "python",
-                },
-                "after": {
-                    "display-name":"python2.7 HEAD",
-                },
-           }),
-           ("python-3.5.1", {
-                "params": {
-                    "bin": "python3",
-                },
-                "after": {
-                },
-           }),
-           ("python-3.5.0", {
-                "params": {
-                    "bin": "python3",
-                },
-                "after": {
-                },
-           }),
-           ("python-3.4.3", {
-                "params": {
-                    "bin": "python3",
-                },
-                "after": {
-                },
-           }),
-           ("python-3.3.2", {
-                "params": {
-                    "bin": "python3",
-                },
-                "after": {
-                },
-           }),
-           ("python-2.7.3", {
-                "params": {
-                    "bin": "python",
-                },
-                "after": {
-                },
-           }),
            ("pypy-2.1", {
                 "params": {
                     "bin": "pypy",
