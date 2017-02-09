@@ -202,25 +202,6 @@
         }, 
         {
             "compile-command": "/bin/true", 
-            "name": "mruby-head", 
-            "language": "Ruby", 
-            "output-file": "prog.rb", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "cd /usr/local/mruby-head && git rev-parse HEAD | cut -c 1-8"
-            ], 
-            "run-command": [
-                "/usr/local/mruby-head/bin/mruby", 
-                "prog.rb"
-            ], 
-            "display-compile-command": "mruby prog.rb", 
-            "display-name": "mruby HEAD", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
             "name": "php-head", 
             "language": "PHP", 
             "output-file": "prog.php", 

@@ -201,33 +201,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_ruby(self):
-        NAMES = [
-           ("mruby-head", {
-                "params": {
-                    "bin": "mruby",
-                },
-                "after": {
-                    "display-name": "mruby HEAD",
-                    "display-compile-command":"mruby prog.rb",
-                    "version-command":["/bin/sh", "-c", "cd /usr/local/mruby-head && git rev-parse HEAD | cut -c 1-8"],
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.rb",
-            "run-command":["/usr/local/{name}/bin/{bin}", "prog.rb"],
-            "display-name":"ruby",
-            "display-compile-command":"ruby prog.rb",
-            "language":"Ruby",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/usr/local/{name}/bin/ruby", "-e", "print RUBY_VERSION"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_php(self):
         NAMES = [
            ("php-head", {
@@ -577,7 +550,6 @@ class Compilers(object):
             self.make_mono() +
             self.make_perl() +
             self.make_python() +
-            self.make_ruby() +
             self.make_php() +
             self.make_node() +
             self.make_spidermonkey() +
