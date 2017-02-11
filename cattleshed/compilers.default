@@ -608,26 +608,6 @@
             "run-command": [
                 "./prog"
             ]
-        }, 
-        {
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/groovy-2.2.1/bin/groovy --version | cut -d' ' -f3"
-            ], 
-            "display-compile-command": "groovy prog.groovy", 
-            "jail-name": "jvm", 
-            "display-name": "Groovy", 
-            "runtime-option-raw": true, 
-            "compile-command": "/bin/true", 
-            "name": "groovy-2.2.1", 
-            "language": "Groovy", 
-            "output-file": "prog.groovy", 
-            "displayable": true, 
-            "run-command": [
-                "/usr/local/groovy-2.2.1/bin/groovy", 
-                "prog.groovy"
-            ]
         }
     ]
 }

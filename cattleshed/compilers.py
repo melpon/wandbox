@@ -489,18 +489,6 @@ class Compilers(object):
             "run-command":["./prog"],
             "version-command":["/bin/sh", "-c", "/usr/local/fpc-2.6.2/bin/fpc | head -1 | cut -d' ' -f5"],
             "switches":["delphi-mode"],
-        },{
-            "name":"groovy-2.2.1",
-            "displayable":True,
-            "output-file":"prog.groovy",
-            "display-name":"Groovy",
-            "display-compile-command":"groovy prog.groovy",
-            "jail-name":"jvm",
-            "language":"Groovy",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/groovy-2.2.1/bin/groovy", "prog.groovy"],
-            "version-command":["/bin/sh", "-c", "/usr/local/groovy-2.2.1/bin/groovy --version | cut -d' ' -f3"],
         }]
         return COMPILERS
 
