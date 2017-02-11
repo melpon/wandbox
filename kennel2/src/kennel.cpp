@@ -85,12 +85,17 @@ private:
                 cache().store_data("compiler_infos_persist", json, -1);
             } else {
                 cache().store_data("compiler_infos", json, 600);
+                cache().store_data("compiler_infos_persist", json, -1);
 
-                booster::intrusive_ptr<kennel> self(this);
-                get_compiler_infos_async([self](std::vector<cppcms::json::value>& jsons) {
-                    auto json = self->merge_compiler_infos(jsons);
-                    self->cache().store_data("compiler_infos", json, 600);
-                    self->cache().store_data("compiler_infos_persist", json, -1);
+                booster::function<cppcms::json::value (std::vector<cppcms::json::value>&)> merge_compiler_infos = &kennel::merge_compiler_infos;
+                auto context = get_context();
+                get_compiler_infos_async([context, merge_compiler_infos](std::vector<cppcms::json::value>& jsons) {
+                    // On old gcc (4.6) bug.
+                    // error: ‘this’ was not captured for this lambda function
+                    // auto json = kennel::merge_compiler_infos(jsons);
+                    auto json = merge_compiler_infos(jsons);
+                    context->cache().store_data("compiler_infos", json, 600);
+                    context->cache().store_data("compiler_infos_persist", json, -1);
                 });
             }
         }
