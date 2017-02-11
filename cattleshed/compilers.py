@@ -49,12 +49,6 @@ class Switches(object):
                 "flags":["-Mdelphi"],
                 "display-name":"Delphi 7 mode",
             },
-            "node-harmony":{
-                "flags":["--harmony"],
-                "display-name":"--harmony",
-                "insert-position":1,
-                "runtime":True,
-            },
             "coffee-compile-only":{
                 "flags":["-p"],
                 "display-name":"Compile Only",
@@ -227,38 +221,6 @@ class Compilers(object):
             "compile-command":"/bin/true",
             "run-command":["/usr/local/{name}/bin/php", "prog.php"],
             "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/php -v | head -1 | cut -d' ' -f2"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
-    def make_node(self):
-        NAMES = [
-           ("node-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name": "node HEAD",
-                    "switches":["node-harmony"],
-                    "initial-checked":["node-harmony"],
-                },
-           }),
-           ("node-0.10.24", {
-                "params": {
-                },
-                "after": {
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "language":"JavaScript",
-            "output-file":"prog.js",
-            "display-name":"node",
-            "display-compile-command":"node prog.js",
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/{name}/bin/node", "prog.js"],
-            "runtime-option-raw":True,
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/node --version | cut -c2-"],
         }
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
@@ -499,7 +461,6 @@ class Compilers(object):
             self.make_perl() +
             self.make_python() +
             self.make_php() +
-            self.make_node() +
             self.make_spidermonkey() +
             self.make_coffee_script() +
             self.make_sqlite() +

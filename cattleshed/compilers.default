@@ -1,5 +1,34 @@
 {
     "switches": {
+        "cpp-p": {
+            "display-name": "-P", 
+            "runtime": true, 
+            "flags": [
+                "-P"
+            ]
+        }, 
+        "perl5.18.0": {
+            "display-name": "-M5.18.0", 
+            "runtime": true, 
+            "flags": "-M5.18.0", 
+            "insert-position": 1
+        }, 
+        "delphi-mode": {
+            "display-name": "Delphi 7 mode", 
+            "flags": [
+                "-Mdelphi"
+            ]
+        }, 
+        "boost-nothing-header": {
+            "conflicts": [
+                "boost-nothing-header", 
+                "boost-1.55-header"
+            ], 
+            "display-name": "Don't Use Boost", 
+            "runtime": true, 
+            "flags": [], 
+            "display-flags": ""
+        }, 
         "coffee-compile-only": {
             "display-name": "Compile Only", 
             "runtime": true, 
@@ -8,30 +37,9 @@
             ], 
             "insert-position": 2
         }, 
-        "cpp-p": {
-            "display-name": "-P", 
-            "runtime": true, 
-            "flags": [
-                "-P"
-            ]
-        }, 
         "mono-optimize": {
             "display-name": "Optimization", 
             "flags": "-optimize"
-        }, 
-        "delphi-mode": {
-            "display-name": "Delphi 7 mode", 
-            "flags": [
-                "-Mdelphi"
-            ]
-        }, 
-        "node-harmony": {
-            "display-name": "--harmony", 
-            "runtime": true, 
-            "flags": [
-                "--harmony"
-            ], 
-            "insert-position": 1
         }, 
         "boost-1.55-header": {
             "conflicts": [
@@ -44,22 +52,6 @@
                 "-I/usr/local/boost-1.55.0/include"
             ], 
             "display-flags": "-I/usr/local/boost-1.55.0/include"
-        }, 
-        "boost-nothing-header": {
-            "conflicts": [
-                "boost-nothing-header", 
-                "boost-1.55-header"
-            ], 
-            "display-name": "Don't Use Boost", 
-            "runtime": true, 
-            "flags": [], 
-            "display-flags": ""
-        }, 
-        "perl5.18.0": {
-            "display-name": "-M5.18.0", 
-            "runtime": true, 
-            "flags": "-M5.18.0", 
-            "insert-position": 1
         }
     }, 
     "compilers": [
@@ -236,50 +228,6 @@
             ], 
             "display-compile-command": "php prog.php", 
             "display-name": "php", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "switches": [
-                "node-harmony"
-            ], 
-            "compile-command": "/bin/true", 
-            "name": "node-head", 
-            "language": "JavaScript", 
-            "output-file": "prog.js", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/node-head/bin/node --version | cut -c2-"
-            ], 
-            "run-command": [
-                "/usr/local/node-head/bin/node", 
-                "prog.js"
-            ], 
-            "display-compile-command": "node prog.js", 
-            "initial-checked": [
-                "node-harmony"
-            ], 
-            "display-name": "node HEAD", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
-            "name": "node-0.10.24", 
-            "language": "JavaScript", 
-            "output-file": "prog.js", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/node-0.10.24/bin/node --version | cut -c2-"
-            ], 
-            "run-command": [
-                "/usr/local/node-0.10.24/bin/node", 
-                "prog.js"
-            ], 
-            "display-compile-command": "node prog.js", 
-            "display-name": "node", 
             "runtime-option-raw": true
         }, 
         {
