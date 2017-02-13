@@ -29,14 +29,6 @@
             "flags": [], 
             "display-flags": ""
         }, 
-        "coffee-compile-only": {
-            "display-name": "Compile Only", 
-            "runtime": true, 
-            "flags": [
-                "-p"
-            ], 
-            "insert-position": 2
-        }, 
         "mono-optimize": {
             "display-name": "Optimization", 
             "flags": "-optimize"
@@ -247,75 +239,6 @@
                 "/usr/local/mozjs-24.2.0/bin/js24 --help | grep Version | cut -d'-' -f2 | cut -c2-"
             ], 
             "displayable": true, 
-            "runtime-option-raw": true
-        }, 
-        {
-            "run-command": [
-                "/usr/local/node-0.10.24/bin/node", 
-                "/usr/local/coffee-script-head/bin/coffee", 
-                "prog.coffee"
-            ], 
-            "compile-command": "/bin/true", 
-            "name": "coffee-script-head", 
-            "language": "CoffeeScript", 
-            "output-file": "prog.coffee", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "cd /usr/local/coffee-script-head && git rev-parse HEAD | cut -c 1-10"
-            ], 
-            "switches": [
-                "coffee-compile-only"
-            ], 
-            "display-compile-command": "coffee prog.coffee", 
-            "display-name": "coffee HEAD", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "run-command": [
-                "/usr/local/node-0.10.24/bin/node", 
-                "/usr/local/coffee-script-1.7.1/bin/coffee", 
-                "prog.coffee"
-            ], 
-            "compile-command": "/bin/true", 
-            "name": "coffee-script-1.7.1", 
-            "language": "CoffeeScript", 
-            "output-file": "prog.coffee", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/node-0.10.24/bin/node /usr/local/coffee-script-1.7.1/bin/coffee --version | cut -d' ' -f3"
-            ], 
-            "switches": [
-                "coffee-compile-only"
-            ], 
-            "display-compile-command": "coffee prog.coffee", 
-            "display-name": "coffee", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "run-command": [
-                "/usr/local/node-0.10.24/bin/node", 
-                "/usr/local/coffee-script-1.6.3/bin/coffee", 
-                "prog.coffee"
-            ], 
-            "compile-command": "/bin/true", 
-            "name": "coffee-script-1.6.3", 
-            "language": "CoffeeScript", 
-            "output-file": "prog.coffee", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/node-0.10.24/bin/node /usr/local/coffee-script-1.6.3/bin/coffee --version | cut -d' ' -f3"
-            ], 
-            "switches": [
-                "coffee-compile-only"
-            ], 
-            "display-compile-command": "coffee prog.coffee", 
-            "display-name": "coffee", 
             "runtime-option-raw": true
         }, 
         {

@@ -49,12 +49,6 @@ class Switches(object):
                 "flags":["-Mdelphi"],
                 "display-name":"Delphi 7 mode",
             },
-            "coffee-compile-only":{
-                "flags":["-p"],
-                "display-name":"Compile Only",
-                "insert-position":2,
-                "runtime":True,
-            },
         }
 
     def make(self):
@@ -238,44 +232,6 @@ class Compilers(object):
             "runtime-option-raw":True,
             "version-command":["/bin/sh", "-c", "/usr/local/mozjs-24.2.0/bin/js24 --help | grep Version | cut -d'-' -f2 | cut -c2-"],
         }]
-
-    def make_coffee_script(self):
-        NAMES = [
-           ("coffee-script-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name":"coffee HEAD",
-                    "version-command":["/bin/sh", "-c", "cd /usr/local/coffee-script-head && git rev-parse HEAD | cut -c 1-10"],
-                },
-           }),
-           ("coffee-script-1.7.1", {
-                "params": {
-                },
-                "after": {
-                },
-           }),
-           ("coffee-script-1.6.3", {
-                "params": {
-                },
-                "after": {
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "language":"CoffeeScript",
-            "output-file":"prog.coffee",
-            "display-name":"coffee",
-            "display-compile-command":"coffee prog.coffee",
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/node-0.10.24/bin/node", "/usr/local/{name}/bin/coffee", "prog.coffee"],
-            "runtime-option-raw":True,
-            "version-command":["/bin/sh", "-c", "/usr/local/node-0.10.24/bin/node /usr/local/{name}/bin/coffee --version | cut -d' ' -f3"],
-            "switches":["coffee-compile-only"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
 
     def make_sqlite(self):
         NAMES = [
@@ -462,7 +418,6 @@ class Compilers(object):
             self.make_python() +
             self.make_php() +
             self.make_spidermonkey() +
-            self.make_coffee_script() +
             self.make_sqlite() +
             self.make_lua() +
             self.make_vim() +
