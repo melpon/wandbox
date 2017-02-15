@@ -219,20 +219,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_spidermonkey(self):
-        return [{
-            "name":"mozjs-24.2.0",
-            "displayable":True,
-            "language":"JavaScript",
-            "output-file":"prog.js",
-            "display-name":"SpiderMonkey",
-            "display-compile-command":"js24 prog.js",
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/mozjs-24.2.0/bin/js24", "prog.js"],
-            "runtime-option-raw":True,
-            "version-command":["/bin/sh", "-c", "/usr/local/mozjs-24.2.0/bin/js24 --help | grep Version | cut -d'-' -f2 | cut -c2-"],
-        }]
-
     def make_sqlite(self):
         NAMES = [
            ("sqlite-head", {
@@ -417,7 +403,6 @@ class Compilers(object):
             self.make_perl() +
             self.make_python() +
             self.make_php() +
-            self.make_spidermonkey() +
             self.make_sqlite() +
             self.make_lua() +
             self.make_vim() +
