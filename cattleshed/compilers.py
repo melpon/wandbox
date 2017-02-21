@@ -139,36 +139,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_sqlite(self):
-        NAMES = [
-           ("sqlite-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name":"sqlite HEAD",
-                },
-           }),
-           ("sqlite-3.8.1", {
-                "params": {
-                },
-                "after": {
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.sql",
-            "run-command":["/bin/sh", "-c", "cat prog.sql | /usr/local/{name}/bin/sqlite3"],
-            "display-name":"sqlite",
-            "display-compile-command":"cat prog.sql | sqlite3",
-            "language":"SQL",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/sqlite3 -version | cut -d' ' -f1"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_vim(self):
         NAMES = [
            ("vim-7.4.1714", {
@@ -269,7 +239,6 @@ class Compilers(object):
             self.make_default1() +
             self.make_mono() +
             self.make_python() +
-            self.make_sqlite() +
             self.make_vim() +
             self.make_default2()
         )

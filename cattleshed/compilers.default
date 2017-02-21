@@ -116,46 +116,6 @@
             "runtime-option-raw": true
         }, 
         {
-            "compile-command": "/bin/true", 
-            "name": "sqlite-head", 
-            "language": "SQL", 
-            "output-file": "prog.sql", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/sqlite-head/bin/sqlite3 -version | cut -d' ' -f1"
-            ], 
-            "run-command": [
-                "/bin/sh", 
-                "-c", 
-                "cat prog.sql | /usr/local/sqlite-head/bin/sqlite3"
-            ], 
-            "display-compile-command": "cat prog.sql | sqlite3", 
-            "display-name": "sqlite HEAD", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
-            "name": "sqlite-3.8.1", 
-            "language": "SQL", 
-            "output-file": "prog.sql", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/sqlite-3.8.1/bin/sqlite3 -version | cut -d' ' -f1"
-            ], 
-            "run-command": [
-                "/bin/sh", 
-                "-c", 
-                "cat prog.sql | /usr/local/sqlite-3.8.1/bin/sqlite3"
-            ], 
-            "display-compile-command": "cat prog.sql | sqlite3", 
-            "display-name": "sqlite", 
-            "runtime-option-raw": true
-        }, 
-        {
             "compile-command": [
                 "/bin/true"
             ], 
