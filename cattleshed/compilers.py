@@ -139,36 +139,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_php(self):
-        NAMES = [
-           ("php-head", {
-                "params": {
-                },
-                "after": {
-                    "display-name": "php HEAD",
-                },
-           }),
-           ("php-5.5.6", {
-                "params": {
-                },
-                "after": {
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.php",
-            "display-name":"php",
-            "display-compile-command":"php prog.php",
-            "language":"PHP",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/{name}/bin/php", "prog.php"],
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/php -v | head -1 | cut -d' ' -f2"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_sqlite(self):
         NAMES = [
            ("sqlite-head", {
@@ -328,7 +298,6 @@ class Compilers(object):
             self.make_default1() +
             self.make_mono() +
             self.make_python() +
-            self.make_php() +
             self.make_sqlite() +
             self.make_lua() +
             self.make_vim() +

@@ -117,44 +117,6 @@
         }, 
         {
             "compile-command": "/bin/true", 
-            "name": "php-head", 
-            "language": "PHP", 
-            "output-file": "prog.php", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/php-head/bin/php -v | head -1 | cut -d' ' -f2"
-            ], 
-            "run-command": [
-                "/usr/local/php-head/bin/php", 
-                "prog.php"
-            ], 
-            "display-compile-command": "php prog.php", 
-            "display-name": "php HEAD", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
-            "name": "php-5.5.6", 
-            "language": "PHP", 
-            "output-file": "prog.php", 
-            "displayable": true, 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/php-5.5.6/bin/php -v | head -1 | cut -d' ' -f2"
-            ], 
-            "run-command": [
-                "/usr/local/php-5.5.6/bin/php", 
-                "prog.php"
-            ], 
-            "display-compile-command": "php prog.php", 
-            "display-name": "php", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
             "name": "sqlite-head", 
             "language": "SQL", 
             "output-file": "prog.sql", 
