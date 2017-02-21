@@ -307,29 +307,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_swift(self):
-        NAMES = [
-            ("swift-2.2", {
-                "params": {
-                },
-                "after": {
-                },
-            }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "language":"Swift",
-            "output-file":"prog.swift",
-            "compiler-option-raw":True,
-            "compile-command":["/usr/local/{name}/bin/run-swift.sh", "/usr/local/{name}/bin/swiftc", "prog.swift"],
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/run-swift.sh /usr/local/{name}/bin/swiftc --version | head -1 | cut -d' ' -f3"],
-            "display-name":"swift",
-            "display-compile-command":"swiftc prog.swift",
-            "run-command":["/usr/local/{name}/bin/run-swift.sh", "./prog"]
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-pp",
@@ -406,7 +383,6 @@ class Compilers(object):
             self.make_sqlite() +
             self.make_lua() +
             self.make_vim() +
-            self.make_swift() +
             self.make_default2()
         )
 
