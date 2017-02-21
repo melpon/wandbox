@@ -169,35 +169,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_lua(self):
-        NAMES = [
-           ("lua-5.3.0", {
-                "params": {
-                },
-                "after": {
-                },
-           }),
-           ("lua-5.2.2", {
-                "params": {
-                },
-                "after": {
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.lua",
-            "run-command":["/usr/local/{name}/bin/lua", "prog.lua"],
-            "display-name":"lua",
-            "display-compile-command":"lua prog.lua",
-            "language":"Lua",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/bin/sh", "-c", "/usr/local/{name}/bin/lua -v | cut -d' ' -f2"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_vim(self):
         NAMES = [
            ("vim-7.4.1714", {
@@ -299,7 +270,6 @@ class Compilers(object):
             self.make_mono() +
             self.make_python() +
             self.make_sqlite() +
-            self.make_lua() +
             self.make_vim() +
             self.make_default2()
         )
