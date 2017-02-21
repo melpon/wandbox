@@ -39,12 +39,6 @@ class Switches(object):
                 "display-name":"-P",
                 "runtime":True,
             },
-            "perl5.18.0":{
-                "flags":"-M5.18.0",
-                "display-name":"-M5.18.0",
-                "runtime":True,
-                "insert-position":1,
-            },
             "delphi-mode":{
                 "flags":["-Mdelphi"],
                 "display-name":"Delphi 7 mode",
@@ -114,50 +108,6 @@ class Compilers(object):
             "display-name":"mcs",
             "display-compile-command":"mcs -out:prog.exe prog.cs",
             "run-command":["/usr/local/{mono}/bin/mono", "prog.exe"]
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
-    def make_perl(self):
-        NAMES = [
-            ("perl-head", {
-                "params": {
-                    "bin": "perl",
-                },
-                "after": {
-                    "display-name":"perl-devel HEAD",
-                    "display-compile-command":"perl prog.pl",
-                },
-            }),
-            ("perl-5.19.2", {
-                "params": {
-                    "bin": "perl5.19.2",
-                },
-                "after": {
-                    "display-name":"perl-devel",
-                    "display-compile-command":"perl5.19.2 prog.pl",
-                },
-            }),
-            ("perl-5.18.0", {
-                "params": {
-                    "bin": "perl",
-                },
-                "after": {
-                    "display-name":"perl",
-                    "display-compile-command":"perl prog.pl",
-                    "switches":["perl5.18.0"],
-                    "initial-checked":["perl5.18.0"],
-                },
-            }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.pl",
-            "run-command":["/usr/local/{name}/bin/{bin}", "prog.pl"],
-            "language":"Perl",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/usr/local/{name}/bin/{bin}", "-e", "print $^V"],
         }
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
@@ -377,7 +327,6 @@ class Compilers(object):
         return (
             self.make_default1() +
             self.make_mono() +
-            self.make_perl() +
             self.make_python() +
             self.make_php() +
             self.make_sqlite() +

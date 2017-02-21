@@ -7,28 +7,6 @@
                 "-P"
             ]
         }, 
-        "perl5.18.0": {
-            "display-name": "-M5.18.0", 
-            "runtime": true, 
-            "flags": "-M5.18.0", 
-            "insert-position": 1
-        }, 
-        "delphi-mode": {
-            "display-name": "Delphi 7 mode", 
-            "flags": [
-                "-Mdelphi"
-            ]
-        }, 
-        "boost-nothing-header": {
-            "conflicts": [
-                "boost-nothing-header", 
-                "boost-1.55-header"
-            ], 
-            "display-name": "Don't Use Boost", 
-            "runtime": true, 
-            "flags": [], 
-            "display-flags": ""
-        }, 
         "mono-optimize": {
             "display-name": "Optimization", 
             "flags": "-optimize"
@@ -44,6 +22,22 @@
                 "-I/usr/local/boost-1.55.0/include"
             ], 
             "display-flags": "-I/usr/local/boost-1.55.0/include"
+        }, 
+        "boost-nothing-header": {
+            "conflicts": [
+                "boost-nothing-header", 
+                "boost-1.55-header"
+            ], 
+            "display-name": "Don't Use Boost", 
+            "runtime": true, 
+            "flags": [], 
+            "display-flags": ""
+        }, 
+        "delphi-mode": {
+            "display-name": "Delphi 7 mode", 
+            "flags": [
+                "-Mdelphi"
+            ]
         }
     }, 
     "compilers": [
@@ -101,69 +95,6 @@
             "swithes": [
                 "mono-optimize"
             ]
-        }, 
-        {
-            "compile-command": "/bin/true", 
-            "name": "perl-head", 
-            "language": "Perl", 
-            "output-file": "prog.pl", 
-            "displayable": true, 
-            "version-command": [
-                "/usr/local/perl-head/bin/perl", 
-                "-e", 
-                "print $^V"
-            ], 
-            "run-command": [
-                "/usr/local/perl-head/bin/perl", 
-                "prog.pl"
-            ], 
-            "display-compile-command": "perl prog.pl", 
-            "display-name": "perl-devel HEAD", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "compile-command": "/bin/true", 
-            "name": "perl-5.19.2", 
-            "language": "Perl", 
-            "output-file": "prog.pl", 
-            "displayable": true, 
-            "version-command": [
-                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
-                "-e", 
-                "print $^V"
-            ], 
-            "run-command": [
-                "/usr/local/perl-5.19.2/bin/perl5.19.2", 
-                "prog.pl"
-            ], 
-            "display-compile-command": "perl5.19.2 prog.pl", 
-            "display-name": "perl-devel", 
-            "runtime-option-raw": true
-        }, 
-        {
-            "switches": [
-                "perl5.18.0"
-            ], 
-            "compile-command": "/bin/true", 
-            "name": "perl-5.18.0", 
-            "language": "Perl", 
-            "output-file": "prog.pl", 
-            "displayable": true, 
-            "version-command": [
-                "/usr/local/perl-5.18.0/bin/perl", 
-                "-e", 
-                "print $^V"
-            ], 
-            "run-command": [
-                "/usr/local/perl-5.18.0/bin/perl", 
-                "prog.pl"
-            ], 
-            "display-compile-command": "perl prog.pl", 
-            "initial-checked": [
-                "perl5.18.0"
-            ], 
-            "display-name": "perl", 
-            "runtime-option-raw": true
         }, 
         {
             "compile-command": "/bin/true", 
