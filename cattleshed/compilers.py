@@ -204,17 +204,6 @@ class Compilers(object):
             "compile-command":"/bin/true",
             "run-command":["/usr/local/lazyk/bin/lazyk", "prog.lazy"],
             "version-command":["/bin/echo", "-e", "\\n"],
-        },{
-            "name":"clisp-2.49.0",
-            "displayable":True,
-            "output-file":"prog.lisp",
-            "display-name":"CLISP",
-            "display-compile-command":"clisp prog.lisp",
-            "language":"Lisp",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/clisp-2.49.0/bin/clisp", "prog.lisp"],
-            "version-command":["/bin/sh", "-c", "/usr/local/clisp-2.49.0/bin/clisp --version | head -1 | cut -d' ' -f3"],
         }]
         return COMPILERS
 

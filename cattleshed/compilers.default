@@ -202,25 +202,6 @@
             ], 
             "displayable": true, 
             "runtime-option-raw": true
-        }, 
-        {
-            "run-command": [
-                "/usr/local/clisp-2.49.0/bin/clisp", 
-                "prog.lisp"
-            ], 
-            "display-compile-command": "clisp prog.lisp", 
-            "compile-command": "/bin/true", 
-            "name": "clisp-2.49.0", 
-            "language": "Lisp", 
-            "output-file": "prog.lisp", 
-            "display-name": "CLISP", 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/clisp-2.49.0/bin/clisp --version | head -1 | cut -d' ' -f3"
-            ], 
-            "displayable": true, 
-            "runtime-option-raw": true
         }
     ]
 }
