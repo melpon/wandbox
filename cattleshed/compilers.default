@@ -183,25 +183,6 @@
             ], 
             "displayable": true, 
             "runtime-option-raw": true
-        }, 
-        {
-            "run-command": [
-                "/usr/local/lazyk/bin/lazyk", 
-                "prog.lazy"
-            ], 
-            "display-compile-command": "lazyk prog.lazy", 
-            "compile-command": "/bin/true", 
-            "name": "lazyk", 
-            "language": "Lazy K", 
-            "output-file": "prog.lazy", 
-            "display-name": "lazyk", 
-            "version-command": [
-                "/bin/echo", 
-                "-e", 
-                "\\n"
-            ], 
-            "displayable": true, 
-            "runtime-option-raw": true
         }
     ]
 }

@@ -193,17 +193,6 @@ class Compilers(object):
             "runtime-option-raw":True,
             "compile-command":"/bin/true",
             "version-command":["/bin/sh", "-c", "/bin/bash --version | head -1"],
-        },{
-            "name":"lazyk",
-            "displayable":True,
-            "output-file":"prog.lazy",
-            "display-name":"lazyk",
-            "display-compile-command":"lazyk prog.lazy",
-            "language":"Lazy K",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "run-command":["/usr/local/lazyk/bin/lazyk", "prog.lazy"],
-            "version-command":["/bin/echo", "-e", "\\n"],
         }]
         return COMPILERS
 
