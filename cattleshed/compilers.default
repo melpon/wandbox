@@ -32,12 +32,6 @@
             "runtime": true, 
             "flags": [], 
             "display-flags": ""
-        }, 
-        "delphi-mode": {
-            "display-name": "Delphi 7 mode", 
-            "flags": [
-                "-Mdelphi"
-            ]
         }
     }, 
     "compilers": [
@@ -227,31 +221,6 @@
             ], 
             "displayable": true, 
             "runtime-option-raw": true
-        }, 
-        {
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/usr/local/fpc-2.6.2/bin/fpc | head -1 | cut -d' ' -f5"
-            ], 
-            "switches": [
-                "delphi-mode"
-            ], 
-            "display-compile-command": "fpc prog.pas", 
-            "display-name": "Free Pascal", 
-            "runtime-option-raw": true, 
-            "compile-command": [
-                "/usr/local/fpc-2.6.2/bin/fpc", 
-                "-Fu/usr/local/fpc-2.6.2/lib/fpc/2.6.2/units/x86_64-linux/*", 
-                "prog.pas"
-            ], 
-            "name": "fpc-2.6.2", 
-            "language": "Pascal", 
-            "output-file": "prog.pas", 
-            "displayable": true, 
-            "run-command": [
-                "./prog"
-            ]
         }
     ]
 }

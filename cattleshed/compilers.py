@@ -39,10 +39,6 @@ class Switches(object):
                 "display-name":"-P",
                 "runtime":True,
             },
-            "delphi-mode":{
-                "flags":["-Mdelphi"],
-                "display-name":"Delphi 7 mode",
-            },
         }
 
     def make(self):
@@ -219,18 +215,6 @@ class Compilers(object):
             "compile-command":"/bin/true",
             "run-command":["/usr/local/clisp-2.49.0/bin/clisp", "prog.lisp"],
             "version-command":["/bin/sh", "-c", "/usr/local/clisp-2.49.0/bin/clisp --version | head -1 | cut -d' ' -f3"],
-        },{
-            "name":"fpc-2.6.2",
-            "displayable":True,
-            "output-file":"prog.pas",
-            "display-name":"Free Pascal",
-            "display-compile-command":"fpc prog.pas",
-            "language":"Pascal",
-            "runtime-option-raw":True,
-            "compile-command":["/usr/local/fpc-2.6.2/bin/fpc", "-Fu/usr/local/fpc-2.6.2/lib/fpc/2.6.2/units/x86_64-linux/*", "prog.pas"],
-            "run-command":["./prog"],
-            "version-command":["/bin/sh", "-c", "/usr/local/fpc-2.6.2/bin/fpc | head -1 | cut -d' ' -f5"],
-            "switches":["delphi-mode"],
         }]
         return COMPILERS
 
