@@ -108,33 +108,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_python(self):
-        NAMES = [
-           ("pypy-2.1", {
-                "params": {
-                    "bin": "pypy",
-                },
-                "after": {
-                    "display-name":"pypy",
-                    "display-compile-command":"pypy prog.py",
-                    "version-command":["/usr/local/pypy-2.1/bin/pypy", "-c", "import sys; print(sys.version.split()[7])"],
-                },
-           }),
-        ]
-        FORMATS = {
-            "displayable":True,
-            "output-file":"prog.py",
-            "run-command":["/usr/local/{name}/bin/{bin}", "prog.py"],
-            "display-name":"python",
-            "display-compile-command":"python prog.py",
-            "language":"Python",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/usr/local/{name}/bin/{bin}", "-c", "import sys; print(sys.version.split()[0])"],
-        }
-        compilers = self.make_common(NAMES, FORMATS)
-        return compilers
-
     def make_default1(self):
         COMPILERS = [{
             "name":"gcc-4.8.2-pp",
@@ -171,7 +144,6 @@ class Compilers(object):
         return (
             self.make_default1() +
             self.make_mono() +
-            self.make_python() +
             self.make_default2()
         )
 

@@ -91,25 +91,6 @@
             ]
         }, 
         {
-            "compile-command": "/bin/true", 
-            "name": "pypy-2.1", 
-            "language": "Python", 
-            "output-file": "prog.py", 
-            "displayable": true, 
-            "version-command": [
-                "/usr/local/pypy-2.1/bin/pypy", 
-                "-c", 
-                "import sys; print(sys.version.split()[7])"
-            ], 
-            "run-command": [
-                "/usr/local/pypy-2.1/bin/pypy", 
-                "prog.py"
-            ], 
-            "display-compile-command": "pypy prog.py", 
-            "display-name": "pypy", 
-            "runtime-option-raw": true
-        }, 
-        {
             "run-command": [
                 "/bin/bash", 
                 "prog.sh"
