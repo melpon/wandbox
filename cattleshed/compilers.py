@@ -11,40 +11,17 @@ class Switches(object):
         conflicts = [p[0] for p in pairs]
         return [(p[0], merge(p[1], { "conflicts": conflicts })) for p in pairs]
 
-    def make_boost_header(self):
-        pairs = [
-            ("boost-nothing-header", {
-                "flags":[],
-                "display-name":"Don't Use Boost",
-                "display-flags":"",
-                "runtime":True,
-            }),
-            ("boost-1.55-header", {
-                "flags":["-I/usr/local/boost-1.55.0/include"],
-                "display-name":"Boost 1.55.0",
-                "display-flags":"-I/usr/local/boost-1.55.0/include",
-                "runtime":True,
-            }),
-        ]
-        return self.resolve_conflicts(pairs)
-
     def make_default(self):
         return {
             "mono-optimize":{
                 "flags":"-optimize",
                 "display-name":"Optimization",
             },
-            "cpp-p":{
-                "flags":["-P"],
-                "display-name":"-P",
-                "runtime":True,
-            },
         }
 
     def make(self):
         return merge(
-            self.make_default(),
-            self.make_boost_header())
+            self.make_default())
 
 class Compilers(object):
     def resolve_format(self, formats, **kwargs):
@@ -108,23 +85,6 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_default1(self):
-        COMPILERS = [{
-            "name":"gcc-4.8.2-pp",
-            "displayable":True,
-            "display-name":"gcc",
-            "display-compile-command":"gcc prog.cpp -E",
-            "language":"CPP",
-            "output-file":"prog.cpp",
-            "compile-command":"/bin/true",
-            "runtime-option-raw":True,
-            "run-command":["/usr/local/gcc-4.8.2/bin/gcc", "-E", "prog.cpp"],
-            "version-command":["/usr/local/gcc-4.8.2/bin/gcc", "-dumpversion"],
-            "switches":["cpp-p", "boost-nothing-header", "boost-1.55-header"],
-            "initial-checked":["cpp-p", "boost-1.55-header"],
-        }]
-        return COMPILERS
-
     def make_default2(self):
         COMPILERS = [{
             "name":"bash",
@@ -142,7 +102,6 @@ class Compilers(object):
 
     def make(self):
         return (
-            self.make_default1() +
             self.make_mono() +
             self.make_default2()
         )
