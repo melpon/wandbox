@@ -85,25 +85,9 @@ class Compilers(object):
         compilers = self.make_common(NAMES, FORMATS)
         return compilers
 
-    def make_default2(self):
-        COMPILERS = [{
-            "name":"bash",
-            "displayable":True,
-            "output-file":"prog.sh",
-            "run-command":["/bin/bash", "prog.sh"],
-            "display-name":"bash",
-            "display-compile-command":"bash prog.sh",
-            "language":"Bash script",
-            "runtime-option-raw":True,
-            "compile-command":"/bin/true",
-            "version-command":["/bin/sh", "-c", "/bin/bash --version | head -1"],
-        }]
-        return COMPILERS
-
     def make(self):
         return (
-            self.make_mono() +
-            self.make_default2()
+            self.make_mono()
         )
 
 def make_config():

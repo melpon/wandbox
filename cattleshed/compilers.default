@@ -32,25 +32,6 @@
             "swithes": [
                 "mono-optimize"
             ]
-        }, 
-        {
-            "run-command": [
-                "/bin/bash", 
-                "prog.sh"
-            ], 
-            "display-compile-command": "bash prog.sh", 
-            "compile-command": "/bin/true", 
-            "name": "bash", 
-            "language": "Bash script", 
-            "output-file": "prog.sh", 
-            "display-name": "bash", 
-            "version-command": [
-                "/bin/sh", 
-                "-c", 
-                "/bin/bash --version | head -1"
-            ], 
-            "displayable": true, 
-            "runtime-option-raw": true
         }
     ]
 }
