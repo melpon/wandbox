@@ -1048,13 +1048,8 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
             ? preview_paragraph
             : $('<pre>').addClass(data.type).attr('data-type', data.type).attr('data-text', '').appendTo(output);
     p.attr('data-text', p.attr('data-text') + data.message);
-    p.html(
-      ansi_up.ansi_to_html(
-        ansi_up.escape_for_html(
-          p.attr('data-text')
-        )
-      )
-    );
+    var ansi_up = new AnsiUp();
+    p.html(ansi_up.ansi_to_html(p.attr('data-text')));
     preview_paragraph = p;
 
     output[0].scrollTop = output[0].scrollHeight;
@@ -1076,13 +1071,10 @@ ResultWindow.prototype.set_code = function(compiler, code, codes, stdin, outputs
   $.each(outputs, function(n,e) {
     var type = e.type;
     var output = e.output;
+    var ansi_up = new AnsiUp();
     $('<pre>').addClass(type)
               .attr('data-type', type)
-              .html(
-                ansi_up.ansi_to_html(
-                  ansi_up.escape_for_html(output)
-                )
-              )
+              .html(ansi_up.ansi_to_html(output))
               .appendTo(self._output_window());
   });
 }

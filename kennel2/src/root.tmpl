@@ -59,40 +59,40 @@
 
 <% template includes() %>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-<link rel="stylesheet" href="<% url "static" %>/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/codemirror.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/addon/dialog/dialog.min.css">
 <link rel="stylesheet" href="<% url "static" %>/css/root.css">
-<link rel="stylesheet" href="<% url "static" %>/codemirror/addon/dialog/dialog.css">
 
 <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 <script src="//platform.twitter.com/widgets.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/codemirror.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/addon/mode/simple.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/clike/clike.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/d/d.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/ruby/ruby.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/python/python.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/perl/perl.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/erlang/erlang.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/haskell/haskell.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/shell/shell.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/lua/lua.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/php/php.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/commonlisp/commonlisp.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/pascal/pascal.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/rust/rust.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/groovy/groovy.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/javascript/javascript.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/coffeescript/coffeescript.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/swift/swift.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/keymap/vim.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/keymap/emacs.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/addon/search/searchcursor.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/addon/edit/matchbrackets.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/addon/dialog/dialog.min.js"></script>
 <script src="<% url "static" %>/js/jquery.url.js"></script>
 <script src="<% url "static" %>/js/jquery.cookie.js"></script>
 <script src="<% url "static" %>/js/ansi_up.js"></script>
-<script src="<% url "static" %>/codemirror/lib/codemirror.js"></script>
-<script src="<% url "static" %>/codemirror/addon/mode/simple.js"></script>
-<script src="<% url "static" %>/codemirror/mode/clike/clike.js"></script>
-<script src="<% url "static" %>/codemirror/mode/d/d.js"></script>
-<script src="<% url "static" %>/codemirror/mode/ruby/ruby.js"></script>
-<script src="<% url "static" %>/codemirror/mode/python/python.js"></script>
-<script src="<% url "static" %>/codemirror/mode/perl/perl.js"></script>
-<script src="<% url "static" %>/codemirror/mode/erlang/erlang.js"></script>
-<script src="<% url "static" %>/codemirror/mode/haskell/haskell.js"></script>
-<script src="<% url "static" %>/codemirror/mode/shell/shell.js"></script>
-<script src="<% url "static" %>/codemirror/mode/lua/lua.js"></script>
-<script src="<% url "static" %>/codemirror/mode/php/php.js"></script>
-<script src="<% url "static" %>/codemirror/mode/commonlisp/commonlisp.js"></script>
-<script src="<% url "static" %>/codemirror/mode/pascal/pascal.js"></script>
-<script src="<% url "static" %>/codemirror/mode/rust/rust.js"></script>
-<script src="<% url "static" %>/codemirror/mode/groovy/groovy.js"></script>
-<script src="<% url "static" %>/codemirror/mode/javascript/javascript.js"></script>
-<script src="<% url "static" %>/codemirror/mode/coffeescript/coffeescript.js"></script>
-<script src="<% url "static" %>/codemirror/mode/swift/swift.js"></script>
-<script src="<% url "static" %>/codemirror/keymap/vim.js"></script>
-<script src="<% url "static" %>/codemirror/keymap/emacs.js"></script>
-<script src="<% url "static" %>/codemirror/addon/search/searchcursor.js"></script>
-<script src="<% url "static" %>/codemirror/addon/edit/matchbrackets.js"></script>
-<script src="<% url "static" %>/codemirror/addon/dialog/dialog.js"></script>
 <script src="<% url "static" %>/js/PostEventSource.js"></script>
 
 <script>
