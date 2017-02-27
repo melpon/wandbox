@@ -325,7 +325,7 @@ footer {
 }
 
 .wandbox-dropdown-lang-area {
-  width: 220px;
+  width: 230px;
   float: right;
   border: 1px solid #e5e5d5;
   border-radius: 6px;
@@ -339,8 +339,13 @@ footer {
   list-style-type: none;
 }
 .wandbox-dropdown-lang-area li {
-  width: 90px;
+  width: 100px;
   float: left;
+}
+.wandbox-dropdown-lang-area span.wandbox-badge {
+  font-size: 8px;
+  color: #888;
+  padding-left: 3px;
 }
 
 .wandbox-stdin-accordion {

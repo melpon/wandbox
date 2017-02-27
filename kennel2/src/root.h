@@ -20,6 +20,7 @@ namespace content {
                     langinfos[lang].language = lang;
                     langinfos[lang].compilers.push_back(info);
                     langinfos[lang].tab_id = "language-tab-" + std::to_string(n);
+                    langinfos[lang].count += 1;
                     n++;
                 }
             }
@@ -75,6 +76,8 @@ namespace content {
             std::string language;
             std::vector<cppcms::json::value> compilers;
             std::string tab_id;
+            int count;
+            language_info() : count(0) { }
         };
         std::map<std::string, language_info> langinfos;
         std::vector<language_info*> vertical_langinfos;

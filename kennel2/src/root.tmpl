@@ -262,7 +262,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
             <% foreach lang in vertical_langinfos %>
               <% item %>
                 <li>
-                  <a href="#<%= lang->tab_id %>" data-toggle="tab"><%= lang->language %></a>
+                  <a href="#<%= lang->tab_id %>" data-toggle="tab"><%= lang->language %></a> <span class="wandbox-badge"><%= lang->count %></span>
                 </li>
               <% end item %>
             <% end foreach %>
