@@ -88,14 +88,24 @@ STATIC_DIR="$sysconfdir/static"
 AC_SUBST(STATIC_DIR)
 
 AC_ARG_WITH(databasedir,
-[AS_HELP_STRING([--databasedir=PATH],
+[AS_HELP_STRING([--with-databasedir=PATH],
                 [specify where pemlink database is stored in (default: $localstatedir/lib/kennel)])])
-if test "x$databasedir" != x; then
-  DATABASE_DIR="$databasedir"
+if test "x$with_databasedir" != x; then
+  DATABASE_DIR="$with_databasedir"
 else
   DATABASE_DIR="$localstatedir/lib/kennel"
 fi
 AC_SUBST(DATABASE_DIR)
+
+AC_ARG_WITH(sponsors,
+[AS_HELP_STRING([--with-sponsors=PATH],
+                [specify sponsors JSON file in (default: "")])])
+if test "x$with_sponsors" != x; then
+  SPONSORS_FILE="$with_sponsors"
+else
+  SPONSORS_FILE=""
+fi
+AC_SUBST(SPONSORS_FILE)
 
 AC_MSG_CHECKING([for cppcms])
 AC_LANG([C++])
@@ -146,6 +156,16 @@ AC_TRY_LINK(
    ],
    [AC_MSG_RESULT([yes])],
    [AC_MSG_RESULT([no]); AC_MSG_ERROR([missing gcrypt or OpenSSL library])])])
+
+AC_MSG_CHECKING([for tm_gmtoff])
+AC_TRY_COMPILE([
+  #include <time.h>
+], [
+  struct tm tm;
+  tm.tm_gmtoff = 1;
+],
+[AC_MSG_RESULT([yes])],
+[AC_MSG_RESULT([no]); AC_MSG_ERROR([no tm_gmtoff in struct tm])])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

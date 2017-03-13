@@ -2,13 +2,17 @@
 #define ROOT_H_INCLUDED
 
 #include <string>
+#include <fstream>
+#include <cstring>
+#include <ctime>
 #include "libs.h"
 
 namespace content {
     struct root : public cppcms::base_content {
-        root() {
+        root(cppcms::service& srv) {
             using_permlink = false;
             permlink = "null";
+            init_sponsors(srv);
         }
 
         void set_compiler_infos(cppcms::json::value compiler_infos) {
@@ -93,6 +97,62 @@ namespace content {
 
         std::string make_full_name(cppcms::json::value& info) {
             return "[" + info["language"].str() + "] " + info["display-name"].str() + " " + info["version"].str();
+        }
+
+        struct sponsor {
+            std::string name;
+            std::string url;
+            std::time_t due_date;
+        };
+        bool has_sponsors;
+        std::vector<sponsor> corporate_sponsors;
+        std::vector<sponsor> private_sponsors;
+        std::time_t from_iso8601(std::string str) {
+            std::tm tm;
+            std::memset(&tm, 0, sizeof(tm));
+            strptime(str.c_str(), "%FT%T%z", &tm);
+            return std::mktime(&tm);
+        }
+        sponsor make_sponsor(cppcms::json::value& json) {
+            sponsor sp;
+            sp.name = json["name"].str();
+            sp.url = json["url"].str();
+            sp.due_date = from_iso8601(json["due_date"].str());
+            return sp;
+        }
+
+        void init_sponsors(cppcms::service& srv) {
+            has_sponsors = false;
+
+            auto file = srv.settings()["application"]["sponsors"].str();
+            if (file.empty()) {
+                return;
+            }
+
+            std::ifstream ifs(file.c_str());
+            if (!ifs) {
+                return;
+            }
+
+            cppcms::json::value js;
+            if (!js.load(ifs, true, nullptr)) {
+                return;
+            }
+
+            auto now = std::time(nullptr);
+            for (auto&& v: js["corporate"].array()) {
+                auto sp = make_sponsor(v);
+                if (now <= sp.due_date) {
+                    corporate_sponsors.push_back(std::move(sp));
+                }
+            }
+            for (auto&& v: js["private"].array()) {
+                auto sp = make_sponsor(v);
+                if (now <= sp.due_date) {
+                    private_sponsors.push_back(std::move(sp));
+                }
+            }
+            has_sponsors = true;
         }
     };
 }

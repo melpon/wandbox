@@ -212,6 +212,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
       </div>
     </div>
     <% include result_container() %>
+    <% include sponsors(1, 1, 0, 0) %>
   </div>
 </div>
 <% end template %>
@@ -332,6 +333,39 @@ var LANGUAGE_NAME_TO_TAB_ID = {
     </div>
   </div>
 </div>
+<% include sponsors(0, 0, 1, 1) %>
+<% end template %>
+
+<% template sponsors(bool xs, bool sm, bool md, bool lg) %>
+<% if has_sponsors %>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="<% if xs %>visible-xs-block<% end if %> <% if sm %>visible-sm-block<% end if %> <% if md %>visible-md-block<% end if %> <% if lg %>visible-lg-block<% end if %> wandbox-sponsors">
+        <div class="wandbox-corporate-sponsors">
+          <label>&#128021; Corporate Sponsors:</label>
+          <ul>
+            <% foreach sp in corporate_sponsors %>
+              <% item %>
+                <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+              <% end item %>
+            <% end foreach %>
+          </ul>
+        </div>
+
+        <div class="wandbox-private-sponsors">
+          <label>&#128054; Private Sponsors:</label>
+          <ul>
+            <% foreach sp in private_sponsors %>
+              <% item %>
+                <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+              <% end item %>
+            <% end foreach %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end if %>
 <% end template %>
 
 <% template editor() %>

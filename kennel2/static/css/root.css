@@ -413,3 +413,34 @@ footer {
 .wandbox-resultwindow-stdin > pre {
   background-color: #fff;
 }
+
+.wandbox-sponsors {
+  margin-top: 50px;
+}
+
+.wandbox-sponsors label {
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wandbox-sponsors li {
+  list-style: none;
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wandbox-private-sponsors {
+  margin-top: 20px;
+}
+
+.wandbox-sponsors > div {
+  font-size: 12px;
+  text-align: right;
+  background-color: #eee;
+  border-radius: 10px;
+  padding-right: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}

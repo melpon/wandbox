@@ -10,3 +10,6 @@
 [submodule "submodules/ansi_up"]
 	path = submodules/ansi_up
 	url = https://github.com/drudru/ansi_up.git
+[submodule "submodules/bootstrap-glyphicons"]
+	path = submodules/bootstrap-glyphicons
+	url = https://github.com/marcoceppi/bootstrap-glyphicons.git

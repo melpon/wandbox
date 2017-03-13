@@ -239,7 +239,7 @@ private:
             return;
         }
 
-        content::root c;
+        content::root c(service());
         c.set_compiler_infos(get_compiler_infos_or_cache());
         render("root", c);
     }
@@ -388,7 +388,7 @@ private:
             return;
         }
 
-        content::root c;
+        content::root c(service());
         c.set_compiler_infos(get_compiler_infos_or_cache());
 
         permlink pl(service());
@@ -547,7 +547,7 @@ private:
             return;
         }
 
-        content::root c;
+        content::root c(service());
         c.set_compiler_infos(get_compiler_infos_or_cache());
         render("nojs_list", c);
     }

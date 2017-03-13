@@ -49,6 +49,7 @@ function load(key) {
 
 $(function() {
   // $.cookie.json = true;
+  $('[data-toggle="tooltip"]').tooltip();
 
   var result_container = new ResultContainer('#result-container', '#result-container-settings')
   result_container.onfinish = function() {
