@@ -346,7 +346,11 @@ var LANGUAGE_NAME_TO_TAB_ID = {
           <ul>
             <% foreach sp in corporate_sponsors %>
               <% item %>
-                <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+                <% if (!sp.url.empty()) %>
+                  <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+                <% else %>
+                  <li><span data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></span></li>
+                <% end %>
               <% end item %>
             <% end foreach %>
           </ul>
@@ -357,7 +361,11 @@ var LANGUAGE_NAME_TO_TAB_ID = {
           <ul>
             <% foreach sp in private_sponsors %>
               <% item %>
-                <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+                <% if (!sp.url.empty()) %>
+                  <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+                <% else %>
+                  <li><span data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></span></li>
+                <% end %>
               <% end item %>
             <% end foreach %>
           </ul>
