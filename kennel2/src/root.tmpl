@@ -340,35 +340,41 @@ var LANGUAGE_NAME_TO_TAB_ID = {
 <% if has_sponsors %>
   <div class="row">
     <div class="col-md-12">
-      <div class="<% if xs %>visible-xs-block<% end if %> <% if sm %>visible-sm-block<% end if %> <% if md %>visible-md-block<% end if %> <% if lg %>visible-lg-block<% end if %> wandbox-sponsors">
-        <div class="wandbox-corporate-sponsors">
-          <label>&#128021; Corporate Sponsors:</label>
-          <ul>
-            <% foreach sp in corporate_sponsors %>
-              <% item %>
-                <% if (!sp.url.empty()) %>
-                  <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
-                <% else %>
-                  <li><span data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></span></li>
-                <% end %>
-              <% end item %>
-            <% end foreach %>
-          </ul>
+      <div class="<% if xs %>visible-xs-block<% end if %> <% if sm %>visible-sm-block<% end if %> <% if md %>visible-md-block<% end if %> <% if lg %>visible-lg-block<% end if %>">
+        <div class="wandbox-sponsors">
+          <div class="wandbox-corporate-sponsors">
+            <label>&#128021; Corporate Sponsors:</label>
+            <ul>
+              <% foreach sp in corporate_sponsors %>
+                <% item %>
+                  <% if (!sp.url.empty()) %>
+                    <li><a target="_blank" href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+                  <% else %>
+                    <li><span data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></span></li>
+                  <% end %>
+                <% end item %>
+              <% end foreach %>
+            </ul>
+          </div>
+
+          <div class="wandbox-private-sponsors">
+            <label>&#128054; Private Sponsors:</label>
+            <ul>
+              <% foreach sp in private_sponsors %>
+                <% item %>
+                  <% if (!sp.url.empty()) %>
+                    <li><a target="_blank" href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
+                  <% else %>
+                    <li><span data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></span></li>
+                  <% end %>
+                <% end item %>
+              <% end foreach %>
+            </ul>
+          </div>
         </div>
 
-        <div class="wandbox-private-sponsors">
-          <label>&#128054; Private Sponsors:</label>
-          <ul>
-            <% foreach sp in private_sponsors %>
-              <% item %>
-                <% if (!sp.url.empty()) %>
-                  <li><a href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>
-                <% else %>
-                  <li><span data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></span></li>
-                <% end %>
-              <% end item %>
-            <% end foreach %>
-          </ul>
+        <div class="wandbox-about-sponsors">
+          <a target="_blank" href="https://gist.github.com/melpon/8f5d7a8e991ed466d09cf887bd8d92ce">About sponsors(Japanese)</a>
         </div>
       </div>
     </div>
