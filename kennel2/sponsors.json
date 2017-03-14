@@ -62,5 +62,13 @@
     , "url": "https://twitter.com/yitabashi"
     , "due_date": "2018-03-15T23:59:59+09:00"
     }
+  , { "name": "@fjnli"
+    , "url": "https://twitter.com/fjnli"
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "@orisano"
+    , "url": "https://twitter.com/orisano"
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
   ]
 }
