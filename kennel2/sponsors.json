@@ -82,5 +82,65 @@
     , "url": "https://twitter.com/jj1bdx"
     , "due_date": "2018-03-15T23:59:59+09:00"
     }
+  , { "name": "@unagix"
+    , "url": "https://twitter.com/unagix"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@mozamimy"
+    , "url": "https://twitter.com/mozamimy"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "太一"
+    , "url": "https://github.com/taichi"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@P_tan"
+    , "url": "https://twitter.com/P_tan"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@TKinugasa"
+    , "url": "https://twitter.com/TKinugasa"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@cpp_akira"
+    , "url": "https://twitter.com/cpp_akira"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@nak2yoshi"
+    , "url": "https://twitter.com/nak2yoshi"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@szktty"
+    , "url": "https://twitter.com/szktty"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@nyaocat"
+    , "url": "https://twitter.com/nyaocat"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "安藤敏彦"
+    , "url": ""
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "srz_zumix"
+    , "url": "https://twitter.com/srz_zumix"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "D"
+    , "url": ""
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "hotpepsi"
+    , "url": "https://competitiveprogramming.info/"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "yohhoy"
+    , "url": "https://twitter.com/yohhoy"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "kariya_mitsuru"
+    , "url": "https://twitter.com/kariya_mitsuru"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
   ]
 }
