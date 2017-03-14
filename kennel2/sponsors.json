@@ -26,5 +26,37 @@
     , "url": "https://twitter.com/kusano_k"
     , "due_date": "2018-03-14T23:59:59+09:00"
     }
+  , { "name": "C++erの清楚なメイドbot"
+    , "url": ""
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "@tzik_tack"
+    , "url": "https://twitter.com/tzik_tack"
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "スズキコジロウ"
+    , "url": ""
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "長谷川一輝"
+    , "url": "https://twitter.com/_NANASI880"
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "@wraith13"
+    , "url": "https://twitter.com/wraith13"
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "zonoise"
+    , "url": ""
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "Kenta IDA"
+    , "url": ""
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
+  , { "name": "@hotwatermorning"
+    , "url": "https://twitter.com/hotwatermorning"
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
   ]
 }
