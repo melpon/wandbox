@@ -58,5 +58,9 @@
     , "url": "https://twitter.com/hotwatermorning"
     , "due_date": "2018-03-15T23:59:59+09:00"
     }
+  , { "name": "@yitabashi"
+    , "url": "https://twitter.com/yitabashi"
+    , "due_date": "2018-03-15T23:59:59+09:00"
+    }
   ]
 }
