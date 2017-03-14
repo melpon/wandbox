@@ -70,8 +70,8 @@
     , "url": "https://twitter.com/orisano"
     , "due_date": "2018-03-15T23:59:59+09:00"
     }
-  , { "name": "島崎清山"
-    , "url": ""
+  , { "name": "seizans"
+    , "url": "https://twitter.com/seizans"
     , "due_date": "2018-03-15T23:59:59+09:00"
     }
   , { "name": "apstndb"
@@ -136,10 +136,6 @@
     }
   , { "name": "yohhoy"
     , "url": "https://twitter.com/yohhoy"
-    , "due_date": "2018-03-16T23:59:59+09:00"
-    }
-  , { "name": "kariya_mitsuru"
-    , "url": "https://twitter.com/kariya_mitsuru"
     , "due_date": "2018-03-16T23:59:59+09:00"
     }
   ]
