@@ -138,5 +138,13 @@
     , "url": "https://twitter.com/yohhoy"
     , "due_date": "2018-03-16T23:59:59+09:00"
     }
+  , { "name": "roentgen"
+    , "url": "https://twitter.com/roentgen"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@nobu_k"
+    , "url": "https://twitter.com/nobu_k"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
   ]
 }
