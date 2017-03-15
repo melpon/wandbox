@@ -169,5 +169,45 @@
     , "url": ""
     , "due_date": "2018-03-16T23:59:59+09:00"
     }
+  , { "name": "ヽ（´・肉・｀）ノ"
+    , "url": "https://twitter.com/niku_name"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "Siv3D"
+    , "url": "http://siv3d.jp"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "s.t."
+    , "url": "https://twitter.com/simizut22"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "戀塚 昭彦"
+    , "url": "https://twitter.com/koizuka"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@aokomoriuta"
+    , "url": "https://twitter.com/aokomoriuta"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@urasandesu"
+    , "url": "https://twitter.com/urasandesu"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@fd0"
+    , "url": "https://twitter.com/fd0"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@530506"
+    , "url": "https://twitter.com/530506"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@meso"
+    , "url": "https://twitter.com/meso"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "Cryolite"
+    , "url": "https://twitter.com/Cryolite"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
   ]
 }
