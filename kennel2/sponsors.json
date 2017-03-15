@@ -1,5 +1,12 @@
 { "corporate":
-  [
+  [ { "name": "セオライド テクノロジー"
+    , "url": "http://theolizer.com/"
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "株式会社フィックスターズ"
+    , "url": "http://www.fixstars.com/"
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
   ]
 , "private":
   [ { "name": "voluntas"
@@ -144,6 +151,22 @@
     }
   , { "name": "@nobu_k"
     , "url": "https://twitter.com/nobu_k"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "@meltedice"
+    , "url": "https://twitter.com/meltedice"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "isoparametric"
+    , "url": "https://twitter.com/isoparametric"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "mtera (@toakou)"
+    , "url": "https://twitter.com/toakou"
+    , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "yamionp"
+    , "url": ""
     , "due_date": "2018-03-16T23:59:59+09:00"
     }
   ]
