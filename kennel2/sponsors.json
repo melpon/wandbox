@@ -7,6 +7,14 @@
     , "url": "http://www.fixstars.com/"
     , "due_date": "2018-03-17T23:59:59+09:00"
     }
+  , { "name": "株式会社アカツキ"
+    , "url": "https://aktsk.jp/"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "有限会社テクニカルアーツ"
+    , "url": "http://www.techarts.co.jp/"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
   ]
 , "private":
   [ { "name": "voluntas"
@@ -208,6 +216,42 @@
   , { "name": "Cryolite"
     , "url": "https://twitter.com/Cryolite"
     , "due_date": "2018-03-16T23:59:59+09:00"
+    }
+  , { "name": "渋谷 裕久"
+    , "url": ""
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "redboltz"
+    , "url": ""
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "@nishiken"
+    , "url": "https://twitter.com/nishiken"
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "futoase"
+    , "url": "https://twitter.com/xga"
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "@houmei"
+    , "url": "https://twitter.com/houmei"
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "h_michael_z"
+    , "url": ""
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "らぴす"
+    , "url": ""
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "下田 卓朗"
+    , "url": "https://twitter.com/tactactad"
+    , "due_date": "2018-03-17T23:59:59+09:00"
+    }
+  , { "name": "Usagi Ito"
+    , "url": "https://twitter.com/USAGI_WRP"
+    , "due_date": "2018-03-17T23:59:59+09:00"
     }
   ]
 }
