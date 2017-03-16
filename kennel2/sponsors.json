@@ -253,5 +253,37 @@
     , "url": "https://twitter.com/USAGI_WRP"
     , "due_date": "2018-03-17T23:59:59+09:00"
     }
+  , { "name": "@chaco_LONI"
+    , "url": "https://twitter.com/chaco_LONI"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "takezoh"
+    , "url": "https://twitter.com/takezoh_"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "kyubuns"
+    , "url": ""
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "akineko"
+    , "url": ""
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "@rbtnn"
+    , "url": "https://twitter.com/rbtnn"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "@rydotyosh"
+    , "url": "https://twitter.com/rydotyosh"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "堀松巧也"
+    , "url": "https://twitter.com/horitaku1124"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "@ore_public"
+    , "url": "https://twitter.com/ore_public"
+    , "due_date": "2018-03-18T23:59:59+09:00"
+    }
   ]
 }
