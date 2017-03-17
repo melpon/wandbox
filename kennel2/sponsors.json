@@ -61,8 +61,8 @@
     , "url": "https://twitter.com/wraith13"
     , "due_date": "2018-03-15T23:59:59+09:00"
     }
-  , { "name": "zonoise"
-    , "url": ""
+  , { "name": "@zonoise"
+    , "url": "https://twitter.com/zonoise"
     , "due_date": "2018-03-15T23:59:59+09:00"
     }
   , { "name": "Kenta IDA"
@@ -284,6 +284,22 @@
   , { "name": "@ore_public"
     , "url": "https://twitter.com/ore_public"
     , "due_date": "2018-03-18T23:59:59+09:00"
+    }
+  , { "name": "sugarbook_"
+    , "url": "https://twitter.com/sugarbook_"
+    , "due_date": "2018-03-19T23:59:59+09:00"
+    }
+  , { "name": "@_mshr_h_"
+    , "url": "https://twitter.com/_mshr_h_"
+    , "due_date": "2018-03-19T23:59:59+09:00"
+    }
+  , { "name": "@zaru"
+    , "url": "https://twitter.com/zaru"
+    , "due_date": "2018-03-19T23:59:59+09:00"
+    }
+  , { "name": "yuitowest"
+    , "url": ""
+    , "due_date": "2018-03-19T23:59:59+09:00"
     }
   ]
 }
