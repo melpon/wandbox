@@ -420,6 +420,7 @@ footer {
 
 .wandbox-sponsors label {
   overflow-x: hidden;
+  overflow-y: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -427,6 +428,7 @@ footer {
 .wandbox-sponsors li {
   list-style: none;
   overflow-x: hidden;
+  overflow-y: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
