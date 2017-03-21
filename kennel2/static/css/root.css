@@ -193,6 +193,7 @@ footer {
 .wandbox-shown-runtime-option-raw {
   margin-top: 10px;
   height: 13px;
+  line-height: 13px;
   border-radius: 5px;
   background-color: #ddd;
 }
