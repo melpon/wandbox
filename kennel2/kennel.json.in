@@ -1,9 +1,9 @@
 { "application" :
     { "database": "sqlite3:db=@databasedir@/kennel_production.sqlite;@pool_size=10"
     , "static_dir": "@staticdir@"
-    , "scheme": "http"
-    , "domain": "melpon.org"
-    , "map_root": "/wandbox"
+    , "scheme": "https"
+    , "domain": "wandbox.org"
+    , "map_root": "/"
     , "dispatch_root": ""
     , "cattleshed":
         [{ "host" : "153.121.40.132"
