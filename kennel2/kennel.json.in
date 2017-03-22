@@ -3,7 +3,7 @@
     , "static_dir": "@staticdir@"
     , "scheme": "https"
     , "domain": "wandbox.org"
-    , "map_root": "/"
+    , "map_root": ""
     , "dispatch_root": ""
     , "cattleshed":
         [{ "host" : "153.121.40.132"
