@@ -426,6 +426,10 @@ footer {
   text-overflow: ellipsis;
 }
 
+.wandbox-sponsors ul {
+  padding-left: 0px;
+}
+
 .wandbox-sponsors li {
   list-style: none;
   overflow-x: hidden;
