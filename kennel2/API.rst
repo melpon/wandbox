@@ -1,7 +1,7 @@
 API
 ============
 
-API home is ``melpon.org/wandbox/api``
+API home is ``https://wandbox.org/api``
 
 GET /list.json
 --------------
@@ -18,7 +18,7 @@ Sample
 
 ::
 
-  $ curl http://melpon.org/wandbox/api/list.json
+  $ curl https://wandbox.org/api/list.json
   [{
     "compiler-option-raw":true,
     "runtime-option-raw":false,
@@ -149,7 +149,7 @@ Sample
     "compiler": "gcc-head",
     "compiler-option-raw": "-Dx=hogefuga\n-O3"
   }
-  $ curl -H "Content-type: application/json" -d "`cat test.json`"  http://melpon.org/wandbox/api/compile.json
+  $ curl -H "Content-type: application/json" -d "`cat test.json`"  https://wandbox.org/api/compile.json
   {
     "status":"0",
     "compiler_message":"prog.cc: In function 'int main()':\n\u003ccommand-line\u003e:0:3: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout \u003c\u003c \"hoge\" \u003c\u003c std::endl; }\n                  ^\n",
