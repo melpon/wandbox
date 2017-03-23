@@ -46,10 +46,10 @@ jBatch developer, Boris Schaeling says
 .. _jBatch: http://iomash.com/
 .. _CodePen: http://codepen.io/iomash/pen/KwBEJG
 
-Boost.MSM-lite
+Boost.SML
 ~~~~~~~~~~~~~~
 
-`Boost.MSM-lite document <http://boost-experimental.github.io/msm-lite/examples/index.html>`_ is using Wandbox on `background <https://github.com/boost-experimental/msm-lite/blob/0d647e1f051993a87359e4a7f83c4f8bdaa911fa/doc/themes/boost-experimental/js/cpp.js#L51>`_
+`Boost.SML document <http://boost-experimental.github.io/sml/examples/index.html>`_ is using Wandbox on `background <https://github.com/boost-experimental/sml/blob/758ceb8646cb2eb56f2e121021c29fab55f24e92/js/cpp.js#L51>`_
 
 Boost.DI
 ~~~~~~~~
