@@ -17,7 +17,8 @@
     , "sponsors": "@sponsorsfile@"
     }
 , "service" :
-    { "api" : "http"
+    { "api" : "fastcgi"
+    , "host" : "127.0.0.1"
     , "port" : 3500
     }
 , "gzip" :
