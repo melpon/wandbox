@@ -3,7 +3,7 @@ Wandbox
 
 Wandbox is a social compilation service.
 
-URL to this service is http://melpon.org/wandbox
+URL to this service is https://wandbox.org/
 
 You can also access via API: https://github.com/melpon/wandbox/blob/master/kennel2/API.rst
 
