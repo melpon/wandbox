@@ -364,10 +364,10 @@ var LANGUAGE_NAME_TO_TAB_ID = {
             </ul>
           </div>
 
-          <div class="wandbox-private-sponsors">
+          <div class="wandbox-personal-sponsors">
             <label>&#128054; Private Sponsors:</label>
             <ul>
-              <% foreach sp in private_sponsors %>
+              <% foreach sp in personal_sponsors %>
                 <% item %>
                   <% if (!sp.url.empty()) %>
                     <li><a target="_blank" href="<%= sp.url %>" data-toggle="tooltip" data-placement="top" title="<%= sp.name %>"><%= sp.name %></a></li>

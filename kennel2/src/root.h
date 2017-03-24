@@ -106,7 +106,7 @@ namespace content {
         };
         bool has_sponsors;
         std::vector<sponsor> corporate_sponsors;
-        std::vector<sponsor> private_sponsors;
+        std::vector<sponsor> personal_sponsors;
         std::time_t from_iso8601(std::string str) {
             std::tm tm;
             std::memset(&tm, 0, sizeof(tm));
@@ -146,10 +146,10 @@ namespace content {
                     corporate_sponsors.push_back(std::move(sp));
                 }
             }
-            for (auto&& v: js["private"].array()) {
+            for (auto&& v: js["personal"].array()) {
                 auto sp = make_sponsor(v);
                 if (now <= sp.due_date) {
-                    private_sponsors.push_back(std::move(sp));
+                    personal_sponsors.push_back(std::move(sp));
                 }
             }
             has_sponsors = true;
