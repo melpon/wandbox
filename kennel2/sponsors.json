@@ -313,5 +313,13 @@
     , "url": "https://twitter.com/kazatsuyu"
     , "due_date": "2018-03-20T23:59:59+09:00"
     }
+  , { "name": "ruby_luna_noir_"
+    , "url": ""
+    , "due_date": "2018-03-25T23:59:59+09:00"
+    }
+  , { "name": "@yamaken"
+    , "url": "https://twitter.com/yamaken"
+    , "due_date": "2018-03-25T23:59:59+09:00"
+    }
   ]
 }
