@@ -15,6 +15,10 @@
     , "url": "http://www.techarts.co.jp/"
     , "due_date": "2018-03-18T23:59:59+09:00"
     }
+  , { "name": "株式会社Preferred Networks"
+    , "url": "https://www.preferred-networks.jp/"
+    , "due_date": "2018-03-25T23:59:59+09:00"
+    }
   ]
 , "private":
   [ { "name": "voluntas"
@@ -319,6 +323,10 @@
     }
   , { "name": "@yamaken"
     , "url": "https://twitter.com/yamaken"
+    , "due_date": "2018-03-25T23:59:59+09:00"
+    }
+  , { "name": "まろ(@_marony)"
+    , "url": "https://twitter.com/_marony"
     , "due_date": "2018-03-25T23:59:59+09:00"
     }
   ]
