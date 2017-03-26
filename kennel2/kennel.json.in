@@ -14,6 +14,7 @@
          , "port" : 2012
          }
          ]
+    , "google_analytics": "@googleanalytics@"
     , "sponsors": "@sponsorsfile@"
     }
 , "service" :

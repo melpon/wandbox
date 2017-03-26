@@ -13,6 +13,8 @@ namespace content {
             using_permlink = false;
             permlink = "null";
             init_sponsors(srv);
+
+            google_analytics = srv.settings()["application"]["google_analytics"].str();
         }
 
         void set_compiler_infos(cppcms::json::value compiler_infos) {
@@ -154,6 +156,8 @@ namespace content {
             }
             has_sponsors = true;
         }
+
+        std::string google_analytics;
     };
 }
 

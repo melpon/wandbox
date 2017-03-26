@@ -99,13 +99,23 @@ AC_SUBST(DATABASE_DIR)
 
 AC_ARG_WITH(sponsors,
 [AS_HELP_STRING([--with-sponsors=PATH],
-                [specify sponsors JSON file in (default: "")])])
+                [specify sponsors JSON file (default: "")])])
 if test "x$with_sponsors" != x; then
   SPONSORS_FILE="$with_sponsors"
 else
   SPONSORS_FILE=""
 fi
 AC_SUBST(SPONSORS_FILE)
+
+AC_ARG_WITH(googleanalytics,
+[AS_HELP_STRING([--with-googleanalytics=TrackingID],
+                [specify Google Analytics Tracking ID (default: "")])])
+if test "x$with_googleanalytics" != x; then
+  GOOGLEANALYTICS="$with_googleanalytics"
+else
+  GOOGLEANALYTICS=""
+fi
+AC_SUBST(GOOGLEANALYTICS)
 
 AC_MSG_CHECKING([for cppcms])
 AC_LANG([C++])
