@@ -94,6 +94,7 @@ def make_config():
     return {
         "switches": Switches().make(),
         "compilers": Compilers().make(),
+        "templates": {},
     }
 
 if __name__ == '__main__':

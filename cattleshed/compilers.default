@@ -5,6 +5,7 @@
             "flags": "-optimize"
         }
     }, 
+    "templates": {}, 
     "compilers": [
         {
             "compile-command": [
