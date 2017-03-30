@@ -63,6 +63,13 @@ namespace content {
         std::string getstr(cppcms::json::value& v, const std::string& key) {
             return v[key].str();
         }
+        std::string getelem(cppcms::json::value& v, const std::string& key, int index) {
+            if (v[key].array().empty()) {
+                return "";
+            } else {
+                return v[key].array()[index].str();
+            }
+        }
         bool getbool(cppcms::json::value& v, const std::string& key) {
             return v[key].boolean();
         }

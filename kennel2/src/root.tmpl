@@ -112,6 +112,7 @@
 <script>
 var URL_COMPILE = '<% url "compile" %>';
 var URL_PERMLINK = '<% url "permlink" %>';
+var URL_API_TEMPLATE = '<% url "api-template" %>';
 var USING_PERMLINK = <% if using_permlink %>true<% else %>false<% end %>;
 var JSON_CODE = <%= permlink | raw %>;
 var DEFAULT_COMPILER = 'gcc-head';
@@ -305,7 +306,10 @@ var LANGUAGE_NAME_TO_TAB_ID = {
             data-command="<%= info.second.info | ext getstr("display-compile-command") %>"
             data-full-name="<%= info.second.info | ext make_full_name %>"
             data-options-raw="<% if (info.second.info["compiler-option-raw"].boolean()) %>compiler<% else %>runtime<% end %>"
+            data-default-template="<%= info.second.info | ext getelem("templates", 0) %>"
           >
+            <p class="wandbox-insert-template"><a href="#">Insert template</a></p>
+
             <% c++ for (auto&& sw: info.second.info["switches"].array()) { %>
               <% c++ content.sw = sw; %>
               <% if (sw["type"] == "single") %>

@@ -23,6 +23,12 @@ function post_code(compiler, result_container) {
 
   result_container.post_code(compiler, code, codes, stdin.get_stdin());
 }
+function insert_template(template_name) {
+  var editor = new Editor('#editor-settings');
+  $.getJSON(URL_API_TEMPLATE + template_name, function(json) {
+    editor.insertValue($('#wandbox-editor-default'), json.code);
+  });
+}
 
 function update_compile_command(compiler) {
   var command = compiler.get_selected_compiler_element().attr('data-command');
@@ -83,6 +89,13 @@ $(function() {
     post_code(compiler, result_container);
   });
   compiler.compiler_changed = function() {
+    if (editor.getValue($('#wandbox-editor-default')).length == 0) {
+      var template_name = compiler.get_selected_compiler_element().attr('data-default-template');
+      if (template_name.length != 0) {
+        insert_template(template_name);
+      }
+    }
+
     update_compile_command(compiler);
 
     var lang = compiler.get_selected_compiler_element().attr('data-language');
@@ -213,6 +226,12 @@ function Compiler(compiler_id, compile_options_id, ctrl_enter) {
     $(this).tab('show');
   });
 
+  $('.wandbox-dropdown-lang-area a').click(function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).tab('show');
+  });
+
   this.compiler_id = compiler_id;
   this.compile_options_id = compile_options_id;
 
@@ -252,6 +271,10 @@ function Compiler(compiler_id, compile_options_id, ctrl_enter) {
       self.raw_changed();
   });
 
+  $(document).on('click', '.wandbox-insert-template > a', function (e) {
+    var template_name = self.get_selected_compiler_element().attr('data-default-template');
+    insert_template(template_name);
+  });
 }
 
 Compiler.prototype._compiler = function() {
@@ -635,6 +658,14 @@ Editor.prototype.setValue = function(elem, value) {
     this.legacy_editor(elem).val(value);
   } else {
     this.smart_editor(elem).setValue(value);
+  }
+}
+
+Editor.prototype.insertValue = function(elem, value) {
+  if (this.is_legacy()) {
+    this.legacy_editor(elem).val(value);
+  } else {
+    this.smart_editor(elem).replaceSelection(value);
   }
 }
 

@@ -47,6 +47,8 @@ public:
         dispatcher().assign("/api/list.json", &kennel::api_list, this);
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
         dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
+        dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this, 1);
+        mapper().assign("api-template", "/api/template/");
 
         dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this, 1);
         mapper().assign("nojs-compile", "/nojs/{1}/compile");
@@ -124,19 +126,19 @@ public:
             std::stringstream ss(json);
             cppcms::json::value value;
             value.load(ss, true, nullptr);
-            //value.save(std::clog, cppcms::json::readable);
             values.push_back(value);
         }
         return values;
     }
     static cppcms::json::value merge_compiler_infos(const std::vector<cppcms::json::value>& infos) {
-        std::vector<cppcms::json::value> results;
+        std::vector<cppcms::json::value> compilers;
+        cppcms::json::object templates;
         for (auto i = 0; i < static_cast<int>(infos.size()); i++) {
-            for (const auto& info: infos[i].array()) {
+            for (const auto& info: infos[i]["compilers"].array()) {
                 auto name = info["name"];
-                auto it = std::find_if(results.begin(), results.end(), [name](cppcms::json::value& v) { return v["name"] == name; });
+                auto it = std::find_if(compilers.begin(), compilers.end(), [name](cppcms::json::value& v) { return v["name"] == name; });
 
-                if (it != results.end()) {
+                if (it != compilers.end()) {
                     // update
                     *it = info;
                     (*it)["provider"].number(i);
@@ -144,12 +146,16 @@ public:
                     // new
                     cppcms::json::value value = info;
                     value.object()["provider"].number(i);
-                    results.push_back(std::move(value));
+                    compilers.push_back(std::move(value));
                 }
+            }
+            for (const auto& info: infos[i]["templates"].object()) {
+                templates[info.first] = info.second;
             }
         }
         cppcms::json::value r;
-        r.array(results);
+        r.set("compilers", compilers);
+        r.set("templates", templates);
         return r;
     }
 
@@ -240,7 +246,7 @@ private:
         }
 
         content::root c(service());
-        c.set_compiler_infos(get_compiler_infos_or_cache());
+        c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
         render("root", c);
     }
     static std::vector<protocol> make_protocols(const cppcms::json::value& value) {
@@ -318,7 +324,7 @@ private:
         auto value = json_post_data();
         auto protos = make_protocols(value);
         auto compiler = value["compiler"].str();
-        auto compiler_infos = get_compiler_infos_or_cache();
+        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
             [&compiler](cppcms::json::value& v) {
@@ -361,7 +367,7 @@ private:
 
         auto value = json_post_data();
 
-        auto compiler_infos = get_compiler_infos_or_cache();
+        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
             [&value](cppcms::json::value& v) {
@@ -389,7 +395,7 @@ private:
         }
 
         content::root c(service());
-        c.set_compiler_infos(get_compiler_infos_or_cache());
+        c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
 
         permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
@@ -429,7 +435,7 @@ private:
 
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
-        get_compiler_infos_or_cache().save(response().out(), cppcms::json::compact);
+        get_compiler_infos_or_cache()["compilers"].save(response().out(), cppcms::json::compact);
     }
 
     static void update_compile_result(cppcms::json::value& result, const protocol& proto) {
@@ -475,7 +481,7 @@ private:
         auto compiler = value["compiler"].str();
         auto save = value.get("save", false);
         auto protos = make_protocols(value);
-        auto compiler_infos = get_compiler_infos_or_cache();
+        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
             [&compiler](cppcms::json::value& v) {
@@ -542,13 +548,47 @@ private:
         result.save(response().out(), cppcms::json::readable);
     }
 
+    void api_template(std::string template_name) {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        auto t = get_compiler_infos_or_cache()["templates"].find(template_name);
+
+        if (t.is_undefined()) {
+            response().status(400);
+            response().out() << "bad template_name: " << template_name << std::endl;
+            return;
+        }
+
+        cppcms::json::value result;
+
+        result["code"] = t["code"];
+
+        cppcms::json::value opt;
+        opt = t.find("stdin");
+        if (!opt.is_undefined()) result["stdin"] = opt;
+        opt = t.find("options");
+        if (!opt.is_undefined()) result["options"] = opt;
+        opt = t.find("compiler-option-raw");
+        if (!opt.is_undefined()) result["compiler-option-raw"] = opt;
+        opt = t.find("runtime-option-raw");
+        if (!opt.is_undefined()) result["runtime-option-raw"] = opt;
+        opt = t.find("codes");
+        if (!opt.is_undefined()) result["codes"] = opt;
+
+        response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
+        result.save(response().out(), cppcms::json::readable);
+    }
+
     void nojs_list() {
         if (!ensure_method_get()) {
             return;
         }
 
         content::root c(service());
-        c.set_compiler_infos(get_compiler_infos_or_cache());
+        c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
         render("nojs_list", c);
     }
 
@@ -557,7 +597,7 @@ private:
             return;
         }
 
-        auto compiler_infos = get_compiler_infos_or_cache();
+        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
             [&compiler](cppcms::json::value& v) {
@@ -591,7 +631,7 @@ private:
         } else {
             content::nojs_root c;
 
-            auto compiler_infos = get_compiler_infos_or_cache();
+            auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
             // find compiler info.
             auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
                 [&compiler](cppcms::json::value& v) {

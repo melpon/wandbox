@@ -349,6 +349,11 @@ footer {
   padding-left: 3px;
 }
 
+.wandbox-insert-template {
+  text-align: right;
+  font-size: 12px;
+}
+
 .wandbox-stdin-accordion {
   display: none;
 }
