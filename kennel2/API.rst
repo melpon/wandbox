@@ -82,6 +82,7 @@ Sample
     "version":"4.9.0 20131031 (experimental)",
     "language":"C++",
     "display-name":"gcc HEAD"
+    "templates":["gcc"]
   },{
     ...
   }]
@@ -175,6 +176,26 @@ parameter
   Same as `POST /compile.json`_ Parameter with ``created-at`` is a compiled time formatted by ISO 8601, and without ``save``.
 result
   Same as `POST /compile.json`_ Result without ``permlink`` and ``url``.
+
+GET /template/:template-name
+--------------
+
+Get a template code for ``:template-name``.
+
+Parameter
+^^^^^^^^^
+
+Nothing.
+
+Sample
+^^^^^^
+
+::
+
+  $ curl https://wandbox.org/api/template/gcc
+  {
+    "code": "// This file is a \"Hello, world!\" in C++ language by gcc for wandbox.\n#include <iostream>\n#include <cstdlib>\n\nint main()\n{\n    std::cout << \"Hello, Wandbox!\" << std::endl;\n}\n\n// C++ language references:\n//   https://msdn.microsoft.com/library/3bstk3k5.aspx\n//   http://www.cplusplus.com/\n//   https://isocpp.org/\n//   http://www.open-std.org/jtc1/sc22/wg21/\n\n// Boost libraries references:\n//   http://www.boost.org/doc/\n"
+  }
 
 Plugin
 ------------
