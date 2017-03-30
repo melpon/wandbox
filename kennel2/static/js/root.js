@@ -88,12 +88,18 @@ $(function() {
   var compiler = new Compiler('#wandbox-compiler', '#wandbox-compile-options', function() {
     post_code(compiler, result_container);
   });
-  compiler.compiler_changed = function() {
+  var initialized = false;
+  var update_template_code = function() {
     if (editor.getValue($('#wandbox-editor-default')).length == 0) {
       var template_name = compiler.get_selected_compiler_element().attr('data-default-template');
       if (template_name.length != 0) {
         insert_template(template_name);
       }
+    }
+  };
+  compiler.compiler_changed = function() {
+    if (initialized) {
+      update_template_code();
     }
 
     update_compile_command(compiler);
@@ -183,6 +189,9 @@ $(function() {
     $(this).parent().find('.wandbox-hidden-runtime-option-raw').show();
   });
   editor.focus_default();
+
+  update_template_code();
+  initialized = true;
 });
 
 /* compiler() */
