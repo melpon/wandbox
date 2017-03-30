@@ -308,7 +308,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
             data-options-raw="<% if (info.second.info["compiler-option-raw"].boolean()) %>compiler<% else %>runtime<% end %>"
             data-default-template="<%= info.second.info | ext getelem("templates", 0) %>"
           >
-            <p class="wandbox-insert-template"><a href="#">Insert template</a></p>
+            <p class="wandbox-insert-template"><a href="#">Load template</a></p>
 
             <% c++ for (auto&& sw: info.second.info["switches"].array()) { %>
               <% c++ content.sw = sw; %>

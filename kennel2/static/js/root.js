@@ -26,7 +26,7 @@ function post_code(compiler, result_container) {
 function insert_template(template_name) {
   var editor = new Editor('#editor-settings');
   $.getJSON(URL_API_TEMPLATE + template_name, function(json) {
-    editor.insertValue($('#wandbox-editor-default'), json.code);
+    editor.setValue($('#wandbox-editor-default'), json.code);
   });
 }
 
