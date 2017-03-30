@@ -190,7 +190,9 @@ $(function() {
   });
   editor.focus_default();
 
-  update_template_code();
+  if (!USING_PERMLINK) {
+    update_template_code();
+  }
   initialized = true;
 });
 
