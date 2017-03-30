@@ -51,8 +51,19 @@ namespace wandbox {
 		bool displayable;
 		bool compiler_option_raw;
 		bool runtime_option_raw;
+		std::vector<std::string> templates;
 	};
 	typedef mendex::multi_index_container<compiler_trait, mendex::indexed_by<mendex::sequenced<>, mendex::hashed_unique<mendex::member<compiler_trait, std::string, &compiler_trait::name>>>> compiler_set;
+
+	struct template_trait {
+		std::string name;
+		std::string code;
+		boost::optional<std::vector<std::string>> codes;
+		boost::optional<std::string> stdin;
+		boost::optional<std::string> options;
+		boost::optional<std::string> compiler_option_raw;
+		boost::optional<std::string> runtime_option_raw;
+	};
 
 	struct system_config {
 		int listen_port;
@@ -75,10 +86,12 @@ namespace wandbox {
 		std::unordered_map<std::string, jail_config> jails;
 		compiler_set compilers;
 		std::unordered_map<std::string, switch_trait> switches;
+		std::unordered_map<std::string, template_trait> templates;
 	};
 
 	server_config load_config(const std::vector<std::string> &cfgs);
 	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches);
+	std::string generate_templates(const std::unordered_map<std::string, template_trait> &templates);
 }
 
 #endif

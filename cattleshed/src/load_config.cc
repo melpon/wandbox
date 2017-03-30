@@ -48,7 +48,7 @@ namespace cfg {
 			pair %= str > ':' > val;
 			obj %= '{' > (((pair % ',') > -qi::lit(',')) | qi::eps) > '}';
 			arr %= '[' > (((val % ',') > -qi::lit(',')) | qi::eps) > ']';
-			str %= qi::lexeme['\"' > *(('\\' > qi::char_("\\\"\'\t\r\n")) | (qi::char_-'\"')) > '\"'];
+			str %= qi::lexeme['\"' > *(('\\' > (qi::char_("\\\"'") | (qi::lit('t') > qi::attr('\t')) | (qi::lit('r') > qi::attr('\r')) | (qi::lit('n') > qi::attr('\n')))) | (qi::char_-'\"')) > '\"'];
 			//debug(top);
 			//debug(val);
 			//debug(pair);
@@ -191,6 +191,7 @@ namespace cfg {
 			t.displayable = get_bool(y, "displayable");
 			t.compiler_option_raw = get_bool(y, "compiler-option-raw");
 			t.runtime_option_raw = get_bool(y, "runtime-option-raw");
+			t.templates = get_str_array(y, "templates");
 			if (const auto &v = find(y, "switches")) {
 				if (const auto *s = boost::get<cfg::string>(&*v)) {
 					t.switches = { *s };
@@ -288,6 +289,24 @@ namespace cfg {
 			x.conflicts = get_str_array(s, "conflicts");
 			x.runtime = get_bool(s, "runtime");
 			x.insert_position = get_int(s, "insert-position");
+			ret[a.first] = std::move(x);
+		}
+		return ret;
+	}
+
+	std::unordered_map<std::string, template_trait> load_templates(const cfg::value &values) {
+		using namespace detail;
+		std::unordered_map<std::string, template_trait> ret;
+		for (const auto &a: boost::get<cfg::object>(boost::get<cfg::object>(values).at("templates"))) {
+			const auto &s = boost::get<cfg::object>(a.second);
+			template_trait x;
+			x.name = a.first;
+			x.code = get_str(s, "code");
+			if (find(s, "codes")) x.codes = get_str_array(s, "codes");
+			if (const auto v = find(s, "stdin")) x.stdin = boost::get<cfg::string>(*v);
+			if (const auto v = find(s, "options")) x.options = boost::get<cfg::string>(*v);
+			if (const auto v = find(s, "compiler-option-raw")) x.compiler_option_raw = boost::get<cfg::string>(*v);
+			if (const auto v = find(s, "runtime-option-raw")) x.runtime_option_raw = boost::get<cfg::string>(*v);
 			ret[a.first] = std::move(x);
 		}
 		return ret;
@@ -449,7 +468,7 @@ namespace cfg {
 			os.insert(os.end(), x.begin(), x.end());
 		}
 		const auto o = merge_cfgs(os);
-		return { load_system_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o) };
+		return { load_system_config(o), load_jail_config(o), load_compiler_trait(o), load_switches(o), load_templates(o) };
 	}
 
 	template <typename Iter>
@@ -551,6 +570,104 @@ namespace cfg {
 		return std::string(char_escaper(in.begin()), char_escaper(in.end()));
 	}
 
+	template<class T>
+	struct is_pair : std::integral_constant<bool, false> {};
+	template<class T, class U>
+	struct is_pair<std::pair<T, U>> : std::integral_constant<bool, true> {}; 
+
+	template<class T>
+	std::true_type is_map_like_(int, typename std::enable_if<is_pair<typename std::remove_reference<decltype(*std::declval<typename std::remove_reference<T>::type>().begin())>::type>::value>::type* = 0);
+	template<class T>
+	std::false_type is_map_like_(...);
+	template<class T>
+	struct is_map_like : decltype(is_map_like_<typename std::remove_cv<typename std::remove_reference<T>::type>::type>(0)) {}; 
+
+	template<std::size_t N>
+	void is_string_literal_check(const char (&)[N]);
+
+	template<class T>
+	std::true_type is_string_literal_(int, typename std::enable_if<decltype(is_string_literal_check(std::declval<T>()), std::true_type())::value>::type* = 0);
+	template<class T>
+	std::false_type is_string_literal_(...);
+
+	template<class T>
+	struct is_string_literal : decltype(is_string_literal_<T>(0)) {};
+
+	template<class T>
+	struct is_string_ : std::integral_constant<bool, is_string_literal<T>::value> {};
+	template<>
+	struct is_string_<std::string> : std::integral_constant<bool, true> {};
+	template<>
+	struct is_string_<const char*> : std::integral_constant<bool, true> {};
+	template<class T>
+	struct is_string : is_string_<typename std::remove_cv<typename std::remove_reference<T>::type>::type> {};
+
+	template<class T>
+	std::true_type is_vector_like_(int, typename std::enable_if<!is_map_like<T>::value && !is_string<T>::value && decltype(*std::declval<T>().begin(), std::true_type())::value>::type* = 0);
+	template<class T>
+	std::false_type is_vector_like_(...);
+	template<class T>
+	struct is_vector_like : decltype(is_vector_like_<typename std::remove_cv<typename std::remove_reference<T>::type>::type>(0)) {};
+
+	enum class json_value_type {
+		object,
+		array,
+		string,
+		number,
+	};
+	class json_object : std::integral_constant<json_value_type, json_value_type::object> {};
+	class json_array : std::integral_constant<json_value_type, json_value_type::array> {};
+	class json_string : std::integral_constant<json_value_type, json_value_type::string> {};
+	class json_number : std::integral_constant<json_value_type, json_value_type::number> {};
+
+	template<class T, bool IsObject, bool IsArray, bool IsString, bool IsNumber>
+	struct json_value_t_;
+	template<class T>
+	struct json_value_t_<T, true, false, false, false> : json_object {};
+	template<class T>
+	struct json_value_t_<T, false, true, false, false> : json_array {};
+	template<class T>
+	struct json_value_t_<T, false, false, true, false> : json_string {};
+	template<class T>
+	struct json_value_t_<T, false, false, false, true> : json_number {};
+
+	template<class T>
+	struct json_value_t : json_value_t_<T, is_map_like<T>::value, is_vector_like<T>::value, is_string<T>::value, std::is_arithmetic<T>::value> {};
+
+	template<class Value>
+	std::string json_serialize(Value&& value);
+
+	template<class Value>
+	std::string json_serialize_(Value&& value, const json_object&) {
+		std::vector<std::string> xs;
+		for (auto&& v: value) {
+			xs.push_back("\"" + json_stringize(v.first) + "\":" + json_serialize(v.second));
+		}
+		return "{" + boost::algorithm::join(xs, ",") + "}";
+	}
+	template<class Value>
+	std::string json_serialize_(Value&& value, const json_array&) {
+		std::vector<std::string> xs;
+		for (auto&& v: value) {
+			xs.push_back(json_serialize(v));
+		}
+		return "[" + boost::algorithm::join(xs, ",") + "]";
+	}
+	template<class Value>
+	std::string json_serialize_(Value&& value, const json_string&) {
+		return "\"" + json_stringize(value) + "\"";
+	}
+	template<class Value>
+	std::string json_serialize_(Value&& value, const json_number&) {
+		return std::to_string(value);
+	}
+
+	template<class Value>
+	std::string json_serialize(Value&& value) {
+		auto x = json_value_t<Value>();
+		return json_serialize_(std::forward<Value>(value), x);
+	}
+
 	std::string generate_displaying_compiler_config(const compiler_trait &compiler, const std::string &version, const std::unordered_map<std::string, switch_trait> &switches) {
 		std::vector<std::string> swlist;
 		{
@@ -644,6 +761,10 @@ namespace cfg {
 				}
 			}
 		}
+		std::vector<std::string> templates;
+		for (const auto &tmpl: compiler.templates) {
+			templates.emplace_back("\"" + json_stringize(tmpl) + "\"");
+		}
 		return
 			"{"
 				"\"name\":\"" + json_stringize(compiler.name) + "\","
@@ -653,9 +774,25 @@ namespace cfg {
 				"\"display-compile-command\":\"" + json_stringize(compiler.display_compile_command) + "\","
 				"\"compiler-option-raw\":" + (compiler.compiler_option_raw ? "true" : "false") + ","
 				"\"runtime-option-raw\":" + (compiler.runtime_option_raw ? "true" : "false") + ","
-				"\"switches\":[" + boost::algorithm::join(swlist, ",") + "]"
+				"\"switches\":[" + boost::algorithm::join(swlist, ",") + "]" + ","
+				"\"templates\":[" + boost::algorithm::join(templates, ",") + "]"
 			"}";
 	}
+
+	std::string generate_templates(const std::unordered_map<std::string, template_trait> &templates) {
+		std::vector<std::string> x;
+		for (const auto& kv: templates) {
+			const auto& t = kv.second;
+			std::vector<std::string> y;
+			y.push_back(json_serialize("name") + ":" + json_serialize(t.name));
+			y.push_back(json_serialize("code") + ":" + json_serialize(t.code));
+			if (t.codes) y.push_back(json_serialize("codes") + ":" + json_serialize(*t.codes));
+			if (t.stdin) y.push_back(json_serialize("stdin") + ":" + json_serialize(*t.stdin));
+			if (t.options) y.push_back(json_serialize("options") + ":" + json_serialize(*t.options));
+			if (t.compiler_option_raw) y.push_back(json_serialize("compiler_option_raw") + ":" + json_serialize(*t.compiler_option_raw));
+			if (t.runtime_option_raw) y.push_back(json_serialize("runtime_option_raw") + ":" + json_serialize(*t.runtime_option_raw));
+			x.push_back(json_serialize(kv.first) + ":{" + boost::algorithm::join(y, ",") + "}");
+		}
+		return "{" + boost::algorithm::join(x, ",") + "}";
+	}
 }
-
-

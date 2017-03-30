@@ -705,7 +705,10 @@ namespace wandbox {
 					}
 				}
 				yield {
-					auto s = "[" + boost::algorithm::join(move(versions), ",") + "]";
+					auto s = "{"
+						"\"compilers\":[" + boost::algorithm::join(move(versions), ",") + "],"
+						"\"templates\":" + generate_templates(config.templates) +
+					"}";
 					PROTECT_FROM_MOVE(sockbuf);
 					sockbuf->async_write_command("VersionResult", move(s), move(*this));
 				}
