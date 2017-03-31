@@ -144,6 +144,7 @@ var EDITOR_MODE_MAPPING = {
   'OCaml': 'text/x-ocaml',
   'Go': 'text/x-go',
   'Crystal': 'text/x-crystal',
+  'OpenSSL': 'text/x-sh',
 };
 var COMPILER_NAME_TO_TAB_ID = {
   <% foreach info in compinfos %>
@@ -340,7 +341,8 @@ var LANGUAGE_NAME_TO_TAB_ID = {
             <% if (info.second.info["runtime-option-raw"].boolean()) %>
               <label>Runtime options:</label>
               <div class="option-raw runtime-option-raw"></div>
-            <% else %>
+            <% end %>
+            <% if (info.second.info["compiler-option-raw"].boolean() && !info.second.info["runtime-option-raw"].boolean()) %>
               <span class="wandbox-hidden-runtime-option-raw">
                 <label>Runtime options:</label>
                 <div class="option-raw runtime-option-raw"></div>
