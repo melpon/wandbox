@@ -337,5 +337,9 @@
     , "url": ""
     , "due_date": "2018-03-25T23:59:59+09:00"
     }
+  , { "name": "@EzoeRyou"
+    , "url": "https://twitter.com/EzoeRyou"
+    , "due_date": "2018-04-07T23:59:59+09:00"
+    }
   ]
 }
