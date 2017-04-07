@@ -341,5 +341,9 @@
     , "url": "https://twitter.com/EzoeRyou"
     , "due_date": "2018-04-07T23:59:59+09:00"
     }
+  , { "name": "@yukihane"
+    , "url": "https://twitter.com/yukihane"
+    , "due_date": "2018-04-08T23:59:59+09:00"
+    }
   ]
 }
