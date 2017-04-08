@@ -345,5 +345,9 @@
     , "url": "https://twitter.com/yukihane"
     , "due_date": "2018-04-08T23:59:59+09:00"
     }
+  , { "name": "@koturn"
+    , "url": "https://twitter.com/koturn"
+    , "due_date": "2018-04-10T23:59:59+09:00"
+    }
   ]
 }
