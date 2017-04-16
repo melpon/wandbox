@@ -209,13 +209,13 @@ void send_command_async(booster::aio::io_service& service, booster::aio::endpoin
         if (e)
             return (void)f(e, protocol());
         std::clog << '[' << sock.get() << ']' << "connected" << std::endl;
-        std::string send_string;
+        booster::shared_ptr<std::string> send_string(new std::string());
         for (auto&& proto: protos) {
-            send_string += proto.to_string();
+            *send_string += proto.to_string();
         }
-        std::size_t send_string_size = send_string.size();
+        std::size_t send_string_size = send_string->size();
 
-        sock->async_write(booster::aio::buffer(send_string), [sock, f, max_line, send_string_size](const booster::system::error_code& e, std::size_t send_size) {
+        sock->async_write(booster::aio::buffer(*send_string), [send_string, sock, f, max_line, send_string_size](const booster::system::error_code& e, std::size_t send_size) {
             if (e)
                 return (void)f(e, protocol());
             assert(send_size == send_string_size);
