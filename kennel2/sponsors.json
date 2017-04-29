@@ -147,7 +147,7 @@
     }
   , { "name": "安藤敏彦"
     , "url": ""
-    , "due_date": "2018-03-16T23:59:59+09:00"
+    , "due_date": "2018-04-30T23:59:59+09:00"
     }
   , { "name": "srz_zumix"
     , "url": "https://twitter.com/srz_zumix"
@@ -360,10 +360,6 @@
   , { "name": "@whenimg0ne"
     , "url": "https://twitter.com/whenimg0ne"
     , "due_date": "2018-04-29T23:59:59+09:00"
-    }
-  , { "name": "安藤敏彦"
-    , "url": ""
-    , "due_date": "2018-04-30T23:59:59+09:00"
     }
   ]
 }
