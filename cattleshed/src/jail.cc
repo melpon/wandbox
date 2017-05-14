@@ -32,7 +32,7 @@
 
 namespace wandbox {
 namespace jail {
-	int wait_and_forward_signals(int primary_child_pid) {
+	int wait_and_forward_signals(int primary_child_pid, bool wait_grandchilds) {
 		struct sigaction actions[256];
 		for (int n = 0; n < 256; ++n) sigaction(n, nullptr, &actions[n]);
 		namespace asio = boost::asio;
@@ -51,10 +51,20 @@ namespace jail {
 			while (true) {
 				const int r = waitpid(-1, &st_, WNOHANG|__WALL);
 				if (r == -1) return;
-				if (r == primary_child_pid) ret = st_;
+				if (r == primary_child_pid) {
+					if (WIFEXITED(st_) || WIFSIGNALED(st_)) {
+						ret = st_;
+						if (!wait_grandchilds) return;
+						waited = true;
+					} else {
+						break;
+					}
+				}
 				if (sig == -1) break;
-				if (r == 0 && !waited) { kill(primary_child_pid, sig); break; }
-				waited = true;
+				if (r == 0) {
+					if (!waited) kill(primary_child_pid, sig);
+					break;
+				}
 			}
 			sigs.async_wait(std::ref(f));
 		};
@@ -83,6 +93,7 @@ namespace jail {
 		std::string startdir;
 		std::vector<mount_target> mounts;
 		std::vector<device_file> devices;
+		bool kill_grandchilds;
 		int pipefd[2];
 		char **argv;
 	};
@@ -183,7 +194,7 @@ namespace jail {
 		}
 		if (const int pid = fork()) {
 			if (pid == -1) exit_error("fork");
-			const int st = wait_and_forward_signals(pid);
+			const int st = wait_and_forward_signals(pid, !static_cast<proc_arg_t *>(arg_)->kill_grandchilds);
 			const int fd = static_cast<proc_arg_t *>(arg_)->pipefd[1];
 			if (write(fd, &st, sizeof(st)) == -1) exit_error("write");
 			close(fd);
@@ -217,7 +228,7 @@ namespace jail {
 		if (kill(getppid(), 0) < 0) raise(SIGKILL);
 
 		char stack[stacksize];
-		proc_arg_t args = { ".", "/", {}, {}, { -1, -1 }, nullptr };
+		proc_arg_t args = { ".", "/", {}, {}, false, { -1, -1 }, nullptr };
 
 		{
 			static const option opts[] = {
@@ -226,6 +237,7 @@ namespace jail {
 				{ "devices", 1, nullptr, 'd' },
 				{ "rootdir", 1, nullptr, 'r' },
 				{ "chdir", 1, nullptr, 'c' },
+				{ "kill", 0, nullptr, 'k' },
 				{ nullptr, 0, nullptr, 0 },
 			};
 			for (int opt; (opt = getopt_long(argc, argv, "m:d:u:g:h:", opts, nullptr)) != -1; )
@@ -279,6 +291,9 @@ namespace jail {
 			case 'c':
 				args.startdir = optarg;
 				break;
+			case 'k':
+				args.kill_grandchilds = true;
+				break;
 			case 'h':
 			default:
 				print_help();
@@ -308,7 +323,7 @@ namespace jail {
 		clear_all_caps();
 		close(args.pipefd[1]);
 
-		int st = wait_and_forward_signals(pid);
+		int st = wait_and_forward_signals(pid, !args.kill_grandchilds);
 		int buf;
 		if (read(args.pipefd[0], &buf, sizeof(buf)) == 4) st = buf;
 		close(args.pipefd[0]);
