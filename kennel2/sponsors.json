@@ -361,5 +361,13 @@
     , "url": "https://twitter.com/whenimg0ne"
     , "due_date": "2018-04-29T23:59:59+09:00"
     }
+  , { "name": "@tadsan"
+    , "url": "https://twitter.com/tadsan"
+    , "due_date": "2018-05-20T23:59:59+09:00"
+    }
+  , { "name": "@kahanaru"
+    , "url": "https://twitter.com/kanaharu"
+    , "due_date": "2018-05-20T23:59:59+09:00"
+    }
   ]
 }
