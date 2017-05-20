@@ -1,0 +1,7 @@
+compiler=gcc-head&options=warning&source=#include <iostream>
+#include <unistd.h>
+int main() {
+	int x;
+	std::cout << "hoge\nhoge" << std::endl;
+	sleep(3);
+}
