@@ -369,5 +369,9 @@
     , "url": "https://twitter.com/kanaharu"
     , "due_date": "2018-05-20T23:59:59+09:00"
     }
+  , { "name": "@aimyskk"
+    , "url": "https://twitter.com/aimyskk"
+    , "due_date": "2018-06-05T23:59:59+09:00"
+    }
   ]
 }
