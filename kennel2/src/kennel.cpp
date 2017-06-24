@@ -9,6 +9,7 @@
 #include "protocol.h"
 #include "eventsource.h"
 #include "permlink.h"
+#include "http_client.h"
 #include "../../cattleshed/src/syslogstream.cc"
 
 namespace cppcms {
@@ -43,6 +44,8 @@ public:
         mapper().assign("permlink", "/permlink");
 
         dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink, this, 1);
+
+        dispatcher().assign("/login/github/callback", &kennel::get_github_callback, this);
 
         dispatcher().assign("/api/list.json", &kennel::api_list, this);
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
@@ -243,6 +246,59 @@ private:
     void root() {
         if (!ensure_method_get()) {
             return;
+        }
+
+        auto access_token = session()["access_token"];
+        if (access_token.empty()) {
+        } else {
+            std::cout << "access_token: " << session()["access_token"] << std::endl;
+
+            std::vector<std::string> headers = {
+                "Content-Type: application/json; charset=utf-8",
+                "Accept: application/json",
+                "User-Agent: Wandbox",
+            };
+            auto resp = http_client::get("https://api.github.com/user?access_token=" + access_token, headers);
+            // got following data
+            /*
+              {
+                "login": "melpon",
+                "id": 816539,
+                "avatar_url": "https://avatars0.githubusercontent.com/u/816539?v=3",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/melpon",
+                "html_url": "https://github.com/melpon",
+                "followers_url": "https://api.github.com/users/melpon/followers",
+                "following_url": "https://api.github.com/users/melpon/following{/other_user}",
+                "gists_url": "https://api.github.com/users/melpon/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/melpon/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/melpon/subscriptions",
+                "organizations_url": "https://api.github.com/users/melpon/orgs",
+                "repos_url": "https://api.github.com/users/melpon/repos",
+                "events_url": "https://api.github.com/users/melpon/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/melpon/received_events",
+                "type": "User",
+                "site_admin": false,
+                "name": "melpon",
+                "company": null,
+                "blog": "http://melpon.org",
+                "location": "Tokyo, Japan",
+                "email": "shigemasa7watanabe+github@gmail.com",
+                "hireable": null,
+                "bio": null,
+                "public_repos": 28,
+                "public_gists": 28,
+                "followers": 97,
+                "following": 16,
+                "created_at": "2011-05-29T02:19:41Z",
+                "updated_at": "2017-06-04T05:56:10Z"
+              }
+            */
+            if (resp.status_code != 200) {
+                // maybe session is expired
+                session()["access_token"] = "";
+            }
+            std::cout << "body: " << resp.body << std::endl;
         }
 
         content::root c(service());
@@ -580,6 +636,52 @@ private:
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
         result.save(response().out(), cppcms::json::readable);
+    }
+
+    void get_github_callback() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        auto qs = request().query_string();
+        auto start_index = qs.find("code=") + 5;
+        if (start_index == std::string::npos) {
+            response().status(500);
+            return;
+        }
+
+        auto end_index = qs.find("&");
+
+        auto code = end_index == std::string::npos ? qs.substr(start_index) : qs.substr(start_index, end_index - start_index);
+
+        cppcms::json::object obj;
+        obj["client_id"] = "d097a8f338db3c15fe08";
+        obj["client_secret"] = "a5705f2106e90caa2e1b73e70274ea3ee2b5ec18";
+        obj["code"] = code;
+        obj["accept"] = "json";
+
+        cppcms::json::value body;
+        body.object(obj);
+        std::stringstream body_ss;
+        body.save(body_ss, cppcms::json::compact);
+
+        std::vector<std::string> headers = {
+            "Content-Type: application/json; charset=utf-8",
+            "Accept: application/json",
+        };
+        auto resp = http_client::post("https://github.com/login/oauth/access_token", std::move(headers), std::move(body_ss.str()));
+        if (resp.status_code == 200) {
+            cppcms::json::value resp_json;
+            std::stringstream resp_ss(resp.body);
+            resp_json.load(resp_ss, true, nullptr);
+
+            auto access_token = resp_json.object()["access_token"].str();
+            session()["access_token"] = access_token;
+        }
+
+        std::stringstream root_ss;
+        mapper().map(root_ss, "root");
+        response().set_redirect_header(root_ss.str());
     }
 
     void nojs_list() {

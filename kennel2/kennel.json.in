@@ -28,4 +28,11 @@
 , "cache" :
     { "backend": "process_shared"
     }
+, "session" :
+    { "location": "client"
+    , "client":
+        { "encryptor": "aes"
+        , "key_file": ".session.key"
+        }
+    }
 }

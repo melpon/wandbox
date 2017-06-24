@@ -69,6 +69,7 @@ if test "x$with_cppdb_lib" != x; then
   cppdblibs="-L$with_cppdb_lib"
 fi
 
+AC_CHECK_LIB([curl], [curl_easy_init], [], [AC_MSG_ERROR([missing curl function])])
 AC_CHECK_LIB([pcre], [pcre_compile], [], [AC_MSG_ERROR([missing pcre function])])
 AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([missing pthread function])])
 AC_CHECK_LIB([sqlite3], [sqlite3_open_v2], [], [AC_MSG_ERROR([missing sqlite3 function])])
@@ -77,7 +78,7 @@ AC_CHECK_LIB([dl], [dlopen], [], [AC_MSG_ERROR([missing dl function])])
 
 CXXFLAGS="$CXXFLAGS $cppcmsinc $cppdbinc"
 CRYPT="-lgcrypt"
-DEFAULT_LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -Wl,-Bstatic -lsqlite3 -Wl,-Bdynamic -lpcre -lz -lpthread -ldl"
+DEFAULT_LIBS="$LIBS $cppcmslibs $cppdblibs $cppcmslibnames $cppdblibnames -Wl,-Bstatic -lsqlite3 -Wl,-Bdynamic -lpcre -lz -lpthread -ldl -lcurl"
 LIBS="$DEFAULT_LIBS"
 LDFLAGS="$LDFLAGS $cppcmsrpath $cppdbrpath"
 
