@@ -16,6 +16,10 @@
          ]
     , "google_analytics": "@googleanalytics@"
     , "sponsors": "@sponsorsfile@"
+    , "github":
+      { "client_id": "d097a8f338db3c15fe08"
+      , "client_secret_file": ".github_secret"
+      }
     }
 , "service" :
     { "api" : "fastcgi"

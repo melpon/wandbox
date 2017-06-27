@@ -59,7 +59,7 @@ struct http_client {
         }
 
         long status_code = 0;
-        curl_easy_getinfo(session, CURLINFO_RESPONSE_CODE, &status_code);
+        curl_easy_getinfo(ctx.curl, CURLINFO_RESPONSE_CODE, &status_code);
 
         response r;
         r.status_code = status_code;
@@ -101,7 +101,7 @@ struct http_client {
         }
 
         long status_code = 0;
-        curl_easy_getinfo(session, CURLINFO_RESPONSE_CODE, &status_code);
+        curl_easy_getinfo(ctx.curl, CURLINFO_RESPONSE_CODE, &status_code);
 
         response r;
         r.status_code = status_code;

@@ -168,7 +168,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
 <% template main() %>
 <div class="row">
   <div class="col-md-12" id="header">
-    <div class="navbar navbar-default">
+    <div class="navbar <% if login %>navbar-inverse<% else %>navbar-default<% end %>">
       <div class="navbar-header">
         <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#wandbox-navbar-collapse">
           <span class="icon-bar"></span>
@@ -207,6 +207,23 @@ var LANGUAGE_NAME_TO_TAB_ID = {
               </li>
             </ul>
           </li>
+          <% if login %>
+            <li class="dropdown">
+              <a class="dropdown-toggle" href="#" data-toggle="dropdown"><img src="<%= login_info.avatar_url %>"> <%= login_info.name %> <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a href="">User</a>
+                </li>
+                <li>
+                  <a href="<% url "signout" %>">Sign out</a>
+                </li>
+              </ul>
+            </li>
+          <% else %>
+            <li>
+              <a href="<%= login_url %>">Sign in</a>
+            </li>
+          <% end %>
         </ul>
       </div>
     </div>

@@ -62,6 +62,9 @@ public:
         dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
         mapper().assign("nojs-list", "/nojs");
 
+        dispatcher().assign("/signout/?", &kennel::signout, this);
+        mapper().assign("signout", "/signout");
+
         dispatcher().assign("/?", &kennel::root, this);
         if (srv.settings()["application"]["map_root"].str().empty()) {
             mapper().assign("root", "/");
@@ -248,63 +251,85 @@ private:
             return;
         }
 
+        content::root c(service());
+        c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
+
         auto access_token = session()["access_token"];
         if (access_token.empty()) {
         } else {
-            std::cout << "access_token: " << session()["access_token"] << std::endl;
-
             std::vector<std::string> headers = {
                 "Content-Type: application/json; charset=utf-8",
                 "Accept: application/json",
                 "User-Agent: Wandbox",
             };
             auto resp = http_client::get("https://api.github.com/user?access_token=" + access_token, headers);
-            // got following data
-            /*
-              {
-                "login": "melpon",
-                "id": 816539,
-                "avatar_url": "https://avatars0.githubusercontent.com/u/816539?v=3",
-                "gravatar_id": "",
-                "url": "https://api.github.com/users/melpon",
-                "html_url": "https://github.com/melpon",
-                "followers_url": "https://api.github.com/users/melpon/followers",
-                "following_url": "https://api.github.com/users/melpon/following{/other_user}",
-                "gists_url": "https://api.github.com/users/melpon/gists{/gist_id}",
-                "starred_url": "https://api.github.com/users/melpon/starred{/owner}{/repo}",
-                "subscriptions_url": "https://api.github.com/users/melpon/subscriptions",
-                "organizations_url": "https://api.github.com/users/melpon/orgs",
-                "repos_url": "https://api.github.com/users/melpon/repos",
-                "events_url": "https://api.github.com/users/melpon/events{/privacy}",
-                "received_events_url": "https://api.github.com/users/melpon/received_events",
-                "type": "User",
-                "site_admin": false,
-                "name": "melpon",
-                "company": null,
-                "blog": "http://melpon.org",
-                "location": "Tokyo, Japan",
-                "email": "shigemasa7watanabe+github@gmail.com",
-                "hireable": null,
-                "bio": null,
-                "public_repos": 28,
-                "public_gists": 28,
-                "followers": 97,
-                "following": 16,
-                "created_at": "2011-05-29T02:19:41Z",
-                "updated_at": "2017-06-04T05:56:10Z"
-              }
-            */
             if (resp.status_code != 200) {
                 // maybe session is expired
-                session()["access_token"] = "";
+                session().erase("access_token");
+            } else {
+                // got following data
+                /*
+                  {
+                    "login": "melpon",
+                    "id": 816539,
+                    "avatar_url": "https://avatars0.githubusercontent.com/u/816539?v=3",
+                    "gravatar_id": "",
+                    "url": "https://api.github.com/users/melpon",
+                    "html_url": "https://github.com/melpon",
+                    "followers_url": "https://api.github.com/users/melpon/followers",
+                    "following_url": "https://api.github.com/users/melpon/following{/other_user}",
+                    "gists_url": "https://api.github.com/users/melpon/gists{/gist_id}",
+                    "starred_url": "https://api.github.com/users/melpon/starred{/owner}{/repo}",
+                    "subscriptions_url": "https://api.github.com/users/melpon/subscriptions",
+                    "organizations_url": "https://api.github.com/users/melpon/orgs",
+                    "repos_url": "https://api.github.com/users/melpon/repos",
+                    "events_url": "https://api.github.com/users/melpon/events{/privacy}",
+                    "received_events_url": "https://api.github.com/users/melpon/received_events",
+                    "type": "User",
+                    "site_admin": false,
+                    "name": "melpon",
+                    "company": null,
+                    "blog": "http://melpon.org",
+                    "location": "Tokyo, Japan",
+                    "email": "shigemasa7watanabe+github@gmail.com",
+                    "hireable": null,
+                    "bio": null,
+                    "public_repos": 28,
+                    "public_gists": 28,
+                    "followers": 97,
+                    "following": 16,
+                    "created_at": "2011-05-29T02:19:41Z",
+                    "updated_at": "2017-06-04T05:56:10Z"
+                  }
+                */
+                cppcms::json::value json;
+                std::stringstream ss(resp.body);
+                json.load(ss, true, nullptr);
+
+                content::root::login_info_t info;
+                info.name = json["login"].str();
+                if (!json["avatar_url"].is_null()) {
+                    info.avatar_url = json["avatar_url"].str() + "&s=20";
+                }
+                c.set_login(info);
             }
-            std::cout << "body: " << resp.body << std::endl;
         }
 
-        content::root c(service());
-        c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
         render("root", c);
     }
+
+    void signout() {
+        if (!ensure_method_get()) {
+            return;
+        }
+        session().erase("access_token");
+
+        std::stringstream root_ss;
+        mapper().map(root_ss, "root");
+        response().status(302);
+        response().set_redirect_header(root_ss.str());
+    }
+
     static std::vector<protocol> make_protocols(const cppcms::json::value& value) {
         std::vector<protocol> protos = {
             protocol{"Control", "compiler=" + value["compiler"].str()},
@@ -654,9 +679,22 @@ private:
 
         auto code = end_index == std::string::npos ? qs.substr(start_index) : qs.substr(start_index, end_index - start_index);
 
+        auto settings = service().settings()["application"]["github"];
+
         cppcms::json::object obj;
-        obj["client_id"] = "d097a8f338db3c15fe08";
-        obj["client_secret"] = "a5705f2106e90caa2e1b73e70274ea3ee2b5ec18";
+        obj["client_id"] = settings["client_id"].str();
+
+        // get client secret from a file
+        {
+            std::fstream fs(settings["client_secret_file"].str());
+            std::stringstream secret_ss;
+            secret_ss << fs.rdbuf();
+            auto secret = secret_ss.str();
+            auto it = std::find_if(secret.rbegin(), secret.rend(), [](char c) { return !std::isspace(c); }).base();
+            secret.erase(it, secret.end());
+            obj["client_secret"].str(secret);
+        }
+
         obj["code"] = code;
         obj["accept"] = "json";
 
@@ -729,6 +767,7 @@ private:
         if (json.get("save", false)) {
             std::stringstream ss;
             mapper().map(ss, "nojs-get-permlink", json["compiler"].str(), result["permlink"].str());
+            response().status(302);
             response().set_redirect_header(ss.str());
         } else {
             content::nojs_root c;
