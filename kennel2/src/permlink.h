@@ -114,7 +114,7 @@ private:
     }
 
 public:
-    void make_permlink(std::string permlink_name, cppcms::json::value code, cppcms::json::value compiler_info) {
+    void make_permlink(std::string permlink_name, cppcms::json::value code, cppcms::json::value compiler_info, cppcms::json::value auth) {
         std::time_t now_time = std::time(nullptr);
         std::tm now = *std::gmtime(&now_time);
 
@@ -123,8 +123,8 @@ public:
         cppdb::statement stat;
 
         stat = sql <<
-            "INSERT INTO code (compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO code (compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at, updated_at, github_user) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             << code["compiler"].str()
             << code["code"].str()
             << false
@@ -134,6 +134,8 @@ public:
             << code.get("runtime-option-raw", "")
             << code.get("stdin", "")
             << now
+            << now
+            << (auth.is_undefined() ? "" : auth["login"].str())
             << cppdb::exec;
 
         auto code_id = stat.last_insert_id();

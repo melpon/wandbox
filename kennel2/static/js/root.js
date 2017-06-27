@@ -908,6 +908,7 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdi
     'compiler-option-raw': compiler_info.compiler_option_raw,
     'runtime-option-raw': compiler_info.runtime_option_raw,
     outputs: outputs,
+    login: LOGIN_NAME != null,
   };
 
   $.post(URL_PERMLINK, JSON.stringify(data),

@@ -246,16 +246,9 @@ private:
         }
     }
 
-    void root() {
-        if (!ensure_method_get()) {
-            return;
-        }
-
-        content::root c(service());
-        c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
-
-        auto access_token = session()["access_token"];
+    cppcms::json::value authenticate(std::string access_token) {
         if (access_token.empty()) {
+            return cppcms::json::value();
         } else {
             std::vector<std::string> headers = {
                 "Content-Type: application/json; charset=utf-8",
@@ -265,7 +258,7 @@ private:
             auto resp = http_client::get("https://api.github.com/user?access_token=" + access_token, headers);
             if (resp.status_code != 200) {
                 // maybe session is expired
-                session().erase("access_token");
+                return cppcms::json::value();
             } else {
                 // got following data
                 /*
@@ -306,13 +299,28 @@ private:
                 std::stringstream ss(resp.body);
                 json.load(ss, true, nullptr);
 
-                content::root::login_info_t info;
-                info.name = json["login"].str();
-                if (!json["avatar_url"].is_null()) {
-                    info.avatar_url = json["avatar_url"].str() + "&s=20";
-                }
-                c.set_login(info);
+                return json;
             }
+        }
+    }
+    void root() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        content::root c(service());
+        c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
+
+        auto json = authenticate(session()["access_token"]);
+        if (json.is_undefined()) {
+            session().erase("access_token");
+        } else {
+            content::root::login_info_t info;
+            info.name = json["login"].str();
+            if (!json["avatar_url"].is_null()) {
+                info.avatar_url = json["avatar_url"].str() + "&s=20";
+            }
+            c.set_login(info);
         }
 
         render("root", c);
@@ -448,6 +456,16 @@ private:
 
         auto value = json_post_data();
 
+        cppcms::json::value auth;
+        if (value["login"].boolean()) {
+            auth = authenticate(session()["access_token"]);
+            if (auth.is_undefined()) {
+                // user is expecting to logged in but actually not.
+                response().status(400);
+                return;
+            }
+        }
+
         auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
@@ -462,7 +480,7 @@ private:
 
         permlink pl(service());
         std::string permlink_name = make_random_name();
-        pl.make_permlink(permlink_name, value, *it);
+        pl.make_permlink(permlink_name, value, *it, auth);
 
         response().content_type("application/json");
         cppcms::json::value result;
@@ -595,7 +613,7 @@ private:
             permlink pl(service());
             std::string permlink_name = make_random_name();
             value["outputs"] = outputs;
-            pl.make_permlink(permlink_name, value, *it);
+            pl.make_permlink(permlink_name, value, *it, cppcms::json::value());
             result["permlink"] = permlink_name;
 
             auto settings = service().settings()["application"];
