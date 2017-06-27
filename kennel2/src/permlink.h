@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <ctime>
+#include <vector>
+#include <string>
+#include <algorithm>
 #include "libs.h"
 
 class permlink {
@@ -69,9 +72,48 @@ public:
             ")"
             << cppdb::exec;
 
+        migrate();
+
         sql.commit();
     }
 
+private:
+    void add_column(std::string table_name, std::string column_name, std::string column_type) {
+        cppdb::result r;
+
+        r = sql <<
+            "PRAGMA table_info(" + table_name + ")";
+
+        /*
+        0|id|INTEGER|0||1
+        1|compiler|VARCHAR|1||0
+        ...
+        8|stdin|VARCHAR|1|""|0
+        9|created_at|TIMESTAMP|1||0
+        */
+        std::vector<std::string> columns;
+        while (r.next()) {
+            columns.push_back(r.get<std::string>(1));
+        }
+        auto it = std::find(columns.begin(), columns.end(), column_name);
+        if (it == columns.end()) {
+            sql <<
+                ("ALTER TABLE " + table_name + " ADD COLUMN " + column_name + " " + column_type)
+                << cppdb::exec;
+        }
+    }
+
+    void migrate() {
+        add_column("code", "title", "VARCHAR NOT NULL DEFAULT \"\"");
+        add_column("code", "description", "VARCHAR NOT NULL DEFAULT \"\"");
+        add_column("code", "github_user", "VARCHAR NOT NULL DEFAULT \"\"");
+        add_column("code", "updated_at", "TIMESTAMP");
+        sql <<
+            "CREATE INDEX IF NOT EXISTS github_user_list ON code (github_user, created_at DESC)"
+            << cppdb::exec;
+    }
+
+public:
     void make_permlink(std::string permlink_name, cppcms::json::value code, cppcms::json::value compiler_info) {
         std::time_t now_time = std::time(nullptr);
         std::tm now = *std::gmtime(&now_time);
