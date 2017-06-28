@@ -733,6 +733,12 @@ private:
 
             auto access_token = resp_json.object()["access_token"].str();
             session()["access_token"] = access_token;
+
+            auto auth = authenticate(access_token);
+            if (!auth.is_undefined()) {
+                permlink pl(service());
+                pl.login_github(auth["login"].str());
+            }
         }
 
         std::stringstream root_ss;
