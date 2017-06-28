@@ -880,8 +880,13 @@ ResultWindow.prototype._output_window = function() {
 ResultWindow.prototype.permlink = function(compiler_info, code, codes, stdin, outputs) {
   var self = this;
 
-  var a = $('<a href="#" class="btn btn-default">Share This Code</a>')
-    .appendTo(this._permlink());
+  var a;
+  if (LOGIN_AVATAR_URL == null) {
+    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share</a>');
+  } else {
+    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share by <img src="' + LOGIN_AVATAR_URL + '" alt="' + LOGIN_NAME + '"></img></a>');
+  }
+  a.appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();
     self.post_permlink(compiler_info, code, codes, stdin, outputs);
