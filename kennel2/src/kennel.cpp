@@ -6,6 +6,7 @@
 #include "libs.h"
 #include "root.h"
 #include "nojs_root.h"
+#include "user.h"
 #include "protocol.h"
 #include "eventsource.h"
 #include "permlink.h"
@@ -64,6 +65,9 @@ public:
 
         dispatcher().assign("/signout/?", &kennel::signout, this);
         mapper().assign("signout", "/signout");
+
+        dispatcher().assign("/user/(.+?)/?", &kennel::user, this, 1);
+        mapper().assign("user", "/user/{1}");
 
         dispatcher().assign("/?", &kennel::root, this);
         if (srv.settings()["application"]["map_root"].str().empty()) {
@@ -686,17 +690,7 @@ private:
             return;
         }
 
-        auto qs = request().query_string();
-        auto start_index = qs.find("code=") + 5;
-        if (start_index == std::string::npos) {
-            response().status(500);
-            return;
-        }
-
-        auto end_index = qs.find("&");
-
-        auto code = end_index == std::string::npos ? qs.substr(start_index) : qs.substr(start_index, end_index - start_index);
-
+        auto code = get_query_string("code");
         auto settings = service().settings()["application"]["github"];
 
         cppcms::json::object obj;
@@ -841,6 +835,79 @@ private:
         c.set_permlink(std::move(result));
 
         render("nojs_root", c);
+    }
+
+    std::string get_query_string(const std::string& key) {
+        const auto& qs = request().query_string();
+        auto start_index = qs.find(key + "=");
+        if (start_index == std::string::npos) {
+            return "";
+        }
+        start_index += key.length() + 1;
+
+        auto end_index = qs.find("&", start_index);
+        if (end_index == std::string::npos) {
+            return qs.substr(start_index);
+        } else {
+            return qs.substr(start_index, end_index - start_index);
+        }
+    }
+
+    static const int rows_per_page = 10;
+
+    void user(std::string username) {
+        permlink pl(service());
+        if (!pl.exists_github_user(username)) {
+            response().status(404);
+            return;
+        }
+
+        std::string avatar_url;
+        {
+            std::vector<std::string> headers = {
+                "Content-Type: application/json; charset=utf-8",
+                "Accept: application/json",
+                "User-Agent: Wandbox",
+            };
+            auto resp = http_client::get("https://api.github.com/users/" + username, headers);
+            if (resp.status_code == 200) {
+                cppcms::json::value json;
+                std::stringstream ss(resp.body);
+                json.load(ss, true, nullptr);
+                if (json["avatar_url"].type() == cppcms::json::is_string) {
+                    avatar_url = json["avatar_url"].str() + "&s=40";
+                }
+            }
+        }
+
+        auto auth = authenticate(session()["access_token"]);
+        auto include_private = !auth.is_undefined() && auth["login"].str() == username;
+
+        int page = 0;
+        std::string page_str = get_query_string("p");
+        if (!page_str.empty()) {
+            page = std::atoi(page_str.c_str());
+            if (page < 0) page = 0;
+        }
+
+        auto usercode = pl.get_github_usercode(username, include_private, page, rows_per_page);
+
+        content::user c(service());
+
+        content::user::login_info_t info;
+        info.name = auth["login"].str();
+        if (!auth["avatar_url"].is_null()) {
+            info.avatar_url = auth["avatar_url"].str() + "&s=20";
+        }
+        c.set_login(info);
+
+        content::user::target_user_info_t uinfo;
+        uinfo.username = username;
+        uinfo.avatar_url = avatar_url;
+        uinfo.usercode = usercode;
+        c.set_target(uinfo);
+
+        render("user", c);
     }
 };
 

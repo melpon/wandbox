@@ -17,9 +17,6 @@ namespace content {
             login_url = "https://github.com/login/oauth/authorize?client_id=" + srv.settings()["application"]["github"]["client_id"].str();
 
             google_analytics = srv.settings()["application"]["google_analytics"].str();
-
-
-        cppcms::json::object obj;
         }
 
         bool login;
