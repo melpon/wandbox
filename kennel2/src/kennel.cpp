@@ -895,12 +895,14 @@ private:
 
         content::user c(service());
 
-        content::user::login_info_t info;
-        info.name = auth["login"].str();
-        if (!auth["avatar_url"].is_null()) {
-            info.avatar_url = auth["avatar_url"].str() + "&s=20";
+        if (!auth.is_undefined()) {
+            content::user::login_info_t info;
+            info.name = auth["login"].str();
+            if (!auth["avatar_url"].is_null()) {
+                info.avatar_url = auth["avatar_url"].str() + "&s=20";
+            }
+            c.set_login(info);
         }
-        c.set_login(info);
 
         content::user::target_user_info_t uinfo;
         uinfo.username = username;

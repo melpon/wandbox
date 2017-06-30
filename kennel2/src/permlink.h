@@ -130,7 +130,7 @@ private:
 public:
     void make_permlink(std::string permlink_name, cppcms::json::value code, cppcms::json::value compiler_info, cppcms::json::value auth) {
         std::time_t now_time = std::time(nullptr);
-        std::tm now = *std::gmtime(&now_time);
+        std::tm now = *std::localtime(&now_time);
 
         cppdb::transaction guard(sql);
 
@@ -321,7 +321,7 @@ public:
             std::string compiler;
             std::string code;
             std::string options;
-            std::tm created_at;
+            std::time_t created_at;
             std::string title;
             std::string description;
             std::string github_user;
@@ -362,7 +362,8 @@ public:
             code.compiler = r.get<std::string>("compiler");
             code.code = r.get<std::string>("code");
             code.options = r.get<std::string>("options");
-            code.created_at = r.get<std::tm>("created_at");
+            std::tm tm = r.get<std::tm>("created_at");
+            code.created_at = std::mktime(&tm);
             code.title = r.get<std::string>("title");
             code.description = r.get<std::string>("description");
             code.github_user = r.get<std::string>("github_user");

@@ -54,6 +54,13 @@
       ga('send', 'pageview');
     </script>
   <% end if %>
+  <script>
+    $(".wandbox-datetime").each(function() {
+      var timestamp = parseInt($(this).text());
+      var date = new Date(timestamp * 1000);
+      $(this).text(date.toString());
+    });
+  </script>
 </html>
 <% end template %>
 
@@ -147,8 +154,9 @@
       <% item %>
         <div class="row">
           <div class="col-md-12">
-            <label><a href="<% url "get-permlink" using code.permlink %>"><%= code.compiler %></a></label>
-            <code><pre><%= code.code | ext head %></pre></code>
+            <h4><a href="<% url "get-permlink" using code.permlink %>"><%= code.compiler %></a></h4>
+            <p class="wandbox-datetime"><%= code.created_at %></p>
+            <pre><code><%= code.code | ext head %></code></pre>
           </div>
         </div>
       <% end item %>
