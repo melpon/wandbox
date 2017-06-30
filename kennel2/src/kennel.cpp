@@ -45,6 +45,7 @@ public:
         mapper().assign("permlink", "/permlink");
 
         dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink, this, 1);
+        mapper().assign("get-permlink", "/permlink/{1}");
 
         dispatcher().assign("/login/github/callback", &kennel::get_github_callback, this);
 

@@ -137,21 +137,72 @@
 
 <div class="row">
   <div class="col-md-12">
+    <% include pagination() %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
     <% foreach code in target.usercode.codes %>
       <% item %>
         <div class="row">
           <div class="col-md-12">
-            <ul>
-              <li>compiler: <%= code.compiler %></li>
-              <li>options: <%= code.options %></li>
-            </ul>
-            <code><pre><%= code.code %></pre></code>
+            <label><a href="<% url "get-permlink" using code.permlink %>"><%= code.compiler %></a></label>
+            <code><pre><%= code.code | ext head %></pre></code>
           </div>
         </div>
       <% end item %>
     <% end foreach %>
   </div>
 </div>
+
+<div class="row">
+  <div class="col-md-12">
+    <% include pagination() %>
+  </div>
+</div>
+
+<% end template %>
+
+<% template pagination() %>
+  <% if (!content.target.usercode.codes.empty()) %>
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        <% c++ bool is_first = content.target.usercode.current_page == 0; %>
+        <% c++ bool is_last = content.target.usercode.current_page == content.target.usercode.page_max - 1; %>
+
+        <li class="<% c++ if (is_first) out() << "disabled"; %>">
+          <% if (is_first) %>
+            <span>
+              <span aria-hidden="true">&laquo;</span>
+            </span>
+          <% else %>
+            <a href="<% url "user" using target.username %>?p=<% c++ out() << (content.target.usercode.current_page - 1); %>" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          <% end %>
+        </li>
+
+        <% c++ for (int page = 0; page < content.target.usercode.page_max; page++) { %>
+          <li class="<% c++ if (page == content.target.usercode.current_page) out() << "active"; %>">
+            <a href="<% url "user" using target.username %>?p=<% c++ out() << page; %>"><% c++ out() << (page + 1); %></a>
+          </li>
+        <% c++ } %>
+
+        <li class="<% c++ if (is_last) out() << "disabled"; %>">
+          <% if (is_last) %>
+            <span>
+              <span aria-hidden="true">&raquo;</span>
+            </span>
+          <% else %>
+            <a href="<% url "user" using target.username %>?p=<% c++ out() << (content.target.usercode.current_page + 1); %>" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          <% end %>
+        </li>
+      </ul>
+    </nav>
+  <% end if %>
 <% end template %>
 
 <% end view %>

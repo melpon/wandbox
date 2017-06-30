@@ -120,6 +120,9 @@ private:
         add_column("code", "private", "BOOLEAN NOT NULL DEFAULT 0");
         add_column("code", "updated_at", "TIMESTAMP");
         sql <<
+            "CREATE INDEX IF NOT EXISTS link_code ON link (code_id)"
+            << cppdb::exec;
+        sql <<
             "CREATE INDEX IF NOT EXISTS github_user_list ON code (github_user, private, created_at DESC)"
             << cppdb::exec;
     }
@@ -323,6 +326,7 @@ public:
             std::string description;
             std::string github_user;
             bool is_private;
+            std::string permlink;
         };
         std::vector<code_t> codes;
     };
@@ -339,9 +343,9 @@ public:
         auto page_max = (r.get<int>("count") + rows_per_page - 1) / rows_per_page;
 
         r = sql <<
-            "SELECT compiler, code, options, created_at, title, description, github_user, private "
-            "FROM code "
-            "WHERE github_user=? AND private<=? "
+            "SELECT compiler, code, options, created_at, title, description, github_user, private, link.permlink as permlink "
+            "FROM code, link "
+            "WHERE github_user=? AND private<=? AND code.id=link.code_id "
             "ORDER BY created_at DESC "
             "LIMIT ? OFFSET ?"
             << username
@@ -363,6 +367,7 @@ public:
             code.description = r.get<std::string>("description");
             code.github_user = r.get<std::string>("github_user");
             code.is_private = r.get<int>("private") != 0;
+            code.permlink = r.get<std::string>("permlink");
             info.codes.push_back(std::move(code));
         }
 
