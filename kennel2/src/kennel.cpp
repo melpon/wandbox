@@ -704,7 +704,7 @@ std::cout << __LINE__ << std::endl;
         // get client secret from a file
         {
 std::cout << __LINE__ << std::endl;
-            std::fstream fs(settings["client_secret_file"].str());
+            std::ifstream fs(settings["client_secret_file"].str());
 std::cout << __LINE__ << std::endl;
             std::stringstream secret_ss;
 std::cout << __LINE__ << std::endl;
