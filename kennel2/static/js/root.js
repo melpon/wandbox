@@ -880,8 +880,13 @@ ResultWindow.prototype._output_window = function() {
 ResultWindow.prototype.permlink = function(compiler_info, code, codes, stdin, outputs) {
   var self = this;
 
-  var a = $('<a href="#" class="btn btn-default">Share This Code</a>')
-    .appendTo(this._permlink());
+  var a;
+  if (LOGIN_AVATAR_URL == null) {
+    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share</a>');
+  } else {
+    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share by <img src="' + LOGIN_AVATAR_URL + '" alt="' + LOGIN_NAME + '"></img></a>');
+  }
+  a.appendTo(this._permlink());
   a.click(function(event) {
     event.preventDefault();
     self.post_permlink(compiler_info, code, codes, stdin, outputs);
@@ -908,6 +913,7 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdi
     'compiler-option-raw': compiler_info.compiler_option_raw,
     'runtime-option-raw': compiler_info.runtime_option_raw,
     outputs: outputs,
+    login: LOGIN_NAME != null,
   };
 
   $.post(URL_PERMLINK, JSON.stringify(data),

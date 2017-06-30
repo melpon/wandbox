@@ -16,6 +16,10 @@
          ]
     , "google_analytics": "@googleanalytics@"
     , "sponsors": "@sponsorsfile@"
+    , "github":
+      { "client_id": "@githubclient@"
+      , "client_secret_file": "@databasedir@/.github_secret"
+      }
     }
 , "service" :
     { "api" : "fastcgi"
@@ -27,5 +31,12 @@
     }
 , "cache" :
     { "backend": "process_shared"
+    }
+, "session" :
+    { "location": "client"
+    , "client":
+        { "encryptor": "aes"
+        , "key_file": "@databasedir@/.session.key"
+        }
     }
 }

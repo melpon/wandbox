@@ -5,6 +5,7 @@ kennel_SOURCES = kennel.cpp skin_kennel.cpp
 
 SKIN_KENNEL = \
 	root.tmpl \
+	user.tmpl \
 	nojs_root.tmpl \
 	nojs_list.tmpl
 

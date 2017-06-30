@@ -20,7 +20,7 @@ cd ../
 cd kennel2
 git clean -xdqf .
 ./autogen.sh
-./configure --prefix=/usr/local/kennel2 --with-cppcms=/usr/local/cppcms --with-cppdb=/usr/local/cppdb --with-sponsors=/usr/local/kennel2/etc/sponsors.json --with-googleanalytics=UA-56896607-3
+./configure --prefix=/usr/local/kennel2 --with-cppcms=/usr/local/cppcms --with-cppdb=/usr/local/cppdb --with-sponsors=/usr/local/kennel2/etc/sponsors.json --with-googleanalytics=UA-56896607-3 --with-githubclient=f9d429d939d997e6b08e
 make
 cd ../
 '

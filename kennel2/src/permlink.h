@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <ctime>
+#include <vector>
+#include <string>
+#include <algorithm>
 #include "libs.h"
 
 class permlink {
@@ -69,20 +72,73 @@ public:
             ")"
             << cppdb::exec;
 
+        sql <<
+            "CREATE TABLE IF NOT EXISTS github_user ("
+            "  id           INTEGER PRIMARY KEY,"
+            "  username     VARCHAR NOT NULL,"
+            "  created_at   TIMESTAMP NOT NULL,"
+            "  updated_at   TIMESTAMP NOT NULL,"
+            "  CONSTRAINT unique_name UNIQUE (username)"
+            ")"
+            << cppdb::exec;
+
+        migrate();
+
         sql.commit();
     }
 
-    void make_permlink(std::string permlink_name, cppcms::json::value code, cppcms::json::value compiler_info) {
+private:
+    void add_column(std::string table_name, std::string column_name, std::string column_type) {
+        cppdb::result r;
+
+        r = sql <<
+            "PRAGMA table_info(" + table_name + ")";
+
+        /*
+        0|id|INTEGER|0||1
+        1|compiler|VARCHAR|1||0
+        ...
+        8|stdin|VARCHAR|1|""|0
+        9|created_at|TIMESTAMP|1||0
+        */
+        std::vector<std::string> columns;
+        while (r.next()) {
+            columns.push_back(r.get<std::string>(1));
+        }
+        auto it = std::find(columns.begin(), columns.end(), column_name);
+        if (it == columns.end()) {
+            sql <<
+                ("ALTER TABLE " + table_name + " ADD COLUMN " + column_name + " " + column_type)
+                << cppdb::exec;
+        }
+    }
+
+    void migrate() {
+        add_column("code", "title", "VARCHAR NOT NULL DEFAULT \"\"");
+        add_column("code", "description", "VARCHAR NOT NULL DEFAULT \"\"");
+        add_column("code", "github_user", "VARCHAR NOT NULL DEFAULT \"\"");
+        add_column("code", "private", "BOOLEAN NOT NULL DEFAULT 0");
+        add_column("code", "updated_at", "TIMESTAMP");
+        sql <<
+            "CREATE INDEX IF NOT EXISTS link_code ON link (code_id)"
+            << cppdb::exec;
+        sql <<
+            "CREATE INDEX IF NOT EXISTS github_user_list ON code (github_user, private, created_at DESC)"
+            << cppdb::exec;
+    }
+
+public:
+    void make_permlink(std::string permlink_name, cppcms::json::value code, cppcms::json::value compiler_info, cppcms::json::value auth) {
         std::time_t now_time = std::time(nullptr);
-        std::tm now = *std::gmtime(&now_time);
+        std::tm now = *std::localtime(&now_time);
 
         cppdb::transaction guard(sql);
 
         cppdb::statement stat;
 
         stat = sql <<
-            "INSERT INTO code (compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO code (compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at, updated_at, github_user) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             << code["compiler"].str()
             << code["code"].str()
             << false
@@ -92,6 +148,8 @@ public:
             << code.get("runtime-option-raw", "")
             << code.get("stdin", "")
             << now
+            << now
+            << (auth.is_undefined() ? "" : auth["login"].str())
             << cppdb::exec;
 
         auto code_id = stat.last_insert_id();
@@ -226,6 +284,95 @@ public:
             }
         }
         return value;
+    }
+
+    // FIXME(melpon): GitHub login is not a category of permlink
+    void login_github(std::string username) {
+        std::time_t now_time = std::time(nullptr);
+        std::tm now = *std::gmtime(&now_time);
+
+        // insert or update
+        sql <<
+            "INSERT OR REPLACE "
+            "INTO github_user (username, created_at, updated_at) "
+            "VALUES (?, COALESCE((SELECT created_at FROM github_user WHERE username=?), ?), ?)"
+            << username
+            << username
+            << now
+            << now
+            << cppdb::row;
+    }
+    bool exists_github_user(std::string username) {
+        cppdb::result r;
+        r = sql <<
+            "SELECT id "
+            "FROM github_user "
+            "WHERE username=?"
+            << username
+            << cppdb::row;
+        return !r.empty();
+    }
+
+    struct usercode_info {
+        int current_page;
+        int page_max;
+        int rows_per_page;
+        struct code_t {
+            std::string compiler;
+            std::string code;
+            std::string options;
+            std::time_t created_at;
+            std::string title;
+            std::string description;
+            std::string github_user;
+            bool is_private;
+            std::string permlink;
+        };
+        std::vector<code_t> codes;
+    };
+    usercode_info get_github_usercode(std::string username, bool include_private, int current_page, int rows_per_page) {
+        cppdb::result r;
+        r = sql <<
+            "SELECT COUNT(*) as count "
+            "FROM code "
+            "WHERE github_user=? AND private<=? "
+            "ORDER BY created_at DESC "
+            << username
+            << (include_private ? 1 : 0)
+            << cppdb::row;
+        auto page_max = (r.get<int>("count") + rows_per_page - 1) / rows_per_page;
+
+        r = sql <<
+            "SELECT compiler, code, options, created_at, title, description, github_user, private, link.permlink as permlink "
+            "FROM code, link "
+            "WHERE github_user=? AND private<=? AND code.id=link.code_id "
+            "ORDER BY created_at DESC "
+            "LIMIT ? OFFSET ?"
+            << username
+            << (include_private ? 1 : 0)
+            << rows_per_page
+            << (current_page * rows_per_page);
+
+        usercode_info info;
+        info.current_page = current_page;
+        info.page_max = page_max;
+        info.rows_per_page = rows_per_page;
+        while (r.next()) {
+            usercode_info::code_t code;
+            code.compiler = r.get<std::string>("compiler");
+            code.code = r.get<std::string>("code");
+            code.options = r.get<std::string>("options");
+            std::tm tm = r.get<std::tm>("created_at");
+            code.created_at = std::mktime(&tm);
+            code.title = r.get<std::string>("title");
+            code.description = r.get<std::string>("description");
+            code.github_user = r.get<std::string>("github_user");
+            code.is_private = r.get<int>("private") != 0;
+            code.permlink = r.get<std::string>("permlink");
+            info.codes.push_back(std::move(code));
+        }
+
+        return info;
     }
 };
 

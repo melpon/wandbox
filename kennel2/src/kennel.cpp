@@ -6,9 +6,11 @@
 #include "libs.h"
 #include "root.h"
 #include "nojs_root.h"
+#include "user.h"
 #include "protocol.h"
 #include "eventsource.h"
 #include "permlink.h"
+#include "http_client.h"
 #include "../../cattleshed/src/syslogstream.cc"
 
 namespace cppcms {
@@ -43,6 +45,9 @@ public:
         mapper().assign("permlink", "/permlink");
 
         dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink, this, 1);
+        mapper().assign("get-permlink", "/permlink/{1}");
+
+        dispatcher().assign("/login/github/callback", &kennel::get_github_callback, this);
 
         dispatcher().assign("/api/list.json", &kennel::api_list, this);
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
@@ -58,6 +63,12 @@ public:
         mapper().assign("nojs-root", "/nojs/{1}");
         dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
         mapper().assign("nojs-list", "/nojs");
+
+        dispatcher().assign("/signout/?", &kennel::signout, this);
+        mapper().assign("signout", "/signout");
+
+        dispatcher().assign("/user/(.+?)/?", &kennel::user, this, 1);
+        mapper().assign("user", "/user/{1}");
 
         dispatcher().assign("/?", &kennel::root, this);
         if (srv.settings()["application"]["map_root"].str().empty()) {
@@ -240,6 +251,63 @@ private:
         }
     }
 
+    cppcms::json::value authenticate(std::string access_token) {
+        if (access_token.empty()) {
+            return cppcms::json::value();
+        } else {
+            std::vector<std::string> headers = {
+                "Content-Type: application/json; charset=utf-8",
+                "Accept: application/json",
+                "User-Agent: Wandbox",
+            };
+            auto resp = http_client::get("https://api.github.com/user?access_token=" + access_token, headers);
+            if (resp.status_code != 200) {
+                // maybe session is expired
+                return cppcms::json::value();
+            } else {
+                // got following data
+                /*
+                  {
+                    "login": "melpon",
+                    "id": 816539,
+                    "avatar_url": "https://avatars0.githubusercontent.com/u/816539?v=3",
+                    "gravatar_id": "",
+                    "url": "https://api.github.com/users/melpon",
+                    "html_url": "https://github.com/melpon",
+                    "followers_url": "https://api.github.com/users/melpon/followers",
+                    "following_url": "https://api.github.com/users/melpon/following{/other_user}",
+                    "gists_url": "https://api.github.com/users/melpon/gists{/gist_id}",
+                    "starred_url": "https://api.github.com/users/melpon/starred{/owner}{/repo}",
+                    "subscriptions_url": "https://api.github.com/users/melpon/subscriptions",
+                    "organizations_url": "https://api.github.com/users/melpon/orgs",
+                    "repos_url": "https://api.github.com/users/melpon/repos",
+                    "events_url": "https://api.github.com/users/melpon/events{/privacy}",
+                    "received_events_url": "https://api.github.com/users/melpon/received_events",
+                    "type": "User",
+                    "site_admin": false,
+                    "name": "melpon",
+                    "company": null,
+                    "blog": "http://melpon.org",
+                    "location": "Tokyo, Japan",
+                    "email": "shigemasa7watanabe+github@gmail.com",
+                    "hireable": null,
+                    "bio": null,
+                    "public_repos": 28,
+                    "public_gists": 28,
+                    "followers": 97,
+                    "following": 16,
+                    "created_at": "2011-05-29T02:19:41Z",
+                    "updated_at": "2017-06-04T05:56:10Z"
+                  }
+                */
+                cppcms::json::value json;
+                std::stringstream ss(resp.body);
+                json.load(ss, true, nullptr);
+
+                return json;
+            }
+        }
+    }
     void root() {
         if (!ensure_method_get()) {
             return;
@@ -247,8 +315,34 @@ private:
 
         content::root c(service());
         c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
+
+        auto json = authenticate(session()["access_token"]);
+        if (json.is_undefined()) {
+            session().erase("access_token");
+        } else {
+            content::root::login_info_t info;
+            info.name = json["login"].str();
+            if (!json["avatar_url"].is_null()) {
+                info.avatar_url = json["avatar_url"].str() + "&s=20";
+            }
+            c.set_login(info);
+        }
+
         render("root", c);
     }
+
+    void signout() {
+        if (!ensure_method_get()) {
+            return;
+        }
+        session().erase("access_token");
+
+        std::stringstream root_ss;
+        mapper().map(root_ss, "root");
+        response().status(302);
+        response().set_redirect_header(root_ss.str());
+    }
+
     static std::vector<protocol> make_protocols(const cppcms::json::value& value) {
         std::vector<protocol> protos = {
             protocol{"Control", "compiler=" + value["compiler"].str()},
@@ -367,6 +461,16 @@ private:
 
         auto value = json_post_data();
 
+        cppcms::json::value auth;
+        if (value["login"].boolean()) {
+            auth = authenticate(session()["access_token"]);
+            if (auth.is_undefined()) {
+                // user is expecting to logged in but actually not.
+                response().status(400);
+                return;
+            }
+        }
+
         auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
@@ -381,7 +485,7 @@ private:
 
         permlink pl(service());
         std::string permlink_name = make_random_name();
-        pl.make_permlink(permlink_name, value, *it);
+        pl.make_permlink(permlink_name, value, *it, auth);
 
         response().content_type("application/json");
         cppcms::json::value result;
@@ -514,7 +618,7 @@ private:
             permlink pl(service());
             std::string permlink_name = make_random_name();
             value["outputs"] = outputs;
-            pl.make_permlink(permlink_name, value, *it);
+            pl.make_permlink(permlink_name, value, *it, cppcms::json::value());
             result["permlink"] = permlink_name;
 
             auto settings = service().settings()["application"];
@@ -582,6 +686,61 @@ private:
         result.save(response().out(), cppcms::json::readable);
     }
 
+    void get_github_callback() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        auto code = get_query_string("code");
+        auto settings = service().settings()["application"]["github"];
+
+        cppcms::json::object obj;
+        obj["client_id"] = settings["client_id"].str();
+
+        // get client secret from a file
+        {
+            std::fstream fs(settings["client_secret_file"].str());
+            std::stringstream secret_ss;
+            secret_ss << fs.rdbuf();
+            auto secret = secret_ss.str();
+            auto it = std::find_if(secret.rbegin(), secret.rend(), [](char c) { return !std::isspace(c); }).base();
+            secret.erase(it, secret.end());
+            obj["client_secret"].str(secret);
+        }
+
+        obj["code"] = code;
+        obj["accept"] = "json";
+
+        cppcms::json::value body;
+        body.object(obj);
+        std::stringstream body_ss;
+        body.save(body_ss, cppcms::json::compact);
+
+        std::vector<std::string> headers = {
+            "Content-Type: application/json; charset=utf-8",
+            "Accept: application/json",
+        };
+        auto resp = http_client::post("https://github.com/login/oauth/access_token", std::move(headers), std::move(body_ss.str()));
+        if (resp.status_code == 200) {
+            cppcms::json::value resp_json;
+            std::stringstream resp_ss(resp.body);
+            resp_json.load(resp_ss, true, nullptr);
+
+            auto access_token = resp_json.object()["access_token"].str();
+            session()["access_token"] = access_token;
+
+            auto auth = authenticate(access_token);
+            if (!auth.is_undefined()) {
+                permlink pl(service());
+                pl.login_github(auth["login"].str());
+            }
+        }
+
+        std::stringstream root_ss;
+        mapper().map(root_ss, "root");
+        response().set_redirect_header(root_ss.str());
+    }
+
     void nojs_list() {
         if (!ensure_method_get()) {
             return;
@@ -627,6 +786,7 @@ private:
         if (json.get("save", false)) {
             std::stringstream ss;
             mapper().map(ss, "nojs-get-permlink", json["compiler"].str(), result["permlink"].str());
+            response().status(302);
             response().set_redirect_header(ss.str());
         } else {
             content::nojs_root c;
@@ -676,6 +836,81 @@ private:
         c.set_permlink(std::move(result));
 
         render("nojs_root", c);
+    }
+
+    std::string get_query_string(const std::string& key) {
+        const auto& qs = request().query_string();
+        auto start_index = qs.find(key + "=");
+        if (start_index == std::string::npos) {
+            return "";
+        }
+        start_index += key.length() + 1;
+
+        auto end_index = qs.find("&", start_index);
+        if (end_index == std::string::npos) {
+            return qs.substr(start_index);
+        } else {
+            return qs.substr(start_index, end_index - start_index);
+        }
+    }
+
+    static const int rows_per_page = 10;
+
+    void user(std::string username) {
+        permlink pl(service());
+        if (!pl.exists_github_user(username)) {
+            response().status(404);
+            return;
+        }
+
+        std::string avatar_url;
+        {
+            std::vector<std::string> headers = {
+                "Content-Type: application/json; charset=utf-8",
+                "Accept: application/json",
+                "User-Agent: Wandbox",
+            };
+            auto resp = http_client::get("https://api.github.com/users/" + username, headers);
+            if (resp.status_code == 200) {
+                cppcms::json::value json;
+                std::stringstream ss(resp.body);
+                json.load(ss, true, nullptr);
+                if (json["avatar_url"].type() == cppcms::json::is_string) {
+                    avatar_url = json["avatar_url"].str() + "&s=40";
+                }
+            }
+        }
+
+        auto auth = authenticate(session()["access_token"]);
+        auto include_private = !auth.is_undefined() && auth["login"].str() == username;
+
+        int page = 0;
+        std::string page_str = get_query_string("p");
+        if (!page_str.empty()) {
+            page = std::atoi(page_str.c_str());
+            if (page < 0) page = 0;
+        }
+
+        auto usercode = pl.get_github_usercode(username, include_private, page, rows_per_page);
+
+        content::user c(service());
+
+        if (!auth.is_undefined()) {
+            content::user::login_info_t info;
+            info.name = auth["login"].str();
+            if (!auth["avatar_url"].is_null()) {
+                info.avatar_url = auth["avatar_url"].str() + "&s=20";
+            }
+            c.set_login(info);
+        }
+
+        content::user::target_user_info_t uinfo;
+        uinfo.username = username;
+        uinfo.avatar_url = avatar_url;
+        uinfo.usercode = usercode;
+        c.set_target(uinfo);
+
+        render("user", c);
     }
 };
 
