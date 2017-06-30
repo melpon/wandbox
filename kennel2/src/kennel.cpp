@@ -691,92 +691,54 @@ private:
             return;
         }
 
-std::cout << __LINE__ << std::endl;
         auto code = get_query_string("code");
-std::cout << __LINE__ << std::endl;
         auto settings = service().settings()["application"]["github"];
-std::cout << __LINE__ << std::endl;
 
         cppcms::json::object obj;
         obj["client_id"] = settings["client_id"].str();
-std::cout << __LINE__ << std::endl;
 
         // get client secret from a file
         {
-std::cout << __LINE__ << std::endl;
             std::ifstream fs(settings["client_secret_file"].str());
-std::cout << __LINE__ << std::endl;
             std::stringstream secret_ss;
-std::cout << __LINE__ << std::endl;
             secret_ss << fs.rdbuf();
-std::cout << __LINE__ << std::endl;
             auto secret = secret_ss.str();
-std::cout << __LINE__ << std::endl;
             auto it = std::find_if(secret.rbegin(), secret.rend(), [](char c) { return !std::isspace(c); }).base();
-std::cout << __LINE__ << std::endl;
             secret.erase(it, secret.end());
-std::cout << __LINE__ << std::endl;
             obj["client_secret"].str(secret);
-std::cout << settings["client_id"].str() << std::endl;
-std::cout << secret << std::endl;
-std::cout << __LINE__ << std::endl;
         }
 
         obj["code"] = code;
-std::cout << __LINE__ << std::endl;
         obj["accept"] = "json";
-std::cout << __LINE__ << std::endl;
 
         cppcms::json::value body;
-std::cout << __LINE__ << std::endl;
         body.object(obj);
-std::cout << __LINE__ << std::endl;
         std::stringstream body_ss;
-std::cout << __LINE__ << std::endl;
         body.save(body_ss, cppcms::json::compact);
-std::cout << __LINE__ << std::endl;
 
         std::vector<std::string> headers = {
             "Content-Type: application/json; charset=utf-8",
             "Accept: application/json",
         };
-std::cout << __LINE__ << std::endl;
         auto resp = http_client::post("https://github.com/login/oauth/access_token", std::move(headers), std::move(body_ss.str()));
-std::cout << __LINE__ << std::endl;
         if (resp.status_code == 200) {
-std::cout << __LINE__ << std::endl;
             cppcms::json::value resp_json;
-std::cout << __LINE__ << std::endl;
             std::stringstream resp_ss(resp.body);
-std::cout << __LINE__ << std::endl;
-std::cout << resp.body << std::endl;
             resp_json.load(resp_ss, true, nullptr);
-std::cout << __LINE__ << std::endl;
 
             auto access_token = resp_json.object()["access_token"].str();
-std::cout << __LINE__ << std::endl;
             session()["access_token"] = access_token;
-std::cout << __LINE__ << std::endl;
 
             auto auth = authenticate(access_token);
-std::cout << __LINE__ << std::endl;
             if (!auth.is_undefined()) {
-std::cout << __LINE__ << std::endl;
                 permlink pl(service());
-std::cout << __LINE__ << std::endl;
                 pl.login_github(auth["login"].str());
-std::cout << __LINE__ << std::endl;
             }
-std::cout << __LINE__ << std::endl;
         }
 
-std::cout << __LINE__ << std::endl;
         std::stringstream root_ss;
-std::cout << __LINE__ << std::endl;
         mapper().map(root_ss, "root");
-std::cout << __LINE__ << std::endl;
         response().set_redirect_header(root_ss.str());
-std::cout << __LINE__ << std::endl;
     }
 
     void nojs_list() {
