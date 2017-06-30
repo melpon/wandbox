@@ -717,6 +717,8 @@ std::cout << __LINE__ << std::endl;
             secret.erase(it, secret.end());
 std::cout << __LINE__ << std::endl;
             obj["client_secret"].str(secret);
+std::cout << settings["client_id"].str() << std::endl;
+std::cout << secret << std::endl;
 std::cout << __LINE__ << std::endl;
         }
 
