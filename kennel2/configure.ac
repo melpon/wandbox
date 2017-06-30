@@ -118,6 +118,16 @@ else
 fi
 AC_SUBST(GOOGLEANALYTICS)
 
+AC_ARG_WITH(githubclient,
+[AS_HELP_STRING([--with-githubclient=Github Client ID],
+                [specify Github Client ID (default: "")])])
+if test "x$with_githubclient" != x; then
+  GITHUBCLIENT="$with_githubclient"
+else
+  GITHUBCLIENT=""
+fi
+AC_SUBST(GITHUBCLIENT)
+
 AC_MSG_CHECKING([for cppcms])
 AC_LANG([C++])
 AC_TRY_COMPILE(
