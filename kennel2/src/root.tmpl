@@ -211,7 +211,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
           </li>
           <% if login %>
             <li class="dropdown">
-              <a class="dropdown-toggle" href="#" data-toggle="dropdown"><img src="<%= login_info.avatar_url %>"> <%= login_info.name %> <b class="caret"></b></a>
+              <a class="dropdown-toggle" href="#" data-toggle="dropdown"><img class="wandbox-small-avatar" src="<%= login_info.avatar_url %>"> <%= login_info.name %> <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li>
                   <a href="<% url "user" using login_info.name %>">User</a>

@@ -66,6 +66,7 @@
 
 <% template includes() %>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="<% url "static" %>/css/root.css">
 
 <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
@@ -115,7 +116,7 @@
           </li>
           <% if login %>
             <li class="dropdown">
-              <a class="dropdown-toggle" href="#" data-toggle="dropdown"><img src="<%= login_info.avatar_url %>"> <%= login_info.name %> <b class="caret"></b></a>
+              <a class="dropdown-toggle" href="#" data-toggle="dropdown"><img class="wandbox-small-avatar" src="<%= login_info.avatar_url %>"> <%= login_info.name %> <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li>
                   <a href="<% url "user" using login_info.name %>">User</a>
@@ -138,7 +139,7 @@
 
 <div class="row">
   <div class="col-md-12">
-    <p><img src="<%= target.avatar_url %>"></img> <%= target.username %></p>
+    <p><img class="wandbox-medium-avatar" src="<%= target.avatar_url %>"> <%= target.username %></p>
   </div>
 </div>
 

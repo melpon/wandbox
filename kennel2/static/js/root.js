@@ -884,7 +884,7 @@ ResultWindow.prototype.permlink = function(compiler_info, code, codes, stdin, ou
   if (LOGIN_AVATAR_URL == null) {
     a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share</a>');
   } else {
-    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share by <img src="' + LOGIN_AVATAR_URL + '" alt="' + LOGIN_NAME + '"></img></a>');
+    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share by <img class="wandbox-small-avatar" src="' + LOGIN_AVATAR_URL + '" alt="' + LOGIN_NAME + '"></img></a>');
   }
   a.appendTo(this._permlink());
   a.click(function(event) {

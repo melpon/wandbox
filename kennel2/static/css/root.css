@@ -462,3 +462,13 @@ footer {
   font-size: 10px;
   margin-top: 10px;
 }
+
+.wandbox-small-avatar {
+  width: 20px;
+  height: 20px;
+}
+
+.wandbox-medium-avatar {
+  width: 40px;
+  height: 40px;
+}
