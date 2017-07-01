@@ -501,6 +501,18 @@ private:
         content::root c(service());
         c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
 
+        auto json = authenticate(session()["access_token"]);
+        if (json.is_undefined()) {
+            session().erase("access_token");
+        } else {
+            content::root::login_info_t info;
+            info.name = json["login"].str();
+            if (!json["avatar_url"].is_null()) {
+                info.avatar_url = json["avatar_url"].str() + "&s=20";
+            }
+            c.set_login(info);
+        }
+
         permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
         std::stringstream ss;
