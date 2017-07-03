@@ -2,27 +2,13 @@
 #define USER_H_INCLUDED
 
 #include "libs.h"
-#include "root.h"
 #include "permlink.h"
+#include "common.h"
 
 namespace content {
-    struct user : public cppcms::base_content {
-        user(cppcms::service& srv) {
-            login = false;
-            login_url = "https://github.com/login/oauth/authorize?client_id=" + srv.settings()["application"]["github"]["client_id"].str();
-            google_analytics = srv.settings()["application"]["google_analytics"].str();
+    struct user : public content::common {
+        user(cppcms::service& srv) : content::common(srv) {
         }
-
-        bool login;
-        std::string login_url;
-        typedef content::root::login_info_t login_info_t;
-        login_info_t login_info;
-        void set_login(content::root::login_info_t info) {
-            login = true;
-            login_info = info;
-        }
-
-        std::string google_analytics;
 
         struct target_user_info_t {
             std::string username;

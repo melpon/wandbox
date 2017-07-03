@@ -4,6 +4,7 @@ kennel_SOURCES = kennel.cpp skin_kennel.cpp
 # AM_CPPFLAGS = -DBINDIR=\"$(bindir)\" -DSYSCONFDIR=\"$(sysconfdir)\" -DBOOST_SPIRIT_USE_PHOENIX_V3=1 @CPPFLAGS@
 
 SKIN_KENNEL = \
+	common.tmpl \
 	root.tmpl \
 	user.tmpl \
 	nojs_root.tmpl \
