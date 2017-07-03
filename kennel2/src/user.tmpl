@@ -157,7 +157,7 @@
           <div class="col-md-12">
             <h4><a href="<% url "get-permlink" using code.permlink %>"><%= code.compiler %></a></h4>
             <p class="wandbox-datetime"><%= code.created_at %></p>
-            <pre><code><%= code.code | ext head %></code></pre>
+            <pre><code><%= code.code | ext head | escape %></code></pre>
           </div>
         </div>
       <% end item %>
