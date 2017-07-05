@@ -76,6 +76,11 @@ namespace content {
         bool using_permlink;
         std::string permlink;
 
+        void set_permlink(std::string permlink) {
+            this->using_permlink = true;
+            this->permlink = std::move(permlink);
+        }
+
         void set_twitter(std::string title, std::string description) {
             std::string tmpl = " - Wandbox";
             twitter_title = title.substr(0, 70 - tmpl.size()) + tmpl;

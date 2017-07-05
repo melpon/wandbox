@@ -308,6 +308,23 @@ private:
             }
         }
     }
+
+    cppcms::json::value get_author(std::string username) {
+        cppcms::json::value json;
+
+        std::vector<std::string> headers = {
+            "Content-Type: application/json; charset=utf-8",
+            "Accept: application/json",
+            "User-Agent: Wandbox",
+        };
+        auto resp = http_client::get("https://api.github.com/users/" + username, headers);
+        if (resp.status_code == 200) {
+            std::stringstream ss(resp.body);
+            json.load(ss, true, nullptr);
+        }
+        return json;
+    }
+
     void root() {
         if (!ensure_method_get()) {
             return;
@@ -517,9 +534,19 @@ private:
         auto result = pl.get_permlink(permlink_name);
         std::stringstream ss;
         result.save(ss, cppcms::json::compact);
-        c.using_permlink = true;
-        c.permlink = ss.str();
+        c.set_permlink(ss.str());
 
+        std::string username = result["github_user"].str();
+
+        std::string avatar_url;
+        if (!username.empty()) {
+            auto author = get_author(username);
+            if (author["avatar_url"].type() == cppcms::json::is_string) {
+                avatar_url = author["avatar_url"].str() + "&s=40";
+            }
+        }
+
+        auto auth = authenticate(session()["access_token"]);
         auto info = result["compiler-info"];
         set_twitter_if_info_exists(c, info, result["code"].str());
 
@@ -877,19 +904,9 @@ private:
 
         std::string avatar_url;
         {
-            std::vector<std::string> headers = {
-                "Content-Type: application/json; charset=utf-8",
-                "Accept: application/json",
-                "User-Agent: Wandbox",
-            };
-            auto resp = http_client::get("https://api.github.com/users/" + username, headers);
-            if (resp.status_code == 200) {
-                cppcms::json::value json;
-                std::stringstream ss(resp.body);
-                json.load(ss, true, nullptr);
-                if (json["avatar_url"].type() == cppcms::json::is_string) {
-                    avatar_url = json["avatar_url"].str() + "&s=40";
-                }
+            auto author = get_author(username);
+            if (author["avatar_url"].type() == cppcms::json::is_string) {
+                avatar_url = author["avatar_url"].str() + "&s=40";
             }
         }
 

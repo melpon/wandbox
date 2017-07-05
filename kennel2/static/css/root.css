@@ -472,3 +472,9 @@ footer {
   width: 40px;
   height: 40px;
 }
+
+.wandbox-userinfo {
+}
+.wandbox-hidden {
+  display: none;
+}

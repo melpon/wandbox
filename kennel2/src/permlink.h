@@ -220,7 +220,7 @@ public:
         auto code_id = r.get<int>("code_id");
 
         r = sql <<
-            "SELECT compiler, code, options, compiler_option_raw, runtime_option_raw, stdin, created_at "
+            "SELECT compiler, code, options, compiler_option_raw, runtime_option_raw, stdin, created_at, title, description, github_user, private "
             "FROM code "
             "WHERE id=?"
             << code_id
@@ -232,12 +232,16 @@ public:
         value["compiler-option-raw"] = r.get<std::string>("compiler_option_raw");
         value["runtime-option-raw"] = r.get<std::string>("runtime_option_raw");
         value["stdin"] = r.get<std::string>("stdin");
-        auto created_at = r.get<std::tm>("created_at");
-        auto time = std::mktime(&created_at);
-        auto local_created_at = *std::localtime(&time);
-        char buf[128];
-        auto size = std::strftime(buf, sizeof(buf), "%FT%T", &local_created_at);
-        value["created-at"] = std::string(buf, size);
+        auto tm = r.get<std::tm>("created_at");
+        auto created_at = std::mktime(&tm);
+        // auto local_created_at = *std::localtime(&time);
+        // char buf[128];
+        // auto size = std::strftime(buf, sizeof(buf), "%FT%T", &local_created_at);
+        value["created_at"] = created_at;
+        value["title"] = r.get<std::string>("title");
+        value["description"] = r.get<std::string>("description");
+        value["github_user"] = r.get<std::string>("github_user");
+        value["is_private"] = r.get<int>("private") != 0;
 
         r = sql <<
             "SELECT file, code "

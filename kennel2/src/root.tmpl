@@ -124,6 +124,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
     <% include compiler() %>
   </div>
   <div class="col-md-10" id="codepanel">
+    <% include userinfo() %>
     <% include editor() %>
     <div class="row">
       <div class="col-md-12">
@@ -311,6 +312,16 @@ var LANGUAGE_NAME_TO_TAB_ID = {
     </div>
   </div>
 <% end if %>
+<% end template %>
+
+<% template userinfo() %>
+<div class="row">
+  <div class="col-md-10">
+    <div class="wandbox-userinfo wandbox-hidden">
+      <p>test</p>
+    </div>
+  </div>
+</div>
 <% end template %>
 
 <% template editor() %>
