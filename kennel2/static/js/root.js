@@ -507,7 +507,7 @@ Editor.prototype._initialize = function() {
   this._add_editor($('#wandbox-editor-default'), this.is_legacy());
 
   $(this.settings_id).find('select').change(function() {
-    var value = $(this).val();
+    var value = $(this).val() || 'default';
     self.contents().each(function(i) {
       self.smart_editor($(this)).setOption('keyMap', value);
     });
