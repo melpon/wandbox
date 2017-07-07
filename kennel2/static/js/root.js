@@ -16,7 +16,7 @@ function post_code(compiler, result_container) {
   $('#wandbox-compile').hide();
   $('#wandbox-compiling').show();
 
-  var editor = new Editor('#editor-settings');
+  var editor = new Editor('#wandbox-editor-settings');
   var code = editor.getValue($('#wandbox-editor-default'));
   var codes = get_codes(editor);
   var stdin = new Stdin('#stdin');
@@ -24,7 +24,7 @@ function post_code(compiler, result_container) {
   result_container.post_code(compiler, code, codes, stdin.get_stdin());
 }
 function insert_template(template_name) {
-  var editor = new Editor('#editor-settings');
+  var editor = new Editor('#wandbox-editor-settings');
   $.getJSON(URL_API_TEMPLATE + template_name, function(json) {
     editor.setValue($('#wandbox-editor-default'), json.code);
   });
@@ -42,6 +42,45 @@ function update_compile_command(compiler) {
 
   var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + options_arguments.join(' ');
   $('#compile_command').html($('<code>').text(compile_command));
+}
+
+function set_author(author) {
+  html = '';
+
+  var created_at = new Date();
+  var created_at_html = '<p class="time-ago"' +
+                        '   datetime="' + author.created_at * 1000 + '"' +
+                        '   data-toggle="tooltip"' +
+                        '   data-placement="bottom"' +
+                        '   title="' + new Date(author.created_at * 1000).toString() + '"></p>';
+  if (author.username === undefined) {
+    html +=
+      '<div>' +
+      '  <p class="wandbox-author-createdby">created by</p>' +
+      '  <i>anonymous</i>' +
+      '  ' + created_at_html +
+      '</div>' +
+      '<div>' +
+      '  <div class="wandbox-medium-avatar"></div>' +
+      '</div>' +
+      '';
+  } else {
+    html +=
+      '<div>' +
+      '  <p class="wandbox-author-createdby">created by</p>' +
+      '  <a href="' + author.username_url + '">' + author.username + '</a>' +
+      '  ' + created_at_html +
+      '</div>' +
+      '<div>' +
+      '  <img class="wandbox-medium-avatar" src="' + author.avatar_url + '" />' +
+      '</div>' +
+      '';
+  }
+
+  $('.wandbox-author').empty();
+  $(html).appendTo($('.wandbox-author'));
+
+  $('[data-toggle="tooltip"]').tooltip();
 }
 
 function save(key, value) {
@@ -72,7 +111,7 @@ $(function() {
   });
   $('#wandbox-compiling').hide();
 
-  var editor = new Editor('#editor-settings');
+  var editor = new Editor('#wandbox-editor-settings');
   editor.onrun = function() {
     post_code(compiler, result_container);
   };
@@ -170,6 +209,8 @@ $(function() {
     });
 
     result_container.set_code(compiler, code.code, code.codes || [], code.stdin, code.outputs);
+
+    set_author(code.author);
   }
 
   update_compile_command(compiler);

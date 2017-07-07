@@ -12,10 +12,11 @@
 <script>
   $(function() {
     $(".wandbox-datetime").each(function() {
-      var timestamp = parseInt($(this).text());
+      var timestamp = parseInt($(this).attr('datetime'));
       var date = new Date(timestamp * 1000);
-      $(this).text(date.toString());
+      $(this).attr('title', date.toString());
     });
+    $('[data-toggle="tooltip"]').tooltip();
   });
 </script>
 <% end template %>
@@ -43,7 +44,9 @@
         <div class="row">
           <div class="col-md-12">
             <h4><a href="<% url "get-permlink" using code.permlink %>"><%= code.compiler %></a></h4>
-            <p class="wandbox-datetime"><%= code.created_at %></p>
+            <div>
+              <p class="wandbox-datetime time-ago" data-toggle="tooltip" data-placement="bottom" datetime="<% c++ out() << (code.created_at * 1000); %>"></p>
+            </div>
             <pre><code><%= code.code | ext head | escape %></code></pre>
           </div>
         </div>

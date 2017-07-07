@@ -124,7 +124,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
     <% include compiler() %>
   </div>
   <div class="col-md-10" id="codepanel">
-    <% include userinfo() %>
+    <% include author() %>
     <% include editor() %>
     <div class="row">
       <div class="col-md-12">
@@ -314,11 +314,10 @@ var LANGUAGE_NAME_TO_TAB_ID = {
 <% end if %>
 <% end template %>
 
-<% template userinfo() %>
+<% template author() %>
 <div class="row">
-  <div class="col-md-10">
-    <div class="wandbox-userinfo wandbox-hidden">
-      <p>test</p>
+  <div class="col-md-offset-8 col-md-4">
+    <div class="wandbox-author">
     </div>
   </div>
 </div>
@@ -351,7 +350,7 @@ var LANGUAGE_NAME_TO_TAB_ID = {
       </div>
     </div>
   </div>
-  <div class="col-md-2" id="editor-settings">
+  <div class="col-md-2" id="wandbox-editor-settings">
     <label>choose key binding:</label>
     <div class="checkbox">
       <select class="wandbox-select" size=3>

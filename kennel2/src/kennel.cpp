@@ -532,19 +532,29 @@ private:
 
         permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
-        std::stringstream ss;
-        result.save(ss, cppcms::json::compact);
-        c.set_permlink(ss.str());
 
         std::string username = result["github_user"].str();
 
-        std::string avatar_url;
+        cppcms::json::object author;
+        author["created_at"] = result["created_at"];
         if (!username.empty()) {
-            auto author = get_author(username);
-            if (author["avatar_url"].type() == cppcms::json::is_string) {
-                avatar_url = author["avatar_url"].str() + "&s=40";
+            auto json = get_author(username);
+            if (json["avatar_url"].type() == cppcms::json::is_string) {
+                std::string avatar_url = json["avatar_url"].str() + "&s=40";
+                author["avatar_url"] = avatar_url;
+                author["username"] = username;
+                std::stringstream url_ss;
+                mapper().map(url_ss, "user", username);
+                author["username_url"] = url_ss.str();
             }
         }
+
+        result["author"].object(author);
+
+        std::stringstream ss;
+        result.save(ss, cppcms::json::compact);
+
+        c.set_permlink(ss.str());
 
         auto auth = authenticate(session()["access_token"]);
         auto info = result["compiler-info"];

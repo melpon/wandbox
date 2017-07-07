@@ -473,8 +473,39 @@ footer {
   height: 40px;
 }
 
-.wandbox-userinfo {
+.wandbox-author {
+  float: right;
+  border-bottom: solid 1px #e6e6e6;
+  padding-bottom: 5px;
+  display: inline;
+  text-align: right;
+}
+.wandbox-author > div:first-of-type {
+  padding-right: 5px;
+  margin-top: -5px;
+}
+.wandbox-author > div {
+  float: left;
+}
+.wandbox-author .wandbox-author-createdby {
+  font-size: 12px;
+}
+.wandbox-author p {
+  margin: 0px;
+}
+.wandbox-author .time-ago {
+  font-size: 10px;
+  color: #888;
 }
 .wandbox-hidden {
   display: none;
+}
+#wandbox-editor-settings > label {
+  margin-top: 10px;
+}
+#wandbox-editor-settings > .checkbox:first-of-type {
+  margin-top: 0px;
+}
+.wandbox-datetime {
+  display: inline;
 }

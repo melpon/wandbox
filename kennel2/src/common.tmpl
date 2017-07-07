@@ -25,6 +25,14 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/timeago.js/3.0.2/timeago.min.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        var timeAgo = timeago();
+        timeAgo.render(document.querySelectorAll('.time-ago'));
+      });
+    </script>
+
     <script>
       document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
     </script>
