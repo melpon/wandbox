@@ -381,23 +381,20 @@ var LANGUAGE_NAME_TO_TAB_ID = {
 <% template result_container() %>
 <div class="row">
   <div class="col-md-10">
-    <div id="result-container">
-      <div class="tabbable tabs-left">
-        <ul class="nav nav-tabs"></ul>
-      </div>
-      <div class="tab-content"></div>
+    <div id="wandbox-output-window">
+      <div class="wandbox-output-window"></div>
     </div>
   </div>
   <div class="col-md-2">
-    <div id="result-container-settings">
+    <div id="wandbox-result-settings">
       <div class="checkbox">
         <label>
-          <input class="nowrap-output-window" type="checkbox" value="nowrap-output-window">No Wrap</input>
+          <input class="wandbox-result-settings-nowrap" type="checkbox" value="wandbox-result-settings-nowrap">No Wrap</input>
         </label>
       </div>
       <div class="checkbox">
         <label>
-          <input class="expand-output-window" type="checkbox" value="expand-output-window">Expand</input>
+          <input class="wandbox-result-settings-expand" type="checkbox" value="wandbox-result-settings-expand">Expand</input>
         </label>
       </div>
     </div>

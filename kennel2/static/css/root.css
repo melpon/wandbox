@@ -219,39 +219,14 @@ footer {
 
 /* result_container() */
 
-#result-container {
-  overflow: hidden;
-  background-color: #ddd;
-}
-#result-container > .tab-content {
-  width: 90%;
-  float: left;
-  margin-left: 0px;
-  min-width: 74px;
-}
-#result-container .tabs-left > .nav-tabs {
-  margin-right: 1px;
-  width: 100%;
-}
-#result-container .tabs-left {
-  float: left;
-  width: 10%;
-}
-#result-container .nav > li > a {
-  position: static;
-}
-
-.permlink {
-  background-color: #888888;
-}
-.output-window {
+.wandbox-output-window {
   margin: 0px;
 
   background-color: #000000;
   height: 300px;
   overflow-y: scroll;
 }
-.output-window pre {
+.wandbox-output-window pre {
   margin: 0px 0px 10px;
   padding: 0px;
 
@@ -259,29 +234,30 @@ footer {
   color: #ffffff;
   border: 0px;
   font-family: "Courier New", monospace;
+  white-space: pre-line;
 }
-.output-window .CompilerMessageE {
+.wandbox-output-window .CompilerMessageE {
   color: #ff0000;
 }
-.output-window .StdOut {
+.wandbox-output-window .StdOut {
 }
-.output-window .Control {
+.wandbox-output-window .Control {
   color: #00ff00;
 }
-.output-window .Signal {
+.wandbox-output-window .Signal {
   color: #ff0000;
 }
-.output-window .ExitCode {
+.wandbox-output-window .ExitCode {
   color: #ff00ff;
 }
 
-.expand .output-window {
+.expand.wandbox-output-window {
   min-height: 300px;
   height: auto;
 }
 
-.nowrap .output-window pre {
-  word-wrap: normal;
+.nowrap.wandbox-output-window pre {
+  white-space: pre;
 }
 
 .wandbox-current-compiler-text {

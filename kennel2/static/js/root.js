@@ -96,7 +96,7 @@ $(function() {
   // $.cookie.json = true;
   $('[data-toggle="tooltip"]').tooltip();
 
-  var result_container = new ResultContainer('#result-container', '#result-container-settings')
+  var result_container = new ResultContainer('#wandbox-output-window', '#wandbox-result-settings')
   result_container.onfinish = function() {
     $('#wandbox-compile').show();
     $('#wandbox-compiling').hide();
@@ -772,72 +772,38 @@ Editor.prototype.deserialize = function(settings) {
 
 /* result_container */
 
-function ResultContainer(id, settings_id) {
+function ResultContainer(window_id, settings_id) {
   var self = this;
 
-  this.id = id;
+  this.window_id = window_id;
   this.settings_id = settings_id;
-  this.name = 1;
   this.running = false;
 
-  $(this.settings_id).find('input.nowrap-output-window').change(function(e) {
-    var content = $(self.id + ' > .tab-content');
+  $(this.settings_id).find('input.wandbox-result-settings-nowrap').change(function(e) {
+    var content = $(self.window_id + ' .wandbox-output-window');
     $(e.target).prop('checked') ? content.addClass('nowrap') : content.removeClass('nowrap')
     if (self.result_changed)
         self.result_changed();
   });
-  $(this.settings_id).find('input.expand-output-window').change(function(e) {
-    var content = $(self.id + ' > .tab-content');
+  $(this.settings_id).find('input.wandbox-result-settings-expand').change(function(e) {
+    var content = $(self.window_id + ' .wandbox-output-window');
     $(e.target).prop('checked') ? content.addClass('expand') : content.removeClass('expand')
     if (self.result_changed)
         self.result_changed();
   });
 }
 
-ResultContainer.prototype._nav_tabs = function() {
-  return $(this.id + ' .tabbable ul');
-}
-
-ResultContainer.prototype._tab_content = function() {
-  return $(this.id + ' > .tab-content');
-}
-
-ResultContainer.prototype._next_name = function() {
-  return this.name++;
-}
-
-ResultContainer.prototype._post_init = function(compiler, code, codes, name) {
+ResultContainer.prototype._post_init = function() {
   var self = this;
-
-  var TAB_PREFIX = 'result-container-tab-';
-
-  var id_name = TAB_PREFIX + name;
-  var tab = $('<li><button type="button" class="close" href="#">&times;</button><a data-toggle="tab" href="#' + id_name + '">#' + name + '</a></li>');
-  var content = $('<div class="tab-pane active result-window" id="' + id_name + '">');
-
-  var close = tab.find('.close');
-  close.click(function() {
-    if (tab.hasClass('active')) {
-      tab.prev().find('a').tab('show');
-      tab.next().find('a').tab('show');
-    }
-    tab.remove();
-    content.remove();
-  });
-
-  this._nav_tabs().prepend(tab);
-  this._tab_content().prepend(content);
-
-  tab.find('a').tab('show');
-
-  var result_window = new ResultWindow('#' + id_name, name);
+  $(this.window_id + ' .wandbox-output-window').empty();
+  var result_window = new ResultWindow(this.window_id);
   result_window.onfinish = function() {
     self.running = false;
     if (self.onfinish)
       self.onfinish();
   };
   return result_window;
-}
+};
 
 ResultContainer.prototype.post_code = function(compiler, code, codes, stdin) {
   if (this.running) {
@@ -845,30 +811,30 @@ ResultContainer.prototype.post_code = function(compiler, code, codes, stdin) {
   }
   this.running = true;
 
-  var result_window = this._post_init(compiler, code, codes, this._next_name());
+  result_window = this._post_init();
   result_window.post_code(compiler, code, codes, stdin);
 }
 
 ResultContainer.prototype.set_code = function(compiler, code, codes, stdin, outputs) {
-  var result_window = this._post_init(compiler, code, codes, 'permlink');
-  result_window.set_code(compiler, code, codes, stdin, outputs);
+  var result_window = this._post_init();
+  result_window.set_output(outputs);
 }
 
 ResultContainer.prototype.expand = function(value) {
-  var eexpand = $(this.settings_id).find('input.expand-output-window');
+  var eexpand = $(this.settings_id).find('input.wandbox-result-settings-expand');
   eexpand.prop('checked', value);
   return eexpand;
 }
 
 ResultContainer.prototype.serialize = function() {
   return {
-    nowrap: $(this.settings_id).find('input.nowrap-output-window').prop('checked'),
-    expand: $(this.settings_id).find('input.expand-output-window').prop('checked'),
+    nowrap: $(this.settings_id).find('input.wandbox-result-settings-nowrap').prop('checked'),
+    expand: $(this.settings_id).find('input.wandbox-result-settings-expand').prop('checked'),
   };
 }
 
 ResultContainer.prototype.deserialize = function(settings) {
-  var enowrap = $(this.settings_id).find('input.nowrap-output-window');
+  var enowrap = $(this.settings_id).find('input.wandbox-result-settings-nowrap');
   enowrap.prop('checked', settings.nowrap);
 
   var eexpand = this.expand(settings.expand);
@@ -887,175 +853,81 @@ function parse(str) {
   };
 }
 
-function random_string(n) {
-    var a = 'abcdefghijklmnopqrstuvwxyz'
-    var s = '';
-    for (var i = 0; i < n; i++) {
-        s += a[Math.floor(Math.random() * a.length)];
-    }
-    return s;
-}
-
-function ResultWindow(id, name_counter) {
+function ResultWindow(id) {
   this.id = id;
-  this.name_counter = name_counter
-  $(this.id).empty();
-  var permlink = $('<div class="permlink"></div>');
-  var code = $('<div class="wandbox-code-window"></div>');
-  var output = $('<div class="output-window"></div>');
-  $(this.id).append(permlink);
-  $(this.id).append(code);
-  $(this.id).append(output);
 }
 
-ResultWindow.prototype._permlink = function() {
-  return $(this.id).find('.permlink');
-}
-ResultWindow.prototype._code_window = function() {
-  return $(this.id).find('.wandbox-code-window');
-}
 ResultWindow.prototype._output_window = function() {
-  return $(this.id).find('.output-window');
+  return $(this.id).find('.wandbox-output-window');
 }
 
-ResultWindow.prototype.permlink = function(compiler_info, code, codes, stdin, outputs) {
-  var self = this;
+//ResultWindow.prototype.permlink = function(compiler_info, code, codes, stdin, outputs) {
+//  var self = this;
+//
+//  var a;
+//  if (LOGIN_AVATAR_URL == null) {
+//    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share</a>');
+//  } else {
+//    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share by <img class="wandbox-small-avatar" src="' + LOGIN_AVATAR_URL + '" alt="' + LOGIN_NAME + '"></img></a>');
+//  }
+//  a.appendTo(this._permlink());
+//  a.click(function(event) {
+//    event.preventDefault();
+//    self.post_permlink(compiler_info, code, codes, stdin, outputs);
+//  });
+//}
 
-  var a;
-  if (LOGIN_AVATAR_URL == null) {
-    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share</a>');
-  } else {
-    a = $('<a href="#" class="btn btn-default"><span class="glyphicon glyphicon-share"></span> Share by <img class="wandbox-small-avatar" src="' + LOGIN_AVATAR_URL + '" alt="' + LOGIN_NAME + '"></img></a>');
-  }
-  a.appendTo(this._permlink());
-  a.click(function(event) {
-    event.preventDefault();
-    self.post_permlink(compiler_info, code, codes, stdin, outputs);
-  });
-}
-
-ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdin, outputs) {
-  var self = this;
-
-  var pm = this._permlink().find('a');
-  if (pm.hasClass('disable')) return;
-  pm.addClass('disable');
-
-  outputs = $.map(outputs, function(e) {
-    return { type: e.type, output: e.output };
-  });
-
-  var data = {
-    compiler: compiler_info.selected_compiler,
-    code: code,
-    codes: codes,
-    stdin: stdin,
-    options: compiler_info.compile_options,
-    'compiler-option-raw': compiler_info.compiler_option_raw,
-    'runtime-option-raw': compiler_info.runtime_option_raw,
-    outputs: outputs,
-    login: LOGIN_NAME != null,
-  };
-
-  $.post(URL_PERMLINK, JSON.stringify(data),
-    function(json) {
-      if (!json.success) {
-        pm.removeClass('disable');
-        return;
-      }
-
-      pm.remove();
-
-      var url = URL_PERMLINK + '/' + json.link;
-      $('<a href="' + url + '" target="_blank" id="permlink">URL</a>')
-        .appendTo(self._permlink());
-
-      var xs = document.URL.split('/');
-      var abs_url =  xs[0] + "//" + xs[2] + url;
-      var div = $('<div></div>').appendTo(self._permlink());
-      twttr.widgets.createShareButton(
-        abs_url,
-        div[0],
-        function() { },
-        {
-          count: 'none',
-          //text: 'wandbox'
-        });
-
-      window.history.pushState(null, null, url);
-    });
-}
-
-ResultWindow.prototype.code_window = function(compiler_info, code, codes, stdin) {
-  var self = this;
-  var header_id = 'wandbox-resultwindow-code-header-' + this.name_counter;
-  var body_id = 'wandbox-resultwindow-code-body-' + this.name_counter;
-  var code_window = $(
-    '<div class="wandbox-code-window-code panel panel-default">' +
-    '  <a' +
-    '    id="' + header_id + '"' +
-    '    data-toggle="collapse" href="#' + body_id + '"' +
-    '    aria-expanded="true" class=""' +
-    '  >' +
-    '    Code' +
-    '  </a>' +
-    '  <div' +
-    '    id="' + body_id + '"' +
-    '    class="panel-collapse collapse"' +
-    '  >' +
-    '    <div class="panel-body">' +
-    '      <div class="wandbox-resultwindow-compiler"></div>' +
-    '      <div class="wandbox-resultwindow-code">' +
-    '        <ul class="nav nav-tabs" role="tablist"></ul>' +
-    '        <div class="tab-content"></div>' +
-    '      </div>' +
-    '      <div class="wandbox-resultwindow-stdin"></div>' +
-    '    </div>' +
-    '  </div>' +
-    '</div>' +
-  '')
-  code_window.find('a').click(function(e) {
-    $($(this).attr('href')).collapse('toggle');
-  });
-  var make_code_header = function(n, active, file_name) {
-    var body_id = 'wandbox-resultwindow-code-body-' + self.name_counter + '-' + n;
-    var li = $(
-      '<li class="' + (active ? 'active' : '') + '">' +
-      '  <a class="" href="#' + body_id + '" role="tab" data-toggle="tab">' +
-      '    <i class="glyphicon glyphicon-file"></i>' +
-      '    <span></span>' +
-      '  </a>' +
-      '</li>' +
-    '');
-    li.find('a > span').text(file_name);
-    return li;
-  };
-  var make_code_body = function(n, active, body) {
-    var id = 'wandbox-resultwindow-code-body-' + self.name_counter + '-' + n;
-    var content = $(
-      '<div' +
-      '  id="' + id + '"' +
-      '  role="tabpanel"' +
-      '  class="tab-pane ' + (active ? 'active' : '') + '"' +
-      '>' +
-      '</div>' +
-    '');
-    content.append($('<pre>').text(body));
-    return content;
-  };
-  var compiler_data = compiler_info.compiler_data;
-
-  code_window.find('.wandbox-resultwindow-code > ul').append(make_code_header(0, true, ''));
-  code_window.find('.wandbox-resultwindow-code > div').append(make_code_body(0, true, code));
-  for (var i = 0; i < codes.length; i++) {
-    code_window.find('.wandbox-resultwindow-code > ul').append(make_code_header(i + 1, false, codes[i].file));
-    code_window.find('.wandbox-resultwindow-code > div').append(make_code_body(i + 1, false, codes[i].code));
-  }
-  code_window.find('.wandbox-resultwindow-stdin').append($('<pre>').text(stdin));
-  code_window.find('.wandbox-resultwindow-compiler').append(compiler_data);
-
-  this._code_window().append(code_window);
-}
+//ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdin, outputs) {
+//  var self = this;
+//
+//  var pm = this._permlink().find('a');
+//  if (pm.hasClass('disable')) return;
+//  pm.addClass('disable');
+//
+//  outputs = $.map(outputs, function(e) {
+//    return { type: e.type, output: e.output };
+//  });
+//
+//  var data = {
+//    compiler: compiler_info.selected_compiler,
+//    code: code,
+//    codes: codes,
+//    stdin: stdin,
+//    options: compiler_info.compile_options,
+//    'compiler-option-raw': compiler_info.compiler_option_raw,
+//    'runtime-option-raw': compiler_info.runtime_option_raw,
+//    outputs: outputs,
+//    login: LOGIN_NAME != null,
+//  };
+//
+//  $.post(URL_PERMLINK, JSON.stringify(data),
+//    function(json) {
+//      if (!json.success) {
+//        pm.removeClass('disable');
+//        return;
+//      }
+//
+//      pm.remove();
+//
+//      var url = URL_PERMLINK + '/' + json.link;
+//      $('<a href="' + url + '" target="_blank" id="permlink">URL</a>')
+//        .appendTo(self._permlink());
+//
+//      var xs = document.URL.split('/');
+//      var abs_url =  xs[0] + "//" + xs[2] + url;
+//      var div = $('<div></div>').appendTo(self._permlink());
+//      twttr.widgets.createShareButton(
+//        abs_url,
+//        div[0],
+//        function() { },
+//        {
+//          count: 'none',
+//          //text: 'wandbox'
+//        });
+//
+//      window.history.pushState(null, null, url);
+//    });
+//}
 
 ResultWindow.prototype.to_compiler_info = function(compiler) {
   var selected_compiler = compiler.get_selected_compiler();
@@ -1063,29 +935,11 @@ ResultWindow.prototype.to_compiler_info = function(compiler) {
   var compiler_option_raw = compiler.get_selected_compiler_option_raw();
   var runtime_option_raw = compiler.get_selected_runtime_option_raw();
 
-  var compiler_data = (function(compiler) {
-    var data = compiler.get_selected_compiler_element().attr('data-full-name');
-    return $('<div><p>' + data + '</p></div>');
-  })(compiler);
-
-  var compile_command_code = (function(compiler) {
-    var command = compiler.get_selected_compiler_element().attr('data-full-name');
-    var compile_options = compiler.get_checked_compile_options().map(function(n,e) { return $(e).attr('data-flags'); });
-    var compiler_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_compiler_option_raw());
-    var runtime_options_arguments = Compiler.prototype.raw_to_arguments(compiler.get_selected_runtime_option_raw());
-    var options_arguments = compiler.get_selected_compiler_element().attr('data-options-raw') == 'compiler' ? compiler_options_arguments : runtime_options_arguments;
-
-    var compile_command = '$ ' + command + ' ' + compile_options.get().join(' ') + ' ' + options_arguments.join(' ');
-    return $('<code>' + compile_command + '</code>');
-  })(compiler);
-
   var compiler_info = {
     selected_compiler: selected_compiler,
     compile_options: compile_options,
     compiler_option_raw: compiler_option_raw,
     runtime_option_raw: runtime_option_raw,
-    compiler_data: compiler_data,
-    compile_command_code: compile_command_code,
   };
 
   return compiler_info;
@@ -1095,8 +949,6 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
   var self = this;
 
   var compiler_info = this.to_compiler_info(compiler);
-
-  this.code_window(compiler_info, code, codes, stdin);
 
   src = new PostEventSource(URL_COMPILE, {
       compiler: compiler_info.selected_compiler,
@@ -1111,10 +963,10 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
   var finalize = function() {
     src.close();
 
-    var outputs = self._output_window().find('pre').map(function(n,e) {
-        return { 'type': $(e).attr('data-type'), 'output': $(e).attr('data-text') };
-    });
-    self.permlink(compiler_info, code, codes, stdin, outputs);
+    //var outputs = self._output_window().find('pre').map(function(n,e) {
+    //    return { 'type': $(e).attr('data-type'), 'output': $(e).attr('data-text') };
+    //});
+    //self.permlink(compiler_info, code, codes, stdin, outputs);
 
     if (self.onfinish)
       self.onfinish();
@@ -1154,10 +1006,8 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
   }
 }
 
-ResultWindow.prototype.set_code = function(compiler, code, codes, stdin, outputs) {
+ResultWindow.prototype.set_output = function(outputs) {
   var self = this;
-  var compiler_info = self.to_compiler_info(compiler);
-  this.code_window(compiler_info, code, codes, stdin);
   $.each(outputs, function(n,e) {
     var type = e.type;
     var output = e.output;
