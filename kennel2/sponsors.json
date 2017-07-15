@@ -377,5 +377,9 @@
     , "url": ""
     , "due_date": "2018-07-04T23:59:59+09:00"
     }
+  , { "name": "@kdxu"
+    , "url": "https://twitter.com/kdxu"
+    , "due_date": "2018-07-17T23:59:59+09:00"
+    }
   ]
 }
