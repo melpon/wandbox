@@ -116,11 +116,7 @@ $(function() {
     post_code(compiler, result_container);
   };
   editor.editor_changed = function() {
-    if (editor.is_legacy()) {
-      $('#wandbox-compile').text('Run');
-    } else {
-      $('#wandbox-compile').text('Run (or Ctrl+Enter)');
-    }
+    $('#wandbox-compile').text('Run (or Ctrl+Enter)');
   };
 
   // create compiler
@@ -229,7 +225,6 @@ $(function() {
     $(this).hide();
     $(this).parent().find('.wandbox-hidden-runtime-option-raw').show();
   });
-  editor.focus_default();
 
   if (!USING_PERMLINK) {
     update_template_code();
@@ -470,17 +465,9 @@ Editor.prototype._to_editor = function(elem) {
   elem.data('editor', codemirror);
 }
 
-Editor.prototype._add_editor = function(elem, legacyVisible) {
+Editor.prototype._add_editor = function(elem) {
   var smart = $('<div class="wandbox-smart-editor"></div>').appendTo(elem);
-  var legacy = $('<textarea class="span12 wandbox-legacy-editor"></textarea>').appendTo(elem);
-
   this._to_editor(smart);
-
-  if (legacyVisible) {
-    smart.hide();
-  } else {
-    legacy.hide();
-  }
 }
 
 function _normalize_path(path) {
@@ -504,38 +491,16 @@ function _normalize_path(path) {
 Editor.prototype._initialize = function() {
   var self = this;
 
-  this._add_editor($('#wandbox-editor-default'), this.is_legacy());
+  this._add_editor($('#wandbox-editor-default'));
 
   $(this.settings_id).find('select').change(function() {
     var value = $(this).val() || 'default';
     self.contents().each(function(i) {
-      self.smart_editor($(this)).setOption('keyMap', value);
+      self.editor($(this)).setOption('keyMap', value);
     });
     if (self.editor_changed)
       self.editor_changed();
   }).change();
-  $(this.settings_id).find('input.use-legacy-editor').change(function() {
-    var legacy = $(this).prop('checked');
-    self.contents().each(function(i) {
-      if (legacy) {
-        var val = self.getValue($(this), false);
-        $(this).find('.wandbox-smart-editor').hide();
-        $(this).find('.wandbox-legacy-editor').show();
-      } else {
-        var val = self.getValue($(this), true);
-        $(this).find('.wandbox-smart-editor').show();
-        $(this).find('.wandbox-legacy-editor').hide();
-      }
-      self.setValue($(this), val);
-    });
-    if (legacy) {
-      $(self.settings_id).find('select').attr('disabled', 'disabled');
-    } else {
-      $(self.settings_id).find('select').removeAttr('disabled');
-    }
-    if (self.editor_changed)
-      self.editor_changed();
-  });
 
   $(this.settings_id).find('input.expand-editor').change(function(e) {
     var editor = $('.wandbox-smart-editor');
@@ -557,7 +522,7 @@ Editor.prototype._initialize = function() {
 
   $(this.settings_id).find('input.no-auto-indent').change(function(e) {
     self.contents().each(function(i) {
-      self.smart_editor($(this)).setOption('smartIndent', !($(e.target).prop('checked')));
+      self.editor($(this)).setOption('smartIndent', !($(e.target).prop('checked')));
     });
     if (self.editor_changed)
       self.editor_changed();
@@ -610,11 +575,11 @@ Editor.prototype._initialize = function() {
     }
   });
   $(document).on('shown.bs.tab', 'li a.wandbox-editor-name-tab', function (e) {
-    self.smart_editor($($(this).attr('href'))).refresh();
+    self.editor($($(this).attr('href'))).refresh();
     self.focus($($(this).attr('href')));
   });
   $(document).on('shown.bs.tab', 'li a#wandbox-editor-default-tab', function (e) {
-    self.smart_editor($($(this).attr('href'))).refresh();
+    self.editor($($(this).attr('href'))).refresh();
     self.focus($($(this).attr('href')));
   });
   $(document).on('focusout keypress', 'li .wandbox-editor-name-tab > .wandbox-renaming > input', function(e) {
@@ -666,7 +631,7 @@ Editor.prototype.addEditor = function(file_name, code) {
   '');
   this.name_counter += 1;
 
-  this._add_editor(content, this.is_legacy());
+  this._add_editor(content);
   this.setValue(content, code || '');
   $('#wandbox-editor-content').append(content);
 
@@ -679,17 +644,8 @@ Editor.prototype.contents = function() {
   return $('#wandbox-editor-content').children();
 }
 
-Editor.prototype.is_legacy = function() {
-  return $(this.settings_id).find('input.use-legacy-editor').prop('checked');
-}
-Editor.prototype.smart_editor = function(elem) {
-  return elem.find('.wandbox-smart-editor').data('editor');
-}
-Editor.prototype.legacy_editor = function(elem) {
-  return elem.find('.wandbox-legacy-editor');
-}
 Editor.prototype.editor = function(elem) {
-  return this.is_legacy() ? this.legacy_editor(elem) : this.smart_editor(elem);
+  return elem.find('.wandbox-smart-editor').data('editor');
 }
 
 Editor.prototype.focus = function(elem) {
@@ -699,26 +655,16 @@ Editor.prototype.focus_default = function() {
   this.editor($('#wandbox-editor-default')).focus();
 }
 
-Editor.prototype.getValue = function(elem, legacy) {
-  if (legacy === undefined)
-    legacy = this.is_legacy();
-  return legacy ? this.legacy_editor(elem).val() : this.smart_editor(elem).getValue();
+Editor.prototype.getValue = function(elem) {
+  return this.editor(elem).getValue();
 }
 
 Editor.prototype.setValue = function(elem, value) {
-  if (this.is_legacy()) {
-    this.legacy_editor(elem).val(value);
-  } else {
-    this.smart_editor(elem).setValue(value);
-  }
+  this.editor(elem).setValue(value);
 }
 
 Editor.prototype.insertValue = function(elem, value) {
-  if (this.is_legacy()) {
-    this.legacy_editor(elem).val(value);
-  } else {
-    this.smart_editor(elem).replaceSelection(value);
-  }
+  this.editor(elem).replaceSelection(value);
 }
 
 function _get_editor_mode(lang) {
@@ -733,7 +679,7 @@ Editor.prototype.setLanguage = function(lang) {
   $('#wandbox-editor-content').attr('data-language', lang);
   var self = this;
   this.contents().each(function(i) {
-    self.smart_editor($(this)).setOption('mode', _get_editor_mode(lang));
+    self.editor($(this)).setOption('mode', _get_editor_mode(lang));
   });
 }
 
@@ -746,7 +692,6 @@ Editor.prototype.expand = function(value) {
 Editor.prototype.serialize = function() {
   return {
     keybinding: $(this.settings_id).find('select').val(),
-    use_smart_editor: $(this.settings_id).find('input.use-legacy-editor').prop('checked'),
     no_auto_indent: $(this.settings_id).find('input.no-auto-indent').prop('checked'),
     expand_editor: $(this.settings_id).find('input.expand-editor').prop('checked'),
   };
@@ -756,16 +701,12 @@ Editor.prototype.deserialize = function(settings) {
   var ekey = $(this.settings_id).find('select');
   ekey.val(settings.keybinding);
 
-  var esmart = $(this.settings_id).find('input.use-legacy-editor');
-  esmart.prop('checked', settings.use_smart_editor);
-
   var eauto = $(this.settings_id).find('input.no-auto-indent');
   eauto.prop('checked', settings.no_auto_indent);
 
   var eexpand = this.expand(settings.expand_editor);
 
   ekey.change();
-  esmart.change();
   eauto.change();
   eexpand.change();
 }
