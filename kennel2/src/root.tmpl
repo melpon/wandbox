@@ -351,17 +351,32 @@ var LANGUAGE_NAME_TO_TAB_ID = {
     </div>
   </div>
   <div class="col-md-2" id="wandbox-editor-settings">
-    <label>choose key binding:</label>
+    <label>Editor settings:</label>
     <div class="checkbox">
-      <select class="wandbox-select" size=3>
-        <option value="default" selected>default</option>
-        <option value="vim">Vim</option>
-        <option value="emacs">Emacs</option>
+      <select class="wandbox-select">
+        <option value="default" selected>editor: default</option>
+        <option value="vim">editor: Vim</option>
+        <option value="emacs">editor: Emacs</option>
+      </select>
+    </div>
+    <div class="checkbox">
+      <select class="wandbox-spaces-or-tab">
+        <option value="spaces-2">tab: 2-spaces</option>
+        <option value="spaces-4" selected>tab: 4-spaces</option>
+        <option value="spaces-8">tab: 8-spaces</option>
+        <option value="tab">tab: TAB</option>
+      </select>
+    </div>
+    <div class="checkbox">
+      <select class="wandbox-tab-width">
+        <option value="tab-2">tab width: 2</option>
+        <option value="tab-4" selected>tab width: 4</option>
+        <option value="tab-8">tab width: 8</option>
       </select>
     </div>
     <div class="checkbox">
       <label>
-        <input class="no-auto-indent" type="checkbox" value="no-auto-indent">OFF Auto Indent</input>
+        <input class="smart-indent" type="checkbox" value="smart-indent" checked>Smart Indent</input>
       </label>
     </div>
     <div class="checkbox">

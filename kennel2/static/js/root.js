@@ -441,25 +441,28 @@ function Editor(settings_id) {
   }
 }
 
+function insert_tab_space(cm) {
+  var cursor = cm.getCursor()['ch'];
+  var indentUnit = cm.getOption("indentUnit");
+  var newCursor = Math.floor((cursor + indentUnit) / indentUnit) * indentUnit
+  var indentNum = newCursor - cursor;
+  var spaces = Array(indentNum + 1).join(" ");
+  cm.replaceSelection(spaces, "end", "+input");
+}
+
 Editor.prototype._to_editor = function(elem) {
   var self = this;
   var codemirror = CodeMirror(elem[0], {
     lineNumbers: true,
     theme: 'user',
     indentUnit: 4,
+    smartIndent: false,
     extraKeys: {
       'Ctrl-Enter': function() {
         if (self.onrun)
           self.onrun();
       },
-      Tab: function(cm) {
-        var cursor = cm.getCursor()['ch'];
-        var indentUnit = cm.getOption("indentUnit");
-        var newCursor = Math.floor((cursor + indentUnit) / indentUnit) * indentUnit
-        var indentNum = newCursor - cursor;
-        var spaces = Array(indentNum + 1).join(" ");
-        cm.replaceSelection(spaces, "end", "+input");
-      },
+      Tab: insert_tab_space,
     },
   });
   elem.data('editor', codemirror);
@@ -493,7 +496,7 @@ Editor.prototype._initialize = function() {
 
   this._add_editor($('#wandbox-editor-default'));
 
-  $(this.settings_id).find('select').change(function() {
+  $(this.settings_id).find('select.wandbox-select').change(function() {
     var value = $(this).val() || 'default';
     self.contents().each(function(i) {
       self.editor($(this)).setOption('keyMap', value);
@@ -501,6 +504,40 @@ Editor.prototype._initialize = function() {
     if (self.editor_changed)
       self.editor_changed();
   }).change();
+
+  $(this.settings_id).find('select.wandbox-spaces-or-tab').change(function(e) {
+    var name = $(this).val() || 'spaces-4';
+    $(this).val(name);
+    // name: 'spaces-N' or 'tab'
+    var xs = name.split('-');
+    var useTab = xs[0] == 'tab';
+    var indentUnit = xs.length >= 2 ? parseInt(xs[1], 10) : 0;
+    self.contents().each(function(i) {
+      var extraKeys = self.editor($(this)).getOption('extraKeys');
+      if (useTab) {
+        extraKeys.Tab = undefined;
+        self.editor($(this)).setOption('indentWithTabs', true);
+      } else {
+        extraKeys.Tab = insert_tab_space;
+        self.editor($(this)).setOption('indentUnit', indentUnit);
+        self.editor($(this)).setOption('indentWithTabs', false);
+      }
+    });
+    if (self.editor_changed)
+      self.editor_changed();
+  });
+  $(this.settings_id).find('select.wandbox-tab-width').change(function(e) {
+    var name = $(this).val() || 'tab-4';
+    $(this).val(name);
+    // name: 'tab-N'
+    var xs = name.split('-');
+    var tabSize = parseInt(xs[1], 10);
+    self.contents().each(function(i) {
+      self.editor($(this)).setOption('tabSize', tabSize);
+    });
+    if (self.editor_changed)
+      self.editor_changed();
+  });
 
   $(this.settings_id).find('input.expand-editor').change(function(e) {
     var editor = $('.wandbox-smart-editor');
@@ -520,9 +557,10 @@ Editor.prototype._initialize = function() {
       self.editor_changed();
   });
 
-  $(this.settings_id).find('input.no-auto-indent').change(function(e) {
+  $(this.settings_id).find('input.auto-indent').change(function(e) {
+    var smartIndent = $(e.target).prop('checked');
     self.contents().each(function(i) {
-      self.editor($(this)).setOption('smartIndent', !($(e.target).prop('checked')));
+      self.editor($(this)).setOption('smartIndent', smartIndent);
     });
     if (self.editor_changed)
       self.editor_changed();
@@ -691,23 +729,33 @@ Editor.prototype.expand = function(value) {
 
 Editor.prototype.serialize = function() {
   return {
-    keybinding: $(this.settings_id).find('select').val(),
-    no_auto_indent: $(this.settings_id).find('input.no-auto-indent').prop('checked'),
+    keybinding: $(this.settings_id).find('select.wandbox-select').val(),
+    spaces_or_tab: $(this.settings_id).find('select.wandbox-spaces-or-tab').val(),
+    tab_width: $(this.settings_id).find('select.wandbox-tab-width').val(),
+    smart_indent: $(this.settings_id).find('input.smart-indent').prop('checked'),
     expand_editor: $(this.settings_id).find('input.expand-editor').prop('checked'),
   };
 }
 
 Editor.prototype.deserialize = function(settings) {
-  var ekey = $(this.settings_id).find('select');
+  var ekey = $(this.settings_id).find('select.wandbox-select');
   ekey.val(settings.keybinding);
 
-  var eauto = $(this.settings_id).find('input.no-auto-indent');
-  eauto.prop('checked', settings.no_auto_indent);
+  var esot = $(this.settings_id).find('select.wandbox-spaces-or-tab');
+  esot.val(settings.spaces_or_tab);
+
+  var etabw = $(this.settings_id).find('select.wandbox-tab-width');
+  etabw.val(settings.tab_width);
+
+  var esmart = $(this.settings_id).find('input.smart-indent');
+  esmart.prop('checked', settings.smart_indent);
 
   var eexpand = this.expand(settings.expand_editor);
 
   ekey.change();
-  eauto.change();
+  esot.change();
+  etabw.change();
+  esmart.change();
   eexpand.change();
 }
 

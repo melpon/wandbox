@@ -22,6 +22,12 @@ footer {
 .wandbox-select {
   width: 100%;
 }
+.wandbox-spaces-or-tab {
+  width: 100%;
+}
+.wandbox-tab-width {
+  width: 100%;
+}
 
 # tabs-left and tabs-right is removed in bootstrap 3
 # http://stackoverflow.com/questions/18432577/stacked-tabs-in-bootstrap-3
