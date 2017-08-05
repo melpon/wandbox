@@ -557,7 +557,7 @@ Editor.prototype._initialize = function() {
       self.editor_changed();
   });
 
-  $(this.settings_id).find('input.auto-indent').change(function(e) {
+  $(this.settings_id).find('input.smart-indent').change(function(e) {
     var smartIndent = $(e.target).prop('checked');
     self.contents().each(function(i) {
       self.editor($(this)).setOption('smartIndent', smartIndent);
