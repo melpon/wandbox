@@ -385,5 +385,9 @@
     , "url": "https://twitter.com/oJADENo"
     , "due_date": "2018-08-31T23:59:59+09:00"
     }
+  , { "name": "hnokx"
+    , "url": "",
+    , "due_date": "2018-09-03T23:59:59+09:00"
+    }
   ]
 }
