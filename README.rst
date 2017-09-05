@@ -55,3 +55,9 @@ Boost.DI
 ~~~~~~~~
 
 `Boost.DI document <http://boost-experimental.github.io/di/examples/index.html>`_ is also using Wandbox on background.
+
+Stensal
+~~~~~~~
+
+`Stensal <https://stensal.io/>`_ is a tool to help developers find the cause of segmentation faults in a more intuitive way.
+It is using Wandbox on background.
