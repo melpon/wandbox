@@ -27,6 +27,10 @@
     , "url": "https://aiming-inc.com/"
     , "due_date": "2018-04-11T23:59:59+09:00"
     }
+  , { "name": "Stensal"
+    , "url": "https://stensal.io/"
+    , "due_date": "2018-09-06T23:59:59+09:00"
+    }
   ]
 , "personal":
   [ { "name": "voluntas"
