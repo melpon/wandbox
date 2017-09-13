@@ -397,5 +397,9 @@
     , "url": "https://twitter.com/ruche7"
     , "due_date": "2018-09-08T23:59:59+09:00"
     }
+  , { "name": "@MitsutakaTakeda"
+    , "url": "https://twitter.com/MitsutakaTakeda"
+    , "due_date": "2018-09-14T23:59:59+09:00"
+    }
   ]
 }
