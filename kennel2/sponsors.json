@@ -401,5 +401,9 @@
     , "url": "https://twitter.com/MitsutakaTakeda"
     , "due_date": "2018-09-14T23:59:59+09:00"
     }
+  , { "name": "@hitsujibane"
+    , "url": "https://twitter.com/hitsujibane"
+    , "due_date": "2018-09-23T23:59:59+09:00"
+    }
   ]
 }
