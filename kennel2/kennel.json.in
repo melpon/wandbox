@@ -8,12 +8,7 @@
     , "cattleshed":
         [{ "host" : "153.121.40.132"
          , "port" : 2012
-         }
-         ,
-         { "host" : "127.0.0.1"
-         , "port" : 2012
-         }
-         ]
+         }]
     , "google_analytics": "@googleanalytics@"
     , "sponsors": "@sponsorsfile@"
     , "github":
