@@ -1,0 +1,11 @@
+[Unit]
+Description=Frontend of Sandbox Compiler
+
+[Service]
+ExecStart=/usr/local/kennel2/bin/kennel --syslog -c /usr/local/kennel2/etc/kennel.json
+Restart=on-failure
+User=wandbox
+Group=wandbox
+
+[Install]
+WantedBy=multi-user.target
