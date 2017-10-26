@@ -47,7 +47,7 @@ document says:
   git clone https://github.com/melpon/cppcms.git
   mkdir cppcms_build
   cd cppcms_build
-  cmake ../cppcms/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/path/to/install -DDISABLE_SHARED=ON -DDISABLE_FCGI=ON -DDISABLE_SCGI=ON -DDISABLE_ICU_LOCALE=ON -DDISABLE_TCPCACHE=ON
+  cmake ../cppcms/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/path/to/install -DDISABLE_SHARED=ON -DDISABLE_SCGI=ON -DDISABLE_ICU_LOCALE=ON -DDISABLE_TCPCACHE=ON
   make
   sudo make install
 
@@ -70,7 +70,7 @@ NOTE: To be exact, CppDB is not required SQLite library. But, kennel require Cpp
   cd cppdb_build
   cmake ../cppdb/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/path/to/install -DSQLITE_BACKEND_INTERNAL=ON -DDISABLE_MYSQL=ON -DDISABLE_PQ=ON -DDISABLE_ODBC=ON
   make
-  make install
+  sudo make install
 
 \5. Install kennel.
 
