@@ -17,6 +17,6 @@ make
 cd ../
 '
 make -C ~wandbox/wandbox/kennel2 install
-stop kennel2 || true
+systemctl stop kennel
 sleep 1
-start kennel2
+systemctl start kennel
