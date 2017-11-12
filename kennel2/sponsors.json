@@ -409,5 +409,9 @@
     , "url": "https://twitter.com/zakkas783"
     , "due_date": "2018-10-07T23:59:59+09:00"
     }
+  , { "name": "@ueokande"
+    , "url": "https://twitter.com/ueokande"
+    , "due_date": "2018-11-14T23:59:59+09:00"
+    }
   ]
 }
