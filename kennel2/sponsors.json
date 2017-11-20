@@ -413,5 +413,9 @@
     , "url": "https://twitter.com/ueokande"
     , "due_date": "2018-11-14T23:59:59+09:00"
     }
+  , { "name": "sho2010"
+    , "url": ""
+    , "due_date": "2018-11-21T23:59:59+09:00"
+    }
   ]
 }
