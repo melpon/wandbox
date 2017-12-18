@@ -31,6 +31,10 @@
     , "url": "https://stensal.io/"
     , "due_date": "2018-09-06T23:59:59+09:00"
     }
+  , { "name": "株式会社ドットインストール"
+    , "url": "https://dotinstall.com/"
+    , "due_date": "2018-12-19T23:59:59+09:00"
+    }
   ]
 , "personal":
   [ { "name": "voluntas"
