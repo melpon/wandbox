@@ -169,7 +169,7 @@ This API accepts only "application/json" in a "Content-Type" header.
 Parameter
 ^^^^^^^^^
 
-Same as `POST /compile.json`_ Parameter.
+Same as `POST /compile.json`_ Parameter. But `save` option is not implemented now.
 
 Result
 ^^^^^^
