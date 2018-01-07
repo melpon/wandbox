@@ -9,6 +9,7 @@
 #include "user.h"
 #include "protocol.h"
 #include "eventsource.h"
+#include "ndjson.h"
 #include "permlink.h"
 #include "http_client.h"
 #include "../../cattleshed/src/syslogstream.cc"
@@ -51,6 +52,7 @@ public:
 
         dispatcher().assign("/api/list.json", &kennel::api_list, this);
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
+        dispatcher().assign("/api/compile.ndjson", &kennel::api_compile_ndjson, this);
         dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
         dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this, 1);
         mapper().assign("api-template", "/api/template/");
@@ -678,6 +680,54 @@ private:
         }
 
         return result;
+    }
+    void api_compile_ndjson() {
+        if (!ensure_method_post()) {
+            return;
+        }
+
+        auto value = json_post_data();
+        auto protos = make_protocols(value);
+        auto compiler = value["compiler"].str();
+        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
+        auto save = value.get("save", false);
+        // find compiler info.
+        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
+            [&compiler](cppcms::json::value& v) {
+                return v["name"].str() == compiler;
+            });
+        // error if the compiler is not found
+        if (it == compiler_infos.array().end()) {
+            throw std::exception();
+        }
+        auto index = static_cast<std::size_t>((*it)["provider"].number());
+
+        booster::shared_ptr<cppcms::json::value> outputs(new cppcms::json::value());
+        outputs->array({});
+
+        auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
+        nd->send_header();
+        nd->context->response().set_header("Access-Control-Allow-Origin", "*");
+        send_command_async(service(), index, protos, [nd, save, outputs, value](const booster::system::error_code& e, const protocol& proto) {
+            if (e)
+                return (void)(std::clog << e.message() << std::endl);
+            cppcms::json::value json;
+            json["type"] = proto.command;
+            json["data"] = proto.contents;
+            nd->send(json, true);
+            //std::clog << proto.command << ":" << proto.contents << std::endl;
+
+            if (save) {
+                cppcms::json::value v;
+                v["type"] = proto.command;
+                v["output"] = proto.contents;
+                outputs->array().push_back(v);
+
+                if (proto.command == "Control" && proto.contents == "Finish") {
+                    // TODO
+                }
+            }
+        });
     }
     void api_permlink(std::string permlink_name) {
         if (!ensure_method_get()) {

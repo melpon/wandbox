@@ -92,7 +92,7 @@ POST /compile.json
 
 Compile posted code.
 
-This API accepts "application/json" in a "Content-Type" header.
+This API accepts only "application/json" in a "Content-Type" header.
 
 Parameter
 ^^^^^^^^^
@@ -158,6 +158,84 @@ Sample
     "compiler_error":"prog.cc: In function 'int main()':\n\u003ccommand-line\u003e:0:3: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout \u003c\u003c \"hoge\" \u003c\u003c std::endl; }\n                  ^\n",
     "program_output":"hoge\n"
   }
+
+POST /compile.ndjson
+--------------------
+
+Compile posted code and return multiple JSONs as [NDJSON](http://specs.okfnlabs.org/ndjson/)
+
+This API accepts only "application/json" in a "Content-Type" header.
+
+Parameter
+^^^^^^^^^
+
+Same as `POST /compile.json`_ Parameter.
+
+Result
+^^^^^^
+
+Return multiple JSONs as NDJSON.
+
+In the response header, ``Content-Type`` is ``application/x-ndjson`` and ``Transfer-Encoding`` is ``chunked``.
+
+``{"type": "Control": "data": "Start"}``
+  Start compilation and running.
+``{"type": "Control": "data": "Finish"}``
+  Finish compilation and running.
+``{"type": "CompilerMessageS": "data": <string>}``
+  Stdout output by the compiler.
+``{"type": "CompilerMessageE": "data": <string>}``
+  Stderr output by the compiler.
+``{"type": "StdOut", "data": <string>}``
+  Stdout output by the program.
+``{"type": "StdErr", "data": <string>}``
+  Stderr output by the program.
+``{"type": "ExitCode", "data": <string>}``
+  Exit code returned by the program.
+``{"type": "Signal", "data": <string>}``
+  Signal code.
+
+Sample
+^^^^^^
+
+::
+
+  $ cat test.json
+  {
+    "code":"#include <iostream>\nint main() { int x = 0; std::cout << \"hoge\" << std::endl; }",
+    "options": "warning,gnu++1y",
+    "compiler": "gcc-head",
+    "compiler-option-raw": "-Dx=hogefuga\n-O3"
+  }
+  $ curl -H "Content-type: application/json" -d "`cat test.json`"  https://wandbox.org/api/compile.json
+  22
+  {"data":"Start","type":"Control"}
+  
+  117
+  {"data":"prog.cc: In function 'int main()':\n<command-line>: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout << \"hoge\" << std::endl; }\n                  ^\n","type":"CompilerMessageE"}
+  
+  22
+  {"data":"hoge\n","type":"StdOut"}
+  
+  1f
+  {"data":"0","type":"ExitCode"}
+  
+  23
+  {"data":"Finish","type":"Control"}
+  
+  0
+  
+
+The response string by curl is chunked by ``Transfer-Encoding: chunked``.
+Joining chunked strings will result in the following.
+
+::
+
+  {"data":"Start","type":"Control"}
+  {"data":"prog.cc: In function 'int main()':\n<command-line>: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout << \"hoge\" << std::endl; }\n                  ^\n","type":"CompilerMessageE"}
+  {"data":"hoge\n","type":"StdOut"}
+  {"data":"0","type":"ExitCode"}
+  {"data":"Finish","type":"Control"}
 
 GET /permlink/:link
 -------------------
