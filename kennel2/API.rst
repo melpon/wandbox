@@ -176,7 +176,7 @@ Result
 
 Return multiple JSONs as NDJSON.
 
-In the response header, ``Content-Type`` is ``application/x-ndjson`` and ``Transfer-Encoding`` is ``chunked``.
+``Content-Type`` in the response header is ``application/x-ndjson``.
 
 ``{"type": "Control": "data": "Start"}``
   Start compilation and running.
@@ -208,29 +208,6 @@ Sample
     "compiler-option-raw": "-Dx=hogefuga\n-O3"
   }
   $ curl -H "Content-type: application/json" -d "`cat test.json`"  https://wandbox.org/api/compile.json
-  22
-  {"data":"Start","type":"Control"}
-  
-  117
-  {"data":"prog.cc: In function 'int main()':\n<command-line>: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout << \"hoge\" << std::endl; }\n                  ^\n","type":"CompilerMessageE"}
-  
-  22
-  {"data":"hoge\n","type":"StdOut"}
-  
-  1f
-  {"data":"0","type":"ExitCode"}
-  
-  23
-  {"data":"Finish","type":"Control"}
-  
-  0
-  
-
-The response string by curl is chunked by ``Transfer-Encoding: chunked``.
-Joining chunked strings will result in the following.
-
-::
-
   {"data":"Start","type":"Control"}
   {"data":"prog.cc: In function 'int main()':\n<command-line>: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout << \"hoge\" << std::endl; }\n                  ^\n","type":"CompilerMessageE"}
   {"data":"hoge\n","type":"StdOut"}

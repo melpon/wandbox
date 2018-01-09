@@ -8,10 +8,10 @@
 
 class ndjson {
     void send_chunk(const std::string& buf, bool flush) const {
-        std::ostringstream oss;
-        oss << std::hex << buf.size();
+        //std::ostringstream oss;
+        //oss << std::hex << buf.size();
         //std::clog << oss.str() << "\r\n" << buf << "\r\n" << std::flush;
-        context->response().out() << oss.str() << "\r\n" << buf << "\r\n";
+        context->response().out() << buf;
         if (flush)
             context->response().out() << std::flush;
     }
@@ -45,7 +45,6 @@ public:
         context->response().protocol(1, 1);
         context->response().status(200);
         context->response().content_type("application/x-ndjson");
-        context->response().transfer_encoding("chunked");
     }
     void close() const {
         send_chunk("", true);
