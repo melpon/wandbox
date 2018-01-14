@@ -296,22 +296,36 @@ public:
     }
 
     // FIXME(melpon): GitHub login is not a category of permlink
-    void login_github(std::string username, std::string github_access_token, std::string wandbox_access_token) {
+    std::string login_github(std::string username, std::string github_access_token, std::string wandbox_access_token) {
         std::time_t now_time = std::time(nullptr);
         std::tm now = *std::gmtime(&now_time);
 
         // insert or update
-        sql <<
+        cppdb::statement stat;
+        stat = sql <<
             "INSERT OR REPLACE "
             "INTO github_user (username, created_at, updated_at, github_access_token, wandbox_access_token) "
-            "VALUES (?, COALESCE((SELECT created_at FROM github_user WHERE username=?), ?), ?, ?, ?)"
+            "VALUES (?, COALESCE((SELECT created_at FROM github_user WHERE username=?), ?), ?, ?, COALESCE((SELECT wandbox_access_token FROM github_user WHERE username=?), ?))"
             << username
             << username
             << now
             << now
             << github_access_token
+            << username
             << wandbox_access_token
+            << cppdb::exec;
+        auto user_id = stat.last_insert_id();
+        cppdb::result r;
+        r = sql <<
+            "SELECT wandbox_access_token "
+            "FROM github_user "
+            "WHERE id=?"
+            << user_id
             << cppdb::row;
+        if (r.empty()) {
+            return "";
+        }
+        return r.get<std::string>("wandbox_access_token");
     }
     bool exists_github_user(std::string username) {
         cppdb::result r;

@@ -857,7 +857,7 @@ private:
             if (!auth.is_undefined()) {
                 permlink pl(service());
                 auto wandbox_access_token = make_random_name(32);
-                pl.login_github(auth["login"].str(), access_token, wandbox_access_token);
+                wandbox_access_token = pl.login_github(auth["login"].str(), access_token, wandbox_access_token);
 
                 session()["access_token"] = wandbox_access_token;
                 query_string = "?session=" + wandbox_access_token;
