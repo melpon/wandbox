@@ -252,6 +252,33 @@ Sample
     "code": "// This file is a \"Hello, world!\" in C++ language by gcc for wandbox.\n#include <iostream>\n#include <cstdlib>\n\nint main()\n{\n    std::cout << \"Hello, Wandbox!\" << std::endl;\n}\n\n// C++ language references:\n//   https://msdn.microsoft.com/library/3bstk3k5.aspx\n//   http://www.cplusplus.com/\n//   https://isocpp.org/\n//   http://www.open-std.org/jtc1/sc22/wg21/\n\n// Boost libraries references:\n//   http://www.boost.org/doc/\n"
   }
 
+GET /user.json
+--------------
+
+Check the user is logged in.
+
+Parameter
+^^^^^^^^^
+
+session
+  Session key passed by Wandbox.
+
+Result
+^^^^^^
+
+login
+  ``true`` If the user is logged in.
+username
+  The user's GitHub login name If ``login`` parameter is ``true``, otherwise the parameter is not set.
+
+Sample
+^^^^^^
+
+::
+
+  $ curl https://wandbox.org/api/user.json?session=zi35OwVNg0SwKMQo3VpfZeWxuXSyQ2nA
+  {"login":true,"username":"melpon"}
+
 Plugin
 ------------
 

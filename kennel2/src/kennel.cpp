@@ -50,6 +50,7 @@ public:
 
         dispatcher().assign("/login/github/callback", &kennel::get_github_callback, this);
 
+        dispatcher().assign("/api/user.json", &kennel::api_user, this);
         dispatcher().assign("/api/list.json", &kennel::api_list, this);
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
         dispatcher().assign("/api/compile.ndjson", &kennel::api_compile_ndjson, this);
@@ -582,6 +583,27 @@ private:
             response().content_type(content_type);
             response().out() << f.rdbuf();
         }
+    }
+
+    void api_user() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
+
+        auto access_token = get_query_string("session");
+        permlink pl(service());
+        auto auth = authenticate(pl.get_github_access_token(access_token));
+        cppcms::json::value resp;
+        if (auth.is_undefined()) {
+            resp["login"] = false;
+        } else {
+            resp["login"] = true;
+            resp["username"] = auth["login"].str();
+        }
+        resp.save(response().out(), cppcms::json::compact);
     }
 
     void api_list() {
