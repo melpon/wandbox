@@ -125,6 +125,11 @@ private:
         sql <<
             "CREATE INDEX IF NOT EXISTS github_user_list ON code (github_user, private, created_at DESC)"
             << cppdb::exec;
+        add_column("github_user", "github_access_token", "VARCHAR NOT NULL DEFAULT \"\"");
+        add_column("github_user", "wandbox_access_token", "VARCHAR NOT NULL DEFAULT \"\"");
+        sql <<
+            "CREATE INDEX IF NOT EXISTS github_user_wandbox_access_token ON  github_user (wandbox_access_token)"
+            << cppdb::exec;
     }
 
 public:
@@ -291,19 +296,21 @@ public:
     }
 
     // FIXME(melpon): GitHub login is not a category of permlink
-    void login_github(std::string username) {
+    void login_github(std::string username, std::string github_access_token, std::string wandbox_access_token) {
         std::time_t now_time = std::time(nullptr);
         std::tm now = *std::gmtime(&now_time);
 
         // insert or update
         sql <<
             "INSERT OR REPLACE "
-            "INTO github_user (username, created_at, updated_at) "
-            "VALUES (?, COALESCE((SELECT created_at FROM github_user WHERE username=?), ?), ?)"
+            "INTO github_user (username, created_at, updated_at, github_access_token, wandbox_access_token) "
+            "VALUES (?, COALESCE((SELECT created_at FROM github_user WHERE username=?), ?), ?, ?, ?)"
             << username
             << username
             << now
             << now
+            << github_access_token
+            << wandbox_access_token
             << cppdb::row;
     }
     bool exists_github_user(std::string username) {
@@ -315,6 +322,19 @@ public:
             << username
             << cppdb::row;
         return !r.empty();
+    }
+    std::string get_github_access_token(std::string wandbox_access_token) {
+        cppdb::result r;
+        r = sql <<
+            "SELECT github_access_token "
+            "FROM github_user "
+            "WHERE wandbox_access_token=?"
+            << wandbox_access_token
+            << cppdb::row;
+        if (r.empty()) {
+            return "";
+        }
+        return r.get<std::string>("github_access_token");
     }
 
     struct usercode_info {

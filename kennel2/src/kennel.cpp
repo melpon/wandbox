@@ -335,7 +335,8 @@ private:
         content::root c(service());
         c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
 
-        auto json = authenticate(session()["access_token"]);
+        permlink pl(service());
+        auto json = authenticate(pl.get_github_access_token(session()["access_token"]));
         if (json.is_undefined()) {
             session().erase("access_token");
         } else {
@@ -458,12 +459,12 @@ private:
             //std::clog << proto.command << ":" << proto.contents << std::endl;
         });
     }
-    static std::string make_random_name() {
+    static std::string make_random_name(std::size_t length) {
         std::string name;
         std::random_device seed_gen;
         std::mt19937 engine(seed_gen());
         std::uniform_int_distribution<> dist(0, 127);
-        while (name.size() < 16) {
+        while (name.size() < length) {
             auto c = (char)dist(engine);
             if (('0' <= c && c <= '9') ||
                 ('a' <= c && c <= 'z') ||
@@ -480,9 +481,11 @@ private:
 
         auto value = json_post_data();
 
+        permlink pl(service());
+
         cppcms::json::value auth;
         if (value["login"].boolean()) {
-            auth = authenticate(session()["access_token"]);
+            auth = authenticate(pl.get_github_access_token(session()["access_token"]));
             if (auth.is_undefined()) {
                 // user is expecting to logged in but actually not.
                 response().status(400);
@@ -502,8 +505,7 @@ private:
             return;
         }
 
-        permlink pl(service());
-        std::string permlink_name = make_random_name();
+        std::string permlink_name = make_random_name(16);
         pl.make_permlink(permlink_name, value, *it, auth);
 
         response().content_type("application/json");
@@ -520,7 +522,8 @@ private:
         content::root c(service());
         c.set_compiler_infos(get_compiler_infos_or_cache()["compilers"]);
 
-        auto json = authenticate(session()["access_token"]);
+        permlink pl(service());
+        auto json = authenticate(pl.get_github_access_token(session()["access_token"]));
         if (json.is_undefined()) {
             session().erase("access_token");
         } else {
@@ -532,7 +535,6 @@ private:
             c.set_login(info);
         }
 
-        permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
 
         std::string username = result["github_user"].str();
@@ -558,7 +560,6 @@ private:
 
         c.set_permlink(ss.str());
 
-        auto auth = authenticate(session()["access_token"]);
         auto info = result["compiler-info"];
         set_twitter_if_info_exists(c, info, result["code"].str());
 
@@ -667,7 +668,7 @@ private:
 
         if (save) {
             permlink pl(service());
-            std::string permlink_name = make_random_name();
+            std::string permlink_name = make_random_name(16);
             value["outputs"] = outputs;
             pl.make_permlink(permlink_name, value, *it, cppcms::json::value());
             result["permlink"] = permlink_name;
@@ -815,6 +816,9 @@ private:
         std::stringstream body_ss;
         body.save(body_ss, cppcms::json::compact);
 
+        auto redirect_uri = get_query_string("redirect_uri");
+        std::string query_string = "";
+
         std::vector<std::string> headers = {
             "Content-Type: application/json; charset=utf-8",
             "Accept: application/json",
@@ -826,18 +830,25 @@ private:
             resp_json.load(resp_ss, true, nullptr);
 
             auto access_token = resp_json.object()["access_token"].str();
-            session()["access_token"] = access_token;
 
             auto auth = authenticate(access_token);
             if (!auth.is_undefined()) {
                 permlink pl(service());
-                pl.login_github(auth["login"].str());
+                auto wandbox_access_token = make_random_name(32);
+                pl.login_github(auth["login"].str(), access_token, wandbox_access_token);
+
+                session()["access_token"] = wandbox_access_token;
+                query_string = "?session=" + wandbox_access_token;
             }
         }
 
-        std::stringstream root_ss;
-        mapper().map(root_ss, "root");
-        response().set_redirect_header(root_ss.str());
+        if (redirect_uri.empty()) {
+            std::stringstream root_ss;
+            mapper().map(root_ss, "root");
+            response().set_redirect_header(root_ss.str());
+        } else {
+            response().set_redirect_header(redirect_uri + query_string);
+        }
     }
 
     void nojs_list() {
@@ -970,7 +981,7 @@ private:
             }
         }
 
-        auto auth = authenticate(session()["access_token"]);
+        auto auth = authenticate(pl.get_github_access_token(session()["access_token"]));
         auto include_private = !auth.is_undefined() && auth["login"].str() == username;
 
         int page = 0;
