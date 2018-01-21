@@ -305,7 +305,7 @@ public:
         stat = sql <<
             "INSERT OR REPLACE "
             "INTO github_user (username, created_at, updated_at, github_access_token, wandbox_access_token) "
-            "VALUES (?, COALESCE((SELECT created_at FROM github_user WHERE username=?), ?), ?, ?, COALESCE((SELECT wandbox_access_token FROM github_user WHERE username=?), ?))"
+            "VALUES (?, COALESCE((SELECT created_at FROM github_user WHERE username=?), ?), ?, ?, COALESCE((SELECT wandbox_access_token FROM github_user WHERE username=? AND wandbox_access_token!=''), ?))"
             << username
             << username
             << now
