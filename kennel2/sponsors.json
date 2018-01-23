@@ -429,5 +429,9 @@
     , "url": "https://twitter.com/ishidakei"
     , "due_date": "2018-12-18T23:59:59+09:00"
     }
+  , { "name": "@2_7182818"
+    , "url": "https://twitter.com/2_7182818"
+    , "due_date": "2019-01-24T23:59:59+09:00"
+    }
   ]
 }
