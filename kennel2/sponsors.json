@@ -437,5 +437,9 @@
     , "url": "https://twitter.com/sonots"
     , "due_date": "2019-02-16T23:59:59+09:00"
     }
+  , { "name": "@s_hiiragi"
+    , "url": "https://twitter.com/s_hiiragi"
+    , "due_date": "2019-02-21T23:59:59+09:00"
+    }
   ]
 }
