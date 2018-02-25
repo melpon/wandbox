@@ -409,9 +409,9 @@
     , "url": "https://twitter.com/hitsujibane"
     , "due_date": "2018-09-23T23:59:59+09:00"
     }
-  , { "name": "@zakkas783"
+  , { "name": "@zakkas783(フォアグラ)"
     , "url": "https://twitter.com/zakkas783"
-    , "due_date": "2018-10-07T23:59:59+09:00"
+    , "due_date": "2019-10-08T23:59:59+09:00"
     }
   , { "name": "@ueokande"
     , "url": "https://twitter.com/ueokande"
@@ -440,10 +440,6 @@
   , { "name": "@s_hiiragi"
     , "url": "https://twitter.com/s_hiiragi"
     , "due_date": "2019-02-21T23:59:59+09:00"
-    }
-  , { "name": "@zakkas783(フォアグラ)"
-    , "url": "https://twitter.com/zakkas783"
-    , "due_date": "2019-02-26T23:59:59+09:00"
     }
   ]
 }
