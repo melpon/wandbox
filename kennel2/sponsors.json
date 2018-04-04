@@ -441,5 +441,13 @@
     , "url": "https://twitter.com/s_hiiragi"
     , "due_date": "2019-02-21T23:59:59+09:00"
     }
+  , { "name": "渡辺 丈"
+    , "url": ""
+    , "due_date": "2019-04-01T23:59:59+09:00"
+    }
+  , { "name": "熊崎宏樹"
+    , "url": "https://twitter.com/kumagi"
+    , "due_date": "2019-04-05T23:59:59+09:00"
+    }
   ]
 }
