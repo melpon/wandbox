@@ -162,7 +162,7 @@ Sample
 POST /compile.ndjson
 --------------------
 
-Compile posted code and return multiple JSONs as `NDJSON <http://specs.okfnlabs.org/ndjson/>`_
+Compile posted code and return multiple JSONs as `NDJSON <https://github.com/ndjson/ndjson-spec/blob/master/README.md>`_
 
 This API accepts only "application/json" in a "Content-Type" header.
 
