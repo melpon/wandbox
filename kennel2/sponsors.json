@@ -465,5 +465,9 @@
     , "url": "https://twitter.com/tkhk_"
     , "due_date": "2019-06-09T23:59:59+09:00"
     }
+  , { "name": "TAKEI Yuya"
+    , "url": "https://github.com/takei-yuya"
+    , "due_date": "2019-07-04T23:59:59+09:00"
+    }
   ]
 }
