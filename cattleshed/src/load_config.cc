@@ -286,7 +286,8 @@ namespace cfg {
 			x.display_name = get_str(s, "display-name");
 			if (const auto v = find(s, "display-flags")) x.display_flags = boost::get<cfg::string>(*v);
 			else x.display_flags = boost::none;
-			x.conflicts = get_str_array(s, "conflicts");
+			if (const auto v = find(s, "group")) x.group = boost::get<cfg::string>(*v);
+			else x.group = boost::none;
 			x.runtime = get_bool(s, "runtime");
 			x.insert_position = get_int(s, "insert-position");
 			ret[a.first] = std::move(x);
@@ -714,7 +715,8 @@ namespace cfg {
 				const auto ite = switches.find(swname);
 				if (ite == switches.end()) continue;
 				const auto &sw = ite->second;
-				if (sw.conflicts.empty()) {
+				const auto &group = sw.group;
+				if (!group) {
 					used.insert(swname);
 					swlist.emplace_back(
 						"{"
@@ -725,24 +727,18 @@ namespace cfg {
 							"\"default\":" + (compiler.initial_checked.count(sw.name) != 0 ? "true" : "false") +
 						"}");
 				} else {
-					std::function<void(const std::string &)> f;
-					std::unordered_set<std::string> set;
-					f = [&](const std::string &swname) {
-						const auto ite = switches.find(swname);
-						if (ite == switches.end()) return;
-						const auto &sw = ite->second;
-						for (const auto &c: sw.conflicts) {
-							const auto ite = switches.find(c);
-							if (ite == switches.end()) continue;
-							if (set.insert(c).second) f(c);
+					std::unordered_set<std::string> groups;
+					for (const auto &swname: compiler.switches) {
+						const auto& sw = switches.at(swname);
+						if (sw.group && *sw.group == *group) {
+							groups.insert(sw.name);
 						}
-					};
-					f(swname);
+					}
 					std::vector<std::string> sel;
 					std::string def = swname;
 					for (const auto &swname: compiler.switches) {
 						const auto &sw = switches.at(swname);
-						if (set.count(swname) == 0) continue;
+						if (groups.count(swname) == 0) continue;
 						sel.emplace_back(
 							"{"
 								"\"name\":\"" + json_stringize(sw.name) + "\","
@@ -753,11 +749,12 @@ namespace cfg {
 					}
 					swlist.emplace_back(
 						"{"
+							"\"name\":\"" + *group + "\","
 							"\"type\":\"select\","
 							"\"default\":\"" + json_stringize(def) + "\","
 							"\"options\":[" + boost::algorithm::join(sel, ",") + "]"
 						"}");
-					used.insert(set.begin(), set.end());
+					used.insert(groups.begin(), groups.end());
 				}
 			}
 		}

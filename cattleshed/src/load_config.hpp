@@ -22,7 +22,7 @@ namespace wandbox {
 		std::vector<std::string> flags;
 		std::string display_name;
 		boost::optional<std::string> display_flags;
-		std::vector<std::string> conflicts;
+		boost::optional<std::string> group;
 		bool runtime;
 		int insert_position;
 	};
