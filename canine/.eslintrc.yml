@@ -1,0 +1,24 @@
+parser: 'babel-eslint'
+plugins:
+  - react
+  - prettier
+extends:
+  - plugin:react/recommended
+  - prettier
+  - prettier/react
+rules:
+  prettier/prettier:
+    - 2
+    -
+      trailingComma: none
+      singleQuote: true
+      semi: false
+  no-empty-pattern: 0
+  prefer-const: 2
+  prefer-arrow-callback: 2
+  no-unused-vars:
+    - 2
+    -
+      argsIgnorePattern: ^_
+      varsIgnorePattern: ^_
+  react/jsx-uses-vars: 2
