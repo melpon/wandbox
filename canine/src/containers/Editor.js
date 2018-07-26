@@ -12,12 +12,16 @@ import {
   cancelRename,
   submitRename
 } from '~/actions/editor'
-import type { State as EditorState } from '~/reducers/editor'
-import type { Source as EditorSource } from '~/reducers/editor'
+import type {
+  State as EditorState,
+  Source as EditorSource
+} from '~/reducers/editor'
+import type { State as CompilerState } from '~/reducers/compiler'
 
 type Props = {
   dispatch: Function,
-  editor: EditorState
+  editor: EditorState,
+  compiler: CompilerState
 }
 type State = {}
 
@@ -74,6 +78,7 @@ class Editor extends React.PureComponent<Props, State> {
     //const { classes } = props
     return (
       <EditorComponent
+        currentLanguage={this.props.compiler.currentLanguage}
         currentTab={this.props.editor.currentTab}
         sources={this.props.editor.sources}
         onChangeTabs={this.onChangeTabs}
@@ -90,7 +95,8 @@ class Editor extends React.PureComponent<Props, State> {
 
 function mapStateToProps(state) {
   return {
-    editor: state.editor
+    editor: state.editor,
+    compiler: state.compiler
   }
 }
 
