@@ -23,3 +23,4 @@ Wandbox frontend
 - [ ] GitHub連携を作る
 - [ ] i18n
 - [ ] ユーザ用のページを作る
+- [ ] おしらせ
