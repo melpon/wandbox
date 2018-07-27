@@ -1,5 +1,7 @@
 // @flow
 
+import './mode-pony'
+
 export function normalizePath(path: string): string {
   const parts = path.split('/')
   const result = []
@@ -133,6 +135,11 @@ const LANGUAGE_MODE = [
     language: 'Perl',
     extensions: ['pl'],
     mode: 'text/x-perl'
+  },
+  {
+    language: 'Pony',
+    extensions: ['pony'],
+    mode: 'text/x-pony'
   },
   {
     language: 'Python',
