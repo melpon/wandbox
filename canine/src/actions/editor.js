@@ -65,3 +65,11 @@ export function closeTab(source: EditorSource) {
     source: source
   }
 }
+
+export const CHANGE_STDIN = makeType('CHANGE_STDIN')
+export function changeStdin(stdin: string) {
+  return {
+    type: CHANGE_STDIN,
+    stdin: stdin
+  }
+}

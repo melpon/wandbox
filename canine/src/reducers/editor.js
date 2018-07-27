@@ -7,7 +7,8 @@ import {
   BEGIN_RENAME,
   CHANGE_RENAME,
   CANCEL_RENAME,
-  SUBMIT_RENAME
+  SUBMIT_RENAME,
+  CHANGE_STDIN
 } from '~/actions/editor'
 import { normalizePath } from '~/utils'
 
@@ -20,7 +21,8 @@ export type Source = {
 
 export type State = {
   currentTab: number,
-  sources: Array<Source>
+  sources: Array<Source>,
+  stdin: string
 }
 const initialState = {
   currentTab: 0,
@@ -31,7 +33,8 @@ const initialState = {
       renaming: false,
       renamingFilename: ''
     }
-  ]
+  ],
+  stdin: ''
 }
 export default function(state: State = initialState, action: Object): State {
   switch (action.type) {
@@ -194,6 +197,11 @@ export default function(state: State = initialState, action: Object): State {
         sources: sources
       }
     }
+    case CHANGE_STDIN:
+      return {
+        ...state,
+        stdin: action.stdin
+      }
   }
   return state
 }

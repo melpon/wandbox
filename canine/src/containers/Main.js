@@ -1,9 +1,10 @@
 // @flow
 import React from 'react'
 import { connect } from 'react-redux'
-import Editor from './Editor'
 import Button from '@material-ui/core/Button'
-import { compile } from '../actions'
+import Editor from './Editor'
+import Stdin from './Stdin'
+import { compile } from '~/actions'
 import type { State as EditorState } from '~/reducers/editor'
 import type { State as CompilerState } from '~/reducers/compiler'
 import type { State as ResultState } from '~/reducers/result'
@@ -38,7 +39,7 @@ class Main extends React.PureComponent<Props, State> {
           .filter(s => s.filename != null)
           .map(s => ({ file: s.filename || '', code: s.text })),
         [],
-        '',
+        editor.stdin,
         [],
         [],
         false
@@ -50,6 +51,7 @@ class Main extends React.PureComponent<Props, State> {
     return (
       <div>
         <Editor />
+        <Stdin />
         <Button onClick={() => this.onClickRun()}>Run</Button>
         <div>
           <li>
