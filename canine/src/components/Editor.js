@@ -1,6 +1,10 @@
 // @flow
 import React from 'react'
 import Paper from '@material-ui/core/Paper'
+import List from '@material-ui/core/List'
+import Grid from '@material-ui/core/Grid'
+import Typography from '@material-ui/core/Typography'
+import Divider from '@material-ui/core/Divider'
 import { withStyles } from '@material-ui/core/styles'
 import EditorTabs from './EditorTabs'
 import CodeMirror from './CodeMirror'
@@ -33,27 +37,39 @@ const Editor = (props: Props) => {
   console.log(mode)
   return (
     <Paper>
-      <EditorTabs
-        currentTab={props.currentTab}
-        sources={props.sources}
-        onChangeTabs={props.onChangeTabs}
-        onClickTabEdit={props.onClickTabEdit}
-        onClickTabClose={props.onClickTabClose}
-        onChangeRenamingFilename={props.onChangeRenamingFilename}
-        onCancelRenamingFilename={props.onCancelRenamingFilename}
-        onSubmitRenamingFilename={props.onSubmitRenamingFilename}
-      />
-      <CodeMirror
-        value={sources[currentTab].text}
-        options={{
-          lineNumbers: true,
-          theme: 'material',
-          mode: mode
-        }}
-        onBeforeChange={(_editor, _data, value) => {
-          onChangeEditorText(sources[currentTab].filename, value)
-        }}
-      />
+      <Grid container>
+        <Grid item style={{ flex: 1 }}>
+          <EditorTabs
+            currentTab={props.currentTab}
+            sources={props.sources}
+            onChangeTabs={props.onChangeTabs}
+            onClickTabEdit={props.onClickTabEdit}
+            onClickTabClose={props.onClickTabClose}
+            onChangeRenamingFilename={props.onChangeRenamingFilename}
+            onCancelRenamingFilename={props.onCancelRenamingFilename}
+            onSubmitRenamingFilename={props.onSubmitRenamingFilename}
+          />
+          <CodeMirror
+            value={sources[currentTab].text}
+            options={{
+              lineNumbers: true,
+              theme: 'material',
+              mode: mode
+            }}
+            onBeforeChange={(_editor, _data, value) => {
+              onChangeEditorText(sources[currentTab].filename, value)
+            }}
+            expand={false}
+          />
+        </Grid>
+        <Grid item style={{ width: 200 }}>
+          <List>
+            <Typography>test</Typography>
+            <Divider />
+            <Typography>test2</Typography>
+          </List>
+        </Grid>
+      </Grid>
     </Paper>
   )
 }

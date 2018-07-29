@@ -2,6 +2,8 @@
 import React from 'react'
 import { Controlled as OrigCodeMirror } from 'react-codemirror2'
 
+import styles from './style.css'
+
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/material.css'
 import 'codemirror/theme/material.css'
@@ -34,25 +36,31 @@ import 'codemirror/addon/search/searchcursor'
 import 'codemirror/addon/edit/matchbrackets'
 import 'codemirror/addon/dialog/dialog'
 
-type CodeMirrorType = Object
+export type CodeMirrorType = Object
+export type CodeMirrorOptions = {
+  keyMap?: string,
+  lineNumbers?: boolean,
+  theme?: string,
+  mode?: string,
+  indentUnit?: number,
+  indentWithTabs?: boolean,
+  tabSize?: number,
+  smartIndent?: boolean,
+  extraKeys?: { [string]: (CodeMirrorType) => void },
+  viewportMargin?: number
+}
 
 type Props = {
   value: string,
-  options: {
-    lineNumbers?: boolean,
-    theme?: string,
-    mode?: string,
-    indentUnit?: number,
-    smartIndent?: boolean,
-    extraKeys?: { [string]: (CodeMirrorType) => void },
-    viewportMargin?: number
-  },
-  onBeforeChange: (CodeMirrorType, Object, string, () => void) => void
+  options: CodeMirrorOptions,
+  onBeforeChange: (CodeMirrorType, Object, string, () => void) => void,
+  expand: boolean
 }
 
 export default function CodeMirror(props: Props) {
   return (
     <OrigCodeMirror
+      className={props.expand ? styles.expand : null}
       value={props.value}
       options={props.options}
       onBeforeChange={props.onBeforeChange}

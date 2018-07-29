@@ -1,16 +1,18 @@
 // @flow
+import { CHANGE_EDITOR_TEXT, CHANGE_STDIN } from '~/actions/editor'
 import {
   CHANGE_EDITOR_TAB,
-  CHANGE_EDITOR_TEXT,
   ADD_EDITOR,
   CLOSE_TAB,
   BEGIN_RENAME,
   CHANGE_RENAME,
   CANCEL_RENAME,
-  SUBMIT_RENAME,
-  CHANGE_STDIN
-} from '~/actions/editor'
+  SUBMIT_RENAME
+} from '~/actions/editor/tabs'
 import { normalizePath } from '~/utils'
+import settings from './editor/settings'
+import { initialState as settingsInitialState } from './editor/settings'
+import type { State as SettingsState } from './editor/settings'
 
 export type Source = {
   filename: string | null,
@@ -22,7 +24,8 @@ export type Source = {
 export type State = {
   currentTab: number,
   sources: Array<Source>,
-  stdin: string
+  stdin: string,
+  settings: SettingsState
 }
 const initialState = {
   currentTab: 0,
@@ -34,7 +37,8 @@ const initialState = {
       renamingFilename: ''
     }
   ],
-  stdin: ''
+  stdin: '',
+  settings: settingsInitialState
 }
 export default function(state: State = initialState, action: Object): State {
   switch (action.type) {
@@ -202,6 +206,10 @@ export default function(state: State = initialState, action: Object): State {
         ...state,
         stdin: action.stdin
       }
+    default:
+      return {
+        ...state,
+        settings: settings(state.settings, action)
+      }
   }
-  return state
 }

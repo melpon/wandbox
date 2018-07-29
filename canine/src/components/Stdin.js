@@ -30,6 +30,7 @@ const Stdin = (props: Props) => {
                 smartIndent: false
               }}
               onBeforeChange={(_cm, _data, value) => onChange(value)}
+              expand={false}
             />
           )
         }
