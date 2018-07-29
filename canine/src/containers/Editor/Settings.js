@@ -9,7 +9,7 @@ import InputLabel from '@material-ui/core/InputLabel'
 import FormControl from '@material-ui/core/FormControl'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Checkbox from '@material-ui/core/Checkbox'
-import SettingsIcon from '@material-ui/icons/Settings'
+import SettingsIcon from '@material-ui/icons/SettingsRounded'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import {
   openSettings,
