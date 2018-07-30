@@ -1,5 +1,8 @@
 // @flow
-import { FETCH_COMPILER_LIST_INIT, FETCH_COMPILER_LIST } from '../actions'
+import {
+  FETCH_COMPILER_LIST_INIT,
+  FETCH_COMPILER_LIST
+} from '../actions/compiler'
 
 export type CompilerInfo = {
   name: string,

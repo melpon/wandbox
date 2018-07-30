@@ -9,8 +9,11 @@ import {
   selectLanguage,
   selectCompiler,
   checkSwitch,
-  selectSwitch
-} from '~/actions'
+  selectSwitch,
+  changeCompilerOptionRaw,
+  changeRuntimeOptionRaw,
+  expandRuntimeOptionRaw
+} from '~/actions/compiler'
 
 type Props = {
   dispatch: Function,
@@ -26,6 +29,9 @@ class SideBar extends React.Component<Props, State> {
     this.onChangeCompiler = this.onChangeCompiler.bind(this)
     this.onChangeChecked = this.onChangeChecked.bind(this)
     this.onChangeSelected = this.onChangeSelected.bind(this)
+    this.onChangeCompilerOptionRaw = this.onChangeCompilerOptionRaw.bind(this)
+    this.onChangeRuntimeOptionRaw = this.onChangeRuntimeOptionRaw.bind(this)
+    this.onExpandRuntimeOptionRaw = this.onExpandRuntimeOptionRaw.bind(this)
   }
 
   onChangeLanguage: string => void
@@ -48,6 +54,21 @@ class SideBar extends React.Component<Props, State> {
     this.props.dispatch(selectSwitch(switchName, selected))
   }
 
+  onChangeCompilerOptionRaw: string => void
+  onChangeCompilerOptionRaw(compilerOptionRaw: string) {
+    this.props.dispatch(changeCompilerOptionRaw(compilerOptionRaw))
+  }
+
+  onChangeRuntimeOptionRaw: string => void
+  onChangeRuntimeOptionRaw(runtimeOptionRaw: string) {
+    this.props.dispatch(changeRuntimeOptionRaw(runtimeOptionRaw))
+  }
+
+  onExpandRuntimeOptionRaw: () => void
+  onExpandRuntimeOptionRaw() {
+    this.props.dispatch(expandRuntimeOptionRaw())
+  }
+
   componentDidMount() {
     this.props.dispatch(fetchCompilerList(this.props.dispatch))
   }
@@ -57,13 +78,14 @@ class SideBar extends React.Component<Props, State> {
     return (
       <SideBarComponent
         compilerList={compilerList}
-        currentLanguage={compiler.currentLanguage}
-        currentCompilerName={compiler.currentCompilerName}
-        currentSwitches={compiler.currentSwitches}
+        compiler={compiler}
         onChangeLanguage={this.onChangeLanguage}
         onChangeCompiler={this.onChangeCompiler}
         onChangeChecked={this.onChangeChecked}
         onChangeSelected={this.onChangeSelected}
+        onChangeCompilerOptionRaw={this.onChangeCompilerOptionRaw}
+        onChangeRuntimeOptionRaw={this.onChangeRuntimeOptionRaw}
+        onExpandRuntimeOptionRaw={this.onExpandRuntimeOptionRaw}
       />
     )
   }

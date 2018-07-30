@@ -1,5 +1,9 @@
 // @flow
-import { COMPILE_INIT, COMPILE_OUTPUT, COMPILE_FINISH } from '../actions'
+import {
+  COMPILE_INIT,
+  COMPILE_OUTPUT,
+  COMPILE_FINISH
+} from '../actions/compiler'
 
 export type State = {
   compiling: boolean,
