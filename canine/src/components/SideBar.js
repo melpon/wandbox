@@ -22,7 +22,8 @@ type Props = {
   onChangeSelected: (string, string) => void,
   onChangeCompilerOptionRaw: string => void,
   onChangeRuntimeOptionRaw: string => void,
-  onExpandRuntimeOptionRaw: () => void
+  onExpandRuntimeOptionRaw: () => void,
+  onCtrlEnter: () => void
 }
 
 const SideBar = (props: Props) => {
@@ -36,7 +37,8 @@ const SideBar = (props: Props) => {
     onChangeSelected,
     onChangeCompilerOptionRaw,
     onChangeRuntimeOptionRaw,
-    onExpandRuntimeOptionRaw
+    onExpandRuntimeOptionRaw,
+    onCtrlEnter
   } = props
   const {
     currentLanguage,
@@ -185,7 +187,12 @@ const SideBar = (props: Props) => {
               value={compilerOptionRaw}
               options={{
                 viewportMargin: Infinity,
-                smartIndent: false
+                smartIndent: false,
+                extraKeys: {
+                  'Ctrl-Enter': () => {
+                    onCtrlEnter()
+                  }
+                }
               }}
               onBeforeChange={(_cm, _data, value) =>
                 onChangeCompilerOptionRaw(value)
@@ -202,7 +209,12 @@ const SideBar = (props: Props) => {
               value={runtimeOptionRaw}
               options={{
                 viewportMargin: Infinity,
-                smartIndent: false
+                smartIndent: false,
+                extraKeys: {
+                  'Ctrl-Enter': () => {
+                    onCtrlEnter()
+                  }
+                }
               }}
               onBeforeChange={(_cm, _data, value) =>
                 onChangeRuntimeOptionRaw(value)

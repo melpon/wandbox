@@ -2,8 +2,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import SideBarComponent from '~/components/SideBar'
-import type { State as CompilerListState } from '~/reducers/compilerList'
+import { compile } from '~/utils'
+import type { State as EditorState } from '~/reducers/editor'
 import type { State as CompilerState } from '~/reducers/compiler'
+import type { State as CompilerListState } from '~/reducers/compilerList'
 import {
   fetchCompilerList,
   selectLanguage,
@@ -17,8 +19,9 @@ import {
 
 type Props = {
   dispatch: Function,
-  compilerList: CompilerListState,
-  compiler: CompilerState
+  editor: EditorState,
+  compiler: CompilerState,
+  compilerList: CompilerListState
 }
 type State = {}
 
@@ -32,6 +35,7 @@ class SideBar extends React.Component<Props, State> {
     this.onChangeCompilerOptionRaw = this.onChangeCompilerOptionRaw.bind(this)
     this.onChangeRuntimeOptionRaw = this.onChangeRuntimeOptionRaw.bind(this)
     this.onExpandRuntimeOptionRaw = this.onExpandRuntimeOptionRaw.bind(this)
+    this.onCtrlEnter = this.onCtrlEnter.bind(this)
   }
 
   onChangeLanguage: string => void
@@ -69,6 +73,12 @@ class SideBar extends React.Component<Props, State> {
     this.props.dispatch(expandRuntimeOptionRaw())
   }
 
+  onCtrlEnter: () => void
+  onCtrlEnter() {
+    const { dispatch, editor, compiler, compilerList } = this.props
+    compile(dispatch, editor, compiler, compilerList)
+  }
+
   componentDidMount() {
     this.props.dispatch(fetchCompilerList(this.props.dispatch))
   }
@@ -86,6 +96,7 @@ class SideBar extends React.Component<Props, State> {
         onChangeCompilerOptionRaw={this.onChangeCompilerOptionRaw}
         onChangeRuntimeOptionRaw={this.onChangeRuntimeOptionRaw}
         onExpandRuntimeOptionRaw={this.onExpandRuntimeOptionRaw}
+        onCtrlEnter={this.onCtrlEnter}
       />
     )
   }
@@ -93,8 +104,9 @@ class SideBar extends React.Component<Props, State> {
 
 function mapStateToProps(state) {
   return {
-    compilerList: state.compilerList,
-    compiler: state.compiler
+    editor: state.editor,
+    compiler: state.compiler,
+    compilerList: state.compilerList
   }
 }
 

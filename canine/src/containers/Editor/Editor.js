@@ -3,16 +3,18 @@ import React from 'react'
 import { connect } from 'react-redux'
 import CodeMirror from '~/components/CodeMirror'
 import { changeEditorText } from '~/actions/editor'
-import { resolveLanguageMode } from '~/utils'
+import { resolveLanguageMode, compile } from '~/utils'
 import type { State as EditorState } from '~/reducers/editor'
 import type { State as EditorSettingsState } from '~/reducers/editor/settings'
 import type { CodeMirrorType, CodeMirrorOptions } from '~/components/CodeMirror'
 import type { State as CompilerState } from '~/reducers/compiler'
+import type { State as CompilerListState } from '~/reducers/compilerList'
 
 type Props = {
   dispatch: Function,
   editor: EditorState,
-  compiler: CompilerState
+  compiler: CompilerState,
+  compilerList: CompilerListState
 }
 type State = {}
 
@@ -25,6 +27,11 @@ class Editor extends React.PureComponent<Props, State> {
   onChangeEditorText: (string | null, string) => void
   onChangeEditorText(filename, text) {
     this.props.dispatch(changeEditorText(filename, text))
+  }
+
+  onCtrlEnter() {
+    const { dispatch, editor, compiler, compilerList } = this.props
+    compile(dispatch, editor, compiler, compilerList)
   }
 
   insertTabSpace(cm: CodeMirrorType) {
@@ -44,7 +51,7 @@ class Editor extends React.PureComponent<Props, State> {
       tabSize: parseInt(settings.tabWidth, 10),
       extraKeys: {
         'Ctrl-Enter': () => {
-          // TODO: compile
+          this.onCtrlEnter()
         }
       }
     }
@@ -105,7 +112,8 @@ class Editor extends React.PureComponent<Props, State> {
 function mapStateToProps(state) {
   return {
     editor: state.editor,
-    compiler: state.compiler
+    compiler: state.compiler,
+    compilerList: state.compilerList
   }
 }
 

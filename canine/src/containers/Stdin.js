@@ -3,11 +3,16 @@ import React from 'react'
 import { connect } from 'react-redux'
 import StdinComponent from '~/components/Stdin'
 import { changeStdin } from '~/actions/editor'
+import { compile } from '~/utils'
 import type { State as EditorState } from '~/reducers/editor'
+import type { State as CompilerState } from '~/reducers/compiler'
+import type { State as CompilerListState } from '~/reducers/compilerList'
 
 type Props = {
   dispatch: Function,
-  editor: EditorState
+  editor: EditorState,
+  compiler: CompilerState,
+  compilerList: CompilerListState
 }
 type State = {
   open: boolean
@@ -18,6 +23,7 @@ class Stdin extends React.PureComponent<Props, State> {
     super()
     this.onChange = this.onChange.bind(this)
     this.onOpen = this.onOpen.bind(this)
+    this.onCtrlEnter = this.onCtrlEnter.bind(this)
     this.state = {
       open: false
     }
@@ -35,6 +41,12 @@ class Stdin extends React.PureComponent<Props, State> {
     })
   }
 
+  onCtrlEnter: () => void
+  onCtrlEnter() {
+    const { dispatch, editor, compiler, compilerList } = this.props
+    compile(dispatch, editor, compiler, compilerList)
+  }
+
   render() {
     return (
       <StdinComponent
@@ -42,6 +54,7 @@ class Stdin extends React.PureComponent<Props, State> {
         stdin={this.props.editor.stdin}
         onOpen={this.onOpen}
         onChange={this.onChange}
+        onCtrlEnter={this.onCtrlEnter}
       />
     )
   }
@@ -49,7 +62,9 @@ class Stdin extends React.PureComponent<Props, State> {
 
 function mapStateToProps(state) {
   return {
-    editor: state.editor
+    editor: state.editor,
+    compiler: state.compiler,
+    compilerList: state.compilerList
   }
 }
 

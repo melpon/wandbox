@@ -11,11 +11,12 @@ type Props = {
   open: boolean,
   stdin: string,
   onOpen: () => void,
-  onChange: string => void
+  onChange: string => void,
+  onCtrlEnter: () => void
 }
 
 const Stdin = (props: Props) => {
-  const { open, stdin, onOpen, onChange } = props
+  const { open, stdin, onOpen, onChange, onCtrlEnter } = props
   return (
     <Grid container>
       {(() => {
@@ -27,7 +28,12 @@ const Stdin = (props: Props) => {
               value={stdin}
               options={{
                 viewportMargin: Infinity,
-                smartIndent: false
+                smartIndent: false,
+                extraKeys: {
+                  'Ctrl-Enter': () => {
+                    onCtrlEnter()
+                  }
+                }
               }}
               onBeforeChange={(_cm, _data, value) => onChange(value)}
               expand={false}
