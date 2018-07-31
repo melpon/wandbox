@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import Button from '@material-ui/core/Button'
 import Editor from './Editor'
 import Stdin from './Stdin'
+import Command from './Command'
 import { compile } from '~/utils'
 import type { State as EditorState } from '~/reducers/editor'
 import type { State as CompilerState } from '~/reducers/compiler'
@@ -30,6 +31,7 @@ class Main extends React.PureComponent<Props, State> {
       <div>
         <Editor />
         <Stdin />
+        <Command />
         <Button onClick={() => this.onClickRun()}>Run</Button>
         <div>
           <li>

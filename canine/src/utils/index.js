@@ -5,6 +5,11 @@ import type { State as CompilerState } from '~/reducers/compiler'
 import type { State as CompilerListState } from '~/reducers/compilerList'
 import type { State as EditorState } from '~/reducers/editor'
 import { compile as compileAction } from '~/actions/compiler'
+import type {
+  CompilerInfo,
+  SingleSwitch,
+  SelectSwitch
+} from '~/reducers/compilerList'
 
 export function normalizePath(path: string): string {
   const parts = path.split('/')
@@ -204,6 +209,56 @@ export function resolveLanguageMode(
   return fallback
 }
 
+export function reduceCompileOptions(
+  currentSwitches: { [string]: string | boolean },
+  info: CompilerInfo,
+  state: any,
+  singleFunc: (SingleSwitch, any) => any,
+  selectFunc: (SelectSwitch, string, any) => any
+): any {
+  for (const sw of info.switches) {
+    if (sw.type === 'single') {
+      if (sw.name in currentSwitches) {
+        if (currentSwitches[sw.name]) {
+          state = singleFunc(sw, state)
+        }
+      } else {
+        if (sw.default) {
+          state = singleFunc(sw, state)
+        }
+      }
+    } else {
+      if (sw.name in currentSwitches) {
+        const value = currentSwitches[sw.name]
+        if (
+          typeof value === 'string' &&
+          sw.options.find(opt => opt.name == value) !== undefined
+        ) {
+          state = selectFunc(sw, value, state)
+        } else {
+          state = selectFunc(sw, sw.default, state)
+        }
+      } else {
+        state = selectFunc(sw, sw.default, state)
+      }
+    }
+  }
+  return state
+}
+
+export function getCompileOptions(
+  currentSwitches: { [string]: string | boolean },
+  info: CompilerInfo
+): Array<string> {
+  return reduceCompileOptions(
+    currentSwitches,
+    info,
+    [],
+    (sw, state) => [...state, sw.name],
+    (_sw, value, state) => [...state, value]
+  )
+}
+
 export function compile(
   dispatch: Function,
   editor: EditorState,
@@ -228,32 +283,7 @@ export function compile(
   }
 
   // get options
-  const options = (() => {
-    const opts = []
-    for (const sw of info.switches) {
-      if (sw.type === 'single') {
-        if (sw.name in compiler.currentSwitches) {
-          if (compiler.currentSwitches[sw.name]) {
-            opts.push(sw.name)
-          }
-        } else {
-          if (sw.default) {
-            opts.push(sw.name)
-          }
-        }
-      } else {
-        if (sw.name in compiler.currentSwitches) {
-          const value = compiler.currentSwitches[sw.name]
-          if (typeof value === 'string') {
-            opts.push(value)
-          }
-        } else {
-          opts.push(sw.default)
-        }
-      }
-    }
-    return opts
-  })()
+  const options = getCompileOptions(compiler.currentSwitches, info)
 
   dispatch(
     compileAction(

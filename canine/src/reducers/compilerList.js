@@ -4,6 +4,24 @@ import {
   FETCH_COMPILER_LIST
 } from '../actions/compiler'
 
+export type SingleSwitch = {|
+  type: 'single',
+  name: string,
+  default: boolean,
+  'display-flags': string,
+  'display-name': string
+|}
+export type SelectSwitchOption = {
+  name: string,
+  'display-flags': string,
+  'display-name': string
+}
+export type SelectSwitch = {|
+  type: 'select',
+  name: string,
+  default: string,
+  options: Array<SelectSwitchOption>
+|}
 export type CompilerInfo = {
   name: string,
   version: string,
@@ -13,25 +31,7 @@ export type CompilerInfo = {
   'compiler-option-raw': boolean,
   'runtime-option-raw': boolean,
   'display-compile-command': string,
-  switches: Array<
-    | {|
-        type: 'single',
-        name: string,
-        default: boolean,
-        'display-flags': string,
-        'display-name': string
-      |}
-    | {|
-        type: 'select',
-        name: string,
-        default: string,
-        options: Array<{
-          name: string,
-          'display-flags': string,
-          'display-name': string
-        }>
-      |}
-  >
+  switches: Array<SingleSwitch | SelectSwitch>
 }
 
 export type Data = {
