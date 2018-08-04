@@ -481,5 +481,9 @@
     , "url": ""
     , "due_date": "2019-07-21T23:59:59+09:00"
     }
+  , { "name": "@inazawa32"
+    , "url": "https://twitter.com/inazawa32"
+    , "due_date": "2019-08-05T23:59:59+09:00"
+    }
   ]
 }
