@@ -1131,12 +1131,16 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
     p.html(ansi_up.ansi_to_html(p.attr('data-text')));
     preview_paragraph = p;
 
-    output[0].scrollTop = output[0].scrollHeight;
-
     if (data.type == 'Control' && data.message == 'Finish') {
         finalize();
     }
   };
+  src.onreceived = function() {
+    var output = self._output_window()
+
+    output[0].scrollTop = output[0].scrollHeight;
+  };
+
 
   src.onerror = function() {
     finalize();
