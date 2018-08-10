@@ -485,5 +485,9 @@
     , "url": "https://twitter.com/inazawa32"
     , "due_date": "2019-08-05T23:59:59+09:00"
     }
+  , { "name": "鈴木勝博(@ksattkb)"
+    , "url": "https://twitter.com/ksattkb"
+    , "due_date": "2019-08-11T23:59:59+09:00"
+    }
   ]
 }
