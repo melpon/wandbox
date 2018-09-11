@@ -15,6 +15,7 @@ const Router = (_props: Props) => {
       <TopBar />
       <ReachRouter>
         <Home path="/" />
+        <Home path="/permlink/:permlink" />
       </ReachRouter>
     </div>
   )
