@@ -497,5 +497,9 @@
     , "url": ""
     , "due_date": "2019-10-01T23:59:59+09:00"
     }
+  , { "name": "taichi"
+    , "url": "https://twitter.com/ryushi"
+    , "due_date": "2019-11-23T23:59:59+09:00"
+    }
   ]
 }
