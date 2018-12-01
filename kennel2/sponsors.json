@@ -501,5 +501,9 @@
     , "url": "https://twitter.com/ryushi"
     , "due_date": "2019-11-23T23:59:59+09:00"
     }
+  , { "name": "@ueokande"
+    , "url": "https://twitter.com/ueokande"
+    , "due_date": "2019-12-02T23:59:59+09:00"
+    }
   ]
 }
