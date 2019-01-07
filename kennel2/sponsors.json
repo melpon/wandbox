@@ -505,5 +505,9 @@
     , "url": "https://twitter.com/ueokande"
     , "due_date": "2019-12-02T23:59:59+09:00"
     }
+  , { "name": "100% Pure NEET"
+    , "url": "https://www.onaneet.org/blog/"
+    , "due_date": "2019-12-02T23:59:59+09:00"
+    }
   ]
 }
