@@ -43,6 +43,18 @@
     , "url": "https://www.miniascape.co.jp/"
     , "due_date": "2019-06-22T23:59:59+09:00"
     }
+  , { "name": "sigboost株式会社"
+    , "url": "https://www.sigboost-inc.com/"
+    , "due_date": "2020-01-13T23:59:59+09:00"
+    }
+  , { "name": "AtCoder株式会社"
+    , "url": "https://atcoder.jp/"
+    , "due_date": "2020-01-13T23:59:59+09:00"
+    }
+  , { "name": "SoundHound Inc.日本法人"
+    , "url": "https://www.soundhound.co.jp/"
+    , "due_date": "2020-01-13T23:59:59+09:00"
+    }
   ]
 , "personal":
   [ { "name": "voluntas"
