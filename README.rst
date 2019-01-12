@@ -59,5 +59,5 @@ Boost.DI
 Stensal
 ~~~~~~~
 
-`Stensal <https://stensal.io/>`_ is a tool to help developers find the cause of segmentation faults in a more intuitive way.
+`Stensal <https://stensal.com/>`_ is a C/C++ SDK tool to help developers find the cause of segmentation faults in a more intuitive way.
 It is using Wandbox on background.
