@@ -440,6 +440,9 @@ footer {
 
 .wandbox-sponsors ul {
   padding-left: 0px;
+  display: flex;
+  justify-content:space-around;
+  flex-flow: wrap;
 }
 
 .wandbox-sponsors li {
@@ -448,6 +451,8 @@ footer {
   overflow-y: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  display: inline-block;
+  margin: 3px;
 }
 
 .wandbox-personal-sponsors {
