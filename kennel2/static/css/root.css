@@ -533,6 +533,6 @@ footer {
   .wandbox-smart-editor.wandbox-expand .CodeMirror-scroll,
   .output-window,
   .expand .output-window {
-      height: calc(50vh - 15rem);
+      height: calc(50vh - 14rem);
   }
 }
