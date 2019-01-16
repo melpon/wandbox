@@ -521,5 +521,9 @@
     , "url": "https://www.onaneet.org/blog/"
     , "due_date": "2020-01-11T23:59:59+09:00"
     }
+  , { "name": "@djeeeno"
+    , "url": "https://twitter.com/djeeeno"
+    , "due_date": "2020-01-17T23:59:59+09:00"
+    }
   ]
 }
