@@ -525,5 +525,9 @@
     , "url": "https://twitter.com/djeeeno"
     , "due_date": "2020-01-17T23:59:59+09:00"
     }
+  , { "name": "@two_ack"
+    , "url": "https://twitter.com/two_ack"
+    , "due_date": "2020-01-26T23:59:59+09:00"
+    }
   ]
 }
