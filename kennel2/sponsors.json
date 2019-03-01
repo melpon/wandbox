@@ -529,5 +529,9 @@
     , "url": "https://twitter.com/two_ack"
     , "due_date": "2020-01-26T23:59:59+09:00"
     }
+  , { "name": "@char8_t"
+    , "url": "https://twitter.com/char8_t"
+    , "due_date": "2020-03-02T23:59:59+09:00"
+    }
   ]
 }
