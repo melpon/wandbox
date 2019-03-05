@@ -61,9 +61,9 @@
     , "url": "https://twitter.com/voluntas"
     , "due_date": "2021-03-14T23:59:59+09:00"
     }
-  , { "name": "ignis_fatuus"
+  , { "name": "@ignis_fatuus"
     , "url": "https://twitter.com/ignis_fatuus"
-    , "due_date": "2019-03-19T23:59:59+09:00"
+    , "due_date": "2020-03-19T23:59:59+09:00"
     }
   , { "name": "ブン"
     , "url": ""
@@ -532,6 +532,10 @@
   , { "name": "@char8_t"
     , "url": "https://twitter.com/char8_t"
     , "due_date": "2020-03-02T23:59:59+09:00"
+    }
+  , { "name": "sublimer"
+    , "url": "https://twitter.com/lz650sss"
+    , "due_date": "2020-03-06T23:59:59+09:00"
     }
   ]
 }
