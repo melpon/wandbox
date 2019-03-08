@@ -461,9 +461,9 @@
     , "url": "https://twitter.com/s_hiiragi"
     , "due_date": "2019-02-21T23:59:59+09:00"
     }
-  , { "name": "@take-cheeze"
+  , { "name": "@take_cheeze"
     , "url": "https://github.com/take-cheeze"
-    , "due_date": "2019-04-01T23:59:59+09:00"
+    , "due_date": "2020-04-01T23:59:59+09:00"
     }
   , { "name": "熊崎宏樹"
     , "url": "https://twitter.com/kumagi"
