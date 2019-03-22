@@ -65,6 +65,9 @@ var URL_PERMLINK = '<% url "permlink" %>';
 var URL_API_TEMPLATE = '<% url "api-template" %>';
 var USING_PERMLINK = <% if using_permlink %>true<% else %>false<% end %>;
 var JSON_CODE = <%= permlink | raw %>;
+if (JSON_CODE != null) {
+  JSON_CODE = JSON.parse(window.atob(JSON_CODE));
+}
 var LOGIN_NAME = <% if login %>'<%= login_info.name %>'<% else %>null<% end %>;
 var LOGIN_AVATAR_URL = <% if login %>'<%= login_info.avatar_url %>'<% else %>null<% end %>;
 var DEFAULT_COMPILER = 'gcc-head';

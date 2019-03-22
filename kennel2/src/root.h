@@ -78,7 +78,10 @@ namespace content {
 
         void set_permlink(std::string permlink) {
             this->using_permlink = true;
-            this->permlink = std::move(permlink);
+            auto str = cppcms::b64url::encode(permlink);
+            std::string pad((str.size() + 3) / 4 * 4 - str.size(), '=');
+            std::transform(str.begin(), str.end(), str.begin(), [](char c) { return c == '-' ? '+' : c == '_' ? '/' : c; });
+            this->permlink = "\"" + str + pad + "\"";
         }
 
         void set_twitter(std::string title, std::string description) {

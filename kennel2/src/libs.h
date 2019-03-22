@@ -17,6 +17,7 @@
 #include <cppcms/view.h>
 #include <cppcms/http_context.h>
 #include <cppcms/http_response.h>
+#include <cppcms/base64.h>
 #include <booster/system_error.h>
 #include <booster/posix_time.h>
 #include <booster/shared_ptr.h>
