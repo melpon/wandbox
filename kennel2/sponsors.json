@@ -83,7 +83,7 @@
     }
   , { "name": "清楚なC++メイドBOT"
     , "url": "https://twitter.com/cpp_maid_BOT"
-    , "due_date": "2019-03-18T23:59:59+09:00"
+    , "due_date": "2020-03-24T23:59:59+09:00"
     }
   , { "name": "@tzik_tack"
     , "url": "https://twitter.com/tzik_tack"
@@ -536,6 +536,10 @@
   , { "name": "sublimer"
     , "url": "https://twitter.com/lz650sss"
     , "due_date": "2020-03-06T23:59:59+09:00"
+    }
+  , { "name": "tai2"
+    , "url": "https://blog.tai2.net/pages/about.html"
+    , "due_date": "2020-03-25T23:59:59+09:00"
     }
   ]
 }
