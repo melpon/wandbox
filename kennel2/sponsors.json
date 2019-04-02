@@ -541,5 +541,9 @@
     , "url": "https://blog.tai2.net/pages/about.html"
     , "due_date": "2020-03-25T23:59:59+09:00"
     }
+  , { "name": "Freezer"
+    , "url": "https://mastodon.social/@Freezer"
+    , "due_date": "2020-04-04T23:59:59+09:00"
+    }
   ]
 }
