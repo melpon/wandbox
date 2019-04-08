@@ -545,5 +545,9 @@
     , "url": "https://mastodon.social/@Freezer"
     , "due_date": "2020-04-04T23:59:59+09:00"
     }
+  , { "name": "@m_akihiro"
+    , "url": "https://twitter.com/m_akihiro"
+    , "due_date": "2020-04-09T23:59:59+09:00"
+    }
   ]
 }
