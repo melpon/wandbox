@@ -61,38 +61,38 @@
 
 <script>
 
-function b64ToUint6 (nChr) {
-  return nChr > 64 && nChr < 91 ?
-      nChr - 65
-    : nChr > 96 && nChr < 123 ?
-      nChr - 71
-    : nChr > 47 && nChr < 58 ?
-      nChr + 4
-    : nChr === 43 ?
+function base64CharDecode(ch) {
+  return ch > 64 && ch < 91 ?
+      ch - 65
+    : ch > 96 && ch < 123 ?
+      ch - 71
+    : ch > 47 && ch < 58 ?
+      ch + 4
+    : ch === 43 ?
       62
-    : nChr === 47 ?
+    : ch === 47 ?
       63
     :
       0;
 }
 
-function base64DecToArr(sBase64, nBlockSize) {
-  var
-    sB64Enc = sBase64, nInLen = sB64Enc.length,
-    nOutLen = nBlockSize ? Math.ceil((nInLen * 3 + 1 >>> 2) / nBlockSize) * nBlockSize : nInLen * 3 + 1 >>> 2, aBytes = new Uint8Array(nOutLen);
+function base64Decode(str) {
+  var buf = new Uint8Array((str.length * 6 + 7) / 8);
 
-  for (var nMod3, nMod4, nUint24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
-    nMod4 = nInIdx & 3;
-    nUint24 |= b64ToUint6(sB64Enc.charCodeAt(nInIdx)) << 18 - 6 * nMod4;
-    if (nMod4 === 3 || nInLen - nInIdx === 1) {
-      for (nMod3 = 0; nMod3 < 3 && nOutIdx < nOutLen; nMod3++, nOutIdx++) {
-        aBytes[nOutIdx] = nUint24 >>> (16 >>> nMod3 & 24) & 255;
-      }
-      nUint24 = 0;
+  var b24 = 0;
+  var j = 0;
+  for (var i = 0; i < str.length; i++) {
+    var b6 = base64CharDecode(str.charCodeAt(i));
+    b24 = (b24 << 6) | b6;
+    if (((i + 1) % 4) == 0) {
+      buf[j++] = (b24 >>> 16) & 0xff;
+      buf[j++] = (b24 >>> 8) & 0xff;
+      buf[j++] = (b24 >>> 0) & 0xff;
+      b24 = 0;
     }
   }
 
-  return aBytes;
+  return buf;
 }
 
 var URL_COMPILE = '<% url "compile" %>';
@@ -101,7 +101,7 @@ var URL_API_TEMPLATE = '<% url "api-template" %>';
 var USING_PERMLINK = <% if using_permlink %>true<% else %>false<% end %>;
 var JSON_CODE = <%= permlink | raw %>;
 if (JSON_CODE != null) {
-  var text = new TextDecoder("utf-8").decode(base64DecToArr(JSON_CODE));
+  var text = new TextDecoder("utf-8").decode(base64Decode(JSON_CODE));
   JSON_CODE = JSON.parse(text);
 }
 var LOGIN_NAME = <% if login %>'<%= login_info.name %>'<% else %>null<% end %>;
