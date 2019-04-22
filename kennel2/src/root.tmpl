@@ -81,8 +81,14 @@ function base64Decode(str) {
 
   var b24 = 0;
   var j = 0;
+  var end = 0;
   for (var i = 0; i < str.length; i++) {
-    var b6 = base64CharDecode(str.charCodeAt(i));
+    var ch = str.charCodeAt(i);
+    // = が来たら終わり
+    if (ch == 61) {
+      end += 1;
+    }
+    var b6 = base64CharDecode(ch);
     b24 = (b24 << 6) | b6;
     if (((i + 1) % 4) == 0) {
       buf[j++] = (b24 >>> 16) & 0xff;
@@ -90,6 +96,14 @@ function base64Decode(str) {
       buf[j++] = (b24 >>> 0) & 0xff;
       b24 = 0;
     }
+  }
+
+  // 最後の = の数に応じて最後のデータを削除する
+  if (end == 2) {
+    buf = buf.slice(0, buf.length - 1);
+  }
+  if (end == 3) {
+    buf = buf.slice(0, buf.length - 2);
   }
 
   return buf;
