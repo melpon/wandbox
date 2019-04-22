@@ -99,8 +99,11 @@ function base64Decode(str) {
   }
 
   // 最後の = の数に応じて最後のデータを削除する
-  if (end == 2) {
+  if (end == 1) {
     buf = buf.slice(0, buf.length - 1);
+  }
+  if (end == 2) {
+    buf = buf.slice(0, buf.length - 2);
   }
   if (end == 3) {
     buf = buf.slice(0, buf.length - 2);
