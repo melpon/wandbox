@@ -37,7 +37,7 @@
     }
   , { "name": "株式会社gumi"
     , "url": "https://gu3.co.jp/"
-    , "due_date": "2019-05-01T23:59:59+09:00"
+    , "due_date": "2019-06-01T23:59:59+09:00"
     }
   , { "name": "Miniascape株式会社"
     , "url": "https://www.miniascape.co.jp/"
@@ -54,6 +54,10 @@
   , { "name": "SoundHound Inc.日本法人"
     , "url": "https://www.soundhound.co.jp/"
     , "due_date": "2020-01-13T23:59:59+09:00"
+    }
+  , { "name": "BASSDRUM株式会社"
+    , "url": "https://bassdrum.org/"
+    , "due_date": "2020-06-01T23:59:59+09:00"
     }
   ]
 , "personal":
