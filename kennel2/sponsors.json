@@ -565,5 +565,13 @@
     , "url": "https://twitter.com/yuushimizup"
     , "due_date": "2020-05-14T23:59:59+09:00"
     }
+  , { "name": "@fukasawah"
+    , "url": "https://twitter.com/fukasawah"
+    , "due_date": "2020-06-19T23:59:59+09:00"
+    }
+  , { "name": "暢気"
+    , "url": "https://twitter.com/f_akinobu"
+    , "due_date": "2020-06-19T23:59:59+09:00"
+    }
   ]
 }
