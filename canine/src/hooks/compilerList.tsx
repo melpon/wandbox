@@ -1,0 +1,127 @@
+import React from "react";
+import _ from "lodash";
+import { useFetchJSON, AnyJson, JsonMap, JsonArray } from "./fetch";
+
+interface SingleSwitch {
+  name: string;
+  default: boolean;
+  displayFlags: string;
+  displayName: string;
+}
+interface SelectSwitchOption {
+  name: string;
+  displayFlags: string;
+  displayName: string;
+}
+interface SelectSwitch {
+  name: string;
+  default: string;
+  options: SelectSwitchOption[];
+}
+interface Switch {
+  type: "single" | "select";
+  switch: SingleSwitch | SelectSwitch;
+}
+interface CompilerInfo {
+  name: string;
+  version: string;
+  language: string;
+  displayName: string;
+  templates: string[];
+  compilerOptionRaw: boolean;
+  runtimeOptionRaw: boolean;
+  displayCompileCommand: string;
+  switches: Switch[];
+}
+
+interface CompilerList {
+  compilers: CompilerInfo[];
+  // CompilerInfo のリストを言語ごとにグループ化したもの
+  languages: {
+    [lang: string]: CompilerInfo[];
+  };
+}
+
+function resolveSwitch(json: AnyJson): Switch {
+  const obj = json as JsonMap;
+  if (obj.type === "single") {
+    return {
+      type: "single",
+      switch: {
+        name: obj.name as string,
+        default: obj.default as boolean,
+        displayFlags: obj["display-flags"] as string,
+        displayName: obj["display-name"] as string
+      }
+    };
+  } else if (obj.type === "select") {
+    return {
+      type: "select",
+      switch: {
+        name: obj.name as string,
+        default: obj.default as string,
+        options: (obj.options as JsonArray).map(
+          (json): SelectSwitchOption => {
+            const obj = json as JsonMap;
+            return {
+              name: obj.name as string,
+              displayFlags: obj["display-flags"] as string,
+              displayName: obj["display-name"] as string
+            };
+          }
+        )
+      }
+    };
+  } else {
+    throw "error";
+  }
+}
+
+function resolveCompilerInfo(json: AnyJson): CompilerInfo {
+  const obj = json as JsonMap;
+  return {
+    name: obj.name as string,
+    version: obj.version as string,
+    language: obj.language as string,
+    displayName: obj["display-name"] as string,
+    templates: obj.templates as string[],
+    compilerOptionRaw: obj["compiler-option-raw"] as boolean,
+    runtimeOptionRaw: obj["runtime-option-raw"] as boolean,
+    displayCompileCommand: obj["display-compile-command"] as string,
+    switches: (obj.switches as JsonArray).map(resolveSwitch)
+  };
+}
+
+export function useCompilerList(
+  url: string,
+  onError: (error: string) => void
+): CompilerList | null {
+  const headers = {
+    method: "GET",
+    "Content-Type": "application/json"
+  };
+
+  const resolver = React.useCallback((json): CompilerInfo[] => {
+    return (json as JsonArray).map(resolveCompilerInfo);
+  }, []);
+
+  const [compilerInfos, , doFetch] = useFetchJSON<CompilerInfo[]>(
+    url,
+    { headers: headers },
+    resolver,
+    onError
+  );
+
+  React.useEffect((): void => {
+    doFetch(null, {});
+  }, []);
+
+  if (compilerInfos === null) {
+    return null;
+  }
+
+  return {
+    compilers: compilerInfos,
+    languages: _.groupBy(compilerInfos, (x): string => x.language)
+  };
+}

@@ -33,3 +33,4 @@ VS Code。以下のプラグインを入れておく。
 ### default export
 
 既存の default export されたライブラリを利用するのは問題ないが、こちらでは default export するスクリプトを書かないこと。
+[eslint-plugin-import](https://github.com/benmosher/eslint-plugin-import) に default export を禁止するプラグインがあるが、依存を増やしたくないのでやめておく。
