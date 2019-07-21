@@ -15,10 +15,16 @@
     "@material-ui/core": "^4.2.0",
     "@material-ui/icons": "^4.2.1",
     "@material-ui/styles": "^4.2.0",
+    "codemirror": "^5.48.0",
+    "codemirror-mode-elixir": "^1.1.2",
+    "css-loader": "^3.1.0",
     "lodash": "^4.17.14",
     "react": "^16.8.6",
+    "react-codemirror2": "^6.0.0",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.1",
+    "style-loader": "^0.23.1",
+    "unstated-next": "^1.1.0",
     "use-react-router": "^1.0.7"
   },
   "devDependencies": {

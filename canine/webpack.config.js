@@ -22,6 +22,18 @@ var config = {
           }
         },
         include: path.resolve(__dirname, "src")
+      },
+      {
+        test: /\.css$/,
+        use: [
+          { loader: "style-loader" },
+          {
+            loader: "css-loader",
+            options: {
+              modules: false
+            }
+          }
+        ]
       }
     ]
   },

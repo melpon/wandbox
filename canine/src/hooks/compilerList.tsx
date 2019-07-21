@@ -2,27 +2,27 @@ import React from "react";
 import _ from "lodash";
 import { useFetchJSON, AnyJson, JsonMap, JsonArray } from "./fetch";
 
-interface SingleSwitch {
+export interface SingleSwitch {
   name: string;
   default: boolean;
   displayFlags: string;
   displayName: string;
 }
-interface SelectSwitchOption {
+export interface SelectSwitchOption {
   name: string;
   displayFlags: string;
   displayName: string;
 }
-interface SelectSwitch {
+export interface SelectSwitch {
   name: string;
   default: string;
   options: SelectSwitchOption[];
 }
-interface Switch {
+export interface Switch {
   type: "single" | "select";
   switch: SingleSwitch | SelectSwitch;
 }
-interface CompilerInfo {
+export interface CompilerInfo {
   name: string;
   version: string;
   language: string;
@@ -34,7 +34,7 @@ interface CompilerInfo {
   switches: Switch[];
 }
 
-interface CompilerList {
+export interface CompilerList {
   compilers: CompilerInfo[];
   // CompilerInfo のリストを言語ごとにグループ化したもの
   languages: {

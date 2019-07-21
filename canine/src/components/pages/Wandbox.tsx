@@ -7,6 +7,7 @@ import { makeStyles } from "@material-ui/styles";
 import { useCompilerList } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
 import { Header } from "../organisms/Header";
+import { Sidebar } from "../organisms/Sidebar";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles((theme: Theme) => ({
@@ -33,6 +34,7 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
   return (
     <React.Fragment>
       <Header />
+      <Sidebar compilerList={compilerList} />
       <Paper className={classes.root}>
         <Typography variant="h2" gutterBottom>
           Wandbox

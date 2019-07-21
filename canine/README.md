@@ -16,7 +16,6 @@ VS Code。以下のプラグインを入れておく。
 
 - Debugger for Chrome
 - ESLint
-- Prettier
 
 このディレクトリをルートとして開けば、VS Code のプラグイン設定が入った状態で動作する。
 
