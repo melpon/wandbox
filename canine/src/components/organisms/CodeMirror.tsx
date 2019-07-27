@@ -34,7 +34,8 @@ import "codemirror/addon/search/searchcursor";
 import "codemirror/addon/edit/matchbrackets";
 import "codemirror/addon/dialog/dialog";
 
-export type CodeMirrorType = object;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type CodeMirrorType = any;
 export interface CodeMirrorOptions {
   keyMap?: string;
   lineNumbers?: boolean;
