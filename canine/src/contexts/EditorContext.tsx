@@ -1,7 +1,7 @@
 import React from "react";
 import { createContainer } from "unstated-next";
 
-export interface EditorSource {
+export interface EditorSourceData {
   filename: string | null;
   text: string;
 }
@@ -10,7 +10,7 @@ type EditorType = "default" | "vim" | "emacs";
 type TabKeyType = "2" | "4" | "8" | "tab";
 type TabWidthType = "2" | "4" | "8";
 
-export interface EditorSettings {
+export interface EditorSettingsData {
   opened: boolean;
   editor: EditorType;
   tabKey: TabKeyType;
@@ -27,9 +27,9 @@ export interface EditorSettings {
 
 export interface EditorContextState {
   currentTab: number;
-  sources: EditorSource[];
+  sources: EditorSourceData[];
   stdin: string;
-  settings: EditorSettings;
+  settings: EditorSettingsData;
 
   setCurrentTab: React.Dispatch<React.SetStateAction<number>>;
   addSource: (filename: string) => number;
@@ -39,7 +39,7 @@ export interface EditorContextState {
   setStdin: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function useSettings(): EditorSettings {
+function useSettings(): EditorSettingsData {
   const [opened, setOpened] = React.useState(false);
   const [editor, setEditor] = React.useState<EditorType>("default");
   const [tabKey, setTabKey] = React.useState<TabKeyType>("4");
@@ -64,7 +64,7 @@ function useSettings(): EditorSettings {
 
 function useEditorContext(): EditorContextState {
   const [currentTab, setCurrentTab] = React.useState<number>(0);
-  const [sources, setSources] = React.useState<EditorSource[]>([
+  const [sources, setSources] = React.useState<EditorSourceData[]>([
     { filename: null, text: "" }
   ]);
   const [stdin, setStdin] = React.useState<string>("");
@@ -72,7 +72,18 @@ function useEditorContext(): EditorContextState {
 
   const addSource = React.useCallback(
     (filename: string): number => {
-      const newSources = [...sources, { filename: filename, text: "" }];
+      // 既に存在している名前だったら、後ろに -1 や -2 を付けて重複させないようにする
+      let resolvedFilename = filename;
+      let n = 1;
+      while (
+        sources.findIndex(
+          (source): boolean => resolvedFilename === source.filename
+        ) >= 0
+      ) {
+        resolvedFilename = `${filename}-${n}`;
+        n += 1;
+      }
+      const newSources = [...sources, { filename: resolvedFilename, text: "" }];
       setSources(newSources);
       return sources.length;
     },
@@ -86,7 +97,7 @@ function useEditorContext(): EditorContextState {
       }
 
       const newSources = [...sources];
-      newSources.splice(currentTab, 1);
+      newSources.splice(tab, 1);
       setSources(newSources);
       // 最後のタブだったらカレントを調整する
       if (currentTab === sources.length - 1) {
