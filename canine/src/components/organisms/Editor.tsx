@@ -6,6 +6,7 @@ import Grid from "@material-ui/core/Grid";
 import { EditorContext } from "~/contexts/EditorContext";
 import { CompilerContext } from "~/contexts/CompilerContext";
 import { CompilerList } from "~/hooks/compilerList";
+import { ResultContext } from "~/contexts/ResultContext";
 import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorSettings } from "./Editor/EditorSettings";
 import { EditorTabs } from "./Editor/EditorTabs";
@@ -17,6 +18,7 @@ export interface EditorProps {
 export const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const editor = useContainer(EditorContext);
   const compiler = useContainer(CompilerContext);
+  const result = useContainer(ResultContext);
   const { compilerList } = props;
   const { settings } = editor;
   return (
@@ -24,7 +26,7 @@ export const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
       <Grid container>
         <Grid item style={{ overflowX: "scroll", flex: 1 }}>
           <EditorTabs editor={editor} />
-          <CodeEditor {...{ editor, compiler, compilerList }} />
+          <CodeEditor {...{ editor, compiler, compilerList, result }} />
         </Grid>
       </Grid>
       {((): React.ReactElement => {

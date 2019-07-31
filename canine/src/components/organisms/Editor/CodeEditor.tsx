@@ -9,17 +9,21 @@ import { resolveLanguageMode } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
 import { CompilerContextState } from "~/contexts/CompilerContext";
 import { EditorContextState } from "~/contexts/EditorContext";
+import { ResultContextState, Result } from "~/contexts/ResultContext";
+import { compile } from "~/utils/compile";
+import { AnyJson } from "~/hooks/fetch";
 
 interface CodeEditorProps {
   editor: EditorContextState;
   compiler: CompilerContextState;
   compilerList: CompilerList;
+  result: ResultContextState;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = (
   props
 ): React.ReactElement => {
-  const { editor, compiler } = props;
+  const { editor, compiler, compilerList, result } = props;
 
   const insertTabSpace = React.useCallback((cm: CodeMirrorType): void => {
     const cursor = cm.getCursor()["ch"];
@@ -31,6 +35,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = (
     cm.replaceSelection(spaces, "end", "+input");
   }, []);
 
+  const onResult = React.useCallback(
+    (json: AnyJson): void => {
+      result.add((json as unknown) as Result);
+    },
+    [result.add]
+  );
+  const onCtrlEnter = React.useCallback((): void => {
+    compile(editor, compiler, compilerList, onResult);
+  }, [editor, compiler, compilerList, onResult]);
+
   const settings = editor.settings;
   const options = React.useMemo((): CodeMirrorOptions => {
     let options = {
@@ -38,9 +52,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = (
       smartIndent: settings.smartIndent,
       tabSize: parseInt(settings.tabWidth, 10),
       extraKeys: {
-        "Ctrl-Enter": (): void => {
-          // TODO(melpon): コンパイルを開始する
-        }
+        "Ctrl-Enter": onCtrlEnter
       }
     };
 
@@ -60,7 +72,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = (
         indentWithTabs: true
       };
     }
-  }, [settings, insertTabSpace]);
+  }, [settings, insertTabSpace, onCtrlEnter]);
 
   const source = editor.sources[editor.currentTab];
   const mode = resolveLanguageMode(
