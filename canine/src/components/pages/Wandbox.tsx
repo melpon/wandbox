@@ -1,6 +1,4 @@
 import React from "react";
-import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
 import { makeStyles } from "@material-ui/styles";
 
@@ -10,6 +8,7 @@ import { Header } from "../organisms/Header";
 import { Sidebar } from "../organisms/Sidebar";
 import { Editor } from "../organisms/Editor";
 import { Command } from "../organisms/Command";
+import { Result } from "../organisms/Result";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles((theme: Theme) => ({
@@ -34,11 +33,12 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
   console.log(compilerList);
 
   return (
-    <React.Fragment>
+    <div className={classes.root}>
       <Header />
       <Sidebar compilerList={compilerList} />
       <Editor compilerList={compilerList} />
       <Command compilerList={compilerList} />
-    </React.Fragment>
+      <Result />
+    </div>
   );
 };

@@ -32,15 +32,15 @@ export function compile(
 
   const body = {
     compiler: compiler.currentCompilerName,
-    source: defaultEditor.text,
-    sources: editor.sources
+    code: defaultEditor.text,
+    codes: editor.sources
       .filter((s): boolean => s.filename !== null)
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       .map(s => ({ file: s.filename, code: s.text })),
     options: options,
     stdin: editor.stdin,
-    compilerOptionRaw: compiler.compilerOptionRaw,
-    runtimeOptionRaw: compiler.runtimeOptionRaw,
+    "compiler-option-raw": compiler.compilerOptionRaw,
+    "runtime-option-raw": compiler.runtimeOptionRaw,
     save: false
   };
   fetch("https://wandbox.org/api/compile.ndjson", {
