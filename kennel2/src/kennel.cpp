@@ -733,7 +733,7 @@ private:
         auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
         nd->send_header();
         nd->context->response().set_header("Access-Control-Allow-Origin", "*");
-        send_command_async(service(), index, protos, [nd, save, value](const booster::system::error_code& e, const protocol& proto) {
+        send_command_async(service(), index, protos, [nd, value](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::clog << e.message() << std::endl);
             cppcms::json::value json;
