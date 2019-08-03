@@ -54,6 +54,7 @@ public:
         dispatcher().assign("/api/list.json", &kennel::api_list, this);
         dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
         dispatcher().assign("/api/compile.ndjson", &kennel::api_compile_ndjson, this);
+        dispatcher().assign("/api/permlink/?", &kennel::api_post_permlink, this);
         dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
         dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this, 1);
         mapper().assign("api-template", "/api/template/");
@@ -610,6 +611,11 @@ private:
             resp["username"] = auth["login"].str();
         }
         resp.save(response().out(), cppcms::json::compact);
+    }
+
+    void api_post_permlink() {
+        response().set_header("Access-Control-Allow-Origin", "*");
+        post_permlink();
     }
 
     void api_list() {
