@@ -881,7 +881,7 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdi
   pm.addClass('disable');
 
   outputs = $.map(outputs, function(e) {
-    return { type: e.type, output: e.output };
+    return { type: e.type, data: e.output };
   });
 
   var data = {
@@ -892,20 +892,20 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdi
     options: compiler_info.compile_options,
     'compiler-option-raw': compiler_info.compiler_option_raw,
     'runtime-option-raw': compiler_info.runtime_option_raw,
-    outputs: outputs,
+    results: outputs,
     login: LOGIN_NAME != null,
   };
 
   $.post(URL_PERMLINK, JSON.stringify(data),
     function(json) {
-      if (!json.success) {
+      if (json.permlink === undefined) {
         pm.removeClass('disable');
         return;
       }
 
       pm.remove();
 
-      var url = URL_PERMLINK + '/' + json.link;
+      var url = URL_PERMLINK + '/' + json.permlink;
       $('<a href="' + url + '" target="_blank" id="permlink">URL</a>')
         .appendTo(self._permlink());
 

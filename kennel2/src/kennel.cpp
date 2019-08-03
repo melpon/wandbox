@@ -511,8 +511,14 @@ private:
 
         response().content_type("application/json");
         cppcms::json::value result;
-        result["success"] = true;
-        result["link"] = permlink_name;
+        result["permlink"] = permlink_name;
+
+        auto settings = service().settings()["application"];
+        auto scheme = settings["scheme"].str();
+        auto domain = settings["domain"].str();
+        auto root = settings["map_root"].str();
+        result["url"] = scheme + "://" + domain + root + "/permlink/" + permlink_name;
+
         result.save(response().out(), cppcms::json::compact);
     }
     void get_permlink(std::string permlink_name) {
@@ -683,7 +689,7 @@ private:
             if (save) {
                 cppcms::json::value v;
                 v["type"] = proto.command;
-                v["output"] = proto.contents;
+                v["data"] = proto.contents;
                 outputs.array().push_back(v);
             }
         });
@@ -713,7 +719,6 @@ private:
         auto protos = make_protocols(value);
         auto compiler = value["compiler"].str();
         auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
-        auto save = value.get("save", false);
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
             [&compiler](cppcms::json::value& v) {
@@ -725,13 +730,10 @@ private:
         }
         auto index = static_cast<std::size_t>((*it)["provider"].number());
 
-        booster::shared_ptr<cppcms::json::value> outputs(new cppcms::json::value());
-        outputs->array({});
-
         auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
         nd->send_header();
         nd->context->response().set_header("Access-Control-Allow-Origin", "*");
-        send_command_async(service(), index, protos, [nd, save, outputs, value](const booster::system::error_code& e, const protocol& proto) {
+        send_command_async(service(), index, protos, [nd, save, value](const booster::system::error_code& e, const protocol& proto) {
             if (e)
                 return (void)(std::clog << e.message() << std::endl);
             cppcms::json::value json;
@@ -739,17 +741,6 @@ private:
             json["data"] = proto.contents;
             nd->send(json, true);
             //std::clog << proto.command << ":" << proto.contents << std::endl;
-
-            if (save) {
-                cppcms::json::value v;
-                v["type"] = proto.command;
-                v["output"] = proto.contents;
-                outputs->array().push_back(v);
-
-                if (proto.command == "Control" && proto.contents == "Finish") {
-                    // TODO
-                }
-            }
         });
     }
     void api_permlink(std::string permlink_name) {

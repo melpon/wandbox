@@ -201,12 +201,12 @@ public:
         stat = sql <<
             "INSERT INTO link_output (link_id, \"order\", type, output) "
             "VALUES (?, ?, ?, ?)";
-        for (auto&& output: code["outputs"].array()) {
+        for (auto&& output: code["results"].array()) {
             stat
                 << link_id
                 << order
                 << output["type"].str()
-                << output["output"].str()
+                << output["data"].str()
                 << cppdb::exec;
             stat.reset();
             order += 1;
