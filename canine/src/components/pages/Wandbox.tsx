@@ -6,6 +6,7 @@ import { useCompilerList } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
 import { Header } from "../organisms/Header";
 import { Sidebar } from "../organisms/Sidebar";
+import { Permlink } from "../organisms/Permlink";
 import { Editor } from "../organisms/Editor";
 import { Command } from "../organisms/Command";
 import { Result } from "../organisms/Result";
@@ -19,7 +20,14 @@ const useStyles = makeStyles((theme: Theme) => ({
   })
 }));
 
-export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
+export interface WandboxProps {
+  permlinkId?: string;
+}
+
+export const Wandbox: React.FC<WandboxProps> = (
+  props
+): React.ReactElement | null => {
+  const permlinkId = props.permlinkId === undefined ? null : props.permlinkId;
   const classes = useStyles();
   const [, setError] = useError();
   const compilerList = useCompilerList(
@@ -36,6 +44,7 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
     <div className={classes.root}>
       <Header />
       <Sidebar compilerList={compilerList} />
+      <Permlink compilerList={compilerList} permlinkId={permlinkId} />
       <Editor compilerList={compilerList} />
       <Command compilerList={compilerList} />
       <Result />

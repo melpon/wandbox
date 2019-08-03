@@ -97,7 +97,6 @@ export function useCompilerList(
   onError: (error: string) => void
 ): CompilerList | null {
   const headers = {
-    method: "GET",
     "Content-Type": "application/json"
   };
 
@@ -107,7 +106,7 @@ export function useCompilerList(
 
   const [compilerInfos, , doFetch] = useFetchJSON<CompilerInfo[]>(
     url,
-    { headers: headers },
+    { method: "GET", headers: headers },
     resolver,
     onError
   );

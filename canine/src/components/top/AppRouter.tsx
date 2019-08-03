@@ -7,6 +7,7 @@ export const AppRouter: React.FC<{}> = (): React.ReactElement => {
     <BrowserRouter>
       <Switch>
         <Route path="/" exact component={Wandbox} />
+        <Route path="/permlink/:permlinkId" exact component={Wandbox} />
       </Switch>
     </BrowserRouter>
   );
