@@ -77,7 +77,7 @@ function resolveSwitch(json: AnyJson): Switch {
   }
 }
 
-function resolveCompilerInfo(json: AnyJson): CompilerInfo {
+export function resolveCompilerInfo(json: AnyJson): CompilerInfo {
   const obj = json as JsonMap;
   return {
     name: obj.name as string,

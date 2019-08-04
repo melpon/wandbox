@@ -10,15 +10,17 @@ import { CompilerList } from "~/hooks/compilerList";
 import { CompilerContext } from "~/contexts/CompilerContext";
 import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
 import { CodeMirror } from "./CodeMirror";
+import { PermlinkData } from "~/hooks/permlink";
 
 interface SidebarProps {
   //editor: EditorState,
   //compiler: CompilerState,
   compilerList: CompilerList;
+  permlinkData: PermlinkData | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
-  const { compilerList } = props;
+  const { compilerList, permlinkData } = props;
   const compilerContext = CompilerContext.useContainer();
   const {
     currentLanguage,
@@ -73,47 +75,72 @@ export const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
   }, []);
   const onCtrlEnter = React.useCallback((): void => {}, []);
 
+  const disabled = permlinkData !== null;
+  const languages =
+    permlinkData === null
+      ? Object.keys(compilerList.languages).sort()
+      : [permlinkData.parameter.compilerInfo.language];
+
+  // パーマリングが有効な場合、変更不可にして permlinkData から構築する
   return (
     <React.Fragment>
       {/* choose language */}
-      <Select value={currentLanguage} onChange={onChangeLanguage}>
-        {Object.keys(compilerList.languages)
-          .sort()
-          .map(
-            (lang): React.ReactElement => {
-              return (
-                <MenuItem key={lang} value={lang}>
-                  {lang}
-                </MenuItem>
-              );
-            }
-          )}
+      <Select
+        disabled={disabled}
+        value={permlinkData === null ? currentLanguage : languages[0]}
+        onChange={onChangeLanguage}
+      >
+        {languages.map(
+          (lang): React.ReactElement => {
+            return (
+              <MenuItem key={lang} value={lang}>
+                {lang}
+              </MenuItem>
+            );
+          }
+        )}
       </Select>
 
       {/* choose compiler */}
       {((): React.ReactElement | null => {
-        if (currentLanguage === "") {
-          return null;
-        }
+        if (permlinkData === null) {
+          if (currentLanguage === "") {
+            return null;
+          }
 
-        const infos = compilerList.languages[currentLanguage];
-        if (infos === undefined) {
-          return null;
-        }
+          const infos = compilerList.languages[currentLanguage];
+          if (infos === undefined) {
+            return null;
+          }
 
-        return (
-          <Select value={currentCompilerName} onChange={onChangeCompiler}>
-            {infos.map(
-              (info): React.ReactElement => {
-                return (
-                  <MenuItem key={info.name} value={info.name}>
-                    {`${info.displayName} ${info.version}`}
-                  </MenuItem>
-                );
-              }
-            )}
-          </Select>
-        );
+          return (
+            <Select value={currentCompilerName} onChange={onChangeCompiler}>
+              {infos.map(
+                (info): React.ReactElement => {
+                  return (
+                    <MenuItem key={info.name} value={info.name}>
+                      {`${info.displayName} ${info.version}`}
+                    </MenuItem>
+                  );
+                }
+              )}
+            </Select>
+          );
+        } else {
+          const compiler = permlinkData.parameter.compiler;
+          const info = permlinkData.parameter.compilerInfo;
+          return (
+            <Select
+              disabled={true}
+              value={compiler}
+              onChange={onChangeCompiler}
+            >
+              <MenuItem key={info.name} value={info.name}>
+                {`${info.displayName} ${info.version}`}
+              </MenuItem>
+            </Select>
+          );
+        }
       })()}
 
       {/* compiler options */}

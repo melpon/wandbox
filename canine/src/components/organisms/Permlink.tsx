@@ -6,31 +6,20 @@ import Button from "@material-ui/core/Button";
 import { ResultContext } from "~/contexts/ResultContext";
 import { EditorContext } from "~/contexts/EditorContext";
 import { CompilerContext } from "~/contexts/CompilerContext";
-import { useFetchJSON, AnyJson, JsonMap } from "~/hooks/fetch";
 import { createBody } from "~/utils/compile";
 import { CompilerList } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
-
-export interface PermlinkData {
-  permlink: string;
-}
-
-function resolvePermlink(json: AnyJson): PermlinkData {
-  const map = json as JsonMap;
-  return {
-    permlink: map.permlink as string
-  };
-}
+import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
 
 export interface PermlinkProps {
   compilerList: CompilerList;
-  permlinkId: string | null;
+  permlinkData: PermlinkData | null;
 }
 
 export const Permlink: React.FC<PermlinkProps> = (
   props
 ): React.ReactElement | null => {
-  const { compilerList, permlinkId } = props;
+  const { compilerList, permlinkData } = props;
   const { history } = useReactRouter();
   const editor = useContainer(EditorContext);
   const compiler = useContainer(CompilerContext);
@@ -38,17 +27,11 @@ export const Permlink: React.FC<PermlinkProps> = (
   const [, setError] = useError();
   const [sharing, setSharing] = React.useState<boolean>(false);
 
-  const headers = {
-    "Content-Type": "application/json"
-  };
-  const [permlinkResp, permlinkFetchId, doPermlink] = useFetchJSON<
-    PermlinkData
-  >(
+  const [permlinkResp, permlinkFetchId, doPermlink] = usePostPermlink(
     "https://wandbox.org/api/permlink",
-    { method: "POST", headers: headers },
-    resolvePermlink,
     setError
   );
+
   const onShare = React.useCallback((): void => {
     setSharing(true);
     const json = createBody(editor, compiler, compilerList);
@@ -83,7 +66,7 @@ export const Permlink: React.FC<PermlinkProps> = (
     return null;
   }
 
-  if (permlinkId === null) {
+  if (permlinkData === null) {
     return <Button onClick={onShare}>Share</Button>;
   } else {
     return (
