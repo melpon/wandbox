@@ -195,13 +195,16 @@ public:
             << cppdb::exec;
 
         auto link_id = stat.last_insert_id();
-        //std::clog << link_id << std::endl;
+        //std::clog << "link_id: " << link_id << std::endl;
 
         int order = 1;
         stat = sql <<
             "INSERT INTO link_output (link_id, \"order\", type, output) "
             "VALUES (?, ?, ?, ?)";
         for (auto&& output: code["results"].array()) {
+            //std::clog << "order: " << order << std::endl;
+            //std::clog << "type: " << output["type"].str() << std::endl;
+            //std::clog << "data: " << output["data"].str() << std::endl;
             stat
                 << link_id
                 << order
@@ -272,8 +275,8 @@ public:
         {
             int n = 0;
             while (r.next()) {
-                value["outputs"][n]["type"] = r.get<std::string>("type");
-                value["outputs"][n]["output"] = r.get<std::string>("output");
+                value["results"][n]["type"] = r.get<std::string>("type");
+                value["results"][n]["data"] = r.get<std::string>("output");
                 n += 1;
             }
         }

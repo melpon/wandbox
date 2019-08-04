@@ -703,7 +703,7 @@ private:
         if (save) {
             permlink pl(service());
             std::string permlink_name = make_random_name(16);
-            value["outputs"] = outputs;
+            value["results"] = outputs;
             pl.make_permlink(permlink_name, value, *it, cppcms::json::value());
             result["permlink"] = permlink_name;
 
@@ -757,18 +757,21 @@ private:
         permlink pl(service());
         auto value = pl.get_permlink(permlink_name);
         cppcms::json::value outputs;
-        for (auto&& output: value["outputs"].array()) {
-            update_compile_result(outputs, protocol{output["type"].str(), output["output"].str()});
+        outputs.array({});
+        for (auto&& output: value["results"].array()) {
+            update_compile_result(outputs, protocol{output["type"].str(), output["data"].str()});
         }
-        value.object().erase("outputs");
+        cppcms::json::value results = value["results"].array();
+        value.object().erase("results");
 
         cppcms::json::value result;
         result["parameter"] = value;
         result["result"] = outputs;
+        result["results"] = results;
 
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
-        result.save(response().out(), cppcms::json::readable);
+        result.save(response().out());
     }
 
     void api_template(std::string template_name) {
@@ -948,10 +951,10 @@ private:
         permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
 
-        for (auto&& output: result["outputs"].array()) {
-            update_compile_result(result, protocol{output["type"].str(), output["output"].str()});
+        for (auto&& output: result["results"].array()) {
+            update_compile_result(result, protocol{output["type"].str(), output["data"].str()});
         }
-        result.object().erase("outputs");
+        result.object().erase("results");
 
         auto info = result["compiler-info"];
         c.compiler_info = info;

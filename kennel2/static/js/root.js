@@ -198,7 +198,7 @@ $(function() {
       runtime_option_raw: code['runtime-option-raw'],
     });
 
-    result_container.set_code(compiler, code.code, code.codes || [], code.stdin, code.outputs);
+    result_container.set_code(compiler, code.code, code.codes || [], code.stdin, code.results);
 
     set_author(code.author);
   }
@@ -1103,7 +1103,7 @@ ResultWindow.prototype.set_code = function(compiler, code, codes, stdin, outputs
   this.code_window(compiler_info, code, codes, stdin);
   $.each(outputs, function(n,e) {
     var type = e.type;
-    var output = e.output;
+    var output = e.data;
     var ansi_up = new AnsiUp();
     $('<pre>').addClass(type)
               .attr('data-type', type)
