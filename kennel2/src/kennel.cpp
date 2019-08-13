@@ -759,8 +759,8 @@ private:
         cppcms::json::value outputs;
         cppcms::json::value results;
 
-        outputs.object(cppcms::json::object());
-        results.array(cppcms::json::array());
+        outputs.object({});
+        results.array({});
 
         // １件も出力が存在しない場合は results フィールドそのものが存在しなくなるのでチェックする
         if (!value["results"].is_undefined()) {
