@@ -573,5 +573,9 @@
     , "url": "https://twitter.com/f_akinobu"
     , "due_date": "2020-06-19T23:59:59+09:00"
     }
+  , { "name": "@gnaggnoyil"
+    , "url": "https://twitter.com/gnaggnoyil"
+    , "due_date": "2020-08-15T23:59:59+09:00"
+    }
   ]
 }
