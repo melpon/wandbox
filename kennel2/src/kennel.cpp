@@ -758,8 +758,11 @@ private:
         auto value = pl.get_permlink(permlink_name);
         cppcms::json::value outputs;
         outputs.array({});
-        for (auto&& output: value["results"].array()) {
-            update_compile_result(outputs, protocol{output["type"].str(), output["data"].str()});
+        // １件も出力が存在しない場合は results フィールドそのものが存在しなくなるのでチェックする
+        if (!value["results"].is_undefined()) {
+          for (auto&& output: value["results"].array()) {
+              update_compile_result(outputs, protocol{output["type"].str(), output["data"].str()});
+          }
         }
         cppcms::json::value results = value["results"].array();
         value.object().erase("results");
