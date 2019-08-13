@@ -757,15 +757,19 @@ private:
         permlink pl(service());
         auto value = pl.get_permlink(permlink_name);
         cppcms::json::value outputs;
-        outputs.array({});
+        cppcms::json::value results;
+
+        outputs.object(cppcms::json::object());
+        results.array(cppcms::json::array());
+
         // １件も出力が存在しない場合は results フィールドそのものが存在しなくなるのでチェックする
         if (!value["results"].is_undefined()) {
           for (auto&& output: value["results"].array()) {
               update_compile_result(outputs, protocol{output["type"].str(), output["data"].str()});
           }
+          results = value["results"].array();
+          value.object().erase("results");
         }
-        cppcms::json::value results = value["results"].array();
-        value.object().erase("results");
 
         cppcms::json::value result;
         result["parameter"] = value;
