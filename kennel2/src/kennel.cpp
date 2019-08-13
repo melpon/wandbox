@@ -756,29 +756,29 @@ private:
 
         permlink pl(service());
         auto value = pl.get_permlink(permlink_name);
-        cppcms::json::value outputs;
+        cppcms::json::value result;
         cppcms::json::value results;
 
-        outputs.object({});
+        result.object({});
         results.array({});
 
         // １件も出力が存在しない場合は results フィールドそのものが存在しなくなるのでチェックする
-        if (!value["results"].is_undefined()) {
+        if (value.object().find("results") != value.object().end()) {
           for (auto&& output: value["results"].array()) {
-              update_compile_result(outputs, protocol{output["type"].str(), output["data"].str()});
+              update_compile_result(result, protocol{output["type"].str(), output["data"].str()});
           }
           results = value["results"].array();
           value.object().erase("results");
         }
 
-        cppcms::json::value result;
-        result["parameter"] = value;
-        result["result"] = outputs;
-        result["results"] = results;
+        cppcms::json::value resp;
+        resp["parameter"] = value;
+        resp["result"] = result;
+        resp["results"] = results;
 
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
-        result.save(response().out());
+        resp.save(response().out());
     }
 
     void api_template(std::string template_name) {
