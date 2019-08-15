@@ -62,6 +62,10 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
     setPermlinkData(permlinkResp);
   }, [permlinkResp]);
 
+  const clearPermlinkData = React.useCallback((): void => {
+    setPermlinkData(null);
+  }, [setPermlinkData]);
+
   if (compilerList === null) {
     return null;
   }
@@ -70,7 +74,11 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
     <div className={classes.root}>
       <Header />
       <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
-      <Permlink compilerList={compilerList} permlinkData={permlinkData} />
+      <Permlink
+        compilerList={compilerList}
+        permlinkData={permlinkData}
+        clearPermlinkData={clearPermlinkData}
+      />
       <Editor compilerList={compilerList} permlinkData={permlinkData} />
       <Command compilerList={compilerList} permlinkData={permlinkData} />
       <Result permlinkData={permlinkData} />
