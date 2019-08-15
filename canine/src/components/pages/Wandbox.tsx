@@ -81,9 +81,9 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
       <Header />
       <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
       <Permlink compilerList={compilerList} permlinkData={permlinkData} />
-      <Editor compilerList={compilerList} />
-      <Command compilerList={compilerList} />
-      <Result />
+      <Editor compilerList={compilerList} permlinkData={permlinkData} />
+      <Command compilerList={compilerList} permlinkData={permlinkData} />
+      <Result permlinkData={permlinkData} />
     </div>
   );
 };

@@ -10,22 +10,24 @@ import { ResultContext } from "~/contexts/ResultContext";
 import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorSettings } from "./Editor/EditorSettings";
 import { EditorTabs } from "./Editor/EditorTabs";
+import { PermlinkData } from "~/hooks/permlink";
 
 export interface EditorProps {
   compilerList: CompilerList;
+  permlinkData: PermlinkData | null;
 }
 
 export const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const editor = useContainer(EditorContext);
   const compiler = useContainer(CompilerContext);
   const result = useContainer(ResultContext);
-  const { compilerList } = props;
+  const { compilerList, permlinkData } = props;
   const { settings } = editor;
   return (
     <Paper>
       <Grid container>
         <Grid item style={{ overflowX: "scroll", flex: 1 }}>
-          <EditorTabs editor={editor} />
+          <EditorTabs editor={editor} permlinkData={permlinkData} />
           <CodeEditor {...{ editor, compiler, compilerList, result }} />
         </Grid>
       </Grid>

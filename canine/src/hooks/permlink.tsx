@@ -79,7 +79,7 @@ function resolvePermlinkData(permlinkId: string, json: AnyJson): PermlinkData {
       isPrivate: param.is_private as boolean,
       compilerInfo: resolveCompilerInfo(param["compiler-info"])
     },
-    results: (param.results as unknown) as Result[]
+    results: (map.results as unknown) as Result[]
   };
 }
 

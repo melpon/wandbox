@@ -9,6 +9,8 @@ import { EditorTab, RenamingSource } from "./EditorTab";
 import "codemirror/lib/codemirror.css";
 import "codemirror/theme/material.css";
 
+import { PermlinkData } from "~/hooks/permlink";
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles(() => ({
   tabRoot: {
@@ -18,13 +20,14 @@ const useStyles = makeStyles(() => ({
 
 interface EditorTabsProps {
   editor: EditorContextState;
+  permlinkData: PermlinkData | null;
 }
 
 export const EditorTabs: React.FC<EditorTabsProps> = (
   props
 ): React.ReactElement | null => {
   const classes = useStyles();
-  const { editor } = props;
+  const { editor, permlinkData } = props;
   const [renamingSources, setRenamingSources] = React.useState<
     RenamingSource[]
   >([]);
@@ -132,7 +135,11 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
           );
         }
       )}
-      <Tab key={editor.sources.length} icon={<AddBoxIcon />} />
+
+      {/* Permlink の場合はタブの追加不可 */}
+      {permlinkData === null ? (
+        <Tab key={editor.sources.length} icon={<AddBoxIcon />} />
+      ) : null}
     </Tabs>
   );
 };

@@ -47,6 +47,7 @@ export interface CodeMirrorOptions {
   smartIndent?: boolean;
   extraKeys?: { [key: string]: (cm: CodeMirrorType) => void };
   viewportMargin?: number;
+  readOnly?: boolean;
 }
 
 export interface CodeMirrorProps {

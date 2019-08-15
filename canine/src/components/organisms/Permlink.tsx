@@ -45,7 +45,7 @@ export const Permlink: React.FC<PermlinkProps> = (
     });
 
     doPermlink(null, { body: body });
-  }, [compilerList, editor, compiler]);
+  }, [compilerList, editor, compiler, result]);
 
   useEffect((): void => {
     // 初回での更新は弾く
