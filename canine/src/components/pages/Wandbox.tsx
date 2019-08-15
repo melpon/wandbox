@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import useReactRouter from "use-react-router";
-import { useContainer } from "unstated-next";
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
 import { makeStyles } from "@material-ui/styles";
 
@@ -13,7 +12,6 @@ import { Permlink } from "../organisms/Permlink";
 import { Editor } from "../organisms/Editor";
 import { Command } from "../organisms/Command";
 import { Result } from "../organisms/Result";
-import { CompilerContext } from "~/contexts/CompilerContext";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles((theme: Theme) => ({
@@ -39,7 +37,6 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
     setError
   );
 
-  const compiler = useContainer(CompilerContext);
   const [permlinkData, setPermlinkData] = React.useState<PermlinkData | null>(
     null
   );
@@ -50,14 +47,12 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
 
   useEffect((): void => {
     if (permlinkId === null) {
-      return;
-    }
-    if (compiler.currentCompilerName !== "") {
+      setPermlinkData(null);
       return;
     }
 
     doGetPermlink(`https://wandbox.org/api/permlink/${permlinkId}`, {});
-  }, [permlinkId, compiler]);
+  }, [permlinkId]);
 
   useEffect((): void => {
     if (permlinkResp === null) {
@@ -70,11 +65,6 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
   if (compilerList === null) {
     return null;
   }
-  // パーマリンクの URL だった場合、データの取得を待つ
-  if (permlinkId !== null && permlinkData === null) {
-    return null;
-  }
-  console.log(compilerList);
 
   return (
     <div className={classes.root}>
