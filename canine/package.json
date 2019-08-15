@@ -12,17 +12,17 @@
   "author": "melpon",
   "license": "BSL",
   "dependencies": {
-    "@material-ui/core": "^4.3.0",
+    "@material-ui/core": "^4.3.2",
     "@material-ui/icons": "^4.2.1",
     "@material-ui/styles": "^4.3.0",
     "can-ndjson-stream": "^1.0.1",
     "codemirror": "^5.48.2",
     "codemirror-mode-elixir": "^1.1.2",
-    "css-loader": "^3.1.0",
+    "css-loader": "^3.2.0",
     "lodash": "^4.17.15",
-    "react": "^16.8.6",
+    "react": "^16.9.0",
     "react-codemirror2": "^6.0.0",
-    "react-dom": "^16.8.6",
+    "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
     "style-loader": "^0.23.1",
     "unstated-next": "^1.1.0",
@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.136",
-    "@types/react": "^16.8.23",
+    "@types/react": "^16.9.1",
     "@types/react-dom": "^16.8.5",
     "@types/react-router-dom": "^4.3.4",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
@@ -43,8 +43,8 @@
     "prettier": "^1.18.2",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.3",
-    "webpack": "^4.38.0",
+    "webpack": "^4.39.2",
     "webpack-cli": "^3.3.6",
-    "webpack-dev-server": "^3.7.2"
+    "webpack-dev-server": "^3.8.0"
   }
 }
