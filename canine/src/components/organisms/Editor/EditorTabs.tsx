@@ -58,13 +58,24 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
   const onChangeTabs = React.useCallback(
     (_e, index: number): void => {
       // 追加ボタン
-      if (index === editor.sources.length) {
+      if (permlinkData === null && index === editor.sources.length) {
         editor.addSource("noname");
       } else {
         editor.setCurrentTab(index);
       }
+
+      // 編集中のタブはキャンセルする
+      const rs = renamingSources.map(
+        (r): RenamingSource => ({
+          ...r,
+          renaming: false,
+          filename: r.originalFilename
+        })
+      );
+
+      setRenamingSources(rs);
     },
-    [editor]
+    [editor, renamingSources]
   );
   const onClickTabClose = React.useCallback(
     (index: number): void => {
@@ -75,11 +86,17 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
 
   const onClickTabEdit = React.useCallback(
     (index: number): void => {
-      const rs = [...renamingSources];
-      rs[index] = { ...rs[index], renaming: true };
+      editor.setCurrentTab(index);
+      const rs = renamingSources.map(
+        (r, i): RenamingSource => ({
+          ...r,
+          renaming: i === index,
+          filename: r.originalFilename
+        })
+      );
       setRenamingSources(rs);
     },
-    [renamingSources]
+    [editor, renamingSources]
   );
   const onChangeRenamingFilename = React.useCallback(
     (index: number, filename: string): void => {
@@ -129,6 +146,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
           return (
             <Tab
               key={index}
+              disableRipple
               classes={{ root: classes.tabRoot }}
               component={EditorTab}
               {...{
