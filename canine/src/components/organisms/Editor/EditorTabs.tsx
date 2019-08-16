@@ -10,6 +10,7 @@ import "codemirror/lib/codemirror.css";
 import "codemirror/theme/material.css";
 
 import { PermlinkData } from "~/hooks/permlink";
+import { createEditorSourceData } from "~/utils/createEditorSourceData";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles(() => ({
@@ -31,6 +32,15 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
   const [renamingSources, setRenamingSources] = React.useState<
     RenamingSource[]
   >([]);
+
+  // パーマリンク時は permlinkData からソースデータを作る
+  const sources =
+    permlinkData === null
+      ? editor.sources
+      : createEditorSourceData(
+          permlinkData.parameter.code,
+          permlinkData.parameter.codes
+        );
 
   React.useEffect((): void => {
     const rs = editor.sources.map(
@@ -114,7 +124,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
       scrollButtons="auto"
       variant="scrollable"
     >
-      {editor.sources.map(
+      {sources.map(
         (source, index): React.ReactElement => {
           return (
             <Tab
@@ -124,6 +134,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
               {...{
                 index,
                 source,
+                readonly: permlinkData !== null,
                 renamingSource: renamingSources[index] || null,
                 onClickTabEdit,
                 onClickTabClose,

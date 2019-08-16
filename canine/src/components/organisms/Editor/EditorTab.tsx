@@ -17,6 +17,7 @@ export interface RenamingSource {
 interface EditorTabProps {
   index: number;
   source: EditorSourceData;
+  readonly: boolean;
   renamingSource: RenamingSource | null;
   onClickTabEdit: (index: number) => void;
   onClickTabClose: (index: number) => void;
@@ -30,6 +31,7 @@ export const EditorTab = React.forwardRef<HTMLDivElement, EditorTabProps>(
     const {
       index,
       source,
+      readonly,
       renamingSource,
       onClickTabEdit,
       onClickTabClose,
@@ -47,7 +49,7 @@ export const EditorTab = React.forwardRef<HTMLDivElement, EditorTabProps>(
             return (
               <React.Fragment>
                 <Typography variant="body1">{source.filename || ""}</Typography>
-                {source.filename === null ? null : (
+                {source.filename === null || readonly ? null : (
                   <React.Fragment>
                     <IconButton
                       onClick={(e): void => {

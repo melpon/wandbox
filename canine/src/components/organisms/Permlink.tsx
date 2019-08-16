@@ -15,6 +15,7 @@ import {
 } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
 import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
+import { createEditorSourceData } from "~/utils/createEditorSourceData";
 
 export interface PermlinkProps {
   compilerList: CompilerList;
@@ -77,69 +78,85 @@ export const Permlink: React.FC<PermlinkProps> = (
       compilerInfo,
       options,
       compilerOptionRaw,
-      runtimeOptionRaw
+      runtimeOptionRaw,
+      code,
+      codes,
+      stdin
     } = permlinkData.parameter;
-    if (!(compilerInfo.language in compilerList.languages)) {
-      // 言語が見つからない場合は諦める
-      setError("対象の言語は既に削除されています。");
-      return;
-    }
-    compiler.setCurrentLanguage(compilerInfo.language);
 
-    let currentCompilerName: string;
-    if (
-      compilerList.compilers.findIndex(
-        (info): boolean => info.name === compilerInfo.name
-      ) === -1
-    ) {
-      // コンパイラが見つからなかったらとりあえずその言語の先頭のコンパイラにしておく
-      currentCompilerName =
-        compilerList.languages[compilerInfo.language][0].name;
-    } else {
-      currentCompilerName = compilerInfo.name;
-    }
-    compiler.setCurrentCompilerName(currentCompilerName);
+    // CompilerContext への設定
+    {
+      if (!(compilerInfo.language in compilerList.languages)) {
+        // 言語が見つからない場合は諦める
+        setError("対象の言語は既に削除されています。");
+        return;
+      }
+      compiler.setCurrentLanguage(compilerInfo.language);
 
-    // PermlinkData の存在しないかもしれないコンパイラ情報ではなく、
-    // 必ず存在する方のコンパイラ情報
-    const targetCompilerInfo = compilerList.compilers.find(
-      (x): boolean => x.name === currentCompilerName
-    ) as CompilerInfo;
+      let currentCompilerName: string;
+      if (
+        compilerList.compilers.findIndex(
+          (info): boolean => info.name === compilerInfo.name
+        ) === -1
+      ) {
+        // コンパイラが見つからなかったらとりあえずその言語の先頭のコンパイラにしておく
+        currentCompilerName =
+          compilerList.languages[compilerInfo.language][0].name;
+      } else {
+        currentCompilerName = compilerInfo.name;
+      }
+      compiler.setCurrentCompilerName(currentCompilerName);
 
-    // optionList は文字列のリストなので、
-    // これを頑張って {[name: string]: string | boolean} に変換する必要がある。
-    const optionList = options.split(",");
-    let switches: { [name: string]: boolean | string } = {};
-    for (const sw of targetCompilerInfo.switches) {
-      if (sw.type === "single") {
-        // single の場合は、スイッチの中にオプション名が存在したら
-        // スイッチ名をキーとして true を設定する
-        const ssw = sw.switch as SingleSwitch;
-        if (optionList.findIndex((opt): boolean => opt === ssw.name) !== -1) {
-          switches[ssw.name] = true;
-        }
-      } else if (sw.type === "select") {
-        // select の場合は、選択項目一覧の中にオプション名が存在したら
-        // スイッチ名をキーとして選択項目を設定する。
-        const ssw = sw.switch as SelectSwitch;
-        for (const swopt of ssw.options) {
-          if (
-            optionList.findIndex((opt): boolean => opt === swopt.name) !== -1
-          ) {
-            switches[ssw.name] = swopt.name;
+      // PermlinkData の存在しないかもしれないコンパイラ情報ではなく、
+      // 必ず存在する方のコンパイラ情報
+      const targetCompilerInfo = compilerList.compilers.find(
+        (x): boolean => x.name === currentCompilerName
+      ) as CompilerInfo;
+
+      // optionList は文字列のリストなので、
+      // これを頑張って {[name: string]: string | boolean} に変換する必要がある。
+      const optionList = options.split(",");
+      let switches: { [name: string]: boolean | string } = {};
+      for (const sw of targetCompilerInfo.switches) {
+        if (sw.type === "single") {
+          // single の場合は、スイッチの中にオプション名が存在したら
+          // スイッチ名をキーとして true を設定する
+          const ssw = sw.switch as SingleSwitch;
+          if (optionList.findIndex((opt): boolean => opt === ssw.name) !== -1) {
+            switches[ssw.name] = true;
+          }
+        } else if (sw.type === "select") {
+          // select の場合は、選択項目一覧の中にオプション名が存在したら
+          // スイッチ名をキーとして選択項目を設定する。
+          const ssw = sw.switch as SelectSwitch;
+          for (const swopt of ssw.options) {
+            if (
+              optionList.findIndex((opt): boolean => opt === swopt.name) !== -1
+            ) {
+              switches[ssw.name] = swopt.name;
+            }
           }
         }
       }
+      compiler.setCurrentSwitches(switches);
+
+      // raw オプションは単に設定するだけ
+      compiler.setCompilerOptionRaw(compilerOptionRaw);
+      compiler.setRuntimeOptionRaw(runtimeOptionRaw);
+      // runtimeOptionRaw が空でないなら expanded にする
+      compiler.setRuntimeOptionRawExpanded(runtimeOptionRaw.length !== 0);
     }
-    compiler.setCurrentSwitches(switches);
 
-    // raw オプションは単に設定するだけ
-    compiler.setCompilerOptionRaw(compilerOptionRaw);
-    compiler.setRuntimeOptionRaw(runtimeOptionRaw);
-    // runtimeOptionRaw が空でないなら expanded にする
-    compiler.setRuntimeOptionRawExpanded(runtimeOptionRaw.length !== 0);
+    // EditorContext への設定
+    {
+      editor.setSources(createEditorSourceData(code, codes));
+      editor.setStdin(stdin);
+    }
 
-    // TODO(melpon): エディタと結果の設定
+    // ResultContext への設定
+    {
+      result.setResults(permlinkData.results);
+    }
 
     // permlink のデータをクリアすれば全体的に編集可能になる
     clearPermlinkData();

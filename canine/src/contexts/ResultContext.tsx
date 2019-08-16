@@ -20,6 +20,7 @@ export interface ResultContextState {
 
   clear: () => void;
   add: (result: Result) => void;
+  setResults: (results: Result[]) => void;
 }
 
 function useResultContext(): ResultContextState {
@@ -32,7 +33,8 @@ function useResultContext(): ResultContextState {
   return {
     results,
     clear,
-    add
+    add,
+    setResults
   };
 }
 

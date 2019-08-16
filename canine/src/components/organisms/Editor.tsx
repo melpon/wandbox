@@ -28,7 +28,9 @@ export const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
       <Grid container>
         <Grid item style={{ overflowX: "scroll", flex: 1 }}>
           <EditorTabs editor={editor} permlinkData={permlinkData} />
-          <CodeEditor {...{ editor, compiler, compilerList, result }} />
+          <CodeEditor
+            {...{ editor, compiler, compilerList, result, permlinkData }}
+          />
         </Grid>
       </Grid>
       {((): React.ReactElement => {

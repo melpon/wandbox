@@ -34,6 +34,7 @@ export interface EditorContextState {
   setCurrentTab: React.Dispatch<React.SetStateAction<number>>;
   addSource: (filename: string) => number;
   removeSource: (tab: number) => void;
+  setSources: (sources: EditorSourceData[]) => void;
   setText: (tab: number, text: string) => void;
   setFilename: (tab: number, filename: string) => void;
   setStdin: React.Dispatch<React.SetStateAction<string>>;
@@ -106,6 +107,7 @@ function useEditorContext(): EditorContextState {
     },
     [currentTab, sources]
   );
+
   const setText = React.useCallback(
     (tab: number, text: string): void => {
       const newSources = [...sources];
@@ -135,6 +137,7 @@ function useEditorContext(): EditorContextState {
     setCurrentTab,
     addSource,
     removeSource,
+    setSources,
     setText,
     setFilename,
     setStdin

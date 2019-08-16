@@ -12,18 +12,21 @@ import { EditorContextState } from "~/contexts/EditorContext";
 import { ResultContextState, Result } from "~/contexts/ResultContext";
 import { compile } from "~/utils/compile";
 import { AnyJson } from "~/hooks/fetch";
+import { PermlinkData } from "~/hooks/permlink";
+import { createEditorSourceData } from "~/utils/createEditorSourceData";
 
 interface CodeEditorProps {
   editor: EditorContextState;
   compiler: CompilerContextState;
   compilerList: CompilerList;
   result: ResultContextState;
+  permlinkData: PermlinkData | null;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = (
   props
 ): React.ReactElement => {
-  const { editor, compiler, compilerList, result } = props;
+  const { editor, compiler, compilerList, result, permlinkData } = props;
 
   const insertTabSpace = React.useCallback((cm: CodeMirrorType): void => {
     const cursor = cm.getCursor()["ch"];
@@ -42,8 +45,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = (
     [result.add]
   );
   const onCtrlEnter = React.useCallback((): void => {
+    if (permlinkData !== null) {
+      return;
+    }
+
+    result.clear();
     compile(editor, compiler, compilerList, onResult);
-  }, [editor, compiler, compilerList, onResult]);
+  }, [editor, result.clear, compiler, compilerList, onResult]);
 
   const settings = editor.settings;
   const options = React.useMemo((): CodeMirrorOptions => {
@@ -74,7 +82,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = (
     }
   }, [settings, insertTabSpace, onCtrlEnter]);
 
-  const source = editor.sources[editor.currentTab];
+  // パーマリンク時は permlinkData からソースデータを作る
+  const sources =
+    permlinkData === null
+      ? editor.sources
+      : createEditorSourceData(
+          permlinkData.parameter.code,
+          permlinkData.parameter.codes
+        );
+
+  const source = sources[editor.currentTab];
+
   const mode = resolveLanguageMode(
     source.filename,
     compiler.currentLanguage,
@@ -92,6 +110,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = (
       expand={editor.settings.expand}
       value={source.text}
       options={{
+        readOnly: permlinkData !== null,
         lineNumbers: true,
         theme: "material",
         mode: mode,
