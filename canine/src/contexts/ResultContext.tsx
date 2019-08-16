@@ -38,4 +38,5 @@ function useResultContext(): ResultContextState {
   };
 }
 
-export const ResultContext = createContainer(useResultContext);
+const ResultContext = createContainer(useResultContext);
+export { ResultContext };

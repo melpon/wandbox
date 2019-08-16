@@ -48,4 +48,5 @@ function useCompilerContext(): CompilerContextState {
   };
 }
 
-export const CompilerContext = createContainer(useCompilerContext);
+const CompilerContext = createContainer(useCompilerContext);
+export { CompilerContext };

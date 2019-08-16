@@ -17,7 +17,7 @@ export interface EditorProps {
   permlinkData: PermlinkData | null;
 }
 
-export const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
+const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const editor = useContainer(EditorContext);
   const compiler = useContainer(CompilerContext);
   const result = useContainer(ResultContext);
@@ -76,3 +76,5 @@ export const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   //  </Paper>
   //);
 };
+
+export { Editor };

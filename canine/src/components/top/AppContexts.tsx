@@ -4,7 +4,7 @@ import { CompilerContext } from "~/contexts/CompilerContext";
 import { EditorContext } from "~/contexts/EditorContext";
 import { ResultContext } from "~/contexts/ResultContext";
 
-export const AppContexts: React.FC<{}> = ({ children }): React.ReactElement => {
+const AppContexts: React.FC<{}> = ({ children }): React.ReactElement => {
   return (
     <CompilerContext.Provider>
       <EditorContext.Provider>
@@ -13,3 +13,5 @@ export const AppContexts: React.FC<{}> = ({ children }): React.ReactElement => {
     </CompilerContext.Provider>
   );
 };
+
+export { AppContexts };

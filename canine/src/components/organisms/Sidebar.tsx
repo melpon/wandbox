@@ -19,7 +19,7 @@ interface SidebarProps {
   permlinkData: PermlinkData | null;
 }
 
-export const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
+const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const compilerContext = CompilerContext.useContainer();
   const {
@@ -422,3 +422,5 @@ export const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
     );
   }
 };
+
+export { Sidebar };

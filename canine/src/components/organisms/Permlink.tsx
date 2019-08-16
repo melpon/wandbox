@@ -23,7 +23,7 @@ export interface PermlinkProps {
   clearPermlinkData: () => void;
 }
 
-export const Permlink: React.FC<PermlinkProps> = (
+const Permlink: React.FC<PermlinkProps> = (
   props
 ): React.ReactElement | null => {
   const { compilerList, permlinkData, clearPermlinkData } = props;
@@ -179,3 +179,5 @@ export const Permlink: React.FC<PermlinkProps> = (
     return <Button onClick={onEdit}>Edit</Button>;
   }
 };
+
+export { Permlink };

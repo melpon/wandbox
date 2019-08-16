@@ -144,4 +144,5 @@ function useEditorContext(): EditorContextState {
   };
 }
 
-export const EditorContext = createContainer(useEditorContext);
+const EditorContext = createContainer(useEditorContext);
+export { EditorContext };

@@ -24,7 +24,7 @@ interface EditorTabsProps {
   permlinkData: PermlinkData | null;
 }
 
-export const EditorTabs: React.FC<EditorTabsProps> = (
+const EditorTabs: React.FC<EditorTabsProps> = (
   props
 ): React.ReactElement | null => {
   const classes = useStyles();
@@ -172,3 +172,5 @@ export const EditorTabs: React.FC<EditorTabsProps> = (
     </Tabs>
   );
 };
+
+export { EditorTabs };

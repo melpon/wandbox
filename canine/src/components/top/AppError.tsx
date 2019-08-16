@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-export const AppError: React.FC<{}> = (props): React.ReactElement => {
+const AppError: React.FC<{}> = (props): React.ReactElement => {
   const [error, setError] = useError();
 
   const onClose = useCallback((): void => setError(null), []);
@@ -70,3 +70,5 @@ export const AppError: React.FC<{}> = (props): React.ReactElement => {
     </React.Fragment>
   );
 };
+
+export { AppError };

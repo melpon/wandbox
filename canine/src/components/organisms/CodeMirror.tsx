@@ -57,7 +57,7 @@ export interface CodeMirrorProps {
   expand: boolean;
 }
 
-export const CodeMirror = (props: CodeMirrorProps): React.ReactElement => {
+const CodeMirror = (props: CodeMirrorProps): React.ReactElement => {
   return (
     <OrigCodeMirror
       //className={props.expand ? styles.expand : null}
@@ -67,3 +67,5 @@ export const CodeMirror = (props: CodeMirrorProps): React.ReactElement => {
     />
   );
 };
+
+export { CodeMirror };

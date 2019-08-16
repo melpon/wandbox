@@ -12,7 +12,7 @@ import "~/utils/mode-pony";
 
 const theme = configureTheme(process.env.NODE_ENV || "development");
 
-export const App: React.FC<{}> = (): React.ReactElement => (
+const App: React.FC<{}> = (): React.ReactElement => (
   <AppContexts>
     <CssBaseline />
     <MuiThemeProvider theme={theme}>
@@ -24,3 +24,5 @@ export const App: React.FC<{}> = (): React.ReactElement => (
     </MuiThemeProvider>
   </AppContexts>
 );
+
+export { App };

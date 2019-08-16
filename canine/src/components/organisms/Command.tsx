@@ -15,7 +15,7 @@ function rawToOptions(raw: string): string {
   return raw.split("\n").join(" ");
 }
 
-export const Command: React.FC<CommandProps> = (props): React.ReactElement => {
+const Command: React.FC<CommandProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const compiler = useContainer(CompilerContext);
 
@@ -57,3 +57,5 @@ export const Command: React.FC<CommandProps> = (props): React.ReactElement => {
 
   return <code>{command}</code>;
 };
+
+export { Command };

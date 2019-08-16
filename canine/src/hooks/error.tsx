@@ -73,7 +73,7 @@ const ErrorContext = React.createContext<ErrorContextType>({
   setState: (): void => {}
 });
 
-export const Error: React.FC<{}> = (props): React.ReactElement => {
+const Error: React.FC<{}> = (props): React.ReactElement => {
   const [state, setState] = React.useState<ErrorState>({
     valid: false,
     value: ""
@@ -89,6 +89,7 @@ export const Error: React.FC<{}> = (props): React.ReactElement => {
     </ErrorContext.Provider>
   );
 };
+export { Error };
 
 export function useError(): [string | null, (error: string | null) => void] {
   const context = React.useContext<ErrorContextType>(ErrorContext);

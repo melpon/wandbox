@@ -26,7 +26,7 @@ interface EditorTabProps {
   onSubmitRenamingFilename: (index: number) => void;
 }
 
-export const EditorTab = React.forwardRef<HTMLDivElement, EditorTabProps>(
+const EditorTab = React.forwardRef<HTMLDivElement, EditorTabProps>(
   (props, ref): React.ReactElement => {
     const {
       index,
@@ -98,3 +98,5 @@ export const EditorTab = React.forwardRef<HTMLDivElement, EditorTabProps>(
 );
 
 EditorTab.displayName = "EditorTab";
+
+export { EditorTab };

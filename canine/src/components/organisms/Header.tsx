@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface HeaderProps {}
 
-export const Header: React.FC<HeaderProps> = (): React.ReactElement => {
+const Header: React.FC<HeaderProps> = (): React.ReactElement => {
   const classes = useStyles();
 
   return (
@@ -50,3 +50,5 @@ export const Header: React.FC<HeaderProps> = (): React.ReactElement => {
     </div>
   );
 };
+
+export { Header };

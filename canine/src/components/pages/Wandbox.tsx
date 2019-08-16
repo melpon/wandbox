@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import useReactRouter from "use-react-router";
-import { Theme } from "@material-ui/core/styles/createMuiTheme";
-import { makeStyles } from "@material-ui/styles";
+//import { makeStyles } from "@material-ui/styles";
+import Grid from "@material-ui/core/Grid";
 
 import { useCompilerList } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
@@ -14,23 +14,19 @@ import { Command } from "../organisms/Command";
 import { Result } from "../organisms/Result";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const useStyles = makeStyles((theme: Theme) => ({
-  root: theme.mixins.gutters({
-    paddingTop: 16,
-    paddingBottom: 16,
-    marginTop: theme.spacing(3)
-  })
-}));
+//const useStyles = makeStyles(() => ({
+//  root: {}
+//}));
 
 interface WandboxRouterProps {
   permlinkId?: string;
 }
 
-export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
+const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
   const { match } = useReactRouter<WandboxRouterProps>();
   const permlinkId =
     match.params.permlinkId === undefined ? null : match.params.permlinkId;
-  const classes = useStyles();
+  //const classes = useStyles();
   const [, setError] = useError();
   const compilerList = useCompilerList(
     "https://wandbox.org/api/list.json",
@@ -71,17 +67,35 @@ export const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
   }
 
   return (
-    <div className={classes.root}>
-      <Header />
-      <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
-      <Permlink
-        compilerList={compilerList}
-        permlinkData={permlinkData}
-        clearPermlinkData={clearPermlinkData}
-      />
-      <Editor compilerList={compilerList} permlinkData={permlinkData} />
-      <Command compilerList={compilerList} permlinkData={permlinkData} />
-      <Result permlinkData={permlinkData} />
-    </div>
+    <Grid container direction="column">
+      <Grid item>
+        <Header />
+      </Grid>
+      <Grid item container direction="row">
+        <Grid item>
+          <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
+        </Grid>
+        <Grid item container direction="column">
+          <Grid item>
+            <Permlink
+              compilerList={compilerList}
+              permlinkData={permlinkData}
+              clearPermlinkData={clearPermlinkData}
+            />
+          </Grid>
+          <Grid item>
+            <Editor compilerList={compilerList} permlinkData={permlinkData} />
+          </Grid>
+          <Grid item>
+            <Command compilerList={compilerList} permlinkData={permlinkData} />
+          </Grid>
+          <Grid item>
+            <Result permlinkData={permlinkData} />
+          </Grid>
+        </Grid>
+      </Grid>
+    </Grid>
   );
 };
+
+export { Wandbox };

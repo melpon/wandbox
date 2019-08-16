@@ -17,7 +17,7 @@ interface ResultProps {
   permlinkData: PermlinkData | null;
 }
 
-export const Result: React.FC<ResultProps> = (props): React.ReactElement => {
+const Result: React.FC<ResultProps> = (props): React.ReactElement => {
   const { permlinkData } = props;
   const classes = useStyles();
   const rs = useContainer(ResultContext);
@@ -35,3 +35,5 @@ export const Result: React.FC<ResultProps> = (props): React.ReactElement => {
     </Paper>
   );
 };
+
+export { Result };

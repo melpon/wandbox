@@ -15,7 +15,7 @@ interface EditorSettingsProps {
   settings: EditorSettingsData;
 }
 
-export const EditorSettings: React.FC<EditorSettingsProps> = (
+const EditorSettings: React.FC<EditorSettingsProps> = (
   props
 ): React.ReactElement => {
   const { settings } = props;
@@ -124,3 +124,5 @@ export const EditorSettings: React.FC<EditorSettingsProps> = (
     </List>
   );
 };
+
+export { EditorSettings };

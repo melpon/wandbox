@@ -23,9 +23,7 @@ interface CodeEditorProps {
   permlinkData: PermlinkData | null;
 }
 
-export const CodeEditor: React.FC<CodeEditorProps> = (
-  props
-): React.ReactElement => {
+const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   const { editor, compiler, compilerList, result, permlinkData } = props;
 
   const insertTabSpace = React.useCallback((cm: CodeMirrorType): void => {
@@ -120,3 +118,5 @@ export const CodeEditor: React.FC<CodeEditorProps> = (
     />
   );
 };
+
+export { CodeEditor };
