@@ -1,6 +1,6 @@
 import { useFetchJSON, AnyJson, JsonMap } from "./fetch";
 import { CompilerInfo, resolveCompilerInfo } from "./compilerList";
-import { Result } from "~/contexts/ResultContext";
+import { ResultData } from "~/contexts/ResultContext";
 
 export interface PermlinkPostData {
   permlink: string;
@@ -53,7 +53,7 @@ export interface PermlinkData {
     isPrivate: boolean;
     compilerInfo: CompilerInfo;
   };
-  results: Result[];
+  results: ResultData[];
 }
 
 function resolvePermlinkData(permlinkId: string, json: AnyJson): PermlinkData {
@@ -79,7 +79,7 @@ function resolvePermlinkData(permlinkId: string, json: AnyJson): PermlinkData {
       isPrivate: param.is_private as boolean,
       compilerInfo: resolveCompilerInfo(param["compiler-info"])
     },
-    results: (map.results as unknown) as Result[]
+    results: (map.results as unknown) as ResultData[]
   };
 }
 

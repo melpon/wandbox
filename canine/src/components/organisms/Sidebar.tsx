@@ -11,6 +11,7 @@ import { CompilerContext } from "~/contexts/CompilerContext";
 import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
 import { CodeMirror } from "./CodeMirror";
 import { PermlinkData } from "~/hooks/permlink";
+import Grid from "@material-ui/core/Grid";
 
 interface SidebarProps {
   //editor: EditorState,
@@ -79,137 +80,147 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
 
   if (permlinkData === null) {
     return (
-      <React.Fragment>
+      <Grid container direction="column">
         {/* choose language */}
-        <Select value={currentLanguage} onChange={onChangeLanguage}>
-          {languages.map(
-            (lang): React.ReactElement => {
-              return (
-                <MenuItem key={lang} value={lang}>
-                  {lang}
-                </MenuItem>
-              );
-            }
-          )}
-        </Select>
-
+        <Grid item>
+          <Select value={currentLanguage} onChange={onChangeLanguage}>
+            {languages.map(
+              (lang): React.ReactElement => {
+                return (
+                  <MenuItem key={lang} value={lang}>
+                    {lang}
+                  </MenuItem>
+                );
+              }
+            )}
+          </Select>
+        </Grid>
         {/* choose compiler */}
-        {((): React.ReactElement | null => {
-          if (currentLanguage === "") {
-            return null;
-          }
+        <Grid item>
+          {((): React.ReactElement | null => {
+            if (currentLanguage === "") {
+              return null;
+            }
 
-          const infos = compilerList.languages[currentLanguage];
-          if (infos === undefined) {
-            return null;
-          }
+            const infos = compilerList.languages[currentLanguage];
+            if (infos === undefined) {
+              return null;
+            }
 
-          return (
-            <Select value={currentCompilerName} onChange={onChangeCompiler}>
-              {infos.map(
-                (info): React.ReactElement => {
-                  return (
-                    <MenuItem key={info.name} value={info.name}>
-                      {`${info.displayName} ${info.version}`}
-                    </MenuItem>
-                  );
-                }
-              )}
-            </Select>
-          );
-        })()}
+            return (
+              <Select value={currentCompilerName} onChange={onChangeCompiler}>
+                {infos.map(
+                  (info): React.ReactElement => {
+                    return (
+                      <MenuItem key={info.name} value={info.name}>
+                        {`${info.displayName} ${info.version}`}
+                      </MenuItem>
+                    );
+                  }
+                )}
+              </Select>
+            );
+          })()}
+        </Grid>
 
         {/* compiler options */}
-        {((): React.ReactElement | null => {
-          if (currentCompilerName === "") {
-            return null;
-          }
+        <Grid item>
+          {((): React.ReactElement | null => {
+            if (currentCompilerName === "") {
+              return null;
+            }
 
-          const info = compilerList.compilers.find(
-            (compiler): boolean => compiler.name === currentCompilerName
-          );
-          if (info === undefined) {
-            return null;
-          }
+            const info = compilerList.compilers.find(
+              (compiler): boolean => compiler.name === currentCompilerName
+            );
+            if (info === undefined) {
+              return null;
+            }
 
-          return (
-            <React.Fragment>
-              {info.switches.map(
-                (sw): React.ReactElement => {
-                  if (sw.type === "single") {
-                    const ssw = sw.switch as SingleSwitch;
-                    // checkbox
-                    const checked =
-                      ssw.name in currentSwitches
-                        ? (currentSwitches[ssw.name] as boolean)
-                        : ssw.default;
-                    return (
-                      <FormControlLabel
-                        key={ssw.name}
-                        control={
-                          <Checkbox
-                            checked={checked}
-                            onChange={(e): void =>
-                              onChangeChecked(ssw.name, e.target.checked)
+            return (
+              <Grid container direction="column">
+                {info.switches.map(
+                  (sw): React.ReactElement => {
+                    if (sw.type === "single") {
+                      const ssw = sw.switch as SingleSwitch;
+                      // checkbox
+                      const checked =
+                        ssw.name in currentSwitches
+                          ? (currentSwitches[ssw.name] as boolean)
+                          : ssw.default;
+                      return (
+                        <Grid item>
+                          <FormControlLabel
+                            key={ssw.name}
+                            control={
+                              <Checkbox
+                                checked={checked}
+                                onChange={(e): void =>
+                                  onChangeChecked(ssw.name, e.target.checked)
+                                }
+                                value={ssw.name}
+                              />
                             }
-                            value={ssw.name}
+                            label={ssw.displayName}
                           />
+                        </Grid>
+                      );
+                    } else if (sw.type === "select") {
+                      const ssw = sw.switch as SelectSwitch;
+                      // select
+                      const value = ((): string => {
+                        if (!(ssw.name in currentSwitches)) {
+                          return ssw.default;
                         }
-                        label={ssw.displayName}
-                      />
-                    );
-                  } else if (sw.type === "select") {
-                    const ssw = sw.switch as SelectSwitch;
-                    // select
-                    const value = ((): string => {
-                      if (!(ssw.name in currentSwitches)) {
-                        return ssw.default;
-                      }
-                      const name = currentSwitches[ssw.name];
-                      if (typeof name !== "string") {
-                        return ssw.default;
-                      }
-                      if (
-                        ssw.options.find(
-                          (opt): boolean => opt.name === name
-                        ) === undefined
-                      ) {
-                        return ssw.default;
-                      }
-                      return name;
-                    })();
-                    return (
-                      <Select
-                        key={ssw.name}
-                        value={value}
-                        onChange={(
-                          e: React.ChangeEvent<{
-                            name?: string;
-                            value: unknown;
-                          }>
-                        ): void =>
-                          onChangeSelected(ssw.name, e.target.value as string)
+                        const name = currentSwitches[ssw.name];
+                        if (typeof name !== "string") {
+                          return ssw.default;
                         }
-                      >
-                        {ssw.options.map(
-                          (opt): React.ReactElement => {
-                            return (
-                              <MenuItem key={opt.name} value={opt.name}>
-                                {opt.displayName}
-                              </MenuItem>
-                            );
-                          }
-                        )}
-                      </Select>
-                    );
-                  } else {
-                    throw "error";
+                        if (
+                          ssw.options.find(
+                            (opt): boolean => opt.name === name
+                          ) === undefined
+                        ) {
+                          return ssw.default;
+                        }
+                        return name;
+                      })();
+                      return (
+                        <Grid item>
+                          <Select
+                            key={ssw.name}
+                            value={value}
+                            onChange={(
+                              e: React.ChangeEvent<{
+                                name?: string;
+                                value: unknown;
+                              }>
+                            ): void =>
+                              onChangeSelected(ssw.name, e.target
+                                .value as string)
+                            }
+                          >
+                            {ssw.options.map(
+                              (opt): React.ReactElement => {
+                                return (
+                                  <MenuItem key={opt.name} value={opt.name}>
+                                    {opt.displayName}
+                                  </MenuItem>
+                                );
+                              }
+                            )}
+                          </Select>
+                        </Grid>
+                      );
+                    } else {
+                      throw "error";
+                    }
                   }
-                }
-              )}
-            </React.Fragment>
-          );
-        })()}
+                )}
+              </Grid>
+            );
+          })()}
+        </Grid>
 
         {/* compiler/runtime options raw */}
         {((): React.ReactElement | null => {
@@ -270,155 +281,171 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
             );
           }
           return (
-            <div>
-              {compilerComponent}
-              {runtimeComponent}
-            </div>
+            <React.Fragment>
+              <Grid item>{compilerComponent}</Grid>
+              <Grid item>{runtimeComponent}</Grid>
+            </React.Fragment>
           );
         })()}
-      </React.Fragment>
+      </Grid>
     );
   } else {
     // パーマリングが有効な場合、変更不可にして permlinkData から構築する
     const { compiler, compilerInfo } = permlinkData.parameter;
 
     return (
-      <React.Fragment>
+      <Grid container direction="column">
         {/* choose language */}
-        <Select disabled value={compilerInfo.language}>
-          <MenuItem value={compilerInfo.language}>
-            {compilerInfo.language}
-          </MenuItem>
-        </Select>
+        <Grid item>
+          <Select disabled value={compilerInfo.language}>
+            <MenuItem value={compilerInfo.language}>
+              {compilerInfo.language}
+            </MenuItem>
+          </Select>
+        </Grid>
 
         {/* choose compiler */}
-        {((): React.ReactElement | null => {
-          return (
-            <Select disabled value={compiler}>
-              <MenuItem value={compilerInfo.name}>
-                {`${compilerInfo.displayName} ${compilerInfo.version}`}
-              </MenuItem>
-            </Select>
-          );
-        })()}
+        <Grid item>
+          {((): React.ReactElement | null => {
+            return (
+              <Select disabled value={compiler}>
+                <MenuItem value={compilerInfo.name}>
+                  {`${compilerInfo.displayName} ${compilerInfo.version}`}
+                </MenuItem>
+              </Select>
+            );
+          })()}
+        </Grid>
 
         {/* compiler options */}
-        {((): React.ReactElement | null => {
-          const options = permlinkData.parameter.options.split(",");
-          return (
-            <React.Fragment>
-              {compilerInfo.switches.map(
-                (sw): React.ReactElement => {
-                  if (sw.type === "single") {
-                    const ssw = sw.switch as SingleSwitch;
-                    // checkbox
-                    const checked =
-                      options.findIndex((x): boolean => x === ssw.name) !== -1;
-                    return (
-                      <FormControlLabel
-                        key={ssw.name}
-                        control={
-                          <Checkbox
-                            disabled
-                            checked={checked}
-                            value={ssw.name}
+        <Grid item>
+          {((): React.ReactElement | null => {
+            const options = permlinkData.parameter.options.split(",");
+            return (
+              <Grid container direction="column">
+                {compilerInfo.switches.map(
+                  (sw): React.ReactElement => {
+                    if (sw.type === "single") {
+                      const ssw = sw.switch as SingleSwitch;
+                      // checkbox
+                      const checked =
+                        options.findIndex((x): boolean => x === ssw.name) !==
+                        -1;
+                      return (
+                        <Grid item>
+                          <FormControlLabel
+                            key={ssw.name}
+                            control={
+                              <Checkbox
+                                disabled
+                                checked={checked}
+                                value={ssw.name}
+                              />
+                            }
+                            label={ssw.displayName}
                           />
-                        }
-                        label={ssw.displayName}
-                      />
-                    );
-                  } else if (sw.type === "select") {
-                    const ssw = sw.switch as SelectSwitch;
-                    // select
-                    const value = ((): SelectSwitchOption => {
-                      // ssw.options の中から options に含まれるオプションを探す。
-                      // 多分複数一致することは無いはずだし、複数あってもどうしようも無いので
-                      // 最初に一致したものを返す。
-                      for (const opt of ssw.options) {
-                        for (const target of options) {
-                          if (opt.name === target) {
-                            return opt;
+                        </Grid>
+                      );
+                    } else if (sw.type === "select") {
+                      const ssw = sw.switch as SelectSwitch;
+                      // select
+                      const value = ((): SelectSwitchOption => {
+                        // ssw.options の中から options に含まれるオプションを探す。
+                        // 多分複数一致することは無いはずだし、複数あってもどうしようも無いので
+                        // 最初に一致したものを返す。
+                        for (const opt of ssw.options) {
+                          for (const target of options) {
+                            if (opt.name === target) {
+                              return opt;
+                            }
                           }
                         }
-                      }
 
-                      // ここに来ることは無いはず
-                      throw "おかしい";
-                    })();
-                    return (
-                      <Select disabled key={ssw.name} value={value.name}>
-                        <MenuItem value={value.name}>
-                          {value.displayName}
-                        </MenuItem>
-                      </Select>
-                    );
-                  } else {
-                    throw "error";
+                        // ここに来ることは無いはず
+                        throw "おかしい";
+                      })();
+                      return (
+                        <Grid item>
+                          <Select disabled key={ssw.name} value={value.name}>
+                            <MenuItem value={value.name}>
+                              {value.displayName}
+                            </MenuItem>
+                          </Select>
+                        </Grid>
+                      );
+                    } else {
+                      throw "error";
+                    }
                   }
-                }
-              )}
-            </React.Fragment>
-          );
-        })()}
+                )}
+              </Grid>
+            );
+          })()}
+        </Grid>
 
         {/* compiler/runtime options raw */}
-        {((): React.ReactElement | null => {
-          const {
-            compilerOptionRaw,
-            runtimeOptionRaw
-          } = permlinkData.parameter;
+        <Grid item>
+          {((): React.ReactElement | null => {
+            const {
+              compilerOptionRaw,
+              runtimeOptionRaw
+            } = permlinkData.parameter;
 
-          let compilerComponent = null;
-          if (compilerInfo.compilerOptionRaw) {
-            compilerComponent = (
-              <CodeMirror
-                value={compilerOptionRaw}
-                options={{
-                  readOnly: true,
-                  viewportMargin: Infinity,
-                  smartIndent: false,
-                  extraKeys: {
-                    "Ctrl-Enter": (): void => {
-                      onCtrlEnter();
+            let compilerComponent = null;
+            if (compilerInfo.compilerOptionRaw) {
+              compilerComponent = (
+                <CodeMirror
+                  value={compilerOptionRaw}
+                  options={{
+                    readOnly: true,
+                    viewportMargin: Infinity,
+                    smartIndent: false,
+                    extraKeys: {
+                      "Ctrl-Enter": (): void => {
+                        onCtrlEnter();
+                      }
                     }
-                  }
-                }}
-                onBeforeChange={onChangeCompilerOptionRaw}
-                expand={false}
-              />
-            );
-          }
+                  }}
+                  onBeforeChange={onChangeCompilerOptionRaw}
+                  expand={false}
+                />
+              );
+            }
 
-          let runtimeComponent = null;
-          if (compilerInfo.runtimeOptionRaw || runtimeOptionRaw.length !== 0) {
-            runtimeComponent = (
-              <CodeMirror
-                value={runtimeOptionRaw}
-                options={{
-                  readOnly: true,
-                  viewportMargin: Infinity,
-                  smartIndent: false,
-                  extraKeys: {
-                    "Ctrl-Enter": (): void => {
-                      onCtrlEnter();
+            let runtimeComponent = null;
+            if (
+              compilerInfo.runtimeOptionRaw ||
+              runtimeOptionRaw.length !== 0
+            ) {
+              runtimeComponent = (
+                <CodeMirror
+                  value={runtimeOptionRaw}
+                  options={{
+                    readOnly: true,
+                    viewportMargin: Infinity,
+                    smartIndent: false,
+                    extraKeys: {
+                      "Ctrl-Enter": (): void => {
+                        onCtrlEnter();
+                      }
                     }
-                  }
-                }}
-                onBeforeChange={onChangeRuntimeOptionRaw}
-                expand={false}
-              />
+                  }}
+                  onBeforeChange={onChangeRuntimeOptionRaw}
+                  expand={false}
+                />
+              );
+            } else {
+              runtimeComponent = null;
+            }
+            return (
+              <Grid container direction="column">
+                <Grid item>{compilerComponent}</Grid>
+                <Grid item>{runtimeComponent}</Grid>
+              </Grid>
             );
-          } else {
-            runtimeComponent = null;
-          }
-          return (
-            <div>
-              {compilerComponent}
-              {runtimeComponent}
-            </div>
-          );
-        })()}
-      </React.Fragment>
+          })()}
+        </Grid>
+      </Grid>
     );
   }
 };

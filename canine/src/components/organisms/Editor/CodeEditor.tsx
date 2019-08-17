@@ -9,7 +9,7 @@ import { resolveLanguageMode } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
 import { CompilerContextState } from "~/contexts/CompilerContext";
 import { EditorContextState } from "~/contexts/EditorContext";
-import { ResultContextState, Result } from "~/contexts/ResultContext";
+import { ResultContextState, ResultData } from "~/contexts/ResultContext";
 import { compile } from "~/utils/compile";
 import { AnyJson } from "~/hooks/fetch";
 import { PermlinkData } from "~/hooks/permlink";
@@ -38,7 +38,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
 
   const onResult = React.useCallback(
     (json: AnyJson): void => {
-      result.add((json as unknown) as Result);
+      result.add((json as unknown) as ResultData);
     },
     [result.add]
   );

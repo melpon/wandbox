@@ -32,49 +32,24 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
             {...{ editor, compiler, compilerList, result, permlinkData }}
           />
         </Grid>
+        {((): React.ReactElement => {
+          if (settings.opened) {
+            return (
+              <Grid item style={{ width: 200 }}>
+                <EditorSettings settings={settings} />
+              </Grid>
+            );
+          } else {
+            return (
+              <Grid item style={{ width: "auto" }}>
+                <EditorSettings settings={settings} />
+              </Grid>
+            );
+          }
+        })()}
       </Grid>
-      {((): React.ReactElement => {
-        if (settings.opened) {
-          return (
-            <Grid item style={{ width: 200 }}>
-              <EditorSettings settings={settings} />
-            </Grid>
-          );
-        } else {
-          return (
-            <Grid item style={{ width: "auto" }}>
-              <EditorSettings settings={settings} />
-            </Grid>
-          );
-        }
-      })()}
     </Paper>
   );
-  //return (
-  //  <Paper>
-  //    <Grid container>
-  //      <Grid item style={{ overflowX: "scroll", flex: 1 }}>
-  //        <EditorTabs />
-  //        <EditorEditor />
-  //      </Grid>
-  //      {(() => {
-  //        if (this.props.settings.opened) {
-  //          return (
-  //            <Grid item style={{ width: 200 }}>
-  //              <EditorSettings />
-  //            </Grid>
-  //          );
-  //        } else {
-  //          return (
-  //            <Grid item style={{ width: "auto" }}>
-  //              <EditorSettings />
-  //            </Grid>
-  //          );
-  //        }
-  //      })()}
-  //    </Grid>
-  //  </Paper>
-  //);
 };
 
 export { Editor };

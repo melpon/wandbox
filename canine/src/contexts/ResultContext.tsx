@@ -10,24 +10,24 @@ type ResultType =
   | "ExitCode"
   | "Signal";
 
-export interface Result {
+export interface ResultData {
   type: ResultType;
   data: string;
 }
 
 export interface ResultContextState {
-  results: Result[];
+  results: ResultData[];
 
   clear: () => void;
-  add: (result: Result) => void;
-  setResults: (results: Result[]) => void;
+  add: (result: ResultData) => void;
+  setResults: (results: ResultData[]) => void;
 }
 
 function useResultContext(): ResultContextState {
-  const [results, setResults] = React.useState<Result[]>([]);
+  const [results, setResults] = React.useState<ResultData[]>([]);
   const clear = React.useCallback((): void => setResults([]), []);
   const add = React.useCallback((result): void => {
-    setResults((results): Result[] => [...results, result]);
+    setResults((results): ResultData[] => [...results, result]);
   }, []);
 
   return {

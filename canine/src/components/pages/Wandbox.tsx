@@ -72,10 +72,10 @@ const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
         <Header />
       </Grid>
       <Grid item container direction="row">
-        <Grid item>
+        <Grid item xs={12} sm={2}>
           <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
         </Grid>
-        <Grid item container direction="column">
+        <Grid item xs={12} sm={10} container direction="column">
           <Grid item>
             <Permlink
               compilerList={compilerList}
