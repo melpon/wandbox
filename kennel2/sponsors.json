@@ -577,5 +577,9 @@
     , "url": "https://twitter.com/gnaggnoyil"
     , "due_date": "2020-08-15T23:59:59+09:00"
     }
+  , { "name": "@mandel59"
+    , "url": "https://twitter.com/mandel59"
+    , "due_date": "2020-08-21T23:59:59+09:00"
+    }
   ]
 }
