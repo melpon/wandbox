@@ -1,0 +1,10 @@
+:local(.expand) :global(.CodeMirror) {
+  min-height: 300px;
+  height: auto;
+  width: 100%;
+}
+:local(.expand) :global(.CodeMirror-scroll) {
+  min-height: 300px;
+  overflow-y: scroll;
+  overflow-x: scroll;
+}

@@ -67,29 +67,29 @@ const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
   }
 
   return (
-    <Grid container direction="column">
-      <Grid item>
+    <Grid container>
+      <Grid item xs={12} sm={12}>
         <Header />
       </Grid>
-      <Grid item container direction="row">
+      <Grid item xs={12} sm={12} container alignItems="flex-start">
         <Grid item xs={12} sm={2}>
           <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
         </Grid>
-        <Grid item xs={12} sm={10} container direction="column">
-          <Grid item>
+        <Grid item xs={12} sm={10} container>
+          <Grid item xs={12} sm={12}>
             <Permlink
               compilerList={compilerList}
               permlinkData={permlinkData}
               clearPermlinkData={clearPermlinkData}
             />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} sm={12}>
             <Editor compilerList={compilerList} permlinkData={permlinkData} />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} sm={12}>
             <Command compilerList={compilerList} permlinkData={permlinkData} />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} sm={12}>
             <Result permlinkData={permlinkData} />
           </Grid>
         </Grid>

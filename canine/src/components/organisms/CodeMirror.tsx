@@ -1,8 +1,6 @@
 import React from "react";
 import { Controlled as OrigCodeMirror } from "react-codemirror2";
 
-// import styles from './style.css'
-
 import "codemirror/lib/codemirror.css";
 import "codemirror/theme/material.css";
 
@@ -34,6 +32,9 @@ import "codemirror/addon/search/searchcursor";
 import "codemirror/addon/edit/matchbrackets";
 import "codemirror/addon/dialog/dialog";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const styles = require("./CodeMirror.module.css");
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type CodeMirrorType = any;
 export interface CodeMirrorOptions {
@@ -60,7 +61,7 @@ export interface CodeMirrorProps {
 const CodeMirror = (props: CodeMirrorProps): React.ReactElement => {
   return (
     <OrigCodeMirror
-      //className={props.expand ? styles.expand : null}
+      className={styles.expand}
       value={props.value}
       options={props.options}
       onBeforeChange={props.onBeforeChange}

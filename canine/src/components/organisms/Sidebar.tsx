@@ -5,6 +5,8 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
+import { Theme } from "@material-ui/core/styles/createMuiTheme";
+import makeStyles from "@material-ui/styles/makeStyles";
 
 import { CompilerList, SelectSwitchOption } from "~/hooks/compilerList";
 import { CompilerContext } from "~/contexts/CompilerContext";
@@ -12,6 +14,16 @@ import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
 import { CodeMirror } from "./CodeMirror";
 import { PermlinkData } from "~/hooks/permlink";
 import Grid from "@material-ui/core/Grid";
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unused-vars
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    overflowX: "hidden"
+  },
+  languages: {
+    backgroundColor: theme.palette.background.paper
+  }
+}));
 
 interface SidebarProps {
   //editor: EditorState,
@@ -21,6 +33,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
+  const classes = useStyles();
   const { compilerList, permlinkData } = props;
   const compilerContext = CompilerContext.useContainer();
   const {
@@ -80,9 +93,9 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
 
   if (permlinkData === null) {
     return (
-      <Grid container direction="column">
+      <Grid container className={classes.root}>
         {/* choose language */}
-        <Grid item>
+        <Grid item sm={12}>
           <Select value={currentLanguage} onChange={onChangeLanguage}>
             {languages.map(
               (lang): React.ReactElement => {
@@ -96,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
           </Select>
         </Grid>
         {/* choose compiler */}
-        <Grid item>
+        <Grid item sm={12}>
           {((): React.ReactElement | null => {
             if (currentLanguage === "") {
               return null;
@@ -124,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
         </Grid>
 
         {/* compiler options */}
-        <Grid item>
+        <Grid item sm={12}>
           {((): React.ReactElement | null => {
             if (currentCompilerName === "") {
               return null;
@@ -138,7 +151,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
             }
 
             return (
-              <Grid container direction="column">
+              <Grid container>
                 {info.switches.map(
                   (sw): React.ReactElement => {
                     if (sw.type === "single") {
@@ -149,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
                           ? (currentSwitches[ssw.name] as boolean)
                           : ssw.default;
                       return (
-                        <Grid item>
+                        <Grid item sm={12}>
                           <FormControlLabel
                             key={ssw.name}
                             control={
@@ -186,7 +199,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
                         return name;
                       })();
                       return (
-                        <Grid item>
+                        <Grid item sm={12}>
                           <Select
                             key={ssw.name}
                             value={value}
@@ -282,8 +295,12 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
           }
           return (
             <React.Fragment>
-              <Grid item>{compilerComponent}</Grid>
-              <Grid item>{runtimeComponent}</Grid>
+              <Grid item sm={12}>
+                {compilerComponent}
+              </Grid>
+              <Grid item sm={12}>
+                {runtimeComponent}
+              </Grid>
             </React.Fragment>
           );
         })()}
@@ -294,9 +311,9 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
     const { compiler, compilerInfo } = permlinkData.parameter;
 
     return (
-      <Grid container direction="column">
+      <Grid container>
         {/* choose language */}
-        <Grid item>
+        <Grid item sm={12}>
           <Select disabled value={compilerInfo.language}>
             <MenuItem value={compilerInfo.language}>
               {compilerInfo.language}
@@ -305,7 +322,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
         </Grid>
 
         {/* choose compiler */}
-        <Grid item>
+        <Grid item sm={12}>
           {((): React.ReactElement | null => {
             return (
               <Select disabled value={compiler}>
@@ -318,11 +335,11 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
         </Grid>
 
         {/* compiler options */}
-        <Grid item>
+        <Grid item sm={12}>
           {((): React.ReactElement | null => {
             const options = permlinkData.parameter.options.split(",");
             return (
-              <Grid container direction="column">
+              <Grid container>
                 {compilerInfo.switches.map(
                   (sw): React.ReactElement => {
                     if (sw.type === "single") {
@@ -332,7 +349,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
                         options.findIndex((x): boolean => x === ssw.name) !==
                         -1;
                       return (
-                        <Grid item>
+                        <Grid item sm={12}>
                           <FormControlLabel
                             key={ssw.name}
                             control={
@@ -365,7 +382,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
                         throw "おかしい";
                       })();
                       return (
-                        <Grid item>
+                        <Grid item sm={12}>
                           <Select disabled key={ssw.name} value={value.name}>
                             <MenuItem value={value.name}>
                               {value.displayName}
@@ -384,7 +401,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
         </Grid>
 
         {/* compiler/runtime options raw */}
-        <Grid item>
+        <Grid item sm={12}>
           {((): React.ReactElement | null => {
             const {
               compilerOptionRaw,
@@ -438,9 +455,13 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
               runtimeComponent = null;
             }
             return (
-              <Grid container direction="column">
-                <Grid item>{compilerComponent}</Grid>
-                <Grid item>{runtimeComponent}</Grid>
+              <Grid container>
+                <Grid item sm={12}>
+                  {compilerComponent}
+                </Grid>
+                <Grid item sm={12}>
+                  {runtimeComponent}
+                </Grid>
               </Grid>
             );
           })()}

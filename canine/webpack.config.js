@@ -24,13 +24,18 @@ var config = {
         include: path.resolve(__dirname, "src")
       },
       {
-        test: /\.css$/,
+        test: /\.css$/i,
+        exclude: /\.module\.css$/i,
+        use: ["style-loader", "css-loader"]
+      },
+      {
+        test: /\.module\.css$/i,
         use: [
           { loader: "style-loader" },
           {
             loader: "css-loader",
             options: {
-              modules: false
+              modules: true
             }
           }
         ]
