@@ -55,13 +55,6 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
     },
     [settings]
   );
-  const onChangeExpand = React.useCallback(
-    (e): void => {
-      const expand = e.target.checked;
-      settings.setExpand(expand);
-    },
-    [settings]
-  );
 
   if (!settings.opened) {
     return (
@@ -111,16 +104,6 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
           />
         }
         label="Smart Indent"
-      />
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={settings.expand}
-            onChange={onChangeExpand}
-            value="expand"
-          />
-        }
-        label="Expand"
       />
     </List>
   );

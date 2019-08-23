@@ -17,13 +17,11 @@ export interface EditorSettingsData {
   tabKey: TabKeyType;
   tabWidth: TabWidthType;
   smartIndent: boolean;
-  expand: boolean;
   setOpened: React.Dispatch<React.SetStateAction<boolean>>;
   setEditor: React.Dispatch<React.SetStateAction<EditorType>>;
   setTabKey: React.Dispatch<React.SetStateAction<TabKeyType>>;
   setTabWidth: React.Dispatch<React.SetStateAction<TabWidthType>>;
   setSmartIndent: React.Dispatch<React.SetStateAction<boolean>>;
-  setExpand: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface EditorContextState {
@@ -47,20 +45,17 @@ function useSettings(): EditorSettingsData {
   const [tabKey, setTabKey] = React.useState<TabKeyType>("4");
   const [tabWidth, setTabWidth] = React.useState<TabWidthType>("4");
   const [smartIndent, setSmartIndent] = React.useState(true);
-  const [expand, setExpand] = React.useState(false);
   return {
     opened,
     editor,
     tabKey,
     tabWidth,
     smartIndent,
-    expand,
     setOpened,
     setEditor,
     setTabKey,
     setTabWidth,
-    setSmartIndent,
-    setExpand
+    setSmartIndent
   };
 }
 

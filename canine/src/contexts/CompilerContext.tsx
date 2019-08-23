@@ -7,7 +7,6 @@ export interface CompilerContextState {
   currentSwitches: { [name: string]: string | boolean };
   compilerOptionRaw: string;
   runtimeOptionRaw: string;
-  runtimeOptionRawExpanded: boolean;
   setCurrentLanguage: React.Dispatch<React.SetStateAction<string>>;
   setCurrentCompilerName: React.Dispatch<React.SetStateAction<string>>;
   setCurrentSwitches: React.Dispatch<
@@ -15,7 +14,6 @@ export interface CompilerContextState {
   >;
   setCompilerOptionRaw: React.Dispatch<React.SetStateAction<string>>;
   setRuntimeOptionRaw: React.Dispatch<React.SetStateAction<string>>;
-  setRuntimeOptionRawExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function useCompilerContext(): CompilerContextState {
@@ -28,23 +26,17 @@ function useCompilerContext(): CompilerContextState {
   }>({});
   const [compilerOptionRaw, setCompilerOptionRaw] = React.useState<string>("");
   const [runtimeOptionRaw, setRuntimeOptionRaw] = React.useState<string>("");
-  const [
-    runtimeOptionRawExpanded,
-    setRuntimeOptionRawExpanded
-  ] = React.useState<boolean>(false);
   return {
     currentLanguage,
     currentCompilerName,
     currentSwitches,
     compilerOptionRaw,
     runtimeOptionRaw,
-    runtimeOptionRawExpanded,
     setCurrentLanguage,
     setCurrentCompilerName,
     setCurrentSwitches,
     setCompilerOptionRaw,
-    setRuntimeOptionRaw,
-    setRuntimeOptionRawExpanded
+    setRuntimeOptionRaw
   };
 }
 
