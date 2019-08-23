@@ -4,13 +4,11 @@ import { makeStyles } from "@material-ui/styles";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import AddBoxIcon from "@material-ui/icons/AddBox";
-import { EditorContextState } from "~/contexts/EditorContext";
-import { EditorTab, RenamingSource } from "./EditorTab";
-import "codemirror/lib/codemirror.css";
-import "codemirror/theme/material.css";
 
+import { EditorContextState } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
+import { EditorTab, RenamingSource } from "./EditorTab";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles(() => ({

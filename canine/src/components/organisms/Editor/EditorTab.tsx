@@ -6,6 +6,7 @@ import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import EditIcon from "@material-ui/icons/Edit";
 import ClearIcon from "@material-ui/icons/Clear";
 import CheckIcon from "@material-ui/icons/Check";
+
 import { EditorSourceData } from "~/contexts/EditorContext";
 
 export interface RenamingSource {

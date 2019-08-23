@@ -9,6 +9,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import SettingsIcon from "@material-ui/icons/SettingsRounded";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+
 import { EditorSettingsData } from "~/contexts/EditorContext";
 
 interface EditorSettingsProps {

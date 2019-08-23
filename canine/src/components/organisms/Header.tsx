@@ -1,12 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import makeStyles from "@material-ui/styles/makeStyles";
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import deepOrange from "@material-ui/core/colors/deepOrange";
-
-import { Link } from "react-router-dom";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({

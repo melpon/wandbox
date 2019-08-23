@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import useReactRouter from "use-react-router";
-//import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/styles";
 import Grid from "@material-ui/core/Grid";
 
 import { useCompilerList } from "~/hooks/compilerList";
@@ -14,9 +14,16 @@ import { Command } from "../organisms/Command";
 import { Result } from "../organisms/Result";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-//const useStyles = makeStyles(() => ({
-//  root: {}
-//}));
+const useStyles = makeStyles(() => ({
+  sidebar: {
+    paddingLeft: "15px",
+    paddingTop: "15px"
+  },
+  contents: {
+    paddingLeft: "15px",
+    paddingTop: "15px"
+  }
+}));
 
 interface WandboxRouterProps {
   permlinkId?: string;
@@ -26,7 +33,7 @@ const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
   const { match } = useReactRouter<WandboxRouterProps>();
   const permlinkId =
     match.params.permlinkId === undefined ? null : match.params.permlinkId;
-  //const classes = useStyles();
+  const classes = useStyles();
   const [, setError] = useError();
   const compilerList = useCompilerList(
     "https://wandbox.org/api/list.json",
@@ -72,10 +79,10 @@ const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
         <Header />
       </Grid>
       <Grid item xs={12} sm={12} container alignItems="flex-start">
-        <Grid item xs={12} sm={2}>
+        <Grid item xs={12} sm={2} className={classes.sidebar}>
           <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
         </Grid>
-        <Grid item xs={12} sm={10} container>
+        <Grid item xs={12} sm={10} className={classes.contents} container>
           <Grid item xs={12} sm={12}>
             <Permlink
               compilerList={compilerList}

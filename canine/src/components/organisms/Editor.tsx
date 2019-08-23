@@ -7,10 +7,10 @@ import { EditorContext } from "~/contexts/EditorContext";
 import { CompilerContext } from "~/contexts/CompilerContext";
 import { CompilerList } from "~/hooks/compilerList";
 import { ResultContext } from "~/contexts/ResultContext";
+import { PermlinkData } from "~/hooks/permlink";
 import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorSettings } from "./Editor/EditorSettings";
 import { EditorTabs } from "./Editor/EditorTabs";
-import { PermlinkData } from "~/hooks/permlink";
 
 export interface EditorProps {
   compilerList: CompilerList;
