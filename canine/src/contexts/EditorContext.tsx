@@ -1,5 +1,6 @@
 import React from "react";
 import { createContainer } from "unstated-next";
+import { normalizePath } from "~/utils/normalizePath";
 
 export interface EditorSourceData {
   filename: string | null;
@@ -122,8 +123,19 @@ function useEditorContext(): EditorContextState {
       if (tab === 0) {
         return;
       }
+      // ファイル名の ../ とか ./ みたいなのを normalize する
+      const newFilename = normalizePath(filename);
+      // 既存のファイルが既にあったら変更させない
+      if (
+        sources.findIndex(
+          (source): boolean => source.filename === newFilename
+        ) !== -1
+      ) {
+        return;
+      }
+
       const newSources = [...sources];
-      newSources[tab] = { ...newSources[tab], filename: filename };
+      newSources[tab] = { ...newSources[tab], filename: newFilename };
       setSources(newSources);
     },
     [sources]
