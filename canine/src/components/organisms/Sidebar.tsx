@@ -243,10 +243,11 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
             }
             runtimeOptionRaw={
               permlinkData === null
-                ? compilerInfo.runtimeOptionRaw
+                ? compilerInfo.runtimeOptionRaw || runtimeOptionRaw !== ""
                   ? runtimeOptionRaw
                   : null
-                : permlinkData.parameter.compilerInfo.runtimeOptionRaw
+                : permlinkData.parameter.compilerInfo.runtimeOptionRaw ||
+                  permlinkData.parameter.runtimeOptionRaw !== ""
                 ? permlinkData.parameter.runtimeOptionRaw
                 : null
             }

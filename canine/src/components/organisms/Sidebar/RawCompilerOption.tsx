@@ -5,38 +5,17 @@ import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
 
 import { CodeMirror } from "~/components/organisms/CodeMirror";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
-  root: {},
   paperTitle: {
     paddingLeft: "8px"
   },
-  languageList: {
-    paddingTop: "0px",
-    paddingBottom: "0px"
-  },
-  languageListItem: {
-    paddingLeft: "16px"
-  },
-  compilerList: {
-    paddingTop: "0px",
-    paddingBottom: "0px"
-  },
-  compilerListItem: {
-    paddingLeft: "16px"
-  },
-  compilerListItemText: {
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    overflowX: "hidden"
-  },
-  compilerOptionContainer: {
-    paddingLeft: "16px",
-    paddingRight: "16px",
-    paddingBottom: "16px"
+  optionTitle: {
+    paddingLeft: "10px"
   }
 }));
 
@@ -75,29 +54,34 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
       <Typography variant="h6" className={classes.paperTitle}>
         Raw Options
       </Typography>
+      <Divider />
 
       <Grid container spacing={2}>
         <Grid item sm={12}>
-          <Typography variant="caption">Compiler Option:</Typography>
           {compilerOptionRaw === null ? null : (
-            <CodeMirror
-              value={compilerOptionRaw}
-              options={{
-                viewportMargin: Infinity,
-                smartIndent: false,
-                extraKeys: {
-                  "Ctrl-Enter": (): void => {
-                    onCtrlEnter();
+            <React.Fragment>
+              <Typography variant="caption" className={classes.optionTitle}>
+                Compiler Option:
+              </Typography>
+              <CodeMirror
+                value={compilerOptionRaw}
+                options={{
+                  readOnly: readOnly,
+                  viewportMargin: Infinity,
+                  smartIndent: false,
+                  extraKeys: {
+                    "Ctrl-Enter": (): void => {
+                      onCtrlEnter();
+                    }
                   }
-                }
-              }}
-              onBeforeChange={onChangeCompilerOptionRaw}
-              expand={false}
-            />
+                }}
+                onBeforeChange={onChangeCompilerOptionRaw}
+                style="input"
+              />
+            </React.Fragment>
           )}
         </Grid>
         <Grid item sm={12}>
-          <Typography variant="caption">Runtime Option:</Typography>
           {runtimeOptionRaw === null && !expanded ? (
             readOnly ? null : (
               <Button onClick={onExpandRuntimeOptionRaw}>
@@ -105,21 +89,26 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
               </Button>
             )
           ) : (
-            <CodeMirror
-              value={runtimeOptionRaw === null ? "" : runtimeOptionRaw}
-              options={{
-                readOnly: readOnly,
-                viewportMargin: Infinity,
-                smartIndent: false,
-                extraKeys: {
-                  "Ctrl-Enter": (): void => {
-                    onCtrlEnter();
+            <React.Fragment>
+              <Typography variant="caption" className={classes.optionTitle}>
+                Runtime Option:
+              </Typography>
+              <CodeMirror
+                value={runtimeOptionRaw === null ? "" : runtimeOptionRaw}
+                options={{
+                  readOnly: readOnly,
+                  viewportMargin: Infinity,
+                  smartIndent: false,
+                  extraKeys: {
+                    "Ctrl-Enter": (): void => {
+                      onCtrlEnter();
+                    }
                   }
-                }
-              }}
-              onBeforeChange={onChangeRuntimeOptionRaw}
-              expand={false}
-            />
+                }}
+                onBeforeChange={onChangeRuntimeOptionRaw}
+                style="input"
+              />
+            </React.Fragment>
           )}
         </Grid>
       </Grid>

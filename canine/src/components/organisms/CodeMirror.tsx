@@ -55,13 +55,13 @@ export interface CodeMirrorProps {
   value: string;
   options: CodeMirrorOptions;
   onBeforeChange: (editor: CodeMirrorType, data: object, value: string) => void;
-  expand: boolean;
+  style: "editor" | "input";
 }
 
 const CodeMirror = (props: CodeMirrorProps): React.ReactElement => {
   return (
     <OrigCodeMirror
-      className={styles.expand}
+      className={styles[props.style]}
       value={props.value}
       options={props.options}
       onBeforeChange={props.onBeforeChange}
