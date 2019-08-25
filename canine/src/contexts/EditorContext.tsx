@@ -45,18 +45,32 @@ function useSettings(): EditorSettingsData {
   const [tabKey, setTabKey] = React.useState<TabKeyType>("4");
   const [tabWidth, setTabWidth] = React.useState<TabWidthType>("4");
   const [smartIndent, setSmartIndent] = React.useState(true);
-  return {
-    opened,
-    editor,
-    tabKey,
-    tabWidth,
-    smartIndent,
-    setOpened,
-    setEditor,
-    setTabKey,
-    setTabWidth,
-    setSmartIndent
-  };
+  return React.useMemo(
+    (): EditorSettingsData => ({
+      opened,
+      editor,
+      tabKey,
+      tabWidth,
+      smartIndent,
+      setOpened,
+      setEditor,
+      setTabKey,
+      setTabWidth,
+      setSmartIndent
+    }),
+    [
+      opened,
+      editor,
+      tabKey,
+      tabWidth,
+      smartIndent,
+      setOpened,
+      setEditor,
+      setTabKey,
+      setTabWidth,
+      setSmartIndent
+    ]
+  );
 }
 
 function useEditorContext(): EditorContextState {
