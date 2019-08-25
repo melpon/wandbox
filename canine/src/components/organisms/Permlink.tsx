@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { useContainer } from "unstated-next";
 import useReactRouter from "use-react-router";
 import Button from "@material-ui/core/Button";
+import Grid from "@material-ui/core/Grid";
+import makeStyles from "@material-ui/styles/makeStyles";
 
 import { ResultContext } from "~/contexts/ResultContext";
 import { EditorContext } from "~/contexts/EditorContext";
@@ -17,6 +19,15 @@ import { useError } from "~/hooks/error";
 import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const useStyles = makeStyles(() => ({
+  share: {},
+  edit: {},
+  hidden: {
+    visibility: "hidden"
+  }
+}));
+
 export interface PermlinkProps {
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
@@ -26,6 +37,7 @@ export interface PermlinkProps {
 const Permlink: React.FC<PermlinkProps> = (
   props
 ): React.ReactElement | null => {
+  const classes = useStyles();
   const { compilerList, permlinkData, clearPermlinkData } = props;
   const { history } = useReactRouter();
   const compiler = useContainer(CompilerContext);
@@ -143,8 +155,6 @@ const Permlink: React.FC<PermlinkProps> = (
       // raw オプションは単に設定するだけ
       compiler.setCompilerOptionRaw(compilerOptionRaw);
       compiler.setRuntimeOptionRaw(runtimeOptionRaw);
-      // runtimeOptionRaw が空でないなら expanded にする
-      compiler.setRuntimeOptionRawExpanded(runtimeOptionRaw.length !== 0);
     }
 
     // EditorContext への設定
@@ -165,19 +175,33 @@ const Permlink: React.FC<PermlinkProps> = (
     history.push(`/`);
   }, [permlinkData, compiler, editor, result]);
 
-  if (permlinkData === null) {
-    if (result.results.length === 0) {
-      return null;
-    }
-
-    return (
-      <Button onClick={onShare} disabled={sharing}>
-        Share
-      </Button>
-    );
-  } else {
-    return <Button onClick={onEdit}>Edit</Button>;
-  }
+  const disabledShare =
+    sharing || permlinkData !== null || result.results.length === 0;
+  const disabledEdit = permlinkData === null;
+  return (
+    <Grid container spacing={2}>
+      <Grid item className={disabledShare ? classes.hidden : undefined}>
+        <Button
+          onClick={onShare}
+          disabled={disabledShare}
+          variant="contained"
+          color="primary"
+        >
+          Share
+        </Button>
+      </Grid>
+      <Grid item className={disabledEdit ? classes.hidden : undefined}>
+        <Button
+          onClick={onEdit}
+          disabled={disabledEdit}
+          variant="contained"
+          color="primary"
+        >
+          Edit
+        </Button>
+      </Grid>
+    </Grid>
+  );
 };
 
 export { Permlink };

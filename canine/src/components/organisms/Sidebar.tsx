@@ -1,16 +1,20 @@
 import React from "react";
+import { useContainer } from "unstated-next";
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
 import makeStyles from "@material-ui/styles/makeStyles";
+import Grid from "@material-ui/core/Grid";
 
 import {
   CompilerList,
   SelectSwitchOption,
   CompilerInfo
 } from "~/hooks/compilerList";
-import { CompilerContext } from "~/contexts/CompilerContext";
-import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
 import { PermlinkData } from "~/hooks/permlink";
-import Grid from "@material-ui/core/Grid";
+import { useCompile } from "~/hooks/compile";
+import { CompilerContext } from "~/contexts/CompilerContext";
+import { EditorContext } from "~/contexts/EditorContext";
+import { ResultContext } from "~/contexts/ResultContext";
+import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
 import { ChooseLanguage } from "./Sidebar/ChooseLanguage";
 import { ChooseCompiler } from "./Sidebar/ChooseCompiler";
 import { CompilerOption } from "./Sidebar/CompilerOption";
@@ -98,7 +102,9 @@ function optionsToSwitch(
 const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
   const classes = useStyles();
   const { compilerList, permlinkData } = props;
-  const compilerContext = CompilerContext.useContainer();
+  const editorContext = useContainer(EditorContext);
+  const compilerContext = useContainer(CompilerContext);
+  const resultContext = useContainer(ResultContext);
   const {
     currentLanguage,
     currentCompilerName,
@@ -152,7 +158,15 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
     },
     []
   );
-  const onCtrlEnter = React.useCallback((): void => {}, []);
+  const doCompile = useCompile(
+    editorContext,
+    compilerContext,
+    compilerList,
+    resultContext
+  );
+  const onCtrlEnter = React.useCallback((): void => {
+    doCompile();
+  }, [doCompile]);
 
   const language =
     permlinkData === null
@@ -179,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
     return info;
   }, [permlinkData, compilerList, currentCompilerName]);
 
-  const compilerInfos: CompilerInfo[] | undefined =
+  const compilerInfos: CompilerInfo[] =
     permlinkData === null ? compilerList.languages[currentLanguage] : [];
 
   const switches =
@@ -206,7 +220,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
       </Grid>
       {/* choose compiler */}
       <Grid item sm={12}>
-        {currentLanguage === "" || compilerInfos === undefined ? null : (
+        {permlinkData === null && currentLanguage === "" ? null : (
           <ChooseCompiler
             compilerInfo={compilerInfo}
             compilerInfos={compilerInfos}

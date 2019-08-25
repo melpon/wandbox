@@ -1,4 +1,3 @@
-// @flow
 import React from "react";
 import {
   CodeMirror,
@@ -9,11 +8,10 @@ import { resolveLanguageMode } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
 import { CompilerContextState } from "~/contexts/CompilerContext";
 import { EditorContextState } from "~/contexts/EditorContext";
-import { ResultContextState, ResultData } from "~/contexts/ResultContext";
-import { compile } from "~/utils/compile";
-import { AnyJson } from "~/hooks/fetch";
+import { ResultContextState } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
+import { useCompile } from "~/hooks/compile";
 
 interface CodeEditorProps {
   editor: EditorContextState;
@@ -25,6 +23,7 @@ interface CodeEditorProps {
 
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   const { editor, compiler, compilerList, result, permlinkData } = props;
+  const { currentLanguage, currentCompilerName } = compiler;
 
   const insertTabSpace = React.useCallback((cm: CodeMirrorType): void => {
     const cursor = cm.getCursor()["ch"];
@@ -36,20 +35,15 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
     cm.replaceSelection(spaces, "end", "+input");
   }, []);
 
-  const onResult = React.useCallback(
-    (json: AnyJson): void => {
-      result.add((json as unknown) as ResultData);
-    },
-    [result.add]
-  );
+  const doCompile = useCompile(editor, compiler, compilerList, result);
+
   const onCtrlEnter = React.useCallback((): void => {
     if (permlinkData !== null) {
       return;
     }
 
-    result.clear();
-    compile(editor, compiler, compilerList, onResult);
-  }, [editor, result.clear, compiler, compilerList, onResult]);
+    doCompile();
+  }, [currentLanguage, currentCompilerName, doCompile]);
 
   const settings = editor.settings;
   const options = React.useMemo((): CodeMirrorOptions => {
@@ -105,7 +99,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
 
   return (
     <CodeMirror
-      expand={editor.settings.expand}
+      style="editor"
       value={source.text}
       options={{
         readOnly: permlinkData !== null,

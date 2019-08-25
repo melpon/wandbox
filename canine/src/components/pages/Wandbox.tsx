@@ -12,6 +12,7 @@ import { Permlink } from "../organisms/Permlink";
 import { Editor } from "../organisms/Editor";
 import { Command } from "../organisms/Command";
 import { Result } from "../organisms/Result";
+import { Run } from "../organisms/Run";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles(() => ({
@@ -22,6 +23,9 @@ const useStyles = makeStyles(() => ({
   contents: {
     paddingLeft: "15px",
     paddingTop: "15px"
+  },
+  permlink: {
+    minHeight: "50px"
   }
 }));
 
@@ -83,7 +87,7 @@ const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
           <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
         </Grid>
         <Grid item xs={12} sm={10} className={classes.contents} container>
-          <Grid item xs={12} sm={12}>
+          <Grid item xs={12} sm={12} className={classes.permlink}>
             <Permlink
               compilerList={compilerList}
               permlinkData={permlinkData}
@@ -94,7 +98,17 @@ const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
             <Editor compilerList={compilerList} permlinkData={permlinkData} />
           </Grid>
           <Grid item xs={12} sm={12}>
-            <Command compilerList={compilerList} permlinkData={permlinkData} />
+            <Grid container spacing={2}>
+              <Grid item>
+                <Run compilerList={compilerList} permlinkData={permlinkData} />
+              </Grid>
+              <Grid item>
+                <Command
+                  compilerList={compilerList}
+                  permlinkData={permlinkData}
+                />
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={12} sm={12}>
             <Result permlinkData={permlinkData} />
