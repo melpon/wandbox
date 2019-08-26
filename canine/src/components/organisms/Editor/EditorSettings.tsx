@@ -10,7 +10,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import SettingsIcon from "@material-ui/icons/SettingsRounded";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 
-import { EditorSettingsData } from "~/contexts/EditorContext";
+import { EditorSettingsData, EditorType } from "~/contexts/EditorContext";
 
 interface EditorSettingsProps {
   settings: EditorSettingsData;
@@ -29,8 +29,22 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
   }, [settings]);
   const onChangeEditor = React.useCallback(
     (e): void => {
-      const editor = e.target.value;
-      settings.setEditor(editor);
+      const editor = e.target.value as EditorType;
+      if (editor === "vim") {
+        import(
+          /* webpackChunkName: "codemirror-keymap-vim" */ "codemirror/keymap/vim"
+        ).then((): void => {
+          settings.setEditor(editor);
+        });
+      } else if (editor === "emacs") {
+        import(
+          /* webpackChunkName: "codemirror-keymap-emacs" */ "codemirror/keymap/emacs"
+        ).then((): void => {
+          settings.setEditor(editor);
+        });
+      } else {
+        settings.setEditor(editor);
+      }
     },
     [settings]
   );

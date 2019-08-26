@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   CodeMirror,
   CodeMirrorOptions,
   CodeMirrorType
 } from "~/components/organisms/CodeMirror";
-import { resolveLanguageMode } from "~/utils/resolveLanguageMode";
+import {
+  resolveLanguageMode,
+  importLanguageMode
+} from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
 import { CompilerContextState } from "~/contexts/CompilerContext";
 import { EditorContextState } from "~/contexts/EditorContext";
@@ -85,11 +88,20 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
 
   const source = sources[editor.currentTab];
 
-  const mode = resolveLanguageMode(
+  const [mode, setMode] = React.useState<string>("text/x-text");
+  const tmpMode = resolveLanguageMode(
     source.filename,
     compiler.currentLanguage,
     "text/x-text"
   );
+  useEffect((): void => {
+    // mode に応じて動的インポート
+    importLanguageMode(tmpMode).then((): void => {
+      // 読み込みが完了したら CodeEditor をリフレッシュ
+      setMode(tmpMode);
+    });
+  }, [tmpMode]);
+
   const onBeforeChange = React.useCallback(
     (_editor, _data, value): void => {
       editor.setText(editor.currentTab, value);

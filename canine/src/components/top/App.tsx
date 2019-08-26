@@ -8,8 +8,6 @@ import { AppRouter } from "./AppRouter";
 import { AppError } from "./AppError";
 import { AppContexts } from "./AppContexts";
 
-import "~/utils/mode-pony";
-
 const theme = configureTheme(process.env.NODE_ENV || "development");
 
 const App: React.FC<{}> = (): React.ReactElement => (

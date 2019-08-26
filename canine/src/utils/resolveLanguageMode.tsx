@@ -177,3 +177,117 @@ export function resolveLanguageMode(
 
   return fallback;
 }
+
+export function importLanguageMode(mode: string): Promise<unknown> {
+  switch (mode) {
+    case "text/x-sh":
+      return import(
+        /* webpackChunkName: "codemirror-mode-shell-shell" */ "codemirror/mode/shell/shell"
+      );
+    case "text/x-csrc":
+      return import(
+        /* webpackChunkName: "codemirror-mode-clike-clike" */ "codemirror/mode/clike/clike"
+      );
+    case "text/x-c++src":
+      return import(
+        /* webpackChunkName: "codemirror-mode-clike-clike" */ "codemirror/mode/clike/clike"
+      );
+    case "text/x-csharp":
+      return import(
+        /* webpackChunkName: "codemirror-mode-clike-clike" */ "codemirror/mode/clike/clike"
+      );
+    case "text/x-coffeescript":
+      return import(
+        /* webpackChunkName: "codemirror-mode-coffeescript-coffeescript" */ "codemirror/mode/coffeescript/coffeescript"
+      );
+    case "text/x-crystal":
+      return import(
+        /* webpackChunkName: "codemirror-mode-crystal-crystal" */ "codemirror/mode/crystal/crystal"
+      );
+    case "text/x-d":
+      return import(
+        /* webpackChunkName: "codemirror-mode-d-d" */ "codemirror/mode/d/d"
+      );
+    case "text/x-elixir":
+      return import(
+        /* webpackChunkName: "codemirror-mode-elixir" */ "codemirror-mode-elixir"
+      );
+    case "text/x-erlang":
+      return import(
+        /* webpackChunkName: "codemirror-mode-erlang-erlang" */ "codemirror/mode/erlang/erlang"
+      );
+    case "text/x-fsharp":
+      return import(
+        /* webpackChunkName: "codemirror-mode-mllike-mllike" */ "codemirror/mode/mllike/mllike"
+      );
+    case "text/x-go":
+      return import(
+        /* webpackChunkName: "codemirror-mode-go-go" */ "codemirror/mode/go/go"
+      );
+    case "text/x-groovy":
+      return import(
+        /* webpackChunkName: "codemirror-mode-groovy-groovy" */ "codemirror/mode/groovy/groovy"
+      );
+    case "text/x-haskell":
+      return import(
+        /* webpackChunkName: "codemirror-mode-haskell-haskell" */ "codemirror/mode/haskell/haskell"
+      );
+    case "text/x-java":
+      return import(
+        /* webpackChunkName: "codemirror-mode-clike-clike" */ "codemirror/mode/clike/clike"
+      );
+    case "text/javascript":
+      return import(
+        /* webpackChunkName: "codemirror-mode-javascript-javascript" */ "codemirror/mode/javascript/javascript"
+      );
+    case "text/x-common-lisp":
+      return import(
+        /* webpackChunkName: "codemirror-mode-commonlisp-commonlisp" */ "codemirror/mode/commonlisp/commonlisp"
+      );
+    case "text/x-lua":
+      return import(
+        /* webpackChunkName: "codemirror-mode-lua-lua" */ "codemirror/mode/lua/lua"
+      );
+    case "text/x-ocaml":
+      return import(
+        /* webpackChunkName: "codemirror-mode-mllike-mllike" */ "codemirror/mode/mllike/mllike"
+      );
+    case "text/x-php":
+      return import(
+        /* webpackChunkName: "codemirror-mode-php-php" */ "codemirror/mode/php/php"
+      );
+    case "text/x-pascal":
+      return import(
+        /* webpackChunkName: "codemirror-mode-pascal-pascal" */ "codemirror/mode/pascal/pascal"
+      );
+    case "text/x-perl":
+      return import(
+        /* webpackChunkName: "codemirror-mode-perl-perl" */ "codemirror/mode/perl/perl"
+      );
+    case "text/x-pony":
+      return import(
+        /* webpackChunkName: "canine-mode-pony" */ "~/utils/mode-pony"
+      );
+    case "text/x-python":
+      return import(
+        /* webpackChunkName: "codemirror-mode-python-python" */ "codemirror/mode/python/python"
+      );
+    case "text/x-ruby":
+      return import(
+        /* webpackChunkName: "codemirror-mode-ruby-ruby" */ "codemirror/mode/ruby/ruby"
+      );
+    case "text/x-rustsrc":
+      return import(
+        /* webpackChunkName: "codemirror-mode-rust-rust" */ "codemirror/mode/rust/rust"
+      );
+    case "text/x-scala":
+      return import(
+        /* webpackChunkName: "codemirror-mode-clike-clike" */ "codemirror/mode/clike/clike"
+      );
+    case "text/x-swift":
+      return import(
+        /* webpackChunkName: "codemirror-mode-swift-swift" */ "codemirror/mode/swift/swift"
+      );
+  }
+  return Promise.resolve(null);
+}

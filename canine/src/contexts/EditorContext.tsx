@@ -7,9 +7,9 @@ export interface EditorSourceData {
   text: string;
 }
 
-type EditorType = "default" | "vim" | "emacs";
-type TabKeyType = "2" | "4" | "8" | "tab";
-type TabWidthType = "2" | "4" | "8";
+export type EditorType = "default" | "vim" | "emacs";
+export type TabKeyType = "2" | "4" | "8" | "tab";
+export type TabWidthType = "2" | "4" | "8";
 
 export interface EditorSettingsData {
   opened: boolean;
