@@ -1,15 +1,15 @@
 import createMuiTheme, { Theme } from "@material-ui/core/styles/createMuiTheme";
 import indigo from "@material-ui/core/colors/indigo";
 import pink from "@material-ui/core/colors/pink";
-import red from "@material-ui/core/colors/red";
-import lime from "@material-ui/core/colors/lime";
+// import red from "@material-ui/core/colors/red";
+// import lime from "@material-ui/core/colors/lime";
 
 export const configureTheme = (env: string): Theme => {
   const t = {
     production: {
       palette: {
-        primary: red,
-        secondary: lime
+        primary: indigo,
+        secondary: pink
       }
     },
     development: {
