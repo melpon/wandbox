@@ -1,5 +1,5 @@
 import React from "react";
-import _ from "lodash";
+import groupBy from "lodash/groupBy";
 import { useFetchJSON, AnyJson, JsonMap, JsonArray } from "./fetch";
 
 export interface SingleSwitch {
@@ -121,6 +121,6 @@ export function useCompilerList(
 
   return {
     compilers: compilerInfos,
-    languages: _.groupBy(compilerInfos, (x): string => x.language)
+    languages: groupBy(compilerInfos, (x): string => x.language)
   };
 }

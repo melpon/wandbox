@@ -2,6 +2,8 @@
 const webpack = require("webpack");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
 
 var config = {
   mode:
@@ -52,7 +54,15 @@ var config = {
     },
     extensions: [".tsx", ".ts", ".js"]
   },
-  plugins: [
+  plugins: (process.env.BUILD_STATS
+    ? [
+        new BundleAnalyzerPlugin({
+          analyzerMode: "static",
+          reportFilename: "stats/report.html"
+        })
+      ]
+    : []
+  ).concat([
     new CopyPlugin([
       {
         from: path.resolve(__dirname, "src/index.html"),
@@ -60,7 +70,7 @@ var config = {
       }
     ]),
     new webpack.EnvironmentPlugin({ NODE_ENV: "develop" })
-  ],
+  ]),
   devServer: {
     historyApiFallback: true
   }
