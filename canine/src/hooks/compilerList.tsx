@@ -1,5 +1,4 @@
 import React from "react";
-import groupBy from "lodash/groupBy";
 import { useFetchJSON, AnyJson, JsonMap, JsonArray } from "./fetch";
 
 export interface SingleSwitch {
@@ -119,8 +118,17 @@ export function useCompilerList(
     return null;
   }
 
+  let languages: { [lang: string]: CompilerInfo[] } = {};
+  for (const info of compilerInfos) {
+    if (info.language in languages) {
+      languages[info.language].push(info);
+    } else {
+      languages[info.language] = [info];
+    }
+  }
+
   return {
     compilers: compilerInfos,
-    languages: groupBy(compilerInfos, (x): string => x.language)
+    languages: languages
   };
 }
