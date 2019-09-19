@@ -295,6 +295,7 @@ function Compiler(compiler_id, compile_options_id, ctrl_enter) {
          smartIndent: false,
          extraKeys: {
            'Ctrl-Enter': ctrl_enter,
+           'Cmd-Enter': ctrl_enter,
          },
        });
        $(e).data('editor', editor);
@@ -453,6 +454,10 @@ Editor.prototype._to_editor = function(elem) {
     smartIndent: false,
     extraKeys: {
       'Ctrl-Enter': function() {
+        if (self.onrun)
+          self.onrun();
+      },
+      'Cmd-Enter': function() {
         if (self.onrun)
           self.onrun();
       },
@@ -1127,6 +1132,7 @@ function Stdin(stdin_id, ctrl_enter) {
          smartIndent: false,
          extraKeys: {
            'Ctrl-Enter': ctrl_enter,
+           'Cmd-Enter': ctrl_enter,
          },
        });
        $(e).data('editor', editor);
