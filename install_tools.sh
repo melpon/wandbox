@@ -8,6 +8,13 @@ set -ex
 mkdir -p $BUILD_DIR
 mkdir -p $INSTALL_DIR
 
+CMAKE_VERSION="3.15.3"
+CMAKE_VERSION_FILE="$INSTALL_DIR/cmake.version"
+CMAKE_CHANGED=0
+if [ ! -e $CMAKE_VERSION_FILE -o "$CMAKE_VERSION" != "`cat $CMAKE_VERSION_FILE`" ]; then
+  CMAKE_CHANGED=1
+fi
+
 ZLIB_VERSION="1.2.11"
 ZLIB_VERSION_FILE="$INSTALL_DIR/zlib.version"
 ZLIB_CHANGED=0
@@ -78,6 +85,31 @@ SQLITE3_CHANGED=0
 if [ ! -e $SQLITE3_VERSION_FILE -o "$SQLITE3_VERSION" != "`cat $SQLITE3_VERSION_FILE`" ]; then
   SQLITE3_CHANGED=1
 fi
+
+# CMake が古いとビルド出来ないので、インストール済み CMake から新しい CMake をインストールする
+if [ $CMAKE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cmake/bin/cmake ]; then
+  _URL=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz
+  _FILE=$BUILD_DIR/cmake-$CMAKE_VERSION.tar.gz
+  if [ ! -e $_FILE ]; then
+    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
+    cmake -P $BUILD_DIR/tmp.cmake
+    rm $BUILD_DIR/tmp.cmake
+  fi
+
+  pushd $BUILD_DIR
+    rm -rf cmake-$CMAKE_VERSION
+    cmake -E tar xf $_FILE
+  popd
+
+  pushd $BUILD_DIR/cmake-$CMAKE_VERSION
+    ./configure --prefix=$INSTALL_DIR/cmake
+    make -j4
+    make install
+  popd
+fi
+echo $CMAKE_VERSION > $CMAKE_VERSION_FILE
+
+export PATH=$INSTALL_DIR/cmake/bin:$PATH
 
 # zlib
 if [ $ZLIB_CHANGED -eq 1 -o ! -e $INSTALL_DIR/zlib/lib/libz.a ]; then

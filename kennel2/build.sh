@@ -6,6 +6,8 @@ INSTALL_DIR="`pwd`/../_install"
 MODULE_PATH="`pwd`/../cmake"
 PROJECT_DIR="`pwd`"
 
+export PATH=$INSTALL_DIR/cmake/bin:$PATH
+
 mkdir -p build
 pushd build
   cmake $PROJECT_DIR \
