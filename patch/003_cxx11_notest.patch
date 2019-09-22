@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5ce0d53..b25ad40 100644
+index 5ce0d53..6268384 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -19,7 +19,7 @@ include(CheckFunctionExists)
@@ -27,6 +27,28 @@ index 5ce0d53..b25ad40 100644
  endif(NOT DISABLE_STATIC)
  
  if(DISABLE_SHARED OR DISABLE_STATIC)
+@@ -686,8 +688,8 @@ endif(NOT DISABLE_SHARED)
+ 
+ 
+ 
+-add_executable(hello_world src/hello_world.cpp skin1.cpp skin2.cpp)
+-target_link_libraries(hello_world ${CPPCMS_LIB})
++# add_executable(hello_world src/hello_world.cpp skin1.cpp skin2.cpp)
++# target_link_libraries(hello_world ${CPPCMS_LIB})
+ 
+ if(NOT DISABLE_TCPCACHE)
+ 	add_executable(cppcms_scale src/cache_server_main.cpp)
+@@ -697,8 +699,8 @@ if(NOT DISABLE_TCPCACHE)
+ 	endif()
+ endif()
+ 
+-add_executable(cppcms_make_key src/make_key.cpp)
+-target_link_libraries(cppcms_make_key ${CPPCMS_LIB})
++# add_executable(cppcms_make_key src/make_key.cpp)
++# target_link_libraries(cppcms_make_key ${CPPCMS_LIB})
+ 
+ add_executable(cppcms_config_find_param src/cppcms_config_find_param.cpp src/json.cpp)
+ if(DISABLE_SHARED)
 @@ -764,17 +766,17 @@ if(NOT IS_WINDOWS)
  	set(ALL_TESTS ${ALL_TESTS} cppcms_service_test)
  endif()
