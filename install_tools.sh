@@ -210,6 +210,27 @@ echo $CPPDB_VERSION > $CPPDB_VERSION_FILE
 
 # Go
 if [ $GO_CHANGED -eq 1 -o ! -e $INSTALL_DIR/go/bin/go ]; then
+  # Bootstrap
+  _URL=https://dl.google.com/go/go1.4-bootstrap-20171003.tar.gz
+  _FILE=$BUILD_DIR/go1.4-bootstrap-20171003.tar.gz
+  if [ ! -e $_FILE ]; then
+    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
+    cmake -P $BUILD_DIR/tmp.cmake
+    rm $BUILD_DIR/tmp.cmake
+  fi
+
+  pushd $BUILD_DIR
+    rm -rf go
+    rm -rf go-bootstrap
+    cmake -E tar xf $_FILE
+    mv go go-bootstrap
+  popd
+
+  pushd $BUILD_DIR/go-bootstrap/src
+    CGO_ENABLED=0 ./make.bash
+  popd
+
+  # 本体
   _URL=https://github.com/golang/go/archive/go$GO_VERSION.tar.gz
   _FILE=$BUILD_DIR/go$GO_VERSION.tar.gz
   if [ ! -e $_FILE ]; then
@@ -226,7 +247,7 @@ if [ $GO_CHANGED -eq 1 -o ! -e $INSTALL_DIR/go/bin/go ]; then
   popd
 
   pushd $INSTALL_DIR/go/src
-    ./make.bash
+    GOROOT_BOOTSTRAP=$BUILD_DIR/go-bootstrap ./make.bash
   popd
 fi
 echo $GO_VERSION > $GO_VERSION_FILE
