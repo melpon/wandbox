@@ -22,7 +22,7 @@ if(CppCMS_FOUND)
     add_library(CppCMS::CppCMS STATIC IMPORTED)
     set_target_properties(CppCMS::CppCMS PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${CppCMS_INCLUDE_DIR}"
-      INTERFACE_LINK_LIBRARIES "CppCMS::Booster;PCRE::PCRE;ICU::uc;ICU::i18n;ICU::data"
+      INTERFACE_LINK_LIBRARIES "CppCMS::Booster;PCRE::PCRE;ICU::i18n;ICU::uc;ICU::data"
       IMPORTED_LOCATION "${CppCMS_LIBRARY}")
   endif()
 
