@@ -3,6 +3,7 @@ find_library(CppCMS_LIBRARY NAMES cppcms PATHS "${CppCMS_ROOT_DIR}/lib" NO_DEFAU
 find_library(CppCMS_Booster_LIBRARY NAMES booster PATHS "${CppCMS_ROOT_DIR}/lib" NO_DEFAULT_PATH)
 find_program(CppCMS_cppcms_tmpl_cc NAMES cppcms_tmpl_cc PATHS "${CppCMS_ROOT_DIR}/bin" NO_DEFAULT_PATH)
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
+find_package(PCRE REQUIRED)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CppCMS DEFAULT_MSG CppCMS_LIBRARY CppCMS_INCLUDE_DIR CppCMS_Booster_LIBRARY CppCMS_cppcms_tmpl_cc)
@@ -21,7 +22,7 @@ if(CppCMS_FOUND)
     add_library(CppCMS::CppCMS STATIC IMPORTED)
     set_target_properties(CppCMS::CppCMS PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${CppCMS_INCLUDE_DIR}"
-      INTERFACE_LINK_LIBRARIES "CppCMS::Booster;ICU::uc;ICU::i18n;ICU::data"
+      INTERFACE_LINK_LIBRARIES "CppCMS::Booster;PCRE::PCRE;ICU::uc;ICU::i18n;ICU::data"
       IMPORTED_LOCATION "${CppCMS_LIBRARY}")
   endif()
 

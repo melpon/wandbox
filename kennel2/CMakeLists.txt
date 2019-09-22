@@ -4,7 +4,6 @@ project(kennel C CXX)
 
 find_package(OpenSSL REQUIRED)
 find_package(SQLite3 REQUIRED)
-find_package(PCRE REQUIRED)
 find_package(CURL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(CppCMS REQUIRED)
@@ -51,12 +50,11 @@ set_target_properties(kennel PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
 target_link_libraries(kennel
   CppCMS::CppCMS
   CppDB::CppDB
-  ZLIB::ZLIB
   CURL::libcurl
-  PCRE::PCRE
   SQLite::SQLite3
   OpenSSL::Crypto
   OpenSSL::SSL
+  ZLIB::ZLIB
   Threads::Threads)
 
 # ---- インストール
