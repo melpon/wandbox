@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5ce0d53..6268384 100644
+index 5ce0d53..ca2b824 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -19,7 +19,7 @@ include(CheckFunctionExists)
@@ -78,6 +78,15 @@ index 5ce0d53..6268384 100644
  
  #####################################
  # End of tests
+@@ -803,7 +805,7 @@ endif(MSVC AND NOT DISABLE_STATIC)
+ 
+ configure_file(config.cmake.h cppcms/config.h)
+ 
+-set(CPPCMS_INSTALL_TARGETS ${CPPCMS_LIBS} cppcms_config_find_param cppcms_make_key)
++set(CPPCMS_INSTALL_TARGETS ${CPPCMS_LIBS} cppcms_config_find_param)
+ if(NOT DISABLE_TCPCACHE)
+ 	set(CPPCMS_INSTALL_TARGETS ${CPPCMS_INSTALL_TARGETS} cppcms_scale)
+ endif()
 diff --git a/booster/CMakeLists.txt b/booster/CMakeLists.txt
 index 4f81833..11bcd05 100644
 --- a/booster/CMakeLists.txt
