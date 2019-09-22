@@ -159,7 +159,7 @@ if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
   pushd $BUILD_DIR/cppcms-source
     patch -p1 < $PATCH_DIR/001_http_protocol.patch
     patch -p1 < $PATCH_DIR/002_ignore_http_header_comments.patch
-    patch -p1 < $PATCH_DIR/003_cxx11.patch
+    patch -p1 < $PATCH_DIR/003_cxx11_notest.patch
   popd
 
   # ビルドとインストール
