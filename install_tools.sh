@@ -43,6 +43,13 @@ if [ ! -e $CPPDB_VERSION_FILE -o "$CPPDB_VERSION" != "`cat $CPPDB_VERSION_FILE`"
   CPPDB_CHANGED=1
 fi
 
+GO_VERSION="1.13"
+GO_VERSION_FILE="$INSTALL_DIR/go.version"
+GO_CHANGED=0
+if [ ! -e $GO_VERSION_FILE -o "$GO_VERSION" != "`cat $GO_VERSION_FILE`" ]; then
+  GO_CHANGED=1
+fi
+
 BORINGSSL_VERSION="6f3e034"
 BORINGSSL_VERSION_FILE="$INSTALL_DIR/boringssl.version"
 BORINGSSL_CHANGED=0
@@ -201,6 +208,29 @@ if [ $CPPDB_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppdb/lib/libcppdb.a ]; then
 fi
 echo $CPPDB_VERSION > $CPPDB_VERSION_FILE
 
+# Go
+if [ $GO_CHANGED -eq 1 -o ! -e $INSTALL_DIR/go/bin/go ]; then
+  _URL=https://github.com/golang/go/archive/go$GO_VERSION.tar.gz
+  _FILE=$BUILD_DIR/go$GO_VERSION.tar.gz
+  if [ ! -e $_FILE ]; then
+    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
+    cmake -P $BUILD_DIR/tmp.cmake
+    rm $BUILD_DIR/tmp.cmake
+  fi
+
+  pushd $BUILD_DIR
+    rm -rf go-go$GO_VERSION
+    rm -rf $INSTALL_DIR/go
+    cmake -E tar xf $_FILE
+    mv go-go$GO_VERSION $INSTALL_DIR/go
+  popd
+
+  pushd $INSTALL_DIR/go/src
+    ./make.bash
+  popd
+fi
+echo $GO_VERSION > $GO_VERSION_FILE
+
 # boringssl
 if [ $BORINGSSL_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boringssl/lib/libcrypto.a ]; then
   rm -rf $BUILD_DIR/boringssl-source
@@ -213,7 +243,8 @@ if [ $BORINGSSL_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boringssl/lib/libcrypto.a ]; 
   pushd $BUILD_DIR/boringssl-build
     cmake $BUILD_DIR/boringssl-source \
       -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/boringssl
+      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/boringssl \
+      -DGO_EXECUTABLE=$INSTALL_DIR/go/bin/go
     make -j4
     # make install はインストールするものが無いって言われるので
     # 手動でインストールする
