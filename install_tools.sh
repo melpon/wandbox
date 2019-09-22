@@ -22,6 +22,13 @@ if [ ! -e $BOOST_VERSION_FILE -o "$BOOST_VERSION" != "`cat $BOOST_VERSION_FILE`"
   BOOST_CHANGED=1
 fi
 
+ICU_VERSION="64.2"
+ICU_VERSION_FILE="$INSTALL_DIR/icu.version"
+ICU_CHANGED=0
+if [ ! -e $ICU_VERSION_FILE -o "$ICU_VERSION" != "`cat $ICU_VERSION_FILE`" ]; then
+  ICU_CHANGED=1
+fi
+
 CPPCMS_VERSION="1.2.1"
 CPPCMS_VERSION_FILE="$INSTALL_DIR/cppcms.version"
 CPPCMS_CHANGED=0
@@ -110,6 +117,38 @@ if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_filesystem.a ]
 fi
 echo $BOOST_VERSION > $BOOST_VERSION_FILE
 
+# icu
+if [ $ICU_CHANGED -eq 1 -o ! -e $INSTALL_DIR/icu/lib/libicudata.a ]; then
+  _VERSION_UNDERSCORE=${ICU_VERSION//./_}
+  _VERSION_MINUS=${ICU_VERSION//./-}
+  _URL=https://github.com/unicode-org/icu/releases/download/release-$_VERSION_MINUS/icu4c-$_VERSION_UNDERSCORE-src.tgz
+  _FILE=$BUILD_DIR/icu4c-$_VERSION_UNDERSCORE-src.tgz
+  if [ ! -e $_FILE ]; then
+    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
+    cmake -P $BUILD_DIR/tmp.cmake
+    rm $BUILD_DIR/tmp.cmake
+  fi
+
+  pushd $BUILD_DIR
+    rm -rf icu
+    rm -rf icu-source
+    cmake -E tar xf $_FILE
+    mv icu icu-source
+  popd
+
+  pushd $BUILD_DIR/icu-source/source
+    ./configure \
+      --prefix=$INSTALL_DIR/icu \
+      --disable-tests \
+      --disable-samples \
+      --disable-shared \
+      --enable-static
+    make -j4
+    make install
+  popd
+fi
+echo $ICU_VERSION > $ICU_VERSION_FILE
+
 # cppcms
 if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
   rm -rf $BUILD_DIR/cppcms-source
@@ -120,6 +159,7 @@ if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
   pushd $BUILD_DIR/cppcms-source
     patch -p1 < $PATCH_DIR/001_http_protocol.patch
     patch -p1 < $PATCH_DIR/002_ignore_http_header_comments.patch
+    patch -p1 < $PATCH_DIR/003_cxx11.patch
   popd
 
   # ビルドとインストール
@@ -128,11 +168,12 @@ if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
     cmake $BUILD_DIR/cppcms-source \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppcms \
-      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/zlib" \
+      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/zlib;$INSTALL_DIR/icu;$INSTALL_DIR/boringssl" \
       -DDISABLE_SHARED=ON \
       -DDISABLE_SCGI=ON \
-      -DDISABLE_ICU_LOCALE=ON \
-      -DDISABLE_TCPCACHE=ON
+      -DDISABLE_TCPCACHE=ON \
+      -DDISABLE_GCRYPT=ON \
+      -DDISABLE_ICONV=ON
     make
     make install
   popd
@@ -235,8 +276,10 @@ if [ $CURL_CHANGED -eq 1 -o ! -e $INSTALL_DIR/curl/lib/libcurl.a ]; then
     ./configure \
       --prefix=$INSTALL_DIR/curl \
       --disable-shared \
+      --disable-ldap \
       --with-ssl=$INSTALL_DIR/boringssl \
-      --with-zlib=$INSTALL_DIR/zlib
+      --with-zlib=$INSTALL_DIR/zlib \
+      --without-librtmp
     make -j4
     make install
   popd
@@ -268,4 +311,3 @@ if [ $SQLITE3_CHANGED -eq 1 -o ! -e $INSTALL_DIR/sqlite3/lib/libsqlite3.a ]; the
   popd
 fi
 echo $SQLITE3_VERSION > $SQLITE3_VERSION_FILE
-
