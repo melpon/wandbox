@@ -1,0 +1,46 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5ce0d53..69b75c4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -473,6 +473,7 @@ endif()
+ 
+ if(NOT DISABLE_SHARED)
+ 	add_library(cppcms SHARED ${CPPCMS_SOURCES})
++	set_target_properties(cppcms PROPERTIES CXX_STANDARD 11)
+ 	set(CPPCMS_LIB cppcms)
+ else(NOT DISABLE_SHARED)
+ 	set(CPPCMS_LIB cppcms-static)
+@@ -480,6 +481,7 @@ endif(NOT DISABLE_SHARED)
+ 
+ if(NOT DISABLE_STATIC)
+ 	add_library(cppcms-static STATIC ${CPPCMS_SOURCES})
++	set_target_properties(cppcms-static PROPERTIES CXX_STANDARD 11)
+ endif(NOT DISABLE_STATIC)
+ 
+ if(DISABLE_SHARED OR DISABLE_STATIC)
+diff --git a/booster/CMakeLists.txt b/booster/CMakeLists.txt
+index 4f81833..fa31d0d 100644
+--- a/booster/CMakeLists.txt
++++ b/booster/CMakeLists.txt
+@@ -570,6 +570,7 @@ if(NOT DISABLE_SHARED)
+ 	set_target_properties(booster PROPERTIES COMPILE_DEFINITIONS "${BOOSTER_SHARED_DEFS}")
+ 	set_target_properties(booster PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+ 	set_target_properties(booster PROPERTIES OUTPUT_NAME "booster${BOOSTER_SUFFIX}")
++	set_target_properties(booster PROPERTIES CXX_STANDARD 11)
+ 
+ endif(NOT DISABLE_SHARED)	
+ 
+@@ -579,6 +580,7 @@ if(NOT DISABLE_STATIC)
+ 	set_target_properties(booster-static PROPERTIES COMPILE_DEFINITIONS "${BOOST_STATIC_DEFS}")
+ 	set_target_properties(booster-static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+ 	set_target_properties(booster-static PROPERTIES OUTPUT_NAME "booster${BOOSTER_SUFFIX}")
++	set_target_properties(booster-static PROPERTIES CXX_STANDARD 11)
+ endif(NOT DISABLE_STATIC)
+ 
+ install(DIRECTORY booster DESTINATION include
+@@ -755,5 +757,3 @@ install(TARGETS ${LINK_LIBS}
+ 	LIBRARY DESTINATION ${LIBDIR}
+ 	ARCHIVE DESTINATION ${LIBDIR}
+ 	PUBLIC_HEADER DESTINATION include/booster)
+-
+-
