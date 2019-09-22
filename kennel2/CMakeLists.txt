@@ -9,6 +9,7 @@ find_package(CURL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(CppCMS REQUIRED)
 find_package(CppDB REQUIRED)
+find_package(Threads REQUIRED)
 
 # ---- skin_kennel.cpp の生成
 
@@ -55,7 +56,8 @@ target_link_libraries(kennel
   PCRE::PCRE
   SQLite::SQLite3
   OpenSSL::Crypto
-  OpenSSL::SSL)
+  OpenSSL::SSL
+  Threads::Threads)
 
 # ---- インストール
 
