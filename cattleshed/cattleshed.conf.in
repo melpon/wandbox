@@ -48,7 +48,7 @@
     "--nofile=256",
     "--nproc=256",
     "--",
-    "/usr/local/cattleshed/bin/cattlegrid",
+    "@CATTLESHED_BINDIR@/cattlegrid",
     "--rootdir=./jail",
     "--mount=/bin,/etc,/lib,/lib32,/lib64,/usr/bin,/usr/lib,/usr/lib32,/usr/lib64,/usr/include,/usr/local,/usr/share",
     "--rwmount=/tmp=./jail/tmp,/home/jail=./store",
