@@ -343,6 +343,7 @@ if [ $SQLITE3_CHANGED -eq 1 -o ! -e $INSTALL_DIR/sqlite3/lib/libsqlite3.a ]; the
   popd
 fi
 echo $SQLITE3_VERSION > $SQLITE3_VERSION_FILE
+
 # cppcms
 if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
   rm -rf $BUILD_DIR/cppcms-source
@@ -362,7 +363,7 @@ if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
     cmake $BUILD_DIR/cppcms-source \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppcms \
-      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/zlib;$INSTALL_DIR/icu;$INSTALL_DIR/boringssl" \
+      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/pcre;$INSTALL_DIR/zlib;$INSTALL_DIR/icu;$INSTALL_DIR/boringssl" \
       -DDISABLE_SHARED=ON \
       -DDISABLE_SCGI=ON \
       -DDISABLE_TCPCACHE=ON \
