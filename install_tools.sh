@@ -380,6 +380,12 @@ if [ $CPPDB_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppdb/lib/libcppdb.a ]; then
   rm -rf $BUILD_DIR/cppdb-source
   git clone --branch v$CPPDB_VERSION --depth 1 https://github.com/melpon/cppdb.git $BUILD_DIR/cppdb-source
 
+  PATCH_DIR=`pwd`/patch
+  # パッチの適用
+  pushd $BUILD_DIR/cppdb-source
+    patch -p1 < $PATCH_DIR/004_cppdb_noshared.patch
+  popd
+
   # ビルドとインストール
   mkdir -p $BUILD_DIR/cppdb-build
   pushd $BUILD_DIR/cppdb-build
