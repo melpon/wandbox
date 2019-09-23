@@ -386,6 +386,7 @@ if [ $CPPDB_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppdb/lib/libcppdb.a ]; then
     cmake $BUILD_DIR/cppdb-source \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppdb \
+      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/sqlite3" \
       -DDISABLE_MYSQL=ON \
       -DDISABLE_PQ=ON \
       -DDISABLE_ODBC=ON \
