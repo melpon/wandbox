@@ -102,7 +102,7 @@ if [ $CMAKE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cmake/bin/cmake ]; then
   popd
 
   pushd $BUILD_DIR/cmake-$CMAKE_VERSION
-    ./configure --system-curl --prefix=$INSTALL_DIR/cmake
+    ./configure --no-system-zlib --system-curl --prefix=$INSTALL_DIR/cmake
     make -j4
     make install
   popd
