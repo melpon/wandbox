@@ -1,5 +1,5 @@
-find_path(CAP_INCLUDE_DIR NAMES aio.h)
-find_library(CAP_LIBRARY NAMES rt)
+find_path(CAP_INCLUDE_DIR NAMES sys/capability.h)
+find_library(CAP_LIBRARY NAMES cap)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CAP DEFAULT_MSG CAP_LIBRARY CAP_INCLUDE_DIR)
