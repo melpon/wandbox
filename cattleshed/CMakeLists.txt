@@ -7,6 +7,8 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED
   COMPONENTS
     program_options)
+find_package(RT REQUIRED)
+find_package(Threads REQUIRED)
 
 # ---- cattleshed
 
@@ -16,10 +18,12 @@ add_executable(cattleshed
   src/quoted_printable.cc
   src/syslogstream.cc)
 set_target_properties(cattleshed PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
-target_compile_definitions(cattleshed PRIVATE SYSCONFDIR=${CMAKE_INSTALL_PREFIX}/etc)
+target_compile_definitions(cattleshed PRIVATE SYSCONFDIR="${CMAKE_INSTALL_PREFIX}/etc")
 target_link_libraries(cattleshed
   Boost::boost
-  Boost::program_options)
+  Boost::program_options
+  RT::RT
+  Threads::Threads)
 
 # ---- cattlegrid
 
