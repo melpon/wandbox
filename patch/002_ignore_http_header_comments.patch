@@ -1,0 +1,54 @@
+commit a3993c0d086fa7bfc14c8795ded41aa7212988ce
+Author: melpon <melt@e-ml.jp>
+Date:   Wed Jan 13 21:17:05 2016 +0900
+
+    ignore HTTP header comments.
+    
+    Connection timeout occured by CppCMS HTTP parser when HTTP Cookie header includes a bracket.
+    ```
+    curl -v -H 'Cookie: x=' http://localhost/  #OK
+    curl -v -H 'Cookie: x=(' http://localhost/  #fail
+    curl -v -H 'Cookie: x=()' http://localhost/  #OK
+    curl -v -H 'Cookie: x=(((((()' http://localhost/  #OK
+    curl -v -H 'Cookie: x=(((((()(' http://localhost/  #fail
+    ```
+    This parsing is for HTTP header comments.
+    But, a cookie header does not include HTTP header comments on RFC.
+    HTTP header comments may not parse so the parsing code is commented out.
+    
+    This commit is for https://github.com/melpon/wandbox/issues/174
+
+diff --git a/private/http_parser.h b/private/http_parser.h
+index 7e244e5..70dc783 100644
+--- a/private/http_parser.h
++++ b/private/http_parser.h
+@@ -123,10 +123,10 @@ public:
+ 				case '"':
+ 					state_=quote_expected;
+ 					break;
+-				case '(':
+-					state_=closing_bracket_expected;
+-					bracket_counter_++;
+-					break;
++				// case '(':
++				// 	state_=closing_bracket_expected;
++				// 	bracket_counter_++;
++				// 	break;
+ 				default:
+ 					state_=input_observed;
+ 				}
+@@ -162,10 +162,10 @@ public:
+ 				case '"':
+ 					state_=quote_expected;
+ 					break;
+-				case '(':
+-					state_=closing_bracket_expected;
+-					bracket_counter_++;
+-					break;
++				// case '(':
++				// 	state_=closing_bracket_expected;
++				// 	bracket_counter_++;
++				// 	break;
+ 				default:
+ 					state_=input_observed;
+ 				}
