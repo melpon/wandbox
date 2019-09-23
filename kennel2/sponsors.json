@@ -585,5 +585,9 @@
     , "url": ""
     , "due_date": "2020-08-27T23:59:59+09:00"
     }
+  , { "name": "イズカワタカノブ"
+    , "url": "https://twitter.com/soundkitchen"
+    , "due_date": "2020-09-24T23:59:59+09:00"
+    }
   ]
 }
