@@ -5,16 +5,17 @@ set -ex
 su - wandbox -c '
 set -ex
 
-cd wandbox/
-git pull
-git submodule update -i
+pushd wandbox
+  git pull
+  git submodule update -i
 
-cd kennel2
-git clean -xdqf .
-./autogen.sh
-./configure --prefix=/usr/local/kennel2 --with-cppcms=/usr/local/cppcms --with-cppdb=/usr/local/cppdb --with-sponsors=/usr/local/kennel2/etc/sponsors.json --with-googleanalytics=UA-56896607-3 --with-githubclient=f9d429d939d997e6b08e
-make
-cd ../
+  ./install_tools.sh
+
+  pushd kennel2
+    ./cmake.sh -DKENNEL_GOOGLEANALYTICS=UA-56896607-3 -DKENNEL_GITHUBCLIENT=f9d429d939d997e6b08e
+    make -C _build
+  popd
+popd
 '
 make -C ~wandbox/wandbox/kennel2 install
 systemctl stop kennel
