@@ -188,57 +188,35 @@ if [ $ICU_CHANGED -eq 1 -o ! -e $INSTALL_DIR/icu/lib/libicudata.a ]; then
 fi
 echo $ICU_VERSION > $ICU_VERSION_FILE
 
-# cppcms
-if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
-  rm -rf $BUILD_DIR/cppcms-source
-  git clone --branch v$CPPCMS_VERSION --depth 1 https://github.com/artyom-beilis/cppcms.git $BUILD_DIR/cppcms-source
+# pcre
+if [ $PCRE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/pcre/lib/libpcre.a ]; then
+  _URL=https://ftp.pcre.org/pub/pcre/pcre-$PCRE_VERSION.zip
+  _FILE=$BUILD_DIR/pcre-$PCRE_VERSION.zip
+  if [ ! -e $_FILE ]; then
+    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
+    cmake -P $BUILD_DIR/tmp.cmake
+    rm $BUILD_DIR/tmp.cmake
+  fi
 
-  PATCH_DIR=`pwd`/patch
-  # パッチの適用
-  pushd $BUILD_DIR/cppcms-source
-    patch -p1 < $PATCH_DIR/001_http_protocol.patch
-    patch -p1 < $PATCH_DIR/002_ignore_http_header_comments.patch
-    patch -p1 < $PATCH_DIR/003_cxx11_notest.patch
+  pushd $BUILD_DIR
+    rm -rf pcre-$PCRE_VERSION
+    cmake -E tar xf $_FILE
   popd
 
-  # ビルドとインストール
-  mkdir -p $BUILD_DIR/cppcms-build
-  pushd $BUILD_DIR/cppcms-build
-    cmake $BUILD_DIR/cppcms-source \
+  rm -rf $BUILD_DIR/pcre-build
+  mkdir -p $BUILD_DIR/pcre-build
+  pushd $BUILD_DIR/pcre-build
+    cmake $BUILD_DIR/pcre-$PCRE_VERSION \
       -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppcms \
-      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/zlib;$INSTALL_DIR/icu;$INSTALL_DIR/boringssl" \
-      -DDISABLE_SHARED=ON \
-      -DDISABLE_SCGI=ON \
-      -DDISABLE_TCPCACHE=ON \
-      -DDISABLE_GCRYPT=ON \
-      -DDISABLE_ICONV=ON
-    make
+      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/pcre \
+      -DPCRE_SUPPORT_UTF=ON \
+      -DPCRE_BUILD_PCREGREP=OFF \
+      -DPCRE_BUILD_TESTS=OFF
+    make -j4
     make install
   popd
 fi
-echo $CPPCMS_VERSION > $CPPCMS_VERSION_FILE
-
-# cppdb
-if [ $CPPDB_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppdb/lib/libcppdb.a ]; then
-  rm -rf $BUILD_DIR/cppdb-source
-  git clone --branch v$CPPDB_VERSION --depth 1 https://github.com/melpon/cppdb.git $BUILD_DIR/cppdb-source
-
-  # ビルドとインストール
-  mkdir -p $BUILD_DIR/cppdb-build
-  pushd $BUILD_DIR/cppdb-build
-    cmake $BUILD_DIR/cppdb-source \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppdb \
-      -DDISABLE_MYSQL=ON \
-      -DDISABLE_PQ=ON \
-      -DDISABLE_ODBC=ON \
-      -DSQLITE_BACKEND_INTERNAL=ON
-    make
-    make install
-  popd
-fi
-echo $CPPDB_VERSION > $CPPDB_VERSION_FILE
+echo $PCRE_VERSION > $PCRE_VERSION_FILE
 
 # Go
 if [ $GO_CHANGED -eq 1 -o ! -e $INSTALL_DIR/go/bin/go ]; then
@@ -310,36 +288,6 @@ if [ $BORINGSSL_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boringssl/lib/libcrypto.a ]; 
 fi
 echo $BORINGSSL_VERSION > $BORINGSSL_VERSION_FILE
 
-# pcre
-if [ $PCRE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/pcre/lib/libpcre.a ]; then
-  _URL=https://ftp.pcre.org/pub/pcre/pcre-$PCRE_VERSION.zip
-  _FILE=$BUILD_DIR/pcre-$PCRE_VERSION.zip
-  if [ ! -e $_FILE ]; then
-    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
-    cmake -P $BUILD_DIR/tmp.cmake
-    rm $BUILD_DIR/tmp.cmake
-  fi
-
-  pushd $BUILD_DIR
-    rm -rf pcre-$PCRE_VERSION
-    cmake -E tar xf $_FILE
-  popd
-
-  rm -rf $BUILD_DIR/pcre-build
-  mkdir -p $BUILD_DIR/pcre-build
-  pushd $BUILD_DIR/pcre-build
-    cmake $BUILD_DIR/pcre-$PCRE_VERSION \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/pcre \
-      -DPCRE_SUPPORT_UTF=ON \
-      -DPCRE_BUILD_PCREGREP=OFF \
-      -DPCRE_BUILD_TESTS=OFF
-    make -j4
-    make install
-  popd
-fi
-echo $PCRE_VERSION > $PCRE_VERSION_FILE
-
 # curl
 if [ $CURL_CHANGED -eq 1 -o ! -e $INSTALL_DIR/curl/lib/libcurl.a ]; then
   _VERSION_UNDERSCORE=${CURL_VERSION//./_}
@@ -395,3 +343,54 @@ if [ $SQLITE3_CHANGED -eq 1 -o ! -e $INSTALL_DIR/sqlite3/lib/libsqlite3.a ]; the
   popd
 fi
 echo $SQLITE3_VERSION > $SQLITE3_VERSION_FILE
+# cppcms
+if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
+  rm -rf $BUILD_DIR/cppcms-source
+  git clone --branch v$CPPCMS_VERSION --depth 1 https://github.com/artyom-beilis/cppcms.git $BUILD_DIR/cppcms-source
+
+  PATCH_DIR=`pwd`/patch
+  # パッチの適用
+  pushd $BUILD_DIR/cppcms-source
+    patch -p1 < $PATCH_DIR/001_http_protocol.patch
+    patch -p1 < $PATCH_DIR/002_ignore_http_header_comments.patch
+    patch -p1 < $PATCH_DIR/003_cxx11_notest.patch
+  popd
+
+  # ビルドとインストール
+  mkdir -p $BUILD_DIR/cppcms-build
+  pushd $BUILD_DIR/cppcms-build
+    cmake $BUILD_DIR/cppcms-source \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppcms \
+      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/zlib;$INSTALL_DIR/icu;$INSTALL_DIR/boringssl" \
+      -DDISABLE_SHARED=ON \
+      -DDISABLE_SCGI=ON \
+      -DDISABLE_TCPCACHE=ON \
+      -DDISABLE_GCRYPT=ON \
+      -DDISABLE_ICONV=ON
+    make
+    make install
+  popd
+fi
+echo $CPPCMS_VERSION > $CPPCMS_VERSION_FILE
+
+# cppdb
+if [ $CPPDB_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppdb/lib/libcppdb.a ]; then
+  rm -rf $BUILD_DIR/cppdb-source
+  git clone --branch v$CPPDB_VERSION --depth 1 https://github.com/melpon/cppdb.git $BUILD_DIR/cppdb-source
+
+  # ビルドとインストール
+  mkdir -p $BUILD_DIR/cppdb-build
+  pushd $BUILD_DIR/cppdb-build
+    cmake $BUILD_DIR/cppdb-source \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppdb \
+      -DDISABLE_MYSQL=ON \
+      -DDISABLE_PQ=ON \
+      -DDISABLE_ODBC=ON \
+      -DSQLITE_BACKEND_INTERNAL=ON
+    make
+    make install
+  popd
+fi
+echo $CPPDB_VERSION > $CPPDB_VERSION_FILE
