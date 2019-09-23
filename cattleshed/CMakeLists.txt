@@ -8,6 +8,7 @@ find_package(Boost REQUIRED
   COMPONENTS
     program_options)
 find_package(RT REQUIRED)
+find_package(CAP REQUIRED)
 find_package(Threads REQUIRED)
 
 # ---- cattleshed
@@ -32,7 +33,9 @@ add_executable(cattlegrid
 set_target_properties(cattlegrid PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
 target_link_libraries(cattlegrid
   Boost::boost
-  Boost::program_options)
+  Boost::program_options
+  CAP::CAP
+  Threads::Threads)
 
 # ---- prlimit
 
