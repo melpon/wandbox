@@ -17,7 +17,7 @@ pushd wandbox
   popd
 popd
 '
-make -C ~wandbox/wandbox/kennel2 install
+make -C ~wandbox/wandbox/kennel2/_build install
 systemctl stop kennel
 sleep 1
 systemctl start kennel
