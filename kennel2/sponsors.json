@@ -365,9 +365,9 @@
     , "url": "https://twitter.com/yamaken"
     , "due_date": "2018-03-25T23:59:59+09:00"
     }
-  , { "name": "まろ(@_marony)"
+  , { "name": "まろ"
     , "url": "https://twitter.com/_marony"
-    , "due_date": "2019-07-03T23:59:59+09:00"
+    , "due_date": "2020-12-01T23:59:59+09:00"
     }
   , { "name": "okdshin"
     , "url": ""
@@ -588,6 +588,10 @@
   , { "name": "イズカワタカノブ"
     , "url": "https://twitter.com/soundkitchen"
     , "due_date": "2020-09-24T23:59:59+09:00"
+    }
+  , { "name": "@tyottyoworks"
+    , "url": "https://twitter.com/tyottyoworks"
+    , "due_date": "2020-12-01T23:59:59+09:00"
     }
   ]
 }
