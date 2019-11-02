@@ -12,7 +12,7 @@ pushd wandbox
   ./install_tools.sh
 
   pushd kennel2
-    ./cmake.sh -DKENNEL_GOOGLEANALYTICS=UA-56896607-3 -DKENNEL_GITHUBCLIENT=f9d429d939d997e6b08e
+    ./cmake.sh -DKENNEL_GOOGLEANALYTICS=UA-56896607-3 -DKENNEL_GITHUBCLIENT=f9d429d939d997e6b08e -DCMAKE_INSTALL_PREFIX=/usr/local/kennel2
     make -C _build
   popd
 popd
