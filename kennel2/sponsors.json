@@ -307,7 +307,7 @@
     }
   , { "name": "takezoh"
     , "url": "https://twitter.com/takezoh_"
-    , "due_date": "2018-03-18T23:59:59+09:00"
+    , "due_date": "2020-11-30T23:59:59+09:00"
     }
   , { "name": "kyubuns"
     , "url": ""
@@ -591,6 +591,10 @@
     }
   , { "name": "@tyottyoworks"
     , "url": "https://twitter.com/tyottyoworks"
+    , "due_date": "2020-12-01T23:59:59+09:00"
+    }
+  , { "name": "___shanon"
+    , "url": ""
     , "due_date": "2020-12-01T23:59:59+09:00"
     }
   ]
