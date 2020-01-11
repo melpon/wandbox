@@ -9,6 +9,9 @@ find_package(ZLIB REQUIRED)
 find_package(CppCMS REQUIRED)
 find_package(CppDB REQUIRED)
 find_package(Threads REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(gRPC REQUIRED)
+find_package(Spdlog REQUIRED)
 
 # ---- 初期値
 
@@ -31,6 +34,28 @@ endif()
 if(NOT KENNEL_GITHUBCLIENT)
   set(KENNEL_GITHUBCLIENT "")
 endif()
+
+# --- cattleshed.pb.cc などの生成
+
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/proto")
+add_custom_command(
+  OUTPUT
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.cc"
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.cc"
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.h"
+  COMMAND $<TARGET_FILE:protobuf::protoc>
+  ARGS
+    --grpc_out "${CMAKE_CURRENT_BINARY_DIR}/proto"
+    --cpp_out "${CMAKE_CURRENT_BINARY_DIR}/proto"
+    -I "${CMAKE_CURRENT_SOURCE_DIR}/../proto"
+    --plugin=protoc-gen-grpc="$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../proto/cattleshed.proto"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../proto/cattleshed.proto")
+
+set(CATTLESHED_PROTO
+  "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.cc"
+  "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.cc")
 
 # ---- skin_kennel.cpp の生成
 
@@ -67,9 +92,13 @@ configure_file(${_KENNEL_JSON_IN} ${KENNEL_JSON} @ONLY)
 
 # ---- kennel 本体のビルド
 
-add_executable(kennel src/kennel.cpp ${SKIN_KENNEL})
+add_executable(kennel src/kennel.cpp ${SKIN_KENNEL} ${CATTLESHED_PROTO})
 set_target_properties(kennel PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
+target_include_directories(kennel PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
 target_link_libraries(kennel
+  protobuf::libprotobuf
+  gRPC::grpc++_unsecure
+  gRPC::grpc++
   CppCMS::CppCMS
   CppDB::CppDB
   CURL::libcurl
@@ -77,7 +106,8 @@ target_link_libraries(kennel
   OpenSSL::Crypto
   OpenSSL::SSL
   ZLIB::ZLIB
-  Threads::Threads)
+  Threads::Threads
+  Spdlog::Spdlog)
 
 # ---- インストール
 

@@ -13,6 +13,7 @@
 #include "permlink.h"
 #include "http_client.h"
 #include "../../cattleshed/src/syslogstream.cc"
+#include "cattleshed_client.h"
 
 namespace cppcms {
     template<>
@@ -32,6 +33,20 @@ namespace cppcms {
 class kennel : public cppcms::application {
 public:
     kennel(cppcms::service &srv) : cppcms::application(srv) {
+        {
+            auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+            CattleshedClientManager cm(channel, 1);
+            cattleshed::GetVersionRequest req;
+            auto client = cm.GetVersion(req, [](cattleshed::GetVersionResponse resp, grpc::Status status) {
+            });
+            auto client2 = cm.RunJob([](cattleshed::RunJobResponse resp) {
+            }, [](grpc::Status status) {
+            });
+            cattleshed::RunJobRequest req2;
+            client2->Write(req2);
+            client2->WritesDone();
+        }
+
         // static file serving is for debugging
         // use Apache, nginx and so on in production
         dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/)*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 4);
