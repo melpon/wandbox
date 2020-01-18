@@ -95,6 +95,13 @@ if [ ! -e $SPDLOG_VERSION_FILE -o "$SPDLOG_VERSION" != "`cat $SPDLOG_VERSION_FIL
   SPDLOG_CHANGED=1
 fi
 
+GGRPC_VERSION="48766d6"
+GGRPC_VERSION_FILE="$INSTALL_DIR/ggrpc.version"
+GGRPC_CHANGED=0
+if [ ! -e $GGRPC_VERSION_FILE -o "$GGRPC_VERSION" != "`cat $GGRPC_VERSION_FILE`" ]; then
+  GGRPC_CHANGED=1
+fi
+
 
 # gRPC のソース
 if [ ! -e $SOURCE_DIR/grpc/.git ]; then
@@ -299,6 +306,7 @@ if [ $ICU_CHANGED -eq 1 -o ! -e $INSTALL_DIR/icu/lib/libicudata.a ]; then
     cmake -E tar xf $_FILE
   popd
 
+  rm -rf $BUILD_DIR/icu-build
   mkdir $BUILD_DIR/icu-build
   pushd $BUILD_DIR/icu-build
     $SOURCE_DIR/icu/source/configure \
@@ -476,3 +484,13 @@ if [ $SPDLOG_CHANGED -eq 1 -o  ! -e $INSTALL_DIR/spdlog/include ]; then
   git clone --branch v$SPDLOG_VERSION --depth 1 https://github.com/gabime/spdlog.git $INSTALL_DIR/spdlog
 fi
 echo $SPDLOG_VERSION > $SPDLOG_VERSION_FILE
+
+# ggrpc
+if [ $GGRPC_CHANGED -eq 1 -o  ! -e $INSTALL_DIR/ggrpc/include ]; then
+  rm -rf $INSTALL_DIR/ggrpc
+  git clone https://github.com/melpon/ggrpc.git $INSTALL_DIR/ggrpc
+  pushd $INSTALL_DIR/ggrpc
+    git reset --hard $GGRPC_VERSION
+  popd
+fi
+echo $GGRPC_VERSION > $GGRPC_VERSION_FILE

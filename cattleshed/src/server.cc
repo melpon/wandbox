@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+// boost
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -20,16 +21,22 @@
 #include <boost/system/system_error.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-#include <time.h>
+// ggrpc
+#include <ggrpc/server.h>
+
+#include "quoted_printable.hpp"
 #include <locale.h>
+#include <time.h>
 
 #include <aio.h>
 #include <syslog.h>
 #include <sys/eventfd.h>
 
-#include "quoted_printable.hpp"
+#include "cattleshed.grpc.pb.h"
+#include "cattleshed.pb.h"
 #include "load_config.hpp"
 #include "posixapi.hpp"
+#include "quoted_printable.hpp"
 #include "syslogstream.hpp"
 #include "yield.hpp"
 
@@ -846,7 +853,60 @@ namespace wandbox {
 		std::shared_ptr<counting_semaphore> sem;
 	};
 
+        class GetVersionHandler : public ggrpc::ServerResponseWriterHandler<
+                                      cattleshed::GetVersionResponse,
+                                      cattleshed::GetVersionRequest> {
+          cattleshed::Cattleshed::AsyncService *service_;
+
+        public:
+          GetVersionHandler(cattleshed::Cattleshed::AsyncService *service)
+              : service_(service) {}
+          void OnRequest(
+              grpc::ServerContext *context,
+              cattleshed::GetVersionRequest *request,
+              grpc::ServerAsyncResponseWriter<cattleshed::GetVersionResponse>
+                  *response,
+              grpc::ServerCompletionQueue *cq, void *tag) override {
+            service_->RequestGetVersion(context, request, response, cq, cq,
+                                        tag);
+          }
+          void OnAccept(cattleshed::GetVersionRequest request) override {
+            SPDLOG_TRACE("received GetVersionRequest: {}",
+                         request.DebugString());
+            cattleshed::GetVersionResponse resp;
+            GetContext()->Finish(resp, grpc::Status::OK);
+          }
+        };
+
+        class CattleshedServer {
+          cattleshed::Cattleshed::AsyncService service_;
+          std::unique_ptr<ggrpc::Server> server_;
+
+        public:
+          void Start(std::string address, int threads) {
+            grpc::ServerBuilder builder;
+            builder.AddListeningPort(address,
+                                     grpc::InsecureServerCredentials());
+            builder.RegisterService(&service_);
+
+            std::vector<std::unique_ptr<grpc::ServerCompletionQueue>> cqs;
+            for (int i = 0; i < threads; i++) {
+              cqs.push_back(builder.AddCompletionQueue());
+            }
+
+            server_ = std::unique_ptr<ggrpc::Server>(
+                new ggrpc::Server(builder.BuildAndStart(), std::move(cqs)));
+
+            SPDLOG_INFO("gRPC Server listening on {}", address);
+
+            // ハンドラの登録
+            server_->AddResponseWriterHandler<GetVersionHandler>(&service_);
+
+            server_->Start();
+          }
+        };
 }
+
 int main(int argc, char **argv) try {
 	using namespace wandbox;
 
@@ -898,9 +958,13 @@ int main(int argc, char **argv) try {
 			return 1;
 		}
 	}
-	auto aio = std::make_shared<asio::io_service>();
-	listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);
-	s();
+
+        std::unique_ptr<CattleshedServer> server(new CattleshedServer());
+        server->Start("0.0.0.0:50051", 4);
+
+        auto aio = std::make_shared<asio::io_service>();
+        listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);
+        s();
 	aio->run();
 	return 0;
 } catch (std::exception &e) {

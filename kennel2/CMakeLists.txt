@@ -12,6 +12,7 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 find_package(Spdlog REQUIRED)
+find_package(Ggrpc REQUIRED)
 
 # ---- 初期値
 
@@ -107,7 +108,8 @@ target_link_libraries(kennel
   OpenSSL::SSL
   ZLIB::ZLIB
   Threads::Threads
-  Spdlog::Spdlog)
+  Spdlog::Spdlog
+  Ggrpc::Ggrpc)
 
 # ---- インストール
 

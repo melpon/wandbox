@@ -37,11 +37,14 @@ public:
             auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
             CattleshedClientManager cm(channel, 1);
             cattleshed::GetVersionRequest req;
-            auto client = cm.GetVersion(req, [](cattleshed::GetVersionResponse resp, grpc::Status status) {
-            });
-            auto client2 = cm.RunJob([](cattleshed::RunJobResponse resp) {
-            }, [](grpc::Status status) {
-            });
+            auto client = cm.GetVersion(
+                req,
+                [](cattleshed::GetVersionResponse resp, grpc::Status status) {},
+                [](ggrpc::ClientResponseReaderError error) {});
+            auto client2 =
+                cm.RunJob([](cattleshed::RunJobResponse resp) {},
+                          [](grpc::Status status) {},
+                          [](ggrpc::ClientReaderWriterError error) {});
             cattleshed::RunJobRequest req2;
             client2->Write(req2);
             client2->WritesDone();
