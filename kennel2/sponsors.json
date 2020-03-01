@@ -599,11 +599,11 @@
     }
   , { "name": "わたやん"
     , "url": ""
-    , "due_date": "2021-02-29T23:59:59+09:00"
+    , "due_date": "2021-03-01T23:59:59+09:00"
     }
   , { "name": "@KorekaraSEDB"
     , "url": "https://twitter.com/KorekaraSEDB"
-    , "due_date": "2021-02-29T23:59:59+09:00"
+    , "due_date": "2021-03-01T23:59:59+09:00"
     }
   ]
 }
