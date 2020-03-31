@@ -183,7 +183,7 @@
     }
   , { "name": "@srz_zumix"
     , "url": "https://twitter.com/srz_zumix"
-    , "due_date": "2020-03-25T23:59:59+09:00"
+    , "due_date": "2021-04-01T23:59:59+09:00"
     }
   , { "name": "D"
     , "url": ""
@@ -369,9 +369,9 @@
     , "url": "https://twitter.com/_marony"
     , "due_date": "2020-12-01T23:59:59+09:00"
     }
-  , { "name": "okdshin"
-    , "url": ""
-    , "due_date": "2018-03-25T23:59:59+09:00"
+  , { "name": "@okdshin"
+    , "url": "https://twitter.com/okdshin"
+    , "due_date": "2021-04-01T23:59:59+09:00"
     }
   , { "name": "@EzoeRyou"
     , "url": "https://twitter.com/EzoeRyou"
@@ -491,7 +491,7 @@
     }
   , { "name": "@mumumu"
     , "url": "https://twitter.com/mumumu"
-    , "due_date": "2019-07-11T23:59:59+09:00"
+    , "due_date": "2021-04-01T23:59:59+09:00"
     }
   , { "name": "堀尾典孝"
     , "url": "https://twitter.com/holyshared"
@@ -549,10 +549,6 @@
     , "url": "https://mastodon.social/@Freezer"
     , "due_date": "2020-04-04T23:59:59+09:00"
     }
-  , { "name": "@m_akihiro"
-    , "url": "https://twitter.com/m_akihiro"
-    , "due_date": "2020-04-09T23:59:59+09:00"
-    }
   , { "name": "松崎啓治"
     , "url": ""
     , "due_date": "2020-05-01T23:59:59+09:00"
@@ -604,6 +600,22 @@
   , { "name": "@KorekaraSEDB"
     , "url": "https://twitter.com/KorekaraSEDB"
     , "due_date": "2021-03-25T23:59:59+09:00"
+    }
+  , { "name": "@kariya_mitsuru"
+    , "url": "https://twitter.com/kariya_mitsuru"
+    , "due_date": "2021-04-01T23:59:59+09:00"
+    }
+  , { "name": "@ciniml"
+    , "url": "https://twitter.com/ciniml"
+    , "due_date": "2021-04-01T23:59:59+09:00"
+    }
+  , { "name": "@beam2d"
+    , "url": "https://twitter.com/beam2d"
+    , "due_date": "2021-04-01T23:59:59+09:00"
+    }
+  , { "name": "@grafi_tt"
+    , "url": "https://twitter.com/grafi_tt"
+    , "due_date": "2021-04-01T23:59:59+09:00"
     }
   ]
 }
