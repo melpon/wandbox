@@ -21,9 +21,6 @@
 #include <boost/system/system_error.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-// ggrpc
-#include <ggrpc/server.h>
-
 #include "quoted_printable.hpp"
 #include <locale.h>
 #include <time.h>
@@ -853,58 +850,58 @@ namespace wandbox {
 		std::shared_ptr<counting_semaphore> sem;
 	};
 
-        class GetVersionHandler : public ggrpc::ServerResponseWriterHandler<
-                                      cattleshed::GetVersionResponse,
-                                      cattleshed::GetVersionRequest> {
-          cattleshed::Cattleshed::AsyncService *service_;
+        // class GetVersionHandler : public ggrpc::ServerResponseWriterHandler<
+        //                              cattleshed::GetVersionResponse,
+        //                              cattleshed::GetVersionRequest> {
+        //  cattleshed::Cattleshed::AsyncService *service_;
 
-        public:
-          GetVersionHandler(cattleshed::Cattleshed::AsyncService *service)
-              : service_(service) {}
-          void OnRequest(
-              grpc::ServerContext *context,
-              cattleshed::GetVersionRequest *request,
-              grpc::ServerAsyncResponseWriter<cattleshed::GetVersionResponse>
-                  *response,
-              grpc::ServerCompletionQueue *cq, void *tag) override {
-            service_->RequestGetVersion(context, request, response, cq, cq,
-                                        tag);
-          }
-          void OnAccept(cattleshed::GetVersionRequest request) override {
-            SPDLOG_TRACE("received GetVersionRequest: {}",
-                         request.DebugString());
-            cattleshed::GetVersionResponse resp;
-            GetContext()->Finish(resp, grpc::Status::OK);
-          }
-        };
+        // public:
+        //  GetVersionHandler(cattleshed::Cattleshed::AsyncService *service)
+        //      : service_(service) {}
+        //  void OnRequest(
+        //      grpc::ServerContext *context,
+        //      cattleshed::GetVersionRequest *request,
+        //      grpc::ServerAsyncResponseWriter<cattleshed::GetVersionResponse>
+        //          *response,
+        //      grpc::ServerCompletionQueue *cq, void *tag) override {
+        //    service_->RequestGetVersion(context, request, response, cq, cq,
+        //                                tag);
+        //  }
+        //  void OnAccept(cattleshed::GetVersionRequest request) override {
+        //    SPDLOG_TRACE("received GetVersionRequest: {}",
+        //                 request.DebugString());
+        //    cattleshed::GetVersionResponse resp;
+        //    GetContext()->Finish(resp, grpc::Status::OK);
+        //  }
+        //};
 
-        class CattleshedServer {
-          cattleshed::Cattleshed::AsyncService service_;
-          std::unique_ptr<ggrpc::Server> server_;
+        // class CattleshedServer {
+        //  cattleshed::Cattleshed::AsyncService service_;
+        //  std::unique_ptr<ggrpc::Server> server_;
 
-        public:
-          void Start(std::string address, int threads) {
-            grpc::ServerBuilder builder;
-            builder.AddListeningPort(address,
-                                     grpc::InsecureServerCredentials());
-            builder.RegisterService(&service_);
+        // public:
+        //  void Start(std::string address, int threads) {
+        //    grpc::ServerBuilder builder;
+        //    builder.AddListeningPort(address,
+        //                             grpc::InsecureServerCredentials());
+        //    builder.RegisterService(&service_);
 
-            std::vector<std::unique_ptr<grpc::ServerCompletionQueue>> cqs;
-            for (int i = 0; i < threads; i++) {
-              cqs.push_back(builder.AddCompletionQueue());
-            }
+        //    std::vector<std::unique_ptr<grpc::ServerCompletionQueue>> cqs;
+        //    for (int i = 0; i < threads; i++) {
+        //      cqs.push_back(builder.AddCompletionQueue());
+        //    }
 
-            server_ = std::unique_ptr<ggrpc::Server>(
-                new ggrpc::Server(builder.BuildAndStart(), std::move(cqs)));
+        //    server_ = std::unique_ptr<ggrpc::Server>(
+        //        new ggrpc::Server(builder.BuildAndStart(), std::move(cqs)));
 
-            SPDLOG_INFO("gRPC Server listening on {}", address);
+        //    SPDLOG_INFO("gRPC Server listening on {}", address);
 
-            // ハンドラの登録
-            server_->AddResponseWriterHandler<GetVersionHandler>(&service_);
+        //    // ハンドラの登録
+        //    server_->AddResponseWriterHandler<GetVersionHandler>(&service_);
 
-            server_->Start();
-          }
-        };
+        //    server_->Start();
+        //  }
+        //};
 }
 
 int main(int argc, char **argv) try {
@@ -959,8 +956,8 @@ int main(int argc, char **argv) try {
 		}
 	}
 
-        std::unique_ptr<CattleshedServer> server(new CattleshedServer());
-        server->Start("0.0.0.0:50051", 4);
+        // std::unique_ptr<CattleshedServer> server(new CattleshedServer());
+        // server->Start("0.0.0.0:50051", 4);
 
         auto aio = std::make_shared<asio::io_service>();
         listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);

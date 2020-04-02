@@ -12,7 +12,6 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 find_package(Spdlog REQUIRED)
-find_package(Ggrpc REQUIRED)
 
 # ---- 初期値
 
@@ -91,6 +90,22 @@ set(_KENNEL_JSON_IN ${PROJECT_SOURCE_DIR}/kennel.json.in)
 
 configure_file(${_KENNEL_JSON_IN} ${KENNEL_JSON} @ONLY)
 
+# --- 便利マクロ定義
+
+macro(set_sanitizer target)
+  # tsan
+  if (ENABLE_TSAN)
+    target_compile_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
+    target_link_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
+  endif()
+
+  # asan
+  if (ENABLE_ASAN)
+    target_compile_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
+    target_link_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
+  endif()
+endmacro()
+
 # ---- kennel 本体のビルド
 
 add_executable(kennel src/kennel.cpp ${SKIN_KENNEL} ${CATTLESHED_PROTO})
@@ -98,18 +113,16 @@ set_target_properties(kennel PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
 target_include_directories(kennel PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
 target_link_libraries(kennel
   protobuf::libprotobuf
-  gRPC::grpc++_unsecure
   gRPC::grpc++
   CppCMS::CppCMS
   CppDB::CppDB
   CURL::libcurl
   SQLite::SQLite3
-  OpenSSL::Crypto
-  OpenSSL::SSL
   ZLIB::ZLIB
   Threads::Threads
-  Spdlog::Spdlog
-  Ggrpc::Ggrpc)
+  Spdlog::Spdlog)
+
+set_sanitizer(kennel)
 
 # ---- インストール
 

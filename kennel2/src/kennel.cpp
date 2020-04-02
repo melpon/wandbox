@@ -13,7 +13,7 @@
 #include "permlink.h"
 #include "http_client.h"
 #include "../../cattleshed/src/syslogstream.cc"
-#include "cattleshed_client.h"
+//#include "cattleshed_client.h"
 
 namespace cppcms {
     template<>
@@ -33,68 +33,80 @@ namespace cppcms {
 class kennel : public cppcms::application {
 public:
     kennel(cppcms::service &srv) : cppcms::application(srv) {
-        {
-            auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
-            CattleshedClientManager cm(channel, 1);
-            cattleshed::GetVersionRequest req;
-            auto client = cm.GetVersion(
-                req,
-                [](cattleshed::GetVersionResponse resp, grpc::Status status) {},
-                [](ggrpc::ClientResponseReaderError error) {});
-            auto client2 =
-                cm.RunJob([](cattleshed::RunJobResponse resp) {},
-                          [](grpc::Status status) {},
-                          [](ggrpc::ClientReaderWriterError error) {});
-            cattleshed::RunJobRequest req2;
-            client2->Write(req2);
-            client2->WritesDone();
-        }
+      //{
+      //    auto channel = grpc::CreateChannel("localhost:50051",
+      //    grpc::InsecureChannelCredentials()); CattleshedClientManager
+      //    cm(channel, 1); cattleshed::GetVersionRequest req; auto client =
+      //    cm.GetVersion(
+      //        req,
+      //        [](cattleshed::GetVersionResponse resp, grpc::Status status) {},
+      //        [](ggrpc::ClientResponseReaderError error) {});
+      //    auto client2 =
+      //        cm.RunJob([](cattleshed::RunJobResponse resp) {},
+      //                  [](grpc::Status status) {},
+      //                  [](ggrpc::ClientReaderWriterError error) {});
+      //    cattleshed::RunJobRequest req2;
+      //    client2->Write(req2);
+      //    client2->WritesDone();
+      //}
 
-        // static file serving is for debugging
-        // use Apache, nginx and so on in production
-        dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/)*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 4);
-        dispatcher().assign("/static/(js/jquery.cookie.(js))", &kennel::serve_file, this, 1, 2);
-        dispatcher().assign("/static/(js/jquery.url.(js))", &kennel::serve_file, this, 1, 2);
-        mapper().assign("static", "/static");
+      // static file serving is for debugging
+      // use Apache, nginx and so on in production
+      dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/"
+                          ")*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))",
+                          &kennel::serve_file, this, 1, 4);
+      dispatcher().assign("/static/(js/jquery.cookie.(js))",
+                          &kennel::serve_file, this, 1, 2);
+      dispatcher().assign("/static/(js/jquery.url.(js))", &kennel::serve_file,
+                          this, 1, 2);
+      mapper().assign("static", "/static");
 
-        dispatcher().assign("/compile/?", &kennel::compile, this);
-        mapper().assign("compile", "/compile");
+      dispatcher().assign("/compile/?", &kennel::compile, this);
+      mapper().assign("compile", "/compile");
 
-        dispatcher().assign("/permlink/?", &kennel::post_permlink, this);
-        mapper().assign("permlink", "/permlink");
+      dispatcher().assign("/permlink/?", &kennel::post_permlink, this);
+      mapper().assign("permlink", "/permlink");
 
-        dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink, this, 1);
-        mapper().assign("get-permlink", "/permlink/{1}");
+      dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink,
+                          this, 1);
+      mapper().assign("get-permlink", "/permlink/{1}");
 
-        dispatcher().assign("/login/github/callback", &kennel::get_github_callback, this);
+      dispatcher().assign("/login/github/callback",
+                          &kennel::get_github_callback, this);
 
-        dispatcher().assign("/api/user.json", &kennel::api_user, this);
-        dispatcher().assign("/api/list.json", &kennel::api_list, this);
-        dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
-        dispatcher().assign("/api/compile.ndjson", &kennel::api_compile_ndjson, this);
-        dispatcher().assign("/api/permlink/?", &kennel::api_post_permlink, this);
-        dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
-        dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this, 1);
-        mapper().assign("api-template", "/api/template/");
+      dispatcher().assign("/api/user.json", &kennel::api_user, this);
+      dispatcher().assign("/api/list.json", &kennel::api_list, this);
+      dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
+      dispatcher().assign("/api/compile.ndjson", &kennel::api_compile_ndjson,
+                          this);
+      dispatcher().assign("/api/permlink/?", &kennel::api_post_permlink, this);
+      dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?",
+                          &kennel::api_permlink, this, 1);
+      dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this,
+                          1);
+      mapper().assign("api-template", "/api/template/");
 
-        dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this, 1);
-        mapper().assign("nojs-compile", "/nojs/{1}/compile");
-        dispatcher().assign("/nojs/(.+?)/permlink/([a-zA-Z0-9]+)/?", &kennel::nojs_get_permlink, this, 1, 2);
-        mapper().assign("nojs-get-permlink", "/nojs/{1}/permlink/{2}");
-        dispatcher().assign("/nojs/([a-zA-Z0-9_\\-\\.]+)/?", &kennel::nojs_root, this, 1);
-        mapper().assign("nojs-root", "/nojs/{1}");
-        dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
-        mapper().assign("nojs-list", "/nojs");
+      dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this,
+                          1);
+      mapper().assign("nojs-compile", "/nojs/{1}/compile");
+      dispatcher().assign("/nojs/(.+?)/permlink/([a-zA-Z0-9]+)/?",
+                          &kennel::nojs_get_permlink, this, 1, 2);
+      mapper().assign("nojs-get-permlink", "/nojs/{1}/permlink/{2}");
+      dispatcher().assign("/nojs/([a-zA-Z0-9_\\-\\.]+)/?", &kennel::nojs_root,
+                          this, 1);
+      mapper().assign("nojs-root", "/nojs/{1}");
+      dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
+      mapper().assign("nojs-list", "/nojs");
 
-        dispatcher().assign("/signout/?", &kennel::signout, this);
-        mapper().assign("signout", "/signout");
+      dispatcher().assign("/signout/?", &kennel::signout, this);
+      mapper().assign("signout", "/signout");
 
-        dispatcher().assign("/user/(.+?)/?", &kennel::user, this, 1);
-        mapper().assign("user", "/user/{1}");
+      dispatcher().assign("/user/(.+?)/?", &kennel::user, this, 1);
+      mapper().assign("user", "/user/{1}");
 
-        dispatcher().assign("/?", &kennel::root, this);
-        if (srv.settings()["application"]["map_root"].str().empty()) {
-            mapper().assign("root", "/");
+      dispatcher().assign("/?", &kennel::root, this);
+      if (srv.settings()["application"]["map_root"].str().empty()) {
+        mapper().assign("root", "/");
         } else {
             mapper().assign("root", "");
         }

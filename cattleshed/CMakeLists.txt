@@ -10,9 +10,9 @@ find_package(Boost REQUIRED
 find_package(RT REQUIRED)
 find_package(CAP REQUIRED)
 find_package(Threads REQUIRED)
+find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 find_package(Spdlog REQUIRED)
-find_package(Ggrpc REQUIRED)
 
 # ---- 初期値
 
@@ -62,6 +62,22 @@ set(CATTLESHED_PROTO
   "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.cc"
   "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.cc")
 
+# --- 便利マクロ定義
+
+macro(set_sanitizer target)
+  # tsan
+  if (ENABLE_TSAN)
+    target_compile_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
+    target_link_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
+  endif()
+
+  # asan
+  if (ENABLE_ASAN)
+    target_compile_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
+    target_link_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
+  endif()
+endmacro()
+
 # ---- cattleshed
 
 add_executable(cattleshed
@@ -78,10 +94,10 @@ target_link_libraries(cattleshed
   Boost::program_options
   RT::RT
   Threads::Threads
-  gRPC::grpc++_unsecure
   gRPC::grpc++
-  Ggrpc::Ggrpc
   Spdlog::Spdlog)
+
+set_sanitizer(cattleshed)
 
 # ---- cattlegrid
 
@@ -94,11 +110,15 @@ target_link_libraries(cattlegrid
   CAP::CAP
   Threads::Threads)
 
+set_sanitizer(cattlegrid)
+
 # ---- prlimit
 
 add_executable(prlimit
   src/prlimit.cc)
 set_target_properties(prlimit PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
+
+set_sanitizer(prlimit)
 
 # ---- 静的ファイルの生成
 

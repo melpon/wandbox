@@ -10,14 +10,14 @@ mkdir -p $SOURCE_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $INSTALL_DIR
 
-CMAKE_VERSION="3.16.2"
+CMAKE_VERSION="3.17.0"
 CMAKE_VERSION_FILE="$INSTALL_DIR/cmake.version"
 CMAKE_CHANGED=0
 if [ ! -e $CMAKE_VERSION_FILE -o "$CMAKE_VERSION" != "`cat $CMAKE_VERSION_FILE`" ]; then
   CMAKE_CHANGED=1
 fi
 
-BOOST_VERSION="1.71.0"
+BOOST_VERSION="1.72.0"
 BOOST_VERSION_FILE="$INSTALL_DIR/boost.version"
 BOOST_CHANGED=0
 if [ ! -e $BOOST_VERSION_FILE -o "$BOOST_VERSION" != "`cat $BOOST_VERSION_FILE`" ]; then
@@ -45,14 +45,7 @@ if [ ! -e $CPPDB_VERSION_FILE -o "$CPPDB_VERSION" != "`cat $CPPDB_VERSION_FILE`"
   CPPDB_CHANGED=1
 fi
 
-GO_VERSION="1.13"
-GO_VERSION_FILE="$INSTALL_DIR/go.version"
-GO_CHANGED=0
-if [ ! -e $GO_VERSION_FILE -o "$GO_VERSION" != "`cat $GO_VERSION_FILE`" ]; then
-  GO_CHANGED=1
-fi
-
-GRPC_VERSION="1.26.0"
+GRPC_VERSION="1.28.0"
 GRPC_VERSION_FILE="$INSTALL_DIR/grpc.version"
 GRPC_CHANGED=0
 if [ ! -e $GRPC_VERSION_FILE -o "$GRPC_VERSION" != "`cat $GRPC_VERSION_FILE`" ]; then
@@ -95,13 +88,17 @@ if [ ! -e $SPDLOG_VERSION_FILE -o "$SPDLOG_VERSION" != "`cat $SPDLOG_VERSION_FIL
   SPDLOG_CHANGED=1
 fi
 
-GGRPC_VERSION="48766d6"
-GGRPC_VERSION_FILE="$INSTALL_DIR/ggrpc.version"
-GGRPC_CHANGED=0
-if [ ! -e $GGRPC_VERSION_FILE -o "$GGRPC_VERSION" != "`cat $GGRPC_VERSION_FILE`" ]; then
-  GGRPC_CHANGED=1
+if [ -z "$JOBS" ]; then
+  # Linux
+  JOBS=`nproc 2>/dev/null`
+  if [ -z "$JOBS" ]; then
+    # macOS
+    JOBS=`sysctl -n hw.logicalcpu_max 2>/dev/null`
+    if [ -z "$JOBS" ]; then
+      JOBS=1
+    fi
+  fi
 fi
-
 
 # gRPC のソース
 if [ ! -e $SOURCE_DIR/grpc/.git ]; then
@@ -135,130 +132,47 @@ echo $CMAKE_VERSION > $CMAKE_VERSION_FILE
 
 export PATH=$INSTALL_DIR/cmake/bin:$PATH
 
-# Go
-if [ $GO_CHANGED -eq 1 -o ! -e $INSTALL_DIR/go/bin/go ]; then
-  # Bootstrap
-  _URL=https://dl.google.com/go/go1.4-bootstrap-20171003.tar.gz
-  _FILE=$SOURCE_DIR/go1.4-bootstrap-20171003.tar.gz
-  if [ ! -e $_FILE ]; then
-    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
-    cmake -P $BUILD_DIR/tmp.cmake
-    rm $BUILD_DIR/tmp.cmake
-  fi
-
-  pushd $BUILD_DIR
-    rm -rf go
-    rm -rf go-bootstrap
-    cmake -E tar xf $_FILE
-    mv go go-bootstrap
-  popd
-
-  pushd $BUILD_DIR/go-bootstrap/src
-    CGO_ENABLED=0 ./make.bash
-  popd
-
-  # 本体
-  _URL=https://github.com/golang/go/archive/go$GO_VERSION.tar.gz
-  _FILE=$SOURCE_DIR/go$GO_VERSION.tar.gz
-  if [ ! -e $_FILE ]; then
-    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
-    cmake -P $BUILD_DIR/tmp.cmake
-    rm $BUILD_DIR/tmp.cmake
-  fi
-
-  pushd $SOURCE_DIR
-    rm -rf go-go$GO_VERSION
-    rm -rf $INSTALL_DIR/go
-    cmake -E tar xf $_FILE
-    mv go-go$GO_VERSION $INSTALL_DIR/go
-  popd
-
-  pushd $INSTALL_DIR/go/src
-    GOROOT_BOOTSTRAP=$BUILD_DIR/go-bootstrap ./make.bash
-  popd
-fi
-echo $GO_VERSION > $GO_VERSION_FILE
-
-# boringssl (cmake)
-if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boringssl/lib/libssl.a ]; then
-  mkdir -p $BUILD_DIR/boringssl-build
-  pushd $BUILD_DIR/boringssl-build
-    cmake $SOURCE_DIR/grpc/third_party/boringssl \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/boringssl \
-      -DGO_EXECUTABLE=$INSTALL_DIR/go/bin/go
-    make -j4
-    # make install はインストールするものが無いって言われるので
-    # 手動でインストールする
-    mkdir -p $INSTALL_DIR/boringssl/lib
-    cp ssl/libssl.a crypto/libcrypto.a $INSTALL_DIR/boringssl/lib
-    mkdir -p $INSTALL_DIR/boringssl/include
-    rm -rf $INSTALL_DIR/boringssl/include/openssl
-    cp -r $SOURCE_DIR/grpc/third_party/boringssl/include/openssl $INSTALL_DIR/boringssl/include/openssl
-  popd
-fi
-
-# zlib (pkgconfig)
-if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/zlib/lib/libz.a ]; then
-  rm -rf $BUILD_DIR/zlib-build
-  mkdir -p $BUILD_DIR/zlib-build
-  pushd $BUILD_DIR/zlib-build
-    $SOURCE_DIR/grpc/third_party/zlib/configure --prefix=$INSTALL_DIR/zlib --static
-    make -j4
-    make install
-    make clean
-  popd
-fi
-
-# cares (cmake)
-if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cares/lib/libcares.a ]; then
-  rm -rf $BUILD_DIR/cares-build
-  mkdir -p $BUILD_DIR/cares-build
-  pushd $BUILD_DIR/cares-build
-    cmake $SOURCE_DIR/grpc/third_party/cares/cares \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cares \
-      -DCARES_STATIC=ON \
-      -DCARES_SHARED=OFF
-    make -j4
-    make install
-  popd
-fi
-
-# protobuf (cmake)
-if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/protobuf/lib/libprotobuf.a ]; then
-  rm -rf $BUILD_DIR/protobuf-build
-  mkdir -p $BUILD_DIR/protobuf-build
-  pushd $BUILD_DIR/protobuf-build
-    cmake $SOURCE_DIR/grpc/third_party/protobuf/cmake \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/protobuf \
-      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/zlib" \
-      -Dprotobuf_BUILD_TESTS=OFF
-    make -j4
-    make install
-  popd
-fi
-
 # grpc (cmake)
 if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; then
-  rm -rf $BUILD_DIR/grpc-build
-  mkdir -p $BUILD_DIR/grpc-build
-  pushd $BUILD_DIR/grpc-build
-    cmake $SOURCE_DIR/grpc \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/grpc \
-      -DgRPC_ZLIB_PROVIDER=package \
-      -DgRPC_CARES_PROVIDER=package \
-      -DgRPC_PROTOBUF_PROVIDER=package \
-      -DgRPC_SSL_PROVIDER=package \
-      -DgRPC_BUILD_CSHARP_EXT=OFF \
-      -DOPENSSL_ROOT_DIR=$INSTALL_DIR/boringssl \
-      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/cares;$INSTALL_DIR/protobuf;$INSTALL_DIR/zlib" \
-      -DBENCHMARK_ENABLE_TESTING=0
-    make -j4
-    make install
-  popd
+  for buildtype in release tsan asan; do
+    case "$buildtype" in
+      "release" )
+        _POSTFIX=""
+        _OPTS="
+          -DCMAKE_BUILD_TYPE=Release \
+        "
+        ;;
+      "tsan" )
+        _POSTFIX="-tsan"
+        _OPTS="
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_FLAGS="-fsanitize=thread" \
+          -DCMAKE_CXX_FLAGS="-fsanitize=thread" \
+        "
+        ;;
+      "asan" )
+        _POSTFIX="-asan"
+        _OPTS="
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_FLAGS="-fsanitize=address" \
+          -DCMAKE_CXX_FLAGS="-fsanitize=address" \
+        "
+        ;;
+    esac
+
+    rm -rf $BUILD_DIR/grpc-build$_POSTFIX
+    mkdir -p $BUILD_DIR/grpc-build$_POSTFIX
+    pushd $BUILD_DIR/grpc-build$_POSTFIX
+      cmake $SOURCE_DIR/grpc \
+        -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/grpc$_POSTFIX \
+        -DgRPC_BUILD_CSHARP_EXT=OFF \
+        $_OPTS
+      make -j$JOBS
+      make install
+      # boringssl のヘッダーも入れておく
+      cp -r $SOURCE_DIR/grpc/third_party/boringssl-with-bazel/src/include/openssl $INSTALL_DIR/grpc/include/openssl
+    popd
+  done
 fi
 echo $GRPC_VERSION > $GRPC_VERSION_FILE
 
@@ -315,7 +229,7 @@ if [ $ICU_CHANGED -eq 1 -o ! -e $INSTALL_DIR/icu/lib/libicudata.a ]; then
       --disable-samples \
       --disable-shared \
       --enable-static
-    make -j4
+    make -j$JOBS
     make install
   popd
 fi
@@ -345,7 +259,7 @@ if [ $PCRE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/pcre/lib/libpcre.a ]; then
       -DPCRE_SUPPORT_UTF=ON \
       -DPCRE_BUILD_PCREGREP=OFF \
       -DPCRE_BUILD_TESTS=OFF
-    make -j4
+    make -j$JOBS
     make install
   popd
 fi
@@ -374,10 +288,10 @@ if [ $CURL_CHANGED -eq 1 -o ! -e $INSTALL_DIR/curl/lib/libcurl.a ]; then
       --prefix=$INSTALL_DIR/curl \
       --disable-shared \
       --disable-ldap \
-      --with-ssl=$INSTALL_DIR/boringssl \
-      --with-zlib=$INSTALL_DIR/zlib \
+      --with-ssl=$INSTALL_DIR/grpc \
+      --with-zlib=$INSTALL_DIR/grpc \
       --without-librtmp
-    make -j4
+    make -j$JOBS
     make install
   popd
 fi
@@ -405,7 +319,7 @@ if [ $SQLITE3_CHANGED -eq 1 -o ! -e $INSTALL_DIR/sqlite3/lib/libsqlite3.a ]; the
       --prefix=$INSTALL_DIR/sqlite3 \
       --disable-shared \
       --enable-static
-    make -j4
+    make -j$JOBS
     make install
   popd
 fi
@@ -430,7 +344,7 @@ if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
     cmake $SOURCE_DIR/cppcms \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppcms \
-      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/pcre;$INSTALL_DIR/zlib;$INSTALL_DIR/icu;$INSTALL_DIR/boringssl" \
+      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/pcre;$INSTALL_DIR/icu;$INSTALL_DIR/grpc" \
       -DDISABLE_SHARED=ON \
       -DDISABLE_SCGI=ON \
       -DDISABLE_TCPCACHE=ON \
@@ -484,13 +398,3 @@ if [ $SPDLOG_CHANGED -eq 1 -o  ! -e $INSTALL_DIR/spdlog/include ]; then
   git clone --branch v$SPDLOG_VERSION --depth 1 https://github.com/gabime/spdlog.git $INSTALL_DIR/spdlog
 fi
 echo $SPDLOG_VERSION > $SPDLOG_VERSION_FILE
-
-# ggrpc
-if [ $GGRPC_CHANGED -eq 1 -o  ! -e $INSTALL_DIR/ggrpc/include ]; then
-  rm -rf $INSTALL_DIR/ggrpc
-  git clone https://github.com/melpon/ggrpc.git $INSTALL_DIR/ggrpc
-  pushd $INSTALL_DIR/ggrpc
-    git reset --hard $GGRPC_VERSION
-  popd
-fi
-echo $GGRPC_VERSION > $GGRPC_VERSION_FILE
