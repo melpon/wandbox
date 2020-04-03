@@ -1,19 +1,20 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <random>
 #include <algorithm>
-#include "libs.h"
-#include "root.h"
-#include "nojs_root.h"
-#include "user.h"
-#include "protocol.h"
-#include "eventsource.h"
-#include "ndjson.h"
-#include "permlink.h"
-#include "http_client.h"
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <sstream>
 #include "../../cattleshed/src/syslogstream.cc"
-//#include "cattleshed_client.h"
+#include "cattleshed_client.h"
+#include "cattleshed_server.h"
+#include "eventsource.h"
+#include "http_client.h"
+#include "libs.h"
+#include "ndjson.h"
+#include "nojs_root.h"
+#include "permlink.h"
+#include "protocol.h"
+#include "root.h"
+#include "user.h"
 
 namespace cppcms {
     template<>
@@ -33,23 +34,6 @@ namespace cppcms {
 class kennel : public cppcms::application {
 public:
     kennel(cppcms::service &srv) : cppcms::application(srv) {
-      //{
-      //    auto channel = grpc::CreateChannel("localhost:50051",
-      //    grpc::InsecureChannelCredentials()); CattleshedClientManager
-      //    cm(channel, 1); cattleshed::GetVersionRequest req; auto client =
-      //    cm.GetVersion(
-      //        req,
-      //        [](cattleshed::GetVersionResponse resp, grpc::Status status) {},
-      //        [](ggrpc::ClientResponseReaderError error) {});
-      //    auto client2 =
-      //        cm.RunJob([](cattleshed::RunJobResponse resp) {},
-      //                  [](grpc::Status status) {},
-      //                  [](ggrpc::ClientReaderWriterError error) {});
-      //    cattleshed::RunJobRequest req2;
-      //    client2->Write(req2);
-      //    client2->WritesDone();
-      //}
-
       // static file serving is for debugging
       // use Apache, nginx and so on in production
       dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/"
@@ -1085,33 +1069,54 @@ public:
 };
 
 int main(int argc, char** argv) try {
-    std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*){});
+  {
+    spdlog::set_level(spdlog::level::trace);
 
-    {
-        const auto ite = std::find(argv, argv+argc, std::string("--syslog"));
-        if (ite != argv+argc) {
-            std::clog.rdbuf(new wandbox::syslogstreambuf("kennel2", LOG_PID, LOG_DAEMON, LOG_DEBUG));
-            std::rotate(ite, ite+1, argv+argc);
-            --argc;
-        }
-    }
+    CattleshedServer server;
+    server.Start("localhost:50051", 1);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    cppcms::service service(argc, argv);
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+    CattleshedClientManager cm(channel, 1);
+    cattleshed::GetVersionRequest req;
+    auto client = cm.CreateGetVersionClient();
+    client->Request(req);
+    auto client2 = cm.CreateRunJobClient();
+    client2->Connect();
+    cattleshed::RunJobRequest req2;
+    client2->Write(req2);
+    client2->WritesDone();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
 
-    permlink pl(service);
-    pl.init();
+  //std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
 
-    std::clog << "start get_compiler_infos()" << std::endl;
-    auto jsons = kennel::get_compiler_infos(service);
-    auto json = kennel::merge_compiler_infos(jsons);
-    kennel::default_compiler_infos() = json;
-    std::clog << "finish get_compiler_infos()" << std::endl;
+  //{
+  //  const auto ite = std::find(argv, argv + argc, std::string("--syslog"));
+  //  if (ite != argv + argc) {
+  //    std::clog.rdbuf(new wandbox::syslogstreambuf("kennel2", LOG_PID,
+  //                                                 LOG_DAEMON, LOG_DEBUG));
+  //    std::rotate(ite, ite + 1, argv + argc);
+  //    --argc;
+  //  }
+  //}
 
-    service.applications_pool().mount(
-        cppcms::applications_factory<kennel_root>()
-    );
-    service.run();
-} catch (std::exception const &e) {
-    std::cerr << e.what() << std::endl;
+  //cppcms::service service(argc, argv);
+
+  //permlink pl(service);
+  //pl.init();
+
+  //std::clog << "start get_compiler_infos()" << std::endl;
+  //auto jsons = kennel::get_compiler_infos(service);
+  //auto json = kennel::merge_compiler_infos(jsons);
+  //kennel::default_compiler_infos() = json;
+  //std::clog << "finish get_compiler_infos()" << std::endl;
+
+  //service.applications_pool().mount(
+  //    cppcms::applications_factory<kennel_root>());
+  //service.run();
+} catch (std::exception const& e) {
+  std::cerr << e.what() << std::endl;
 }
 

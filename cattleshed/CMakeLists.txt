@@ -88,7 +88,10 @@ add_executable(cattleshed
   ${CATTLESHED_PROTO})
 set_target_properties(cattleshed PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
 target_include_directories(cattleshed PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
-target_compile_definitions(cattleshed PRIVATE SYSCONFDIR="${CMAKE_INSTALL_PREFIX}/etc")
+target_compile_definitions(cattleshed
+  PRIVATE
+    SYSCONFDIR="${CMAKE_INSTALL_PREFIX}/etc"
+    SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 target_link_libraries(cattleshed
   Boost::boost
   Boost::program_options

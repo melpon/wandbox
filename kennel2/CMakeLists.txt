@@ -110,6 +110,7 @@ endmacro()
 
 add_executable(kennel src/kennel.cpp ${SKIN_KENNEL} ${CATTLESHED_PROTO})
 set_target_properties(kennel PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
+target_compile_definitions(kennel PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 target_include_directories(kennel PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
 target_link_libraries(kennel
   protobuf::libprotobuf
