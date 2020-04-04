@@ -4,8 +4,6 @@
 #include <random>
 #include <sstream>
 #include "../../cattleshed/src/syslogstream.cc"
-#include "cattleshed_client.h"
-#include "cattleshed_server.h"
 #include "eventsource.h"
 #include "http_client.h"
 #include "libs.h"
@@ -1069,53 +1067,32 @@ public:
 };
 
 int main(int argc, char** argv) try {
+  std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
+
   {
-    spdlog::set_level(spdlog::level::trace);
-
-    CattleshedServer server;
-    server.Start("localhost:50051", 1);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    auto channel = grpc::CreateChannel("localhost:50051",
-                                       grpc::InsecureChannelCredentials());
-    CattleshedClientManager cm(channel, 1);
-    cattleshed::GetVersionRequest req;
-    auto client = cm.CreateGetVersionClient();
-    client->Request(req);
-    auto client2 = cm.CreateRunJobClient();
-    client2->Connect();
-    cattleshed::RunJobRequest req2;
-    client2->Write(req2);
-    client2->WritesDone();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    const auto ite = std::find(argv, argv + argc, std::string("--syslog"));
+    if (ite != argv + argc) {
+      std::clog.rdbuf(new wandbox::syslogstreambuf("kennel2", LOG_PID,
+                                                   LOG_DAEMON, LOG_DEBUG));
+      std::rotate(ite, ite + 1, argv + argc);
+      --argc;
+    }
   }
 
-  //std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
+  cppcms::service service(argc, argv);
 
-  //{
-  //  const auto ite = std::find(argv, argv + argc, std::string("--syslog"));
-  //  if (ite != argv + argc) {
-  //    std::clog.rdbuf(new wandbox::syslogstreambuf("kennel2", LOG_PID,
-  //                                                 LOG_DAEMON, LOG_DEBUG));
-  //    std::rotate(ite, ite + 1, argv + argc);
-  //    --argc;
-  //  }
-  //}
+  permlink pl(service);
+  pl.init();
 
-  //cppcms::service service(argc, argv);
+  std::clog << "start get_compiler_infos()" << std::endl;
+  auto jsons = kennel::get_compiler_infos(service);
+  auto json = kennel::merge_compiler_infos(jsons);
+  kennel::default_compiler_infos() = json;
+  std::clog << "finish get_compiler_infos()" << std::endl;
 
-  //permlink pl(service);
-  //pl.init();
-
-  //std::clog << "start get_compiler_infos()" << std::endl;
-  //auto jsons = kennel::get_compiler_infos(service);
-  //auto json = kennel::merge_compiler_infos(jsons);
-  //kennel::default_compiler_infos() = json;
-  //std::clog << "finish get_compiler_infos()" << std::endl;
-
-  //service.applications_pool().mount(
-  //    cppcms::applications_factory<kennel_root>());
-  //service.run();
+  service.applications_pool().mount(
+      cppcms::applications_factory<kennel_root>());
+  service.run();
 } catch (std::exception const& e) {
   std::cerr << e.what() << std::endl;
 }

@@ -1,0 +1,45 @@
+{
+    "switches": {
+        "bash-help": {
+            "display-name": "Help", 
+            "flags": [
+                "--help"
+            ]
+        }
+    }, 
+    "templates": {
+        "bash": {
+            "code": "#!/bin/bash\n# This file is a \"Hello, world!\" in Bash script for wandbox.\necho Hello, Wandbox!\n\n# Bash script references:\n#   https://www.gnu.org/software/bash/manual/bashref.html\n#   http://shellscript.sunone.me ( Japanese )\n"
+        }
+    }, 
+    "compilers": [
+        {
+            "templates": [
+                "bash"
+            ], 
+            "compiler-option-raw": false, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/bin/bash --version | head -n 1 | cut -d' ' -f4"
+            ], 
+            "switches": [], 
+            "display-compile-command": "bash prog.sh", 
+            "initial-checked": [], 
+            "jail-name": "test", 
+            "display-name": "bash", 
+            "runtime-option-raw": true, 
+            "compile-command": [
+                "/bin/true"
+            ], 
+            "name": "bash", 
+            "language": "Bash script", 
+            "output-file": "prog.sh", 
+            "displayable": true, 
+            "run-command": [
+                "/bin/bash", 
+                "prog.sh"
+            ]
+        }
+    ]
+}
