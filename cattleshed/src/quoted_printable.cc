@@ -27,12 +27,12 @@ class kennel_quoted_printable {
     return w < 33 || w == 61 || w > 126;
   }
 
-public:
-  static std::string encode(const std::string &str) {
+ public:
+  static std::string encode(const std::string& str) {
     std::string r;
     r.reserve(str.size() + str.size() / 2);
     int n = 0;
-    for (auto &&c : str) {
+    for (auto&& c : str) {
       bool enc = is_encode(c);
       if (enc) {
         auto h = to_hex(c);
@@ -61,13 +61,12 @@ public:
     return r;
   }
 
-  static std::string decode(const std::string &str) {
+  static std::string decode(const std::string& str) {
     std::string r;
     r.reserve(str.size());
     std::size_t n = 0;
     while (true) {
-      if (n == str.size())
-        break;
+      if (n == str.size()) break;
       auto c = str[n++];
       if (c == '=') {
         if (n == str.size()) {
@@ -94,11 +93,11 @@ public:
 namespace wandbox {
 namespace quoted_printable {
 
-std::string decode(const std::string &r) {
+std::string decode(const std::string& r) {
   return kennel_quoted_printable::decode(r);
 }
-std::string encode(const std::string &r) {
+std::string encode(const std::string& r) {
   return kennel_quoted_printable::encode(r);
 }
-}
-}
+}  // namespace quoted_printable
+}  // namespace wandbox
