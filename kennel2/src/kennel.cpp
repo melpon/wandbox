@@ -1178,15 +1178,7 @@ public:
     }
 };
 
-#include "cattleshed_server.h"
-
 int main(int argc, char** argv) try {
-  spdlog::set_level(spdlog::level::trace);
-
-  CattleshedServer server;
-  server.Start("0.0.0.0:50051", 1);
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-
   std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
 
   {

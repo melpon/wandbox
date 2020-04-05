@@ -28,8 +28,7 @@
 #include <syslog.h>
 #include <time.h>
 
-#include "cattleshed.grpc.pb.h"
-#include "cattleshed.pb.h"
+#include "cattleshed_server.h"
 #include "load_config.hpp"
 #include "posixapi.hpp"
 #include "quoted_printable.hpp"
@@ -981,6 +980,11 @@ int main(int argc, char** argv) try {
   using namespace wandbox;
 
   ::setlocale(LC_ALL, "C");
+
+  spdlog::set_level(spdlog::level::trace);
+
+  CattleshedServer server;
+  server.Start("0.0.0.0:50051", 1);
 
   std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
 

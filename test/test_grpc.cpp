@@ -2,8 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "../cattleshed/src/cattleshed_server.h"
 #include "../kennel2/src/cattleshed_client.h"
-#include "../kennel2/src/cattleshed_server.h"
 
 int main() {
   spdlog::set_level(spdlog::level::trace);

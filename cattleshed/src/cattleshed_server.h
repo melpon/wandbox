@@ -18,6 +18,9 @@
 // spdlog
 #include <spdlog/spdlog.h>
 
+#include "cattleshed.grpc.pb.h"
+#include "cattleshed.pb.h"
+
 struct CattleshedServerHandler {
   virtual void Proceed(bool ok) = 0;
 };
