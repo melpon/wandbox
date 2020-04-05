@@ -194,24 +194,27 @@ void send_command(booster::aio::io_service& service, booster::aio::endpoint ep, 
     std::clog << '[' << sock.get() << ']' << "finish" << std::endl;
 }
 
-template<class F>
-void send_command_async(booster::aio::io_service& service, booster::aio::endpoint ep, std::vector<protocol> protos, F f, int max_line = 0) {
-    booster::shared_ptr<booster::aio::stream_socket> sock(new booster::aio::stream_socket(service));
+template <class F>
+void send_command_async(booster::aio::io_service& service,
+                        booster::aio::endpoint ep, std::vector<protocol> protos,
+                        F f, int max_line = 0) {
+  booster::shared_ptr<booster::aio::stream_socket> sock(
+      new booster::aio::stream_socket(service));
 
-    std::clog << '[' << sock.get() << ']' << "open start" << std::endl;
-    booster::system::error_code ec;
-    sock->open(booster::aio::family_type::pf_inet, ec);
-    if (ec)
-        return (void)f(ec, protocol());
+  std::clog << '[' << sock.get() << ']' << "open start" << std::endl;
+  booster::system::error_code ec;
+  sock->open(booster::aio::family_type::pf_inet, ec);
+  if (ec) return (void)f(ec, protocol());
 
-    std::clog << '[' << sock.get() << ']' << "connect start" << std::endl;
-    sock->async_connect(ep, [sock, f, max_line, protos](const booster::system::error_code& e) {
+  std::clog << '[' << sock.get() << ']' << "connect start" << std::endl;
+  sock->async_connect(
+      ep, [sock, f, max_line, protos](const booster::system::error_code& e) {
         if (e)
             return (void)f(e, protocol());
         std::clog << '[' << sock.get() << ']' << "connected" << std::endl;
         booster::shared_ptr<std::string> send_string(new std::string());
         for (auto&& proto: protos) {
-            *send_string += proto.to_string();
+          *send_string += proto.to_string();
         }
         std::size_t send_string_size = send_string->size();
 
@@ -226,7 +229,7 @@ void send_command_async(booster::aio::io_service& service, booster::aio::endpoin
             arp->read_async();
             std::clog << '[' << sock.get() << ']' << "finish" << std::endl;
         });
-    });
+      });
 }
 
 template<class F>

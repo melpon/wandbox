@@ -343,7 +343,7 @@ class RunJobHandler {
 
     if (write_status_ == WriteStatus::IDLE) {
       ResponseData d;
-      d.finish = false;
+      d.finish = true;
       d.status = std::move(status);
 
       write_status_ = WriteStatus::FINISHING;
@@ -351,7 +351,7 @@ class RunJobHandler {
       Notify();
     } else if (write_status_ == WriteStatus::WRITING) {
       ResponseData d;
-      d.finish = false;
+      d.finish = true;
       d.status = std::move(status);
 
       response_queue_.push_back(std::move(d));
@@ -578,12 +578,18 @@ class RunJobHandler {
       grpc::ServerCompletionQueue* cq, void* tag) {
     service_->RequestRunJob(context, streamer, cq, cq, tag);
   }
-  void OnAccept() {}
+  void OnAccept() { SPDLOG_INFO("RunJobRequest::OnAccept"); }
   void OnRead(cattleshed::RunJobRequest req) {
     SPDLOG_INFO("received RunJobRequest {}", req.DebugString());
-    Finish(grpc::Status::OK);
+    cattleshed::RunJobResponse resp;
+    resp.set_type(cattleshed::RunJobResponse::STDOUT);
+    resp.set_data("foo\n");
+    Write(std::move(resp));
+    resp.set_type(cattleshed::RunJobResponse::EXIT_CODE);
+    resp.set_data("0");
+    Write(std::move(resp));
   }
-  void OnReadDoneOrError() {}
+  void OnReadDoneOrError() { Finish(grpc::Status::OK); }
 };
 
 class CattleshedServer {

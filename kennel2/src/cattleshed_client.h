@@ -377,7 +377,8 @@ class RunJobClient {
     if (write_status_ == WriteStatus::IDLE) {
       streamer_->WritesDone(&writer_thunk_);
       write_status_ = WriteStatus::FINISHING;
-    } else if (write_status_ == WriteStatus::WRITING) {
+    } else if (write_status_ == WriteStatus::WRITING ||
+               write_status_ == WriteStatus::CONNECTING) {
       request_queue_.push_back(nullptr);
     }
   }
