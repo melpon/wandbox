@@ -785,8 +785,6 @@ class RunJobHandler {
 
       workdir_ = workdir;
 
-      SPDLOG_INFO("[0x{}] ready.", (void*)this);
-
       DoWriteProgram();
     }
 
@@ -1240,11 +1238,6 @@ class RunJobHandler {
     }
 
     void OnForward() {
-      for (int i = 0; i < pipes_.size(); i++) {
-        SPDLOG_TRACE("[0x{}] OnForward, pipes_[{}] is {}", (void*)this, i,
-                     std::string(pipes_[i]->Closed() ? "closed" : "opened"));
-      }
-
       if (not std::all_of(pipes_.begin(), pipes_.end(),
                           [](std::shared_ptr<PipeForwarderBase> p) {
                             return p->Closed();

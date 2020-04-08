@@ -17,81 +17,9 @@ set(KENNEL_SERVICE_API "http")
 add_subdirectory(../cattleshed cattleshed)
 add_subdirectory(../kennel2 kennel2)
 
-find_package(Protobuf REQUIRED)
-find_package(gRPC REQUIRED)
-find_package(Spdlog REQUIRED)
-find_package(Boost REQUIRED)
-find_package(RT REQUIRED)
-find_package(CAP REQUIRED)
-find_package(Threads REQUIRED)
-
+# ---- テストの設定
 
 enable_testing()
-
-# --- cattleshed.pb.cc などの生成
-
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/proto")
-add_custom_command(
-  OUTPUT
-    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.cc"
-    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.cc"
-    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.h"
-  COMMAND $<TARGET_FILE:protobuf::protoc>
-  ARGS
-    --grpc_out "${CMAKE_CURRENT_BINARY_DIR}/proto"
-    --cpp_out "${CMAKE_CURRENT_BINARY_DIR}/proto"
-    -I "${CMAKE_CURRENT_SOURCE_DIR}/../proto"
-    --plugin=protoc-gen-grpc="$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../proto/cattleshed.proto"
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../proto/cattleshed.proto")
-
-set(CATTLESHED_PROTO
-  "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.cc"
-  "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.cc")
-
-# --- 便利マクロ定義
-
-macro(set_sanitizer target)
-  # tsan
-  if (ENABLE_TSAN)
-    target_compile_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
-    target_link_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
-  endif()
-
-  # asan
-  if (ENABLE_ASAN)
-    target_compile_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
-    target_link_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
-  endif()
-endmacro()
-
-# ---- テスト本体のビルド
-
-add_executable(test_grpc test_grpc.cpp ../cattleshed/src/load_config.cc ${CATTLESHED_PROTO})
-set_target_properties(test_grpc PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
-target_compile_definitions(test_grpc PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
-target_include_directories(test_grpc PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
-target_link_libraries(test_grpc
-  gRPC::grpc++
-  Spdlog::Spdlog
-  Boost::boost
-  RT::RT
-  Threads::Threads)
-
-set_sanitizer(test_grpc)
-
-add_test(
-  NAME test_grpc
-  COMMAND $<TARGET_FILE:test_grpc>
-)
-
-if (ENABLE_TSAN)
-  set(_E2E_ARGS --tsan)
-endif()
-if (ENABLE_ASAN)
-  set(_E2E_ARGS --asan)
-endif()
 
 add_test(
   NAME test_e2e
