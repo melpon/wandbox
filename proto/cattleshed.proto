@@ -77,12 +77,13 @@ message RunJobRequest {
 
 message RunJobResponse {
   enum Type {
-    COMPILER_STDOUT = 0;
-    COMPILER_STDERR = 1;
-    STDOUT = 2;
-    STDERR = 3;
-    EXIT_CODE = 4;
-    SIGNAL = 5;
+    CONTROL = 0;
+    COMPILER_STDOUT = 1;
+    COMPILER_STDERR = 2;
+    STDOUT = 3;
+    STDERR = 4;
+    EXIT_CODE = 5;
+    SIGNAL = 6;
   }
   Type type = 1;
   string data = 2;

@@ -477,6 +477,11 @@ struct program_runner : private coroutine {
         yield break;
 
       wait_process_killed:
+        for (int i = 0; i < pipes.size(); i++) {
+          std::clog << "wait_process_killed, pipes[" << i << "] is "
+                    << (std::string(pipes[i]->closed() ? "closed" : "opened"));
+        }
+
         if (not std::all_of(pipes.begin(), pipes.end(),
                             [](std::shared_ptr<pipe_forwarder_base> p) {
                               return p->closed();
@@ -983,9 +988,6 @@ int main(int argc, char** argv) try {
 
   spdlog::set_level(spdlog::level::trace);
 
-  CattleshedServer server;
-  server.Start("0.0.0.0:50051", 1);
-
   std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
 
   {
@@ -1035,10 +1037,11 @@ int main(int argc, char** argv) try {
     }
   }
 
-  // std::unique_ptr<CattleshedServer> server(new CattleshedServer());
-  // server->Start("0.0.0.0:50051", 4);
+  auto aio = std::make_shared<boost::asio::io_context>();
 
-  auto aio = std::make_shared<asio::io_service>();
+  CattleshedServer server(aio, config);
+  server.Start("0.0.0.0:50051", 1);
+
   listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);
   s();
   aio->run();

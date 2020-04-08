@@ -20,6 +20,11 @@ add_subdirectory(../kennel2 kennel2)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 find_package(Spdlog REQUIRED)
+find_package(Boost REQUIRED)
+find_package(RT REQUIRED)
+find_package(CAP REQUIRED)
+find_package(Threads REQUIRED)
+
 
 enable_testing()
 
@@ -63,13 +68,16 @@ endmacro()
 
 # ---- テスト本体のビルド
 
-add_executable(test_grpc test_grpc.cpp ${CATTLESHED_PROTO})
+add_executable(test_grpc test_grpc.cpp ../cattleshed/src/load_config.cc ${CATTLESHED_PROTO})
 set_target_properties(test_grpc PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
 target_compile_definitions(test_grpc PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 target_include_directories(test_grpc PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
 target_link_libraries(test_grpc
   gRPC::grpc++
-  Spdlog::Spdlog)
+  Spdlog::Spdlog
+  Boost::boost
+  RT::RT
+  Threads::Threads)
 
 set_sanitizer(test_grpc)
 
@@ -78,8 +86,15 @@ add_test(
   COMMAND $<TARGET_FILE:test_grpc>
 )
 
+if (ENABLE_TSAN)
+  set(_E2E_ARGS --tsan)
+endif()
+if (ENABLE_ASAN)
+  set(_E2E_ARGS --asan)
+endif()
+
 add_test(
   NAME test_e2e
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_e2e.sh
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_e2e.sh ${_E2E_ARGS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

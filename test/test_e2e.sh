@@ -2,15 +2,31 @@
 
 cd "`dirname $0`"
 
+BUILD_DIR="_build/release"
+
+while [ $# -ne 0 ]; do
+  case "$1" in
+    "--tsan" )
+      BUILD_DIR="_build/tsan"
+      ;;
+    "--asan" )
+      BUILD_DIR="_build/asan"
+      ;;
+  esac
+  shift 1
+done
+
 set -ex
 
-cp session.key _build/release/kennel2/.session.key
+cp session.key $BUILD_DIR/kennel2/.session.key
 mkdir -p _tmp
 
-_build/release/cattleshed/cattleshed -c _build/release/cattleshed/cattleshed.conf -c compilers.default &
+$BUILD_DIR/cattleshed/cattleshed -c $BUILD_DIR/cattleshed/cattleshed.conf -c compilers.default &
 CATTLESHED_PID=$!
 
-_build/release/kennel2/kennel -c _build/release/kennel2/kennel.json &
+sleep 1
+
+$BUILD_DIR/kennel2/kennel -c $BUILD_DIR/kennel2/kennel.json &
 KENNEL_PID=$!
 
 trap "kill $CATTLESHED_PID $KENNEL_PID" EXIT

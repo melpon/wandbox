@@ -722,7 +722,8 @@ private:
         else
           v.str() += str;
       };
-      if (resp.type() == cattleshed::RunJobResponse::COMPILER_STDOUT) {
+      if (resp.type() == cattleshed::RunJobResponse::CONTROL) {
+      } else if (resp.type() == cattleshed::RunJobResponse::COMPILER_STDOUT) {
         append(result["compiler_output"], resp.data());
         append(result["compiler_message"], resp.data());
       } else if (resp.type() == cattleshed::RunJobResponse::COMPILER_STDERR) {
@@ -788,6 +789,9 @@ private:
                 cppcms::json::value v;
                 std::string type;
                 switch (resp.type()) {
+                  case cattleshed::RunJobResponse::CONTROL:
+                    type = "Control";
+                    break;
                   case cattleshed::RunJobResponse::COMPILER_STDOUT:
                     type = "CompilerMessageS";
                     break;

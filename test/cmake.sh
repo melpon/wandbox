@@ -49,5 +49,9 @@ pushd $BUILD_DIR
     -DENABLE_ASAN=$ENABLE_ASAN
   cmake --build . -j`nproc`
   sudo setcap cap_sys_admin,cap_sys_chroot,cap_mknod,cap_net_admin=p cattleshed/cattlegrid
+
+  rm -rf /var/crash/*cattleshed.*.crash
+  rm -rf /var/crash/*kennel.*.crash
+
   ctest . -V
 popd
