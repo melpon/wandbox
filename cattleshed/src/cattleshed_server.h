@@ -468,6 +468,7 @@ class RunJobHandler {
       lock.unlock();
       try {
         OnReadDoneOrError();
+        lock.lock();
       } catch (...) {
         lock.lock();
       }

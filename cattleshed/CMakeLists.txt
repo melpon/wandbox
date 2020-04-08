@@ -113,15 +113,11 @@ target_link_libraries(cattlegrid
   CAP::CAP
   Threads::Threads)
 
-set_sanitizer(cattlegrid)
-
 # ---- prlimit
 
 add_executable(prlimit
   src/prlimit.cc)
 set_target_properties(prlimit PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
-
-set_sanitizer(prlimit)
 
 # ---- 静的ファイルの生成
 
