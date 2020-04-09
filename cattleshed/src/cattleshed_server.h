@@ -84,19 +84,23 @@ class GetVersionHandler {
   grpc::Alarm alarm_;
   void Notify() { alarm_.Set(cq_, gpr_time_0(GPR_TIMESPAN), &notifier_thunk_); }
 
-  cattleshed::Cattleshed::AsyncService* service_;
-
  public:
   GetVersionHandler(std::function<bool()> shutdown_requested,
                     grpc::ServerCompletionQueue* cq,
-                    cattleshed::Cattleshed::AsyncService* service)
+                    cattleshed::Cattleshed::AsyncService* service,
+                    std::shared_ptr<boost::asio::io_context> ioc,
+                    std::shared_ptr<boost::asio::signal_set> sigs,
+                    const wandbox::server_config& config)
       : shutdown_requested_(std::move(shutdown_requested)),
         cq_(cq),
         response_writer_(&server_context_),
         acceptor_thunk_(this),
         writer_thunk_(this),
         notifier_thunk_(this),
-        service_(service) {
+        service_(service),
+        ioc_(ioc),
+        sigs_(sigs),
+        config_(&config) {
     Request(&server_context_, &request_, &response_writer_, cq_,
             &acceptor_thunk_);
   }
@@ -110,6 +114,8 @@ class GetVersionHandler {
     if (shutdown_requested_()) {
       return;
     }
+
+    SPDLOG_TRACE("[0x{}] Finish: {}", (void*)this, resp.DebugString());
 
     if (write_status_ == WriteStatus::IDLE) {
       response_.error = false;
@@ -160,7 +166,8 @@ class GetVersionHandler {
     }
 
     // 次の要求に備える
-    new GetVersionHandler(shutdown_requested_, cq_, service_);
+    new GetVersionHandler(shutdown_requested_, cq_, service_, ioc_, sigs_,
+                          *config_);
 
     write_status_ = WriteStatus::IDLE;
 
@@ -224,18 +231,302 @@ class GetVersionHandler {
     write_status_ = WriteStatus::FINISHING;
   }
 
-private:
- void Request(grpc::ServerContext* context,
-              cattleshed::GetVersionRequest* request,
-              grpc::ServerAsyncResponseWriter<cattleshed::GetVersionResponse>*
-                  response_writer,
-              grpc::ServerCompletionQueue* cq, void* tag) {
-   service_->RequestGetVersion(context, request, response_writer, cq, cq, tag);
+ private:
+  struct VersionRunner {
+    VersionRunner(std::shared_ptr<boost::asio::io_context> ioc,
+                  std::shared_ptr<boost::asio::signal_set> sigs,
+                  const wandbox::server_config& config)
+        : ioc_(ioc), sigs_(sigs), config_(&config) {
+      for (const wandbox::compiler_trait& c : config_->compilers) {
+        commands_.push_back(c);
+      }
+    }
+    void AsyncRun(std::function<void(boost::system::error_code ec,
+                                     const std::map<std::string, std::string>&)>
+                      handler) {
+      // 全部のバージョン取得処理が終わったので結果を返す
+      if (commands_.empty()) {
+        handler(boost::system::error_code(), versions_);
+        handler = nullptr;
+        return;
+      }
+
+      current_ = commands_.front();
+      commands_.pop_front();
+      if (current_.version_command.empty() || not current_.displayable) {
+        // 次へ
+        AsyncRun(std::move(handler));
+        return;
+      }
+
+      // 実行開始
+      {
+        auto c = wandbox::piped_spawn(wandbox::opendir("/"),
+                                      current_.version_command);
+        SPDLOG_DEBUG("[0x{}] run [{}]", (void*)this,
+                     boost::algorithm::join(current_.version_command, " "));
+        child_ = std::make_shared<wandbox::unique_child_pid>(std::move(c.pid));
+        pipe_stdout_ = std::make_shared<boost::asio::posix::stream_descriptor>(
+            *ioc_, c.fd_stdout.get());
+        c.fd_stdout.release();
+      }
+
+      // 実行完了を待つ
+      sigs_->async_wait(std::bind(&VersionRunner::OnWait, this,
+                                  std::placeholders::_1,
+                                  std::placeholders::_2));
+
+      handler_ = std::move(handler);
+    }
+
+   private:
+    void OnWait(const boost::system::error_code& ec, int signum) {
+      child_->wait_nonblock();
+      if (not child_->finished()) {
+        // まだ終わってないので再度待つ
+        sigs_->async_wait(std::bind(&VersionRunner::OnWait, this,
+                                    std::placeholders::_1,
+                                    std::placeholders::_2));
+        return;
+      }
+
+      {
+        int st = child_->wait_nonblock();
+        SPDLOG_DEBUG("[0x{}] WIFEXITED(st): {}, WEXITSTATUS(st): {}",
+                     (void*)this, WIFEXITED(st), WEXITSTATUS(st));
+        // バージョン取得に失敗したので次へ
+        if (!WIFEXITED(st) || (WEXITSTATUS(st) != 0)) {
+          AsyncRun(std::move(handler_));
+          return;
+        }
+      }
+
+      // 出力の読み込み
+      DoRead();
+    }
+
+    void DoRead() {
+      buf_ = std::make_shared<boost::asio::streambuf>();
+      boost::asio::async_read_until(
+          *pipe_stdout_, *buf_, '\n',
+          std::bind(&VersionRunner::OnRead, this, std::placeholders::_1,
+                    std::placeholders::_2));
+    }
+
+    void OnRead(boost::system::error_code ec, std::size_t bytes_transferred) {
+      // なぜか失敗したので次へ
+      if (ec) {
+        SPDLOG_WARN("[0x{}] failed to async_read_until: {}", (void*)this,
+                    ec.message());
+        AsyncRun(std::move(handler_));
+        return;
+      }
+
+      std::istream is(buf_.get());
+      std::string ver;
+      if (!std::getline(is, ver)) {
+        SPDLOG_WARN("[0x{}] failed to getline", (void*)this);
+        AsyncRun(std::move(handler_));
+        return;
+      }
+
+      SPDLOG_DEBUG("[0x{}] add version: {} {}", (void*)this, current_.name,
+                   ver);
+      versions_[current_.name] = ver;
+
+      // 無事バージョンの取得に成功したので次へ
+      AsyncRun(std::move(handler_));
+    }
+
+   private:
+    std::shared_ptr<boost::asio::io_context> ioc_;
+    std::shared_ptr<boost::asio::signal_set> sigs_;
+    const wandbox::server_config* config_;
+
+    wandbox::compiler_trait current_;
+    std::deque<wandbox::compiler_trait> commands_;
+    std::function<void(boost::system::error_code ec,
+                       const std::map<std::string, std::string>&)>
+        handler_;
+    std::map<std::string, std::string> versions_;
+    std::shared_ptr<boost::asio::posix::stream_descriptor> pipe_stdout_;
+    std::shared_ptr<wandbox::unique_child_pid> child_;
+    std::shared_ptr<boost::asio::streambuf> buf_;
+  };
+
+  void Request(grpc::ServerContext* context,
+               cattleshed::GetVersionRequest* request,
+               grpc::ServerAsyncResponseWriter<cattleshed::GetVersionResponse>*
+                   response_writer,
+               grpc::ServerCompletionQueue* cq, void* tag) {
+    service_->RequestGetVersion(context, request, response_writer, cq, cq, tag);
   }
   void OnAccept(cattleshed::GetVersionRequest request) {
-    cattleshed::GetVersionResponse resp;
-    Finish(resp, grpc::Status::OK);
+    version_runner_.reset(new VersionRunner(ioc_, sigs_, *config_));
+    version_runner_->AsyncRun(
+        [this](boost::system::error_code ec,
+               const std::map<std::string, std::string>& versions) {
+          // バージョンが取得できたので、レスポンス用データを作る
+          auto resp = GenResponse(*config_, versions);
+
+          Finish(std::move(resp), grpc::Status::OK);
+        });
   }
+
+  static cattleshed::GetVersionResponse GenResponse(
+      const wandbox::server_config& config,
+      const std::map<std::string, std::string>& versions) {
+    cattleshed::GetVersionResponse resp;
+
+    for (const auto& pair : versions) {
+      const auto it = config.compilers.get<1>().find(pair.first);
+      // 必ずあるはずなんだけど一応チェック
+      if (it == config.compilers.get<1>().end()) {
+        continue;
+      }
+      const wandbox::compiler_trait& compiler = *it;
+
+      cattleshed::CompilerInfo* info = resp.add_compiler_info();
+
+      for (const auto& sw : compiler.local_switches.get<1>()) {
+        auto rng = compiler.local_switches.get<2>().equal_range(sw.group_name);
+        if (rng.first->name != sw.name) {
+          continue;
+        }
+
+        if (std::next(rng.first) != rng.second) {
+          cattleshed::SelectSwitch* sel =
+              info->add_switches()->mutable_select();
+          std::string def;
+          for (; rng.first != rng.second; ++rng.first) {
+            cattleshed::SelectSwitchOption* opt = sel->add_options();
+            auto&& sw = *rng.first;
+            opt->set_name(sw.name);
+            opt->set_display_name(sw.display_name);
+            opt->set_display_flags(sw.display_flags
+                                       ? *sw.display_flags
+                                       : boost::algorithm::join(sw.flags, " "));
+
+            if (compiler.initial_checked.count(sw.name) != 0) {
+              def = sw.name;
+            }
+          }
+          sel->set_name(sw.group_name);
+          sel->set_default_value(def);
+        } else {
+          cattleshed::SingleSwitch* single =
+              info->add_switches()->mutable_single();
+          auto&& sw = *rng.first;
+          single->set_name(sw.name);
+          single->set_display_name(sw.display_name);
+          single->set_default_value(compiler.initial_checked.count(sw.name) !=
+                                    0);
+        }
+      }
+
+      std::unordered_set<std::string> used;
+      for (const auto& swname : compiler.switches) {
+        if (used.count(swname) != 0) {
+          continue;
+        }
+        if (compiler.local_switches.get<1>().count(swname)) {
+          continue;
+        }
+        const auto ite = config.switches.find(swname);
+        if (ite == config.switches.end()) {
+          continue;
+        }
+        const auto& sw = ite->second;
+        const auto& group = sw.group;
+
+        if (!group) {
+          used.insert(swname);
+
+          cattleshed::SingleSwitch* single =
+              info->add_switches()->mutable_single();
+          single->set_name(sw.name);
+          single->set_display_name(sw.display_name);
+          single->set_display_flags(
+              sw.display_flags ? *sw.display_flags
+                               : boost::algorithm::join(sw.flags, " "));
+          single->set_default_value(compiler.initial_checked.count(sw.name) !=
+                                    0);
+        } else {
+          std::unordered_set<std::string> groups;
+          for (const auto& swname : compiler.switches) {
+            const auto& sw = config.switches.at(swname);
+            if (sw.group && *sw.group == *group) {
+              groups.insert(sw.name);
+            }
+          }
+
+          cattleshed::SelectSwitch* sel =
+              info->add_switches()->mutable_select();
+          std::string def = swname;
+          for (const auto& swname : compiler.switches) {
+            const auto& sw = config.switches.at(swname);
+            if (groups.count(swname) == 0) {
+              continue;
+            }
+
+            cattleshed::SelectSwitchOption* opt = sel->add_options();
+            opt->set_name(sw.name);
+            opt->set_display_name(sw.display_name);
+            opt->set_display_flags(sw.display_flags
+                                       ? *sw.display_flags
+                                       : boost::algorithm::join(sw.flags, " "));
+
+            if (compiler.initial_checked.count(sw.name) != 0) {
+              def = swname;
+            }
+          }
+          sel->set_name(*group);
+          sel->set_default_value(def);
+
+          used.insert(groups.begin(), groups.end());
+        }
+      }
+
+      info->set_name(compiler.name);
+      info->set_version(pair.second);
+      info->set_language(compiler.language);
+      info->set_display_name(compiler.display_name);
+      info->set_display_compile_command(compiler.display_compile_command);
+      info->set_compiler_option_raw(compiler.compiler_option_raw);
+      info->set_runtime_option_raw(compiler.runtime_option_raw);
+      for (const std::string& tmpl : compiler.templates) {
+        info->add_templates(tmpl);
+      }
+    }
+    for (const auto& pair : config.templates) {
+      const wandbox::template_trait& t = pair.second;
+      cattleshed::Template* tmpl = resp.add_templates();
+      tmpl->set_name(t.name);
+      tmpl->set_default_source(t.code);
+      // TODO(melpon): sources を設定する（template_traits 側を直さないといけない）
+      if (t.stdin) {
+        tmpl->set_stdin(*t.stdin);
+      }
+      if (t.options) {
+        tmpl->set_compiler_options(*t.options);
+      }
+      if (t.compiler_option_raw) {
+        tmpl->set_compiler_option_raw(*t.compiler_option_raw);
+      }
+      if (t.runtime_option_raw) {
+        tmpl->set_runtime_option_raw(*t.runtime_option_raw);
+      }
+    }
+
+    return resp;
+  }
+
+ private:
+  std::shared_ptr<boost::asio::io_context> ioc_;
+  std::shared_ptr<boost::asio::signal_set> sigs_;
+  const wandbox::server_config* config_;
+  cattleshed::Cattleshed::AsyncService* service_;
+  std::shared_ptr<VersionRunner> version_runner_;
 };
 
 class RunJobHandler {
@@ -1435,7 +1726,8 @@ class CattleshedServer {
  private:
   void HandleRpcs(grpc::ServerCompletionQueue* cq) {
     auto shutdown_requested = [this]() -> bool { return shutdown_; };
-    new GetVersionHandler(shutdown_requested, cq, &service_);
+    new GetVersionHandler(shutdown_requested, cq, &service_, ioc_, sigs_,
+                          config_);
     new RunJobHandler(shutdown_requested, cq, &service_, ioc_, sigs_, config_);
 
     void* got_tag = nullptr;

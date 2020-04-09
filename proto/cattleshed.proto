@@ -50,8 +50,19 @@ message CompilerInfo {
   repeated Switch switches = 9;
 }
 
+message Template {
+  string name = 1;
+  string stdin = 2;
+  string compiler_option_raw = 3;
+  string runtime_option_raw = 4;
+  string default_source = 5;
+  repeated Source sources = 6;
+  string compiler_options = 7;
+}
+
 message GetVersionResponse {
   repeated CompilerInfo compiler_info = 1;
+  repeated Template templates = 5;
 }
 
 message Source {

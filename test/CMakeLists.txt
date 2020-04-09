@@ -21,6 +21,13 @@ add_subdirectory(../kennel2 kennel2)
 
 enable_testing()
 
+if (ENABLE_TSAN)
+  set(_E2E_ARGS --tsan)
+endif()
+if (ENABLE_ASAN)
+  set(_E2E_ARGS --asan)
+endif()
+
 add_test(
   NAME test_e2e
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_e2e.sh ${_E2E_ARGS}

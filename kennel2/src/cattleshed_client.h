@@ -90,10 +90,13 @@ class GetVersionClient {
 
   void SetOnResponse(on_response_t on_response) {
     std::lock_guard<std::mutex> guard(mutex_);
+    SPDLOG_TRACE("SetOnResponse start");
     if (shutdown_ || shutdown_requested_()) {
+      SPDLOG_TRACE("SetOnResponse shutdown requested");
       return;
     }
     on_response_ = std::move(on_response);
+    SPDLOG_TRACE("SetOnResponse end");
   }
   void SetOnError(on_error_t on_error) {
     std::lock_guard<std::mutex> guard(mutex_);
@@ -142,6 +145,32 @@ class GetVersionClient {
       lock.unlock();
       try {
         f(std::forward<Args>(args)...);
+        // f に自身の shared_ptr がバインドされていて、コールバック中に SetOn〜 で nullptr が渡されてた場合、
+        // RunCallback を抜ける時に Shutdown が呼ばれる可能性があり、ロック中に Shutdown するとデッドロックするので
+        // アンロック中に f を無効にする必要がある。
+        f = nullptr;
+        lock.lock();
+        running_callback_ = false;
+      } catch (...) {
+        lock.lock();
+        running_callback_ = false;
+      }
+    }
+  }
+
+  template <class F, class... Args>
+  void RunCallbackOnce(std::unique_lock<std::mutex>& lock, F& f,
+                       Args&&... args) {
+    // 呼び出した後に f が無効になるバージョン。
+    // f に自身の shared_ptr がバインドされている場合、無効にした時点で
+    // Shutdown が呼ばれる可能性があり、ロック中に Shutdown するとデッドロックするので
+    // アンロック中に f を無効にする必要がある。
+    if (f) {
+      running_callback_ = true;
+      lock.unlock();
+      try {
+        f(std::forward<Args>(args)...);
+        f = nullptr;
         lock.lock();
         running_callback_ = false;
       } catch (...) {
@@ -168,7 +197,7 @@ class GetVersionClient {
 
     if (!ok) {
       SPDLOG_ERROR("finishing error");
-      RunCallback(lock, on_error_, GetVersionClientError::FINISH);
+      RunCallbackOnce(lock, on_error_, GetVersionClientError::FINISH);
       if (Deletable()) {
         p.reset(this);
       }
@@ -176,8 +205,8 @@ class GetVersionClient {
     }
 
     // 結果が取得できた
-    RunCallback(lock, on_response_, std::move(response_),
-                std::move(grpc_status_));
+    RunCallbackOnce(lock, on_response_, std::move(response_),
+                    std::move(grpc_status_));
     if (Deletable()) {
       p.reset(this);
     }
@@ -394,6 +423,10 @@ class RunJobClient {
       lock.unlock();
       try {
         f(std::forward<Args>(args)...);
+        // f に自身の shared_ptr がバインドされていて、コールバック中に SetOn〜 で nullptr が渡されてた場合、
+        // RunCallback を抜ける時に Shutdown が呼ばれる可能性があり、ロック中に Shutdown するとデッドロックするので
+        // アンロック中に f を無効にする必要がある。
+        f = nullptr;
         lock.lock();
         running_callback_ = false;
       } catch (...) {
