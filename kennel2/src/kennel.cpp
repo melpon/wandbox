@@ -198,7 +198,7 @@ class kennel : public cppcms::application {
   // cattleshed::GetVersionResponse を頑張って JSON にする
   static cppcms::json::value version_response_to_json(
       const cattleshed::GetVersionResponse& resp) {
-    cppcms::json::value compilers;
+    cppcms::json::value compilers = cppcms::json::array();
     for (int i = 0; i < resp.compiler_info_size(); i++) {
       cppcms::json::value info;
 
@@ -207,13 +207,14 @@ class kennel : public cppcms::application {
       info["version"] = c.version();
       info["language"] = c.language();
       info["display-name"] = c.display_name();
+      info["templates"] = cppcms::json::array();
       for (int j = 0; j < c.templates_size(); j++) {
         info["templates"].array().push_back(c.templates(j));
       }
       info["compiler-option-raw"] = c.compiler_option_raw();
       info["runtime-option-raw"] = c.runtime_option_raw();
       info["display-compile-command"] = c.display_compile_command();
-      cppcms::json::value switches;
+      cppcms::json::value switches = cppcms::json::array();
       for (int j = 0; j < c.switches_size(); j++) {
         cppcms::json::value sw;
 
@@ -235,6 +236,7 @@ class kennel : public cppcms::application {
             option["name"] = opt.name();
             option["display-name"] = opt.display_name();
             option["display-flags"] = opt.display_flags();
+            sw["options"] = cppcms::json::array();
             sw["options"].array().push_back(option);
           }
         }
@@ -246,7 +248,7 @@ class kennel : public cppcms::application {
       compilers.array().push_back(info);
     }
 
-    cppcms::json::value templates;
+    cppcms::json::value templates = cppcms::json::object();
     for (int i = 0; i < resp.templates_size(); i++) {
       cppcms::json::value tmpl;
       {
@@ -297,88 +299,57 @@ class kennel : public cppcms::application {
       throw std::exception();
     }
     return future.get();
+  }
+
+ private:
+  static void get_compiler_infos_async(
+      cppcms::service& service,
+      std::function<void(std::vector<cattleshed::GetVersionResponse>)>
+          callback) {
+    auto results =
+        std::make_shared<std::vector<cattleshed::GetVersionResponse>>();
+    auto count = std::make_shared<int>(0);
+    auto size = service.settings()["application"]["cattleshed"].array().size();
+    for (auto i = 0; i < static_cast<int>(size); i++) {
+      auto cm = get_cattleshed_client_manager(service, i);
+      auto client = cm->CreateGetVersionClient();
+      client->SetOnResponse(
+          [callback, results, client, count, size](
+              cattleshed::GetVersionResponse resp, grpc::Status status) {
+            if (status.ok()) {
+              results->push_back(resp);
+            }
+            *count += 1;
+            if (*count == size) {
+              callback(std::move(*results));
+            }
+          });
+      cattleshed::GetVersionRequest req;
+      client->Request(req);
+    }
+  }
+
+  bool ensure_method_get() {
+    if (request().request_method() == "HEAD") {
+      return true;
+    }
+    if (request().request_method() == "GET") {
+      return true;
     }
 
-   private:
-    static void get_compiler_infos_async(
-        cppcms::service& service,
-        std::function<void(std::vector<cattleshed::GetVersionResponse>)>
-            callback) {
-      auto results =
-          std::make_shared<std::vector<cattleshed::GetVersionResponse>>();
-      auto count = std::make_shared<int>(0);
-      auto size =
-          service.settings()["application"]["cattleshed"].array().size();
-      for (auto i = 0; i < static_cast<int>(size); i++) {
-        auto cm = get_cattleshed_client_manager(service, i);
-        auto client = cm->CreateGetVersionClient();
-        client->SetOnResponse(
-            [callback, results, client, count, size](
-                cattleshed::GetVersionResponse resp, grpc::Status status) {
-              if (status.ok()) {
-                results->push_back(resp);
-              }
-              *count += 1;
-              if (*count == size) {
-                callback(std::move(*results));
-              }
-            });
-        cattleshed::GetVersionRequest req;
-        client->Request(req);
-      }
-
-      //for (auto i = 0; i < static_cast<int>(size); i++) {
-      //std::vector<protocol> protos = {
-      //    protocol{"Version", ""},
-      //};
-      //typedef booster::shared_ptr<cppcms::json::value> json_ptr;
-      //typedef booster::shared_ptr<std::vector<booster::shared_ptr<cppcms::json::value>>> result_type;
-      //auto results = result_type(new result_type::value_type());
-      //auto size = service().settings()["application"]["cattleshed"].array().size();
-      //results->resize(size);
-
-      //for (auto i = 0; i < static_cast<int>(size); i++) {
-      //    send_command_async(service(), i, protos, [callback, results, i](const booster::system::error_code& e, const protocol& proto) {
-      //        if (e)
-      //            return (void)(std::clog << e.message() << std::endl);
-      //        std::stringstream ss(proto.contents);
-      //        json_ptr value(new cppcms::json::value());
-      //        value->load(ss, true, nullptr);
-      //        //value->save(std::clog, cppcms::json::readable);
-      //        (*results)[i] = value;
-      //        auto completed = std::all_of(results->begin(), results->end(), [](const json_ptr& v) { return v; });
-      //        if (completed) {
-      //            std::vector<cppcms::json::value> jsons(results->size());
-      //            for (auto i = 0; i < static_cast<int>(jsons.size()); i++) {
-      //                jsons[i] = std::move(*(*results)[i]);
-      //            }
-      //            callback(jsons);
-      //        }
-      //    }, 1);
-      //}
+    if (request().request_method() == "OPTIONS") {
+      response().status(200);
+      response().allow("OPTIONS, GET, HEAD");
+      response().set_header("Access-Control-Allow-Origin", "*");
+      auto headers = request().getenv("HTTP_ACCESS_CONTROL_REQUEST_HEADERS");
+      if (!headers.empty())
+        response().set_header("Access-Control-Allow-Headers", headers);
+      return false;
+    } else {
+      response().status(405);
+      response().allow("OPTIONS, GET, HEAD");
+      return false;
     }
-
-    bool ensure_method_get() {
-        if (request().request_method() == "HEAD") {
-            return true;
-        }
-        if (request().request_method() == "GET") {
-            return true;
-        }
-
-        if (request().request_method() == "OPTIONS") {
-            response().status(200);
-            response().allow("OPTIONS, GET, HEAD");
-            response().set_header("Access-Control-Allow-Origin", "*");
-            auto headers = request().getenv("HTTP_ACCESS_CONTROL_REQUEST_HEADERS");
-            if (!headers.empty())
-                response().set_header("Access-Control-Allow-Headers", headers);
-            return false;
-        } else {
-            response().status(405);
-            response().allow("OPTIONS, GET, HEAD");
-            return false;
-        }
     }
 
     bool ensure_method_post() {
@@ -1296,6 +1267,8 @@ public:
 };
 
 int main(int argc, char** argv) try {
+  spdlog::set_level(spdlog::level::trace);
+
   std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
 
   {
@@ -1313,15 +1286,21 @@ int main(int argc, char** argv) try {
   permlink pl(service);
   pl.init();
 
-  std::clog << "start get_compiler_infos()" << std::endl;
+  SPDLOG_INFO("start get_compiler_infos()");
   auto responses = kennel::get_compiler_infos(service);
   std::vector<cppcms::json::value> jsons;
   for (const auto& resp : responses) {
     jsons.push_back(kennel::version_response_to_json(resp));
   }
   auto json = kennel::merge_compiler_infos(jsons);
+
+  SPDLOG_INFO("finish get_compiler_infos()");
+  {
+    std::stringstream ss;
+    json.save(ss, cppcms::json::readable);
+    SPDLOG_TRACE("contents: {}", ss.str());
+  }
   kennel::default_compiler_infos() = json;
-  std::clog << "finish get_compiler_infos()" << std::endl;
 
   service.applications_pool().mount(
       cppcms::applications_factory<kennel_root>());

@@ -166,11 +166,12 @@ class GetVersionClient {
     // Shutdown が呼ばれる可能性があり、ロック中に Shutdown するとデッドロックするので
     // アンロック中に f を無効にする必要がある。
     if (f) {
+      auto g = std::move(f);
       running_callback_ = true;
       lock.unlock();
       try {
-        f(std::forward<Args>(args)...);
-        f = nullptr;
+        g(std::forward<Args>(args)...);
+        g = nullptr;
         lock.lock();
         running_callback_ = false;
       } catch (...) {
