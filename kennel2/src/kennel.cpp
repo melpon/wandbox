@@ -575,33 +575,49 @@ class kennel : public cppcms::application {
     }
 
     void compile() {
-        if (!ensure_method_post()) {
-            return;
-        }
+      if (!ensure_method_post()) {
+        return;
+      }
 
-        auto value = json_post_data();
-        auto protos = make_protocols(value);
-        auto compiler = value["compiler"].str();
-        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
-        // find compiler info.
-        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
-            [&compiler](cppcms::json::value& v) {
-                return v["name"].str() == compiler;
-            });
-        // error if the compiler is not found
-        if (it == compiler_infos.array().end()) {
-            throw std::exception();
-        }
-        auto index = static_cast<std::size_t>((*it)["provider"].number());
+      auto value = json_post_data();
+      auto protos = make_protocols(value);
+      auto compiler = value["compiler"].str();
+      auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
+      // find compiler info.
+      auto it = std::find_if(compiler_infos.array().begin(),
+                             compiler_infos.array().end(),
+                             [&compiler](cppcms::json::value& v) {
+                               return v["name"].str() == compiler;
+                             });
+      // error if the compiler is not found
+      if (it == compiler_infos.array().end()) {
+        throw std::exception();
+      }
+      auto index = static_cast<std::size_t>((*it)["provider"].number());
 
-        auto es = booster::shared_ptr<eventsource>(new eventsource(release_context()));
-        es->send_header();
-        send_command_async(service(), index, protos, [es](const booster::system::error_code& e, const protocol& proto) {
-            if (e)
-                return (void)(std::clog << e.message() << std::endl);
-            es->send_data(proto.command + ":" + proto.contents, true);
-            //std::clog << proto.command << ":" << proto.contents << std::endl;
-        });
+      auto es =
+          booster::shared_ptr<eventsource>(new eventsource(release_context()));
+      es->send_header();
+
+      auto request = make_run_job_request(value);
+
+      SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
+
+      auto cm = get_cattleshed_client_manager(service(), index);
+      auto client = cm->CreateRunJobClient();
+      client->SetOnRead([client, es](cattleshed::RunJobResponse resp) {
+        SPDLOG_DEBUG("[client] OnRead: {}", resp.DebugString());
+
+        es->send_data(response_type_to_string(resp.type()) + ":" + resp.data(),
+                      true);
+      });
+      client->SetOnReadDone([client](grpc::Status status) {
+        SPDLOG_DEBUG("[client] OnReadDone");
+        client->Shutdown();
+      });
+      client->Connect();
+      client->Write(std::move(request));
+      client->WritesDone();
     }
     static std::string make_random_name(std::size_t length) {
         std::string name;
@@ -827,6 +843,28 @@ class kennel : public cppcms::application {
         //append(result["error"], resp.data());
       }
     }
+    static std::string response_type_to_string(
+        cattleshed::RunJobResponse::Type type) {
+      switch (type) {
+        case cattleshed::RunJobResponse::CONTROL:
+          return "Control";
+        case cattleshed::RunJobResponse::COMPILER_STDOUT:
+          return "CompilerMessageS";
+        case cattleshed::RunJobResponse::COMPILER_STDERR:
+          return "CompilerMessageE";
+        case cattleshed::RunJobResponse::STDOUT:
+          return "StdOut";
+        case cattleshed::RunJobResponse::STDERR:
+          return "StdErr";
+        case cattleshed::RunJobResponse::EXIT_CODE:
+          return "ExitCode";
+        case cattleshed::RunJobResponse::SIGNAL:
+          return "Signal";
+        default:
+          return "";
+      }
+    }
+
     void api_compile() {
         if (!ensure_method_post()) {
             return;
@@ -871,31 +909,7 @@ class kennel : public cppcms::application {
 
               if (save) {
                 cppcms::json::value v;
-                std::string type;
-                switch (resp.type()) {
-                  case cattleshed::RunJobResponse::CONTROL:
-                    type = "Control";
-                    break;
-                  case cattleshed::RunJobResponse::COMPILER_STDOUT:
-                    type = "CompilerMessageS";
-                    break;
-                  case cattleshed::RunJobResponse::COMPILER_STDERR:
-                    type = "CompilerMessageE";
-                    break;
-                  case cattleshed::RunJobResponse::STDOUT:
-                    type = "StdOut";
-                    break;
-                  case cattleshed::RunJobResponse::STDERR:
-                    type = "StdErr";
-                    break;
-                  case cattleshed::RunJobResponse::EXIT_CODE:
-                    type = "ExitCode";
-                    break;
-                  case cattleshed::RunJobResponse::SIGNAL:
-                    type = "Signal";
-                    break;
-                }
-                v["type"] = type;
+                v["type"] = response_type_to_string(resp.type());
                 v["data"] = resp.data();
                 outputs.array().push_back(v);
               }
@@ -929,37 +943,51 @@ class kennel : public cppcms::application {
         return result;
     }
     void api_compile_ndjson() {
-        if (!ensure_method_post()) {
-            return;
-        }
+      if (!ensure_method_post()) {
+        return;
+      }
 
-        auto value = json_post_data();
-        auto protos = make_protocols(value);
-        auto compiler = value["compiler"].str();
-        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
-        // find compiler info.
-        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
-            [&compiler](cppcms::json::value& v) {
-                return v["name"].str() == compiler;
-            });
-        // error if the compiler is not found
-        if (it == compiler_infos.array().end()) {
-            throw std::exception();
-        }
-        auto index = static_cast<std::size_t>((*it)["provider"].number());
+      auto value = json_post_data();
+      auto protos = make_protocols(value);
+      auto compiler = value["compiler"].str();
+      auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
+      // find compiler info.
+      auto it = std::find_if(compiler_infos.array().begin(),
+                             compiler_infos.array().end(),
+                             [&compiler](cppcms::json::value& v) {
+                               return v["name"].str() == compiler;
+                             });
+      // error if the compiler is not found
+      if (it == compiler_infos.array().end()) {
+        throw std::exception();
+      }
+      auto index = static_cast<std::size_t>((*it)["provider"].number());
 
-        auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
-        nd->send_header();
-        nd->context->response().set_header("Access-Control-Allow-Origin", "*");
-        send_command_async(service(), index, protos, [nd, value](const booster::system::error_code& e, const protocol& proto) {
-            if (e)
-                return (void)(std::clog << e.message() << std::endl);
-            cppcms::json::value json;
-            json["type"] = proto.command;
-            json["data"] = proto.contents;
-            nd->send(json, true);
-            //std::clog << proto.command << ":" << proto.contents << std::endl;
-        });
+      auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
+      nd->send_header();
+      nd->context->response().set_header("Access-Control-Allow-Origin", "*");
+
+      auto request = make_run_job_request(value);
+
+      SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
+
+      auto cm = get_cattleshed_client_manager(service(), index);
+      auto client = cm->CreateRunJobClient();
+      client->SetOnRead([nd](cattleshed::RunJobResponse resp) {
+        SPDLOG_DEBUG("[client] OnRead: {}", resp.DebugString());
+
+        cppcms::json::value v;
+        v["type"] = response_type_to_string(resp.type());
+        v["data"] = resp.data();
+        nd->send(v, true);
+      });
+      client->SetOnReadDone([client](grpc::Status status) {
+        SPDLOG_DEBUG("[client] OnReadDone");
+        client->Shutdown();
+      });
+      client->Connect();
+      client->Write(std::move(request));
+      client->WritesDone();
     }
     void api_permlink(std::string permlink_name) {
         if (!ensure_method_get()) {

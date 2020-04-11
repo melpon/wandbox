@@ -2,8 +2,8 @@
 
 PROC=$1
 
-rm -rf crash/
+rm -rf _crash/
 if [ -e /var/crash/*$PROC.*.crash ]; then
-  apport-unpack /var/crash/*$PROC.*.crash crash/
-  gdb `cat crash/ExecutablePath` -c crash/CoreDump
+  apport-unpack /var/crash/*$PROC.*.crash _crash/
+  gdb `cat _crash/ExecutablePath` -c _crash/CoreDump
 fi

@@ -22,9 +22,10 @@ public:
 
     ndjson() = default;
     ~ndjson() {
-        try {
-            close();
-        } catch (...) { }
+      try {
+        close();
+      } catch (...) {
+      }
     }
     //ndjson(const ndjson&) = default;
     ndjson(ndjson&&) = default;

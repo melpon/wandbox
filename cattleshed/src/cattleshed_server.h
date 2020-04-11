@@ -1597,6 +1597,11 @@ class RunJobHandler {
       //std::clog << "[" << sock.get() << "]"
       //          << "finished [" << this << "]" << std::endl;
 
+      cattleshed::RunJobResponse resp;
+      resp.set_type(cattleshed::RunJobResponse::CONTROL);
+      resp.set_data("Finish");
+      send_(resp);
+
       cb_();
     }
 
