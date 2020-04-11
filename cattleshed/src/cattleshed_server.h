@@ -1177,9 +1177,9 @@ class RunJobHandler {
 
    private:
     void Complete(boost::system::error_code ec) {
-      ioc_->post([ec, cb = std::move(cb_), workdir = std::move(workdir_)]() {
-        cb(ec, workdir);
-      });
+      boost::asio::post(ioc_->get_executor(),
+                        [ec, cb = std::move(cb_),
+                         workdir = std::move(workdir_)]() { cb(ec, workdir); });
     }
 
     std::shared_ptr<boost::asio::io_context> ioc_;
@@ -1347,7 +1347,7 @@ class RunJobHandler {
         if (ec) {
           pipe_.close();
           if (handler_) {
-            ioc_->post(std::move(handler_));
+            boost::asio::post(ioc_->get_executor(), std::move(handler_));
             handler_ = {};
           }
           return;
@@ -1692,6 +1692,7 @@ class CattleshedServer {
           new std::thread([this, cq] { this->HandleRpcs(cq); })));
     }
   }
+  void Wait() { server_->Wait(); }
 
   void Shutdown() {
     std::unique_lock<std::mutex> lock(mutex_);

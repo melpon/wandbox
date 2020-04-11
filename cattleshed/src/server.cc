@@ -1037,14 +1037,14 @@ int main(int argc, char** argv) try {
     }
   }
 
-  auto aio = std::make_shared<boost::asio::io_context>();
+  auto ioc = std::make_shared<boost::asio::io_context>();
 
-  CattleshedServer server(aio, config);
-  server.Start("0.0.0.0:50051", 1);
+  CattleshedServer server(ioc, config);
+  server.Start("0.0.0.0:" + std::to_string(config.system.listen_port), 1);
 
-  listener s(aio, boost::asio::ip::tcp::v4(), config.system.listen_port);
-  s();
-  aio->run();
+  boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+      work = boost::asio::make_work_guard(ioc->get_executor());
+  ioc->run();
   return 0;
 } catch (std::exception& e) {
   std::clog << "fatal: " << e.what() << std::endl;

@@ -107,9 +107,8 @@ class kennel : public cppcms::application {
     }
 
     auto host = srv.settings()["application"]["cattleshed"][n]["host"].str();
-    //auto port =
-    //    (int)srv.settings()["application"]["cattleshed"][n]["port"].number();
-    auto port = 50051;
+    auto port =
+        (int)srv.settings()["application"]["cattleshed"][n]["port"].number();
     auto channel = grpc::CreateChannel(host + ":" + std::to_string(port),
                                        grpc::InsecureChannelCredentials());
     SPDLOG_INFO("Create gRPC channel to {}", host + ":" + std::to_string(port));
