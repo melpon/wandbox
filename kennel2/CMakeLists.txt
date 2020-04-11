@@ -23,6 +23,14 @@ if(NOT KENNEL_STATICDIR)
   set(KENNEL_STATICDIR ${CMAKE_INSTALL_PREFIX}/etc/static)
 endif()
 
+if(NOT KENNEL_SCHEME)
+  set(KENNEL_SCHEME "https")
+endif()
+
+if(NOT KENNEL_DOMAIN)
+  set(KENNEL_DOMAIN "wandbox.org")
+endif()
+
 if(NOT KENNEL_GOOGLEANALYTICS)
   set(KENNEL_GOOGLEANALYTICS "")
 endif()

@@ -12,6 +12,8 @@ set(KENNEL_STATICDIR ${CMAKE_CURRENT_SOURCE_DIR}/static)
 set(KENNEL_SPONSORSFILE ${CMAKE_CURRENT_SOURCE_DIR}/sponsors.json)
 set(KENNEL_CATTLESHED_HOST "127.0.0.1")
 set(KENNEL_CATTLESHED_PORT 50051)
+set(KENNEL_SCHEME "http")
+set(KENNEL_DOMAIN "localhost:3500")
 set(KENNEL_SERVICE_API "http")
 
 add_subdirectory(../cattleshed cattleshed)

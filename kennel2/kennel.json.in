@@ -1,8 +1,8 @@
 { "application" :
     { "database": "sqlite3:db=@KENNEL_DATABASEDIR@/kennel_production.sqlite;@pool_size=10"
     , "static_dir": "@KENNEL_STATICDIR@"
-    , "scheme": "https"
-    , "domain": "wandbox.org"
+    , "scheme": "@KENNEL_SCHEME@"
+    , "domain": "@KENNEL_DOMAIN@"
     , "map_root": ""
     , "dispatch_root": ""
     , "cattleshed":
