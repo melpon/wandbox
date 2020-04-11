@@ -12,7 +12,6 @@
 #include "ndjson.h"
 #include "nojs_root.h"
 #include "permlink.h"
-#include "protocol.h"
 #include "root.h"
 #include "user.h"
 
@@ -483,27 +482,6 @@ class kennel : public cppcms::application {
         response().set_redirect_header(root_ss.str());
     }
 
-    static std::vector<protocol> make_protocols(
-        const cppcms::json::value& value) {
-      std::vector<protocol> protos = {
-          protocol{"Control", "compiler=" + value["compiler"].str()},
-          protocol{"StdIn", value.get("stdin", "")},
-          protocol{"CompilerOptionRaw", value.get("compiler-option-raw", "")},
-          protocol{"RuntimeOptionRaw", value.get("runtime-option-raw", "")},
-          protocol{"Source", value["code"].str()},
-          protocol{"CompilerOption", value.get("options", "")},
-      };
-      const auto& codes = value.find("codes");
-      if (!codes.is_undefined()) {
-        for (const auto& code : codes.array()) {
-          protos.push_back(protocol{"SourceFileName", code["file"].str()});
-          protos.push_back(protocol{"Source", code["code"].str()});
-        }
-      }
-      protos.push_back(protocol{"Control", "run"});
-      return protos;
-    }
-
     static cattleshed::RunJobRequest make_run_job_request(
         const cppcms::json::value& value) {
       cattleshed::RunJobRequest request;
@@ -579,7 +557,6 @@ class kennel : public cppcms::application {
       }
 
       auto value = json_post_data();
-      auto protos = make_protocols(value);
       auto compiler = value["compiler"].str();
       auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
       // find compiler info.
@@ -785,34 +762,6 @@ class kennel : public cppcms::application {
         get_compiler_infos_or_cache()["compilers"].save(response().out(), cppcms::json::compact);
     }
 
-    static void update_compile_result(cppcms::json::value& result, const protocol& proto) {
-        static auto append = [](cppcms::json::value& v, const std::string& str) {
-            if (v.is_undefined())
-                v = str;
-            else
-                v.str() += str;
-        };
-        if (false) {
-        } else if (proto.command == "CompilerMessageS") {
-            append(result["compiler_output"], proto.contents);
-            append(result["compiler_message"], proto.contents);
-        } else if (proto.command == "CompilerMessageE") {
-            append(result["compiler_error"], proto.contents);
-            append(result["compiler_message"], proto.contents);
-        } else if (proto.command == "StdOut") {
-            append(result["program_output"], proto.contents);
-            append(result["program_message"], proto.contents);
-        } else if (proto.command == "StdErr") {
-            append(result["program_error"], proto.contents);
-            append(result["program_message"], proto.contents);
-        } else if (proto.command == "ExitCode") {
-            append(result["status"], proto.contents);
-        } else if (proto.command == "Signal") {
-            append(result["signal"], proto.contents);
-        } else {
-            //append(result["error"], proto.contents);
-        }
-    }
     static void update_compile_result(cppcms::json::value& result,
                                       const cattleshed::RunJobResponse& resp) {
       static auto append = [](cppcms::json::value& v, const std::string& str) {
@@ -862,6 +811,25 @@ class kennel : public cppcms::application {
         default:
           return "";
       }
+    }
+    static cattleshed::RunJobResponse::Type string_to_response_type(
+        std::string str) {
+      if (str == "Control") {
+        return cattleshed::RunJobResponse::CONTROL;
+      } else if (str == "CompilerMessageS") {
+        return cattleshed::RunJobResponse::COMPILER_STDOUT;
+      } else if (str == "CompilerMessageE") {
+        return cattleshed::RunJobResponse::COMPILER_STDERR;
+      } else if (str == "StdOut") {
+        return cattleshed::RunJobResponse::STDOUT;
+      } else if (str == "StdErr") {
+        return cattleshed::RunJobResponse::STDERR;
+      } else if (str == "ExitCode") {
+        return cattleshed::RunJobResponse::EXIT_CODE;
+      } else if (str == "Signal") {
+        return cattleshed::RunJobResponse::SIGNAL;
+      }
+      return cattleshed::RunJobResponse::CONTROL;
     }
 
     void api_compile() {
@@ -947,7 +915,6 @@ class kennel : public cppcms::application {
       }
 
       auto value = json_post_data();
-      auto protos = make_protocols(value);
       auto compiler = value["compiler"].str();
       auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
       // find compiler info.
@@ -1004,7 +971,10 @@ class kennel : public cppcms::application {
         // １件も出力が存在しない場合は results フィールドそのものが存在しなくなるのでチェックする
         if (value.object().find("results") != value.object().end()) {
           for (auto&& output: value["results"].array()) {
-              update_compile_result(result, protocol{output["type"].str(), output["data"].str()});
+            cattleshed::RunJobResponse resp;
+            resp.set_type(string_to_response_type(output["type"].str()));
+            resp.set_data(output["data"].str());
+            update_compile_result(result, resp);
           }
           results = value["results"].array();
           value.object().erase("results");
@@ -1198,7 +1168,10 @@ class kennel : public cppcms::application {
         auto result = pl.get_permlink(permlink_name);
 
         for (auto&& output: result["results"].array()) {
-            update_compile_result(result, protocol{output["type"].str(), output["data"].str()});
+          cattleshed::RunJobResponse resp;
+          resp.set_type(string_to_response_type(output["type"].str()));
+          resp.set_data(output["data"].str());
+          update_compile_result(result, resp);
         }
         result.object().erase("results");
 
