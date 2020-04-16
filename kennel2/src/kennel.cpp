@@ -4,6 +4,9 @@
 #include <iostream>
 #include <random>
 #include <sstream>
+
+#include <CLI/CLI.hpp>
+
 #include "cattleshed_client.h"
 #include "eventsource.h"
 #include "http_client.h"
@@ -1266,9 +1269,45 @@ public:
 };
 
 int main(int argc, char** argv) try {
-  spdlog::set_level(spdlog::level::trace);
+  CLI::App app("kennel");
 
-  cppcms::service service(argc, argv);
+  spdlog::level::level_enum log_level = spdlog::level::info;
+  auto log_level_map =
+      std::vector<std::pair<std::string, spdlog::level::level_enum>>(
+          {{"trace", spdlog::level::trace},
+           {"debug", spdlog::level::debug},
+           {"info", spdlog::level::info},
+           {"warning", spdlog::level::warn},
+           {"error", spdlog::level::err},
+           {"critical", spdlog::level::critical},
+           {"off", spdlog::level::off}});
+  app.add_option("--log-level", log_level, "Log severity level threshold")
+      ->transform(CLI::CheckedTransformer(log_level_map, CLI::ignore_case));
+
+  std::string config_file;
+  app.add_option("-c,--config", config_file, "config file")
+      ->check(CLI::ExistingFile)
+      ->required();
+
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::ParseError& e) {
+    return app.exit(e);
+  }
+
+  spdlog::set_level(log_level);
+
+  cppcms::json::value config_json;
+  std::ifstream ifs(config_file.c_str());
+
+  int line_number = 0;
+  if (!config_json.load(ifs, true, &line_number)) {
+    SPDLOG_ERROR("Error reading configuration file {} in line:{}", config_file,
+                 line_number);
+    throw - 1;
+  }
+
+  cppcms::service service(config_json);
 
   permlink pl(service);
   pl.init();

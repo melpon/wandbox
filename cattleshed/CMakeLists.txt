@@ -13,6 +13,7 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 find_package(Spdlog REQUIRED)
+find_package(CLI11 REQUIRED)
 
 # ---- 初期値
 
@@ -96,7 +97,8 @@ target_link_libraries(cattleshed
   RT::RT
   Threads::Threads
   gRPC::grpc++
-  Spdlog::Spdlog)
+  Spdlog::Spdlog
+  CLI11::CLI11)
 
 set_sanitizer(cattleshed)
 

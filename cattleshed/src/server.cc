@@ -27,6 +27,12 @@
 #include <sys/eventfd.h>
 #include <time.h>
 
+// CLI11
+#include <CLI/CLI.hpp>
+
+// spdlog
+#include <spdlog/spdlog.h>
+
 #include "cattleshed_server.h"
 #include "load_config.hpp"
 #include "posixapi.hpp"
@@ -36,49 +42,51 @@ int main(int argc, char** argv) try {
 
   ::setlocale(LC_ALL, "C");
 
-  spdlog::set_level(spdlog::level::trace);
+  CLI::App app("cattleshed");
+
+  spdlog::level::level_enum log_level = spdlog::level::info;
+  auto log_level_map =
+      std::vector<std::pair<std::string, spdlog::level::level_enum>>(
+          {{"trace", spdlog::level::trace},
+           {"debug", spdlog::level::debug},
+           {"info", spdlog::level::info},
+           {"warning", spdlog::level::warn},
+           {"error", spdlog::level::err},
+           {"critical", spdlog::level::critical},
+           {"off", spdlog::level::off}});
+  app.add_option("--log-level", log_level, "Log severity level threshold")
+      ->transform(CLI::CheckedTransformer(log_level_map, CLI::ignore_case));
+
+  std::vector<std::string> config_paths;
+  app.add_option("-c,--config", config_paths, "config files or dirs")
+      ->check(CLI::ExistingPath)
+      ->required();
+
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::ParseError& e) {
+    return app.exit(e);
+  }
+
+  spdlog::set_level(log_level);
 
   wandbox::server_config config;
 
-  {
-    namespace po = boost::program_options;
+  try {
+    config = load_config(config_paths);
+  } catch (...) {
+    SPDLOG_ERROR("failed to read config file(s), check existence or syntax.");
+    throw;
+  }
 
-    std::vector<std::string> config_files{
-        std::string(SYSCONFDIR) + "/cattleshed.conf",
-        std::string(SYSCONFDIR) + "/cattleshed.conf.d"};
-    {
-      po::options_description opt("options");
-      opt.add_options()("help,h", "show this help")(
-          "config,c", po::value<std::vector<std::string>>(&config_files),
-          "specify config file")("syslog", "use syslog for trace")(
-          "verbose", "be verbose");
+  if (config.system.storedir[0] != '/') {
+    SPDLOG_ERROR("storedir must be absolute.");
+    return 1;
+  }
 
-      po::variables_map vm;
-      po::store(po::parse_command_line(argc, argv, opt), vm);
-      po::notify(vm);
-
-      if (vm.count("help")) {
-        std::cout << opt << std::endl;
-        return 0;
-      }
-    }
-
-    try {
-      config = load_config(config_files);
-    } catch (...) {
-      SPDLOG_ERROR("failed to read config file(s), check existence or syntax.");
-      throw;
-    }
-
-    if (config.system.storedir[0] != '/') {
-      SPDLOG_ERROR("storedir must be absolute.");
-      return 1;
-    }
-
-    if (config.system.basedir[0] != '/') {
-      SPDLOG_ERROR("basedir must be absolute.");
-      return 1;
-    }
+  if (config.system.basedir[0] != '/') {
+    SPDLOG_ERROR("basedir must be absolute.");
+    return 1;
   }
 
   auto ioc = std::make_shared<boost::asio::io_context>();
