@@ -30,7 +30,7 @@ jobs:
         echo "    User root" >> $HOME/.ssh/config
         ssh-keyscan -H 153.121.40.132 >> $HOME/.ssh/known_hosts
     - name: apt install
-      run: apt install -y libcap-dev
+      run: sudo apt-get install -y libcap-dev
     - name: Get cached tools
       id: cache-tools
       uses: actions/cache@v1
