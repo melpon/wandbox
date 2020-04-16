@@ -20,6 +20,8 @@
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/variant.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include "posixapi.hpp"
 
 namespace wandbox {
@@ -213,7 +215,7 @@ compiler_set load_compiler_trait(const cfg::value& o) {
     }
     for (auto& x : get_str_array(y, "initial-checked"))
       t.initial_checked.insert(std::move(x));
-    std::clog << "load compiler " << t.name << std::endl;
+    SPDLOG_INFO("load compiler {}", t.name);
     const auto inherits = get_str_array(y, "inherits");
     if (!inherits.empty()) inherit_map[t.name] = inherits;
     const auto appendto = get_str(y, "append-to");
@@ -421,7 +423,7 @@ struct parse_config_error : std::runtime_error {
 
 cfg::value read_single_config_file(const std::shared_ptr<DIR>& at,
                                    const std::string& cfg) {
-  std::clog << "reading " << cfg << std::endl;
+  SPDLOG_INFO("reading {}", cfg);
   namespace s = boost::spirit;
   namespace qi = boost::spirit::qi;
   typedef s::multi_pass<

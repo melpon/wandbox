@@ -1429,10 +1429,11 @@ class RunJobHandler {
             }
           }
 
-          //std::clog << "[" << sock.get() << "]"
-          //          << "using option " << sw << ':';
-          //for (auto&& f : t.flags) std::clog << ' ' << f;
-          //std::clog << std::endl;
+          std::stringstream ss;
+          for (auto&& f : t.flags) {
+            ss << ' ' << f;
+          }
+          SPDLOG_INFO("[0x{}] using option {}:", (void*)this, ss.str());
 
           const auto f = [&t](std::vector<std::string>& args) {
             if (t.insert_position == 0) {
@@ -1594,15 +1595,14 @@ class RunJobHandler {
         send_(resp);
       }
 
-      //std::clog << "[" << sock.get() << "]"
-      //          << "finished [" << this << "]" << std::endl;
-
       cattleshed::RunJobResponse resp;
       resp.set_type(cattleshed::RunJobResponse::CONTROL);
       resp.set_data("Finish");
       send_(resp);
 
       cb_();
+
+      SPDLOG_INFO("[0x{}] finished", (void*)this);
     }
 
     const wandbox::jail_config& jail() const {

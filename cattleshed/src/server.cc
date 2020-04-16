@@ -25,13 +25,11 @@
 #include <aio.h>
 #include <locale.h>
 #include <sys/eventfd.h>
-#include <syslog.h>
 #include <time.h>
 
 #include "cattleshed_server.h"
 #include "load_config.hpp"
 #include "posixapi.hpp"
-#include "syslogstream.hpp"
 
 int main(int argc, char** argv) try {
   using namespace wandbox;
@@ -39,8 +37,6 @@ int main(int argc, char** argv) try {
   ::setlocale(LC_ALL, "C");
 
   spdlog::set_level(spdlog::level::trace);
-
-  std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
 
   wandbox::server_config config;
 
@@ -65,29 +61,22 @@ int main(int argc, char** argv) try {
         std::cout << opt << std::endl;
         return 0;
       }
-
-      if (vm.count("syslog")) {
-        logbuf.reset(
-            new syslogstreambuf("cattleshed", LOG_PID, LOG_DAEMON, LOG_DEBUG));
-        std::clog.rdbuf(logbuf.get());
-      }
     }
 
     try {
       config = load_config(config_files);
     } catch (...) {
-      std::clog << "failed to read config file(s), check existence or syntax."
-                << std::endl;
+      SPDLOG_ERROR("failed to read config file(s), check existence or syntax.");
       throw;
     }
 
     if (config.system.storedir[0] != '/') {
-      std::clog << "storedir must be absolute." << std::endl;
+      SPDLOG_ERROR("storedir must be absolute.");
       return 1;
     }
 
     if (config.system.basedir[0] != '/') {
-      std::clog << "basedir must be absolute." << std::endl;
+      SPDLOG_ERROR("basedir must be absolute.");
       return 1;
     }
   }
@@ -102,6 +91,6 @@ int main(int argc, char** argv) try {
   ioc->run();
   return 0;
 } catch (std::exception& e) {
-  std::clog << "fatal: " << e.what() << std::endl;
+  SPDLOG_ERROR("fatal: {}", e.what());
   return -1;
 }

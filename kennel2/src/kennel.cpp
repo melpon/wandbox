@@ -4,7 +4,6 @@
 #include <iostream>
 #include <random>
 #include <sstream>
-#include "../../cattleshed/src/syslogstream.cc"
 #include "cattleshed_client.h"
 #include "eventsource.h"
 #include "http_client.h"
@@ -1269,18 +1268,6 @@ public:
 int main(int argc, char** argv) try {
   spdlog::set_level(spdlog::level::trace);
 
-  std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*) {});
-
-  {
-    const auto ite = std::find(argv, argv + argc, std::string("--syslog"));
-    if (ite != argv + argc) {
-      std::clog.rdbuf(new wandbox::syslogstreambuf("kennel2", LOG_PID,
-                                                   LOG_DAEMON, LOG_DEBUG));
-      std::rotate(ite, ite + 1, argv + argc);
-      --argc;
-    }
-  }
-
   cppcms::service service(argc, argv);
 
   permlink pl(service);
@@ -1306,6 +1293,6 @@ int main(int argc, char** argv) try {
       cppcms::applications_factory<kennel_root>());
   service.run();
 } catch (std::exception const& e) {
-  std::cerr << e.what() << std::endl;
+  SPDLOG_ERROR("app error: {}", e.what());
 }
 

@@ -83,7 +83,6 @@ endmacro()
 add_executable(cattleshed
   src/server.cc
   src/load_config.cc
-  src/syslogstream.cc
   ${CATTLESHED_PROTO})
 set_target_properties(cattleshed PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
 target_include_directories(cattleshed PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
