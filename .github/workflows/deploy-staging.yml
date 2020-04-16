@@ -1,0 +1,45 @@
+name: Deploy staging.wandbox.org
+
+on:
+  push:
+    branches:
+      - grpc
+
+jobs:
+  deploy:
+    runs-on: ubuntu-16.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Register SSH key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p $HOME/.ssh
+        echo "$SSH_PRIVATE_KEY" > $HOME/.ssh/id_ed25519
+        chmod 600 $HOME/.ssh/id_ed25519
+    - name: Add SSH config
+      run: |
+        echo "Host kennel-root" >> $HOME/.ssh/config
+        echo "    HostName 49.212.130.73" >> $HOME/.ssh/config
+        echo "    User root" >> $HOME/.ssh/config
+        ssh-keyscan -H 49.212.130.73 >> $HOME/.ssh/known_hosts
+        echo "Host cattleshed-root" >> $HOME/.ssh/config
+        echo "    HostName 153.121.40.132" >> $HOME/.ssh/config
+        echo "    User root" >> $HOME/.ssh/config
+        ssh-keyscan -H 153.121.40.132 >> $HOME/.ssh/known_hosts
+    - name: Get cached tools
+      id: cache-tools
+      uses: actions/cache@v1
+      with:
+        path: _install
+        key: install-tools
+    - name: Install tools
+      run: ./install_tools.sh
+    - name: Deploy kennel to staging.wandbox.org
+      run: |
+        ./package.sh kennel staging
+        ./deploy.sh kennel-root kennel staging
+    - name: Deploy cattleshed to staging.wandbox.org
+      run: |
+        ./package.sh cattleshed staging
+        ./deploy.sh cattleshed-root cattleshed staging
