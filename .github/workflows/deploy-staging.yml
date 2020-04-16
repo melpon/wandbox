@@ -34,7 +34,7 @@ jobs:
         path: _install
         key: install-tools
     - name: Install tools
-      run: ./install_tools.sh
+      run: ./install_tools.sh --release
     - name: Deploy kennel to staging.wandbox.org
       run: |
         ./package.sh kennel staging

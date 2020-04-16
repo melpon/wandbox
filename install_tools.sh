@@ -10,6 +10,11 @@ mkdir -p $SOURCE_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $INSTALL_DIR
 
+RELEASE_MODE=0
+if [ "$1" = "--release" ]; then
+  RELEASE_MODE=1
+fi
+
 CMAKE_VERSION="3.17.0"
 CMAKE_VERSION_FILE="$INSTALL_DIR/cmake.version"
 CMAKE_CHANGED=0
@@ -134,7 +139,12 @@ export PATH=$INSTALL_DIR/cmake/bin:$PATH
 
 # grpc (cmake)
 if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; then
-  for buildtype in release tsan asan; do
+  # RELEASE_MODE=1 の場合は tsan, asan は入れない
+  _BUILDTYPE="release tsan asan"
+  if [ $RELEASE_MODE -eq 1 ]; then
+    _BUILDTYPE="release"
+  fi
+  for buildtype in $_BUILDTYPE; do
     case "$buildtype" in
       "release" )
         _POSTFIX=""
