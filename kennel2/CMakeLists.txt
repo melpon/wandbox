@@ -111,8 +111,11 @@ set_source_files_properties(${SKIN_KENNEL} PROPERTIES
 
 set(KENNEL_JSON ${CMAKE_CURRENT_BINARY_DIR}/kennel.json)
 set(_KENNEL_JSON_IN ${PROJECT_SOURCE_DIR}/kennel.json.in)
-
 configure_file(${_KENNEL_JSON_IN} ${KENNEL_JSON} @ONLY)
+
+set(KENNEL_SERVICE ${CMAKE_CURRENT_BINARY_DIR}/kennel.service)
+set(_KENNEL_SERVICE_IN ${PROJECT_SOURCE_DIR}/kennel.service.in)
+configure_file(${_KENNEL_SERVICE_IN} ${KENNEL_SERVICE} @ONLY)
 
 # --- 便利マクロ定義
 
@@ -154,5 +157,7 @@ set_sanitizer(kennel)
 set(SPONSORS_JSON ${PROJECT_SOURCE_DIR}/sponsors.json)
 
 install(TARGETS kennel)
-install(FILES ${SPONSORS_JSON} ${KENNEL_JSON} DESTINATION etc)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/static DESTINATION etc/static)
+install(FILES ${SPONSORS_JSON} ${KENNEL_JSON} ${KENNEL_SERVICE} DESTINATION etc)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/static DESTINATION etc)
+install(FILES ${PROJECT_SOURCE_DIR}/../submodules/ansi_up/ansi_up.js DESTINATION etc/static/js)
+install(FILES ${PROJECT_SOURCE_DIR}/../submodules/jquery-cookie/src/jquery.cookie.js DESTINATION etc/static/js)
