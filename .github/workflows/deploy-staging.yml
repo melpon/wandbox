@@ -39,15 +39,15 @@ jobs:
         key: install-tools
     - name: Install tools
       run: ./install_tools.sh --release
-    - name: Package kennel
-      run: |
-        ./package.sh kennel staging
     - name: Package cattleshed
       run: |
         ./package.sh cattleshed staging
-    - name: Deploy kennel to staging.wandbox.org
+    - name: Package kennel
       run: |
-        ./deploy.sh kennel-root kennel staging
+        ./package.sh kennel staging
     - name: Deploy cattleshed to staging.wandbox.org
       run: |
         ./deploy.sh cattleshed-root cattleshed staging
+    - name: Deploy kennel to staging.wandbox.org
+      run: |
+        ./deploy.sh kennel-root kennel staging
