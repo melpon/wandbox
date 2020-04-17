@@ -1,0 +1,4 @@
+{"data":"Start","type":"Control"}
+{"data":"foo\n","type":"StdOut"}
+{"data":"0","type":"ExitCode"}
+{"data":"Finish","type":"Control"}

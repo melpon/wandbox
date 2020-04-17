@@ -10,6 +10,10 @@ find_package(Boost REQUIRED
 find_package(RT REQUIRED)
 find_package(CAP REQUIRED)
 find_package(Threads REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(gRPC REQUIRED)
+find_package(Spdlog REQUIRED)
+find_package(CLI11 REQUIRED)
 
 # ---- 初期値
 
@@ -30,27 +34,73 @@ if(NOT CATTLESHED_BASEDIR)
 endif()
 
 if(NOT CATTLESHED_LISTEN_PORT)
-  set(CATTLESHED_LISTEN_PORT 2012)
+  set(CATTLESHED_LISTEN_PORT 50051)
 endif()
 
 if(NOT CATTLESHED_SERVICE_ARGS)
   set(CATTLESHED_SERVICE_ARGS "-c /opt/wandbox/cattleshed-conf/compilers.default")
 endif()
 
+# --- cattleshed.pb.cc などの生成
+
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/proto")
+add_custom_command(
+  OUTPUT
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.cc"
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.cc"
+    "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.h"
+  COMMAND $<TARGET_FILE:protobuf::protoc>
+  ARGS
+    --grpc_out "${CMAKE_CURRENT_BINARY_DIR}/proto"
+    --cpp_out "${CMAKE_CURRENT_BINARY_DIR}/proto"
+    -I "${CMAKE_CURRENT_SOURCE_DIR}/../proto"
+    --plugin=protoc-gen-grpc="$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../proto/cattleshed.proto"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../proto/cattleshed.proto")
+
+set(CATTLESHED_PROTO
+  "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.pb.cc"
+  "${CMAKE_CURRENT_BINARY_DIR}/proto/cattleshed.grpc.pb.cc")
+
+# --- 便利マクロ定義
+
+macro(set_sanitizer target)
+  # tsan
+  if (ENABLE_TSAN)
+    target_compile_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
+    target_link_options(${target} PRIVATE -g -fsanitize=thread -fsanitize=undefined)
+  endif()
+
+  # asan
+  if (ENABLE_ASAN)
+    target_compile_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
+    target_link_options(${target} PRIVATE -g -fsanitize=address -fsanitize=undefined)
+  endif()
+endmacro()
+
 # ---- cattleshed
 
 add_executable(cattleshed
   src/server.cc
   src/load_config.cc
-  src/quoted_printable.cc
-  src/syslogstream.cc)
+  ${CATTLESHED_PROTO})
 set_target_properties(cattleshed PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
-target_compile_definitions(cattleshed PRIVATE SYSCONFDIR="${CMAKE_INSTALL_PREFIX}/etc")
+target_include_directories(cattleshed PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
+target_compile_definitions(cattleshed
+  PRIVATE
+    SYSCONFDIR="${CMAKE_INSTALL_PREFIX}/etc"
+    SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 target_link_libraries(cattleshed
   Boost::boost
   Boost::program_options
   RT::RT
-  Threads::Threads)
+  Threads::Threads
+  gRPC::grpc++
+  Spdlog::Spdlog
+  CLI11::CLI11)
+
+set_sanitizer(cattleshed)
 
 # ---- cattlegrid
 

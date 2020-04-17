@@ -1,0 +1,9 @@
+data: Control:Start
+
+data: StdOut:foo
+data: 
+
+data: ExitCode:0
+
+data: Control:Finish
+

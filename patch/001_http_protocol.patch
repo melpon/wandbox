@@ -14,7 +14,7 @@ index 72d4d5a..9648717 100644
  		///
  		void status(int code);
 diff --git a/src/http_api.cpp b/src/http_api.cpp
-index b233f23..e80c75d 100644
+index b233f23..82268dd 100644
 --- a/src/http_api.cpp
 +++ b/src/http_api.cpp
 @@ -479,7 +479,7 @@ namespace cgi {
@@ -26,7 +26,7 @@ index b233f23..e80c75d 100644
  			if(!output_body_.empty())
  				packet+= booster::aio::buffer(output_body_);
  			packet+= in;
-@@ -507,18 +507,28 @@ namespace cgi {
+@@ -507,18 +507,38 @@ namespace cgi {
  							e=booster::system::error_code(errc::protocol_violation,cppcms_category);
  							return true;
  						}
@@ -37,9 +37,19 @@ index b233f23..e80c75d 100644
 -							response_line_.append(addon);
 +						if(strcmp(name,"PROTOCOL")==0) {
 +							response_protocol_ = value;
-+							return true;
 +						} else if(strcmp(name,"STATUS")==0) {
 +							response_status_ = value;
++							if (response_protocol_.empty()) {
++								response_protocol_ = "HTTP/1.0";
++							}
++							if (response_status_.empty()) {
++								response_protocol_ += " 200 OK";
++							} else {
++								response_protocol_ += " ";
++								response_protocol_ += response_status_;
++							}
++							response_protocol_ += "\r\n";
++							response_protocol_.append(addon);
  							return true;
  						}
  					}
@@ -62,7 +72,7 @@ index b233f23..e80c75d 100644
  					return true;
  
  				case parser::error_observerd:
-@@ -675,7 +685,8 @@ namespace cgi {
+@@ -675,7 +695,8 @@ namespace cgi {
  		::cppcms::http::impl::parser output_parser_;
  
  

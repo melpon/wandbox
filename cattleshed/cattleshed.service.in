@@ -7,7 +7,8 @@ User=cattleshed
 Group=cattleshed
 WorkingDirectory=@CMAKE_INSTALL_PREFIX@
 Restart=on-failure
-ExecStart=@CATTLESHED_BINDIR@/cattleshed -c @CATTLESHED_SYSCONFDIR@/cattleshed.conf @CATTLESHED_SERVICE_ARGS@ --syslog /var/log/cattleshed.log
+ExecStart=@CATTLESHED_BINDIR@/cattleshed -c @CATTLESHED_SYSCONFDIR@/cattleshed.conf @CATTLESHED_SERVICE_ARGS@
+LimitCORE=infinity
 
 [Install]
 WantedBy=multi-user.target
