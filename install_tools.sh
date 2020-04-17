@@ -105,16 +105,6 @@ if [ -z "$JOBS" ]; then
   fi
 fi
 
-# gRPC のソース
-if [ ! -e $SOURCE_DIR/grpc/.git ]; then
-  git clone https://github.com/grpc/grpc.git $SOURCE_DIR/grpc
-fi
-pushd $SOURCE_DIR/grpc
-  git fetch
-  git reset --hard v$GRPC_VERSION
-  git submodule update -i --recursive
-popd
-
 # CMake が古いとビルド出来ないので、インストール済み CMake から新しい CMake をインストールする
 if [ $CMAKE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cmake/bin/cmake ]; then
   _URL=https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz
@@ -139,6 +129,16 @@ export PATH=$INSTALL_DIR/cmake/bin:$PATH
 
 # grpc (cmake)
 if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; then
+  # gRPC のソース取得
+  if [ ! -e $SOURCE_DIR/grpc/.git ]; then
+    git clone https://github.com/grpc/grpc.git $SOURCE_DIR/grpc
+  fi
+  pushd $SOURCE_DIR/grpc
+    git fetch
+    git reset --hard v$GRPC_VERSION
+    git submodule update -i --recursive
+  popd
+
   # RELEASE_MODE=1 の場合は tsan, asan は入れない
   _BUILDTYPE="release tsan asan"
   if [ $RELEASE_MODE -eq 1 ]; then
