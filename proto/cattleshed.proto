@@ -52,10 +52,10 @@ message CompilerInfo {
 
 message Template {
   string name = 1;
-  string stdin = 2;
-  string compiler_option_raw = 3;
-  string runtime_option_raw = 4;
-  string default_source = 5;
+  bytes stdin = 2;
+  bytes compiler_option_raw = 3;
+  bytes runtime_option_raw = 4;
+  bytes default_source = 5;
   repeated Source sources = 6;
   string compiler_options = 7;
 }
@@ -67,16 +67,16 @@ message GetVersionResponse {
 
 message Source {
   string file_name = 1;
-  string source = 2;
+  bytes source = 2;
 }
 
 message RunJobRequest {
   message Start {
     string compiler = 1;
-    string stdin = 2;
-    string compiler_option_raw = 3;
-    string runtime_option_raw = 4;
-    string default_source = 5;
+    bytes stdin = 2;
+    bytes compiler_option_raw = 3;
+    bytes runtime_option_raw = 4;
+    bytes default_source = 5;
     repeated Source sources = 6;
     string compiler_options = 7;
   }
@@ -97,5 +97,5 @@ message RunJobResponse {
     SIGNAL = 6;
   }
   Type type = 1;
-  string data = 2;
+  bytes data = 2;
 }

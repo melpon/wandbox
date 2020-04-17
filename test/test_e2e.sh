@@ -66,5 +66,12 @@ if [ "$OUTPUT" != '"foo\n"' ]; then
   exit 1
 fi
 
+# https://github.com/melpon/wandbox/issues/299
+curl -f -H "Content-type: application/json" -d @assets/test_issue299.json  http://localhost:3600/api/compile.json > _tmp/actual_issue299.json
+if ! diff -u assets/expected_issue299.json _tmp/actual_issue299.json; then
+  echo "failed test /api/compile.json" 1>&2
+  exit 1
+fi
+
 echo "e2e test succeeded"
 
