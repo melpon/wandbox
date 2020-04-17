@@ -241,8 +241,9 @@ class GetVersionHandler {
         commands_.push_back(c);
       }
     }
-    void AsyncRun(std::function<void(boost::system::error_code ec,
-                                     const std::map<std::string, std::string>&)>
+    void AsyncRun(std::function<
+                  void(boost::system::error_code ec,
+                       const std::vector<std::pair<std::string, std::string>>&)>
                       handler) {
       // 全部のバージョン取得処理が終わったので結果を返す
       if (commands_.empty()) {
@@ -332,7 +333,7 @@ class GetVersionHandler {
 
       SPDLOG_DEBUG("[0x{}] add version: {} {}", (void*)this, current_.name,
                    ver);
-      versions_[current_.name] = ver;
+      versions_.push_back(std::make_pair(current_.name, ver));
 
       // 無事バージョンの取得に成功したので次へ
       AsyncRun(std::move(handler_));
@@ -346,9 +347,9 @@ class GetVersionHandler {
     wandbox::compiler_trait current_;
     std::deque<wandbox::compiler_trait> commands_;
     std::function<void(boost::system::error_code ec,
-                       const std::map<std::string, std::string>&)>
+                       const std::vector<std::pair<std::string, std::string>>&)>
         handler_;
-    std::map<std::string, std::string> versions_;
+    std::vector<std::pair<std::string, std::string>> versions_;
     std::shared_ptr<boost::asio::posix::stream_descriptor> pipe_stdout_;
     std::shared_ptr<wandbox::unique_child_pid> child_;
     std::shared_ptr<boost::asio::streambuf> buf_;
@@ -364,8 +365,9 @@ class GetVersionHandler {
   void OnAccept(cattleshed::GetVersionRequest request) {
     version_runner_.reset(new VersionRunner(ioc_, sigs_, *config_));
     version_runner_->AsyncRun(
-        [this](boost::system::error_code ec,
-               const std::map<std::string, std::string>& versions) {
+        [this](
+            boost::system::error_code ec,
+            const std::vector<std::pair<std::string, std::string>>& versions) {
           // バージョンが取得できたので、レスポンス用データを作る
           auto resp = GenResponse(*config_, versions);
 
@@ -375,7 +377,7 @@ class GetVersionHandler {
 
   static cattleshed::GetVersionResponse GenResponse(
       const wandbox::server_config& config,
-      const std::map<std::string, std::string>& versions) {
+      const std::vector<std::pair<std::string, std::string>>& versions) {
     cattleshed::GetVersionResponse resp;
 
     for (const auto& pair : versions) {
