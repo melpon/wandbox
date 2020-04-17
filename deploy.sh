@@ -36,7 +36,7 @@ ssh $REMOTE /bin/bash -c "
   mkdir -p /opt/wandbox
   pushd /opt/wandbox
     tar xf /tmp/$APP-$ENV.tar.gz
-    #rm /tmp/$APP-$ENV.tar.gz
+    rm /tmp/$APP-$ENV.tar.gz
 
     pushd $APP-$ENV
       if [ "$APP" = "cattleshed" ]; then

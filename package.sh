@@ -35,11 +35,13 @@ PREFIX="/opt/wandbox/$APP-$ENV"
 
 if [ "$APP" = "kennel" ]; then
   pushd kennel2
+    rm -r _build/release
     ./cmake.sh --prefix $PREFIX --$ENV
     sudo $INSTALL_DIR/cmake/bin/cmake --install _build/release
   popd
 elif [ "$APP" = "cattleshed" ]; then
   pushd cattleshed
+    rm -r _build/release
     ./cmake.sh --prefix $PREFIX --$ENV
     sudo $INSTALL_DIR/cmake/bin/cmake --install _build/release
   popd
