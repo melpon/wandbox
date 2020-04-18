@@ -33,6 +33,13 @@ trap "kill $CATTLESHED_PID $KENNEL_PID" EXIT
 
 sleep 2
 
+# list.json のテスト
+curl -f http://localhost:3600/api/list.json > _tmp/actual_api_list.json
+if ! diff -u assets/expected_api_list.json _tmp/actual_api_list.json; then
+  echo "failed test /api/list.json" 1>&2
+  exit 1
+fi
+
 # コンパイルのテスト
 curl -f -H "Content-type: application/json" -d @assets/test.json  http://localhost:3600/api/compile.json > _tmp/actual_api_compile.json
 if ! diff -u assets/expected_api_compile.json _tmp/actual_api_compile.json; then

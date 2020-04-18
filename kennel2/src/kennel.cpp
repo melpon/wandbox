@@ -230,13 +230,13 @@ class kennel : public cppcms::application {
           const cattleshed::SelectSwitch& ss = s.select();
           sw["type"] = "select";
           sw["default"] = ss.default_value();
+          sw["options"] = cppcms::json::array();
           for (int k = 0; k < ss.options_size(); k++) {
             cppcms::json::value option;
             const cattleshed::SelectSwitchOption& opt = ss.options(k);
             option["name"] = opt.name();
             option["display-name"] = opt.display_name();
             option["display-flags"] = opt.display_flags();
-            sw["options"] = cppcms::json::array();
             sw["options"].array().push_back(option);
           }
         }

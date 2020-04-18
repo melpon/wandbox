@@ -1,10 +1,32 @@
 {
     "switches": {
-        "bash-help": {
-            "display-name": "Help", 
+        "warning": {
+            "display-name": "Warnings", 
             "flags": [
-                "--help"
+                "-Wall", 
+                "-Wextra"
             ]
+        }, 
+        "optimize": {
+            "display-name": "Optimization", 
+            "flags": [
+                "-O2", 
+                "-march=native"
+            ]
+        }, 
+        "boost-1.72.0-gcc-head": {
+            "group": "boost-gcc-head", 
+            "display-name": "Boost 1.72.0", 
+            "flags": [
+            ], 
+            "display-flags": "-I/opt/wandbox/boost-1.72.0/gcc-head/include"
+        }, 
+        "boost-1.71.0-gcc-head": {
+            "group": "boost-gcc-head", 
+            "display-name": "Boost 1.71.0", 
+            "flags": [
+            ], 
+            "display-flags": "-I/opt/wandbox/boost-1.71.0/gcc-head/include"
         }
     }, 
     "templates": {
@@ -13,6 +35,40 @@
         }
     }, 
     "compilers": [
+        {
+            "templates": [
+                "gcc"
+            ], 
+            "run-command": "./prog.exe", 
+            "compile-command": [
+                "/usr/bin/g++", 
+                "-oprog.exe", 
+                "prog.cc"
+            ], 
+            "name": "gcc", 
+            "language": "C++", 
+            "output-file": "prog.cc", 
+            "compiler-option-raw": true, 
+            "version-command": [
+                "/bin/sh", 
+                "-c", 
+                "/usr/bin/g++ --version | head -1 | cut -d' ' -f4-"
+            ], 
+            "switches": [
+                "warning", 
+                "optimize", 
+                "boost-1.71.0-gcc-head", 
+                "boost-1.72.0-gcc-head"
+            ], 
+            "display-compile-command": "g++ prog.cc", 
+            "initial-checked": [
+                "warning", 
+                "boost-1.72.0-gcc-head"
+            ], 
+            "jail-name": "test", 
+            "displayable": true, 
+            "display-name": "gcc HEAD"
+        }, 
         {
             "templates": [
                 "bash"
