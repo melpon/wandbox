@@ -26,6 +26,7 @@
 #include <sys/mount.h>
 #include <sys/prctl.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -285,7 +286,7 @@ int main(int argc, char** argv) {
           for (auto& d : devices) {
             if (d.first.empty()) continue;
             device_file x = {
-                std::move(d.first), d.second ? (S_IFCHR | 0666) : 0,
+                std::move(d.first), d.second ? (S_IFCHR | 0666) : 0u,
                 d.second ? makedev(d.second->first, d.second->second) : 0};
             if (!d.second) {
               struct stat s;
