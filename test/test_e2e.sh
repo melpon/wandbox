@@ -21,12 +21,12 @@ set -ex
 cp assets/session.key $BUILD_DIR/kennel2/.session.key
 mkdir -p _tmp
 
-$BUILD_DIR/cattleshed/cattleshed -c $BUILD_DIR/cattleshed/cattleshed.conf -c assets/compilers.default &
+$BUILD_DIR/cattleshed/cattleshed --log-level=trace -c $BUILD_DIR/cattleshed/cattleshed.conf -c assets/compilers.default &
 CATTLESHED_PID=$!
 
 sleep 1
 
-$BUILD_DIR/kennel2/kennel -c $BUILD_DIR/kennel2/kennel.json &
+$BUILD_DIR/kennel2/kennel --log-level=trace -c $BUILD_DIR/kennel2/kennel.json &
 KENNEL_PID=$!
 
 trap "kill $CATTLESHED_PID $KENNEL_PID" EXIT

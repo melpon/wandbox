@@ -3,7 +3,7 @@ name: Deploy staging.wandbox.org
 on:
   push:
     branches:
-      - grpc
+      - logging
 
 jobs:
   deploy:
