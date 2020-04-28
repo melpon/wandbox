@@ -1099,6 +1099,7 @@ class RunJobHandler {
         opt.always_print_primitive_fields = true;
         // ソースの情報を以外を JSON 化する
         auto req = *req_;
+        req.clear_default_source();
         req.clear_sources();
         google::protobuf::util::MessageToJsonString(req, &loginfocontent_, opt);
       }
