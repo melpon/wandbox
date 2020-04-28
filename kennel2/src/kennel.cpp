@@ -485,7 +485,7 @@ class kennel : public cppcms::application {
     }
 
     static cattleshed::RunJobRequest make_run_job_request(
-        const cppcms::json::value& value) {
+        const cppcms::json::value& value, cattleshed::Issuer issuer) {
       cattleshed::RunJobRequest request;
       auto start = request.mutable_start();
       start->set_compiler(value["compiler"].str());
@@ -494,6 +494,7 @@ class kennel : public cppcms::application {
       start->set_runtime_option_raw(value.get("compiler-option-raw", ""));
       start->set_default_source(value["code"].str());
       start->set_compiler_options(value.get("options", ""));
+      *start->mutable_issuer() = std::move(issuer);
       const auto& codes = value.find("codes");
       if (!codes.is_undefined()) {
         for (const auto& code : codes.array()) {
@@ -552,6 +553,16 @@ class kennel : public cppcms::application {
             c.set_twitter(std::move(title), std::move(description));
         }
     }
+    static cattleshed::Issuer make_issuer(cppcms::http::request& req,
+                                          std::string github_username) {
+      cattleshed::Issuer issuer;
+      issuer.set_remote_addr(req.remote_addr());
+      issuer.set_real_ip(req.getenv("HTTP_X_REAL_IP"));
+      issuer.set_forwarded_for(req.getenv("HTTP_X_FORWARDED_FOR"));
+      issuer.set_path_info(req.path_info());
+      issuer.set_github_username(github_username);
+      return issuer;
+    }
 
     void compile() {
       if (!ensure_method_post()) {
@@ -573,11 +584,14 @@ class kennel : public cppcms::application {
       }
       auto index = static_cast<std::size_t>((*it)["provider"].number());
 
+      permlink pl(service());
+      auto issuer = make_issuer(
+          request(), pl.get_github_username(session()["access_token"]));
+      auto request = make_run_job_request(value, std::move(issuer));
+
       auto es =
           booster::shared_ptr<eventsource>(new eventsource(release_context()));
       es->send_header();
-
-      auto request = make_run_job_request(value);
 
       SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
 
@@ -848,7 +862,6 @@ class kennel : public cppcms::application {
     cppcms::json::value api_compile_internal(cppcms::json::value value) {
         auto compiler = value["compiler"].str();
         auto save = value.get("save", false);
-        auto request = make_run_job_request(value);
         auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
@@ -867,6 +880,11 @@ class kennel : public cppcms::application {
         cppcms::json::value result;
         cppcms::json::value outputs;
         outputs.array({});
+
+        permlink pl(service());
+        auto issuer = make_issuer(
+            request(), pl.get_github_username(session()["access_token"]));
+        auto request = make_run_job_request(value, std::move(issuer));
 
         SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
 
@@ -935,7 +953,10 @@ class kennel : public cppcms::application {
       nd->send_header();
       nd->context->response().set_header("Access-Control-Allow-Origin", "*");
 
-      auto request = make_run_job_request(value);
+      permlink pl(service());
+      auto issuer = make_issuer(
+          request(), pl.get_github_username(session()["access_token"]));
+      auto request = make_run_job_request(value, std::move(issuer));
 
       SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
 

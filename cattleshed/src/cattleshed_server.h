@@ -24,6 +24,9 @@
 // spdlog
 #include <spdlog/spdlog.h>
 
+// protobuf
+#include <google/protobuf/util/json_util.h>
+
 #include "cattleshed.grpc.pb.h"
 #include "cattleshed.pb.h"
 #include "load_config.hpp"
@@ -982,11 +985,25 @@ class RunJobHandler {
                                cb) {
       cb_ = std::move(cb);
 
+      std::string date;
+      std::string time;
+      {
+        char s[64];
+        time_t t = ::time(0);
+        struct tm l;
+        ::localtime_r(&t, &l);
+
+        ::strftime(s, sizeof(s), "%Y%m%d", &l);
+        date = s;
+        ::strftime(s, sizeof(s), "%H%M%S", &l);
+        time = s;
+      }
+
       std::string unique_name;
       std::shared_ptr<DIR> workdir;
       while (unique_name.empty() || !workdir) {
         try {
-          unique_name = wandbox::mkdtemp("wandboxXXXXXX");
+          unique_name = wandbox::mkdtemp("wandbox_" + time + "_XXXXXX");
           workdir = wandbox::opendir(unique_name);
         } catch (std::system_error& e) {
           if (e.code().value() != ENOTDIR) {
@@ -998,16 +1015,13 @@ class RunJobHandler {
         }
       }
 
-      char s[64];
-      time_t t = ::time(0);
-      struct tm l;
-      ::localtime_r(&t, &l);
-      ::strftime(s, 64, "%Y%m%d", &l);
-
-      std::string logdirname =
-          config_->system.storedir + "/" + s + "/" + unique_name;
+      std::string logdirnamebase = config_->system.storedir + "/" + date;
+      std::string logdirname = logdirnamebase + "/" + unique_name;
       SPDLOG_INFO("[0x{}] create log directory '{}'", (void*)this, logdirname);
-      const auto logdir = wandbox::mkdir_p_open_at(nullptr, logdirname, 0700);
+      const auto logdirbase =
+          wandbox::mkdir_p_open_at(nullptr, logdirnamebase, 0700);
+      const auto logdir =
+          wandbox::mkdir_p_open_at(logdirbase, unique_name, 0700);
       if (!logdir) {
         SPDLOG_ERROR("[0x{}] failed to create log directory '{}'", (void*)this,
                      logdirname);
@@ -1077,7 +1091,83 @@ class RunJobHandler {
       }
 
       workdir_ = workdir;
+      logdir_ = logdirbase;
+      loginfoname_ = unique_name + ".json";
+      {
+        google::protobuf::util::JsonPrintOptions opt;
+        opt.add_whitespace = true;
+        opt.always_print_primitive_fields = true;
+        // ソースの情報を以外を JSON 化する
+        auto req = *req_;
+        req.clear_sources();
+        google::protobuf::util::MessageToJsonString(req, &loginfocontent_, opt);
+      }
 
+      // まずソース以外の情報を書き込む
+      DoWriteInfo();
+    }
+
+    void DoWriteInfo() {
+      ::memset(&aiocb_, 0, sizeof(aiocb_));
+      aiocb_.aio_fildes = ::openat(
+          ::dirfd(logdir_.get()), ("./" + loginfoname_).c_str(),
+          O_WRONLY | O_CLOEXEC | O_CREAT | O_TRUNC | O_EXCL | O_NOATIME, 0600);
+      if (aiocb_.aio_fildes < 0) {
+        if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) {
+          SPDLOG_ERROR("[0x{}] open failed '{}'", (void*)this, loginfoname_);
+          Complete(boost::system::error_code(
+              errno, boost::system::generic_category()));
+          return;
+        } else {
+          SPDLOG_ERROR("[0x{}] open failed '{}'", (void*)this, loginfoname_);
+          Complete(boost::system::error_code(
+              errno, boost::system::generic_category()));
+          return;
+        }
+      }
+
+      SPDLOG_DEBUG("[0x{}] write program '{}'", (void*)this, loginfoname_);
+      SPDLOG_DEBUG("[0x{}] write program contents: {}", (void*)this,
+                   loginfocontent_);
+      aiocb_.aio_buf = &loginfocontent_[0];
+      aiocb_.aio_nbytes = loginfocontent_.size();
+      aiocb_.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+      aiocb_.aio_sigevent.sigev_signo = SIGHUP;
+      ::aio_write(&aiocb_);
+      // 書き込みを待つ
+      sigs_->async_wait(std::bind(&ProgramWriter::OnWriteInfo, this,
+                                  std::placeholders::_1,
+                                  std::placeholders::_2));
+    }
+
+    void OnWriteInfo(const boost::system::error_code& ec, int signum) {
+      if (ec) {
+        Complete(ec);
+        return;
+      }
+      int error = ::aio_error(&aiocb_);
+      // まだ終わってなかったので再度待ち状態へ
+      if (error == EINPROGRESS) {
+        sigs_->async_wait(std::bind(&ProgramWriter::OnWriteInfo, this,
+                                    std::placeholders::_1,
+                                    std::placeholders::_2));
+        return;
+      }
+
+      ::close(aiocb_.aio_fildes);
+      aiocb_.aio_fildes = -1;
+
+      if (error != 0) {
+        SPDLOG_ERROR("[0x{}] write failed '{}' error={}", (void*)this,
+                     loginfoname_, error);
+        Complete(boost::system::error_code(error,
+                                           boost::system::generic_category()));
+        return;
+      }
+
+      SPDLOG_INFO("[0x{}] write success '{}'", (void*)this, loginfoname_);
+
+      // プログラムのソース情報を書き込む
       DoWriteProgram();
     }
 
@@ -1094,7 +1184,7 @@ class RunJobHandler {
 
       ::memset(&aiocb_, 0, sizeof(aiocb_));
       aiocb_.aio_fildes = ::openat(
-          ::dirfd(sources_.front().dir.get()), ("./" + source.name).c_str(),
+          ::dirfd(source.dir.get()), ("./" + source.name).c_str(),
           O_WRONLY | O_CLOEXEC | O_CREAT | O_TRUNC | O_EXCL | O_NOATIME, 0600);
       if (aiocb_.aio_fildes < 0) {
         if (errno == EAGAIN || errno == EMFILE || errno == EWOULDBLOCK) {
@@ -1183,6 +1273,10 @@ class RunJobHandler {
                         [ec, cb = std::move(cb_),
                          workdir = std::move(workdir_)]() { cb(ec, workdir); });
     }
+
+    std::shared_ptr<DIR> logdir_;
+    std::string loginfoname_;
+    std::string loginfocontent_;
 
     std::shared_ptr<boost::asio::io_context> ioc_;
     std::shared_ptr<boost::asio::signal_set> sigs_;

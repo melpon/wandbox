@@ -342,16 +342,26 @@ public:
     }
     std::string get_github_access_token(std::string wandbox_access_token) {
         cppdb::result r;
-        r = sql <<
-            "SELECT github_access_token "
-            "FROM github_user "
-            "WHERE wandbox_access_token=?"
-            << wandbox_access_token
-            << cppdb::row;
+        r = sql << "SELECT github_access_token "
+                   "FROM github_user "
+                   "WHERE wandbox_access_token=?"
+                << wandbox_access_token << cppdb::row;
         if (r.empty()) {
-            return "";
+          return "";
         }
         return r.get<std::string>("github_access_token");
+    }
+
+    std::string get_github_username(std::string wandbox_access_token) {
+      cppdb::result r;
+      r = sql << "SELECT username "
+                 "FROM github_user "
+                 "WHERE wandbox_access_token=?"
+              << wandbox_access_token << cppdb::row;
+      if (r.empty()) {
+        return "";
+      }
+      return r.get<std::string>("username");
     }
 
     struct usercode_info {

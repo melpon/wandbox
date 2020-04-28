@@ -70,6 +70,14 @@ message Source {
   bytes source = 2;
 }
 
+message Issuer {
+  string remote_addr = 1;
+  string real_ip = 2;
+  string forwarded_for = 3;
+  string path_info = 4;
+  string github_username = 5;
+}
+
 message RunJobRequest {
   message Start {
     string compiler = 1;
@@ -79,6 +87,7 @@ message RunJobRequest {
     bytes default_source = 5;
     repeated Source sources = 6;
     string compiler_options = 7;
+    Issuer issuer = 8;
   }
 
   oneof data {
