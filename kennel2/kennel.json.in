@@ -29,6 +29,8 @@
     }
 , "session" :
     { "location": "client"
+    , "expire": "renew"
+    , "timeout": 2592000
     , "client":
         { "encryptor": "aes"
         , "key_file": "@KENNEL_DATABASEDIR@/.session.key"
