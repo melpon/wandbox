@@ -87,7 +87,7 @@
     }
   , { "name": "清楚なC++メイドBOT"
     , "url": "https://twitter.com/cpp_maid_BOT"
-    , "due_date": "2020-03-24T23:59:59+09:00"
+    , "due_date": "2021-04-29T23:59:59+09:00"
     }
   , { "name": "@tzik_tack"
     , "url": "https://twitter.com/tzik_tack"
@@ -139,7 +139,7 @@
     }
   , { "name": "@jj1bdx"
     , "url": "https://twitter.com/jj1bdx"
-    , "due_date": "2020-05-11T23:59:59+09:00"
+    , "due_date": "2021-05-11T23:59:59+09:00"
     }
   , { "name": "@unagix"
     , "url": "https://twitter.com/unagix"
@@ -417,9 +417,9 @@
     , "url": "https://twitter.com/oJADENo"
     , "due_date": "2018-08-31T23:59:59+09:00"
     }
-  , { "name": "hnokx"
-    , "url": ""
-    , "due_date": "2018-09-03T23:59:59+09:00"
+  , { "name": "@hnokx"
+    , "url": "https://twitter.com/hnokx"
+    , "due_date": "2021-04-30T23:59:59+09:00"
     }
   , { "name": "@ruche7"
     , "url": "https://twitter.com/ruche7"
@@ -451,7 +451,7 @@
     }
   , { "name": "@ishidakei"
     , "url": "https://twitter.com/ishidakei"
-    , "due_date": "2018-12-18T23:59:59+09:00"
+    , "due_date": "2021-04-29T23:59:59+09:00"
     }
   , { "name": "@2_7182818"
     , "url": "https://twitter.com/2_7182818"
@@ -483,7 +483,7 @@
     }
   , { "name": "TAKEI Yuya"
     , "url": "https://github.com/takei-yuya"
-    , "due_date": "2019-07-04T23:59:59+09:00"
+    , "due_date": "2021-04-29T23:59:59+09:00"
     }
   , { "name": "daisy1754"
     , "url": "https://twitter.com/daisy1754"
@@ -616,6 +616,9 @@
   , { "name": "@grafi_tt"
     , "url": "https://twitter.com/grafi_tt"
     , "due_date": "2021-04-01T23:59:59+09:00"
+  , { "name": "@nekketsuuu"
+    , "url": "https://twitter.com/nekketsuuu"
+    , "due_date": "2021-04-29T23:59:59+09:00"
     }
   ]
 }
