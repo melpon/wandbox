@@ -161,6 +161,7 @@ std::string catpath(const std::string& dir, const std::string& file) {
   return dir + "/" + file;
 }
 int proc(void* arg_) {
+  if (prctl(PR_SET_PDEATHSIG, SIGKILL) == -1) exit_error("prctl SET_PDEATHSIG");
   const auto& arg = *static_cast<proc_arg_t*>(arg_);
   close(arg.pipefd[0]);
   const auto& argv = arg.argv;
