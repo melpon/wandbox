@@ -96,7 +96,15 @@ int main(int argc, char** argv) try {
 
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
       work = boost::asio::make_work_guard(ioc->get_executor());
-  ioc->run();
+  try {
+    ioc->run();
+  } catch (std::exception& e) {
+    SPDLOG_ERROR("fatal: {}", e.what());
+    std::quick_exit(1);
+  } catch (...) {
+    SPDLOG_ERROR("fatal");
+    std::quick_exit(1);
+  }
   return 0;
 } catch (std::exception& e) {
   SPDLOG_ERROR("fatal: {}", e.what());
