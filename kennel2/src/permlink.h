@@ -353,6 +353,9 @@ public:
     }
 
     std::string get_github_username(std::string wandbox_access_token) {
+      if (wandbox_access_token.empty()) {
+        return "";
+      }
       cppdb::result r;
       r = sql << "SELECT username "
                  "FROM github_user "
