@@ -1346,7 +1346,12 @@ class RunJobHandler {
       int GetStatus() noexcept { return pid_.wait_nonblock(); }
       void Kill(int signo) noexcept {
         if (!pid_.finished()) {
-          ::kill(pid_.get(), signo);
+          int n = ::kill(pid_.get(), signo);
+          if (n == 0) {
+            SPDLOG_INFO("kill sent: signo={}", signo);
+          } else {
+            SPDLOG_ERROR("kill failed: signo={}, errno={}", signo, errno);
+          }
         }
       }
       void OnWait(std::function<void()> handler) {
@@ -1381,8 +1386,10 @@ class RunJobHandler {
         }
         if (auto p = proc_.lock()) {
           if (hard_limit_ < current_) {
+            SPDLOG_WARN("output hard limit. send SIGKILL");
             p->Kill(SIGKILL);
           } else if (soft_limit_ < current_) {
+            SPDLOG_WARN("output soft limit. send SIGXFSZ");
             p->Kill(SIGXFSZ);
           }
         }
@@ -1691,9 +1698,6 @@ class RunJobHandler {
 
       // SIGXCPU だとダメだったので SIGKILL
       std::static_pointer_cast<StatusForwarder>(pipes_[3])->Kill(SIGKILL);
-      pipes_[0]->Close();
-      pipes_[1]->Close();
-      pipes_[2]->Close();
     }
 
     void Completed() {
