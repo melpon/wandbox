@@ -95,7 +95,6 @@ struct proc_arg_t {
   std::vector<device_file> devices;
   bool kill_grandchilds;
   int pipefd[2];
-  int ppid;
   unsigned newuid;
   char** argv;
 };
@@ -239,9 +238,9 @@ int proc(void* arg_) {
     if (setresuid(olduid, -1, -1) == -1) exit_error("setresuid");
     if (prctl(PR_SET_PDEATHSIG, SIGKILL) == -1)
       exit_error("prctl SET_PDEATHSIG");
-    if (kill(arg.ppid, 0) < 0) raise(SIGKILL);
-    const int st = wait_and_forward_signals(pid, !arg.kill_grandchilds);
     const int fd = arg.pipefd[1];
+    if (write(fd, &fd, sizeof(fd)) == -1) exit_error("parent process has gone");
+    const int st = wait_and_forward_signals(pid, !arg.kill_grandchilds);
     if (write(fd, &st, sizeof(st)) == -1) exit_error("write");
     close(fd);
   } else {
@@ -273,8 +272,7 @@ int main(int argc, char** argv) {
   if (kill(getppid(), 0) < 0) raise(SIGKILL);
 
   char stack[stacksize];
-  proc_arg_t args = {".",      "/",      {},       {},     false,
-                     {-1, -1}, getpid(), getuid(), nullptr};
+  proc_arg_t args = {".", "/", {}, {}, false, {-1, -1}, getuid(), nullptr};
 
   {
     static const option opts[] = {
@@ -387,6 +385,7 @@ int main(int argc, char** argv) {
 
   int st = wait_and_forward_signals(pid, !args.kill_grandchilds);
   int buf;
+  read(args.pipefd[0], &buf, sizeof(buf));
   if (read(args.pipefd[0], &buf, sizeof(buf)) == 4) st = buf;
   close(args.pipefd[0]);
   {
