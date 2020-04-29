@@ -1,0 +1,4 @@
+{
+  "compiler": "bash",
+  "code": "while :; do $0; done"
+}

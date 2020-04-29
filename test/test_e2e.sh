@@ -89,7 +89,32 @@ fi
 # 無限 fork の後も正常に動作するか確認する
 curl -f -H "Content-type: application/json" -d @assets/test.json  http://localhost:3600/api/compile.json > _tmp/actual_api_compile.json
 if ! diff -u assets/expected_api_compile.json _tmp/actual_api_compile.json; then
+  echo "failed test fork" 1>&2
+  exit 1
+fi
+sleep 3
+# cattlegrid プロセスは１個もいないはず
+if [ `ps -ef | grep cattlegrid | grep -v grep | wc -l` -ne 0 ]; then
+  ps -ef | grep cattlegrid | grep -v grep
+  echo "failed test fork" 1>&2
+  exit 1
+fi
+
+# 無限 fork その２
+OUTPUT_SIGNAL=`curl -f -H "Content-type: application/json" -d @assets/test_fork2.json  http://localhost:3600/api/compile.json | jq -r .signal`
+if [ "$OUTPUT_SIGNAL" != "Killed" ]; then
+  echo "failed test fork2" 1>&2
+  exit 1
+fi
+curl -f -H "Content-type: application/json" -d @assets/test.json  http://localhost:3600/api/compile.json > _tmp/actual_api_compile.json
+if ! diff -u assets/expected_api_compile.json _tmp/actual_api_compile.json; then
   echo "failed test /api/compile.json" 1>&2
+  exit 1
+fi
+sleep 3
+if [ `ps -ef | grep cattlegrid | grep -v grep | wc -l` -ne 0 ]; then
+  ps -ef | grep cattlegrid | grep -v grep
+  echo "failed test fork" 1>&2
   exit 1
 fi
 
