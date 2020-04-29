@@ -1328,6 +1328,7 @@ class RunJobHandler {
     };
 
     struct PipeForwarderBase : boost::noncopyable {
+      virtual void Close() noexcept = 0;
       virtual bool Closed() const noexcept = 0;
       virtual void AsyncForward(std::function<void()>) noexcept = 0;
     };
@@ -1337,6 +1338,7 @@ class RunJobHandler {
                       std::shared_ptr<boost::asio::signal_set> sigs,
                       wandbox::unique_child_pid pid)
           : ioc_(ioc), sigs_(std::move(sigs)), pid_(std::move(pid)) {}
+      void Close() noexcept override {}
       bool Closed() const noexcept override { return pid_.finished(); }
       void AsyncForward(std::function<void()> handler) noexcept override {
         sigs_->async_wait(std::bind(&StatusForwarder::OnWait, this, handler));
@@ -1352,6 +1354,7 @@ class RunJobHandler {
         if (not pid_.finished()) {
           // プロセスが終わってなかったので待ち直し
           AsyncForward(handler);
+          return;
         }
 
         // プロセスが終わってたのでハンドラを読んで終了
@@ -1399,6 +1402,7 @@ class RunJobHandler {
         pipe_.assign(fd.get());
         fd.release();
       }
+      void Close() noexcept override { pipe_.close(); }
       bool Closed() const noexcept override { return !pipe_.is_open(); }
       void AsyncForward(std::function<void()> handler) noexcept override {
         boost::asio::async_write(pipe_, boost::asio::buffer(input_),
@@ -1431,6 +1435,7 @@ class RunJobHandler {
         pipe_.assign(fd.get());
         fd.release();
       }
+      void Close() noexcept override { pipe_.close(); }
       bool Closed() const noexcept override { return !pipe_.is_open(); }
       void AsyncForward(std::function<void()> handler) noexcept override {
         handler_ = std::move(handler);
@@ -1615,6 +1620,7 @@ class RunJobHandler {
         limitter_->SetProcess(
             std::static_pointer_cast<StatusForwarder>(pipes_[3]));
       }
+
       pipes_[0]->AsyncForward(std::bind(&ProgramRunner::OnForward, this));
       pipes_[1]->AsyncForward(std::bind(&ProgramRunner::OnForward, this));
       pipes_[2]->AsyncForward(std::bind(&ProgramRunner::OnForward, this));
@@ -1627,6 +1633,15 @@ class RunJobHandler {
     }
 
     void OnForward() {
+      //SPDLOG_TRACE("OnForward: pipes[0] is {}",
+      //             pipes_[0]->Closed() ? "closed" : "opened");
+      //SPDLOG_TRACE("OnForward: pipes[1] is {}",
+      //             pipes_[1]->Closed() ? "closed" : "opened");
+      //SPDLOG_TRACE("OnForward: pipes[2] is {}",
+      //             pipes_[2]->Closed() ? "closed" : "opened");
+      //SPDLOG_TRACE("OnForward: pipes[3] is {}",
+      //             pipes_[3]->Closed() ? "closed" : "opened");
+
       if (not std::all_of(pipes_.begin(), pipes_.end(),
                           [](std::shared_ptr<PipeForwarderBase> p) {
                             return p->Closed();
@@ -1676,6 +1691,9 @@ class RunJobHandler {
 
       // SIGXCPU だとダメだったので SIGKILL
       std::static_pointer_cast<StatusForwarder>(pipes_[3])->Kill(SIGKILL);
+      pipes_[0]->Close();
+      pipes_[1]->Close();
+      pipes_[2]->Close();
     }
 
     void Completed() {

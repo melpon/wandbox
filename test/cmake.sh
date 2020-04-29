@@ -49,7 +49,7 @@ pushd $BUILD_DIR
     -DENABLE_TSAN=$ENABLE_TSAN \
     -DENABLE_ASAN=$ENABLE_ASAN
   cmake --build . -j`nproc`
-  sudo setcap cap_sys_admin,cap_sys_chroot,cap_mknod,cap_net_admin=p cattleshed/cattlegrid
+  sudo setcap cap_sys_admin,cap_chown,cap_setuid,cap_setgid,cap_sys_chroot,cap_mknod,cap_net_admin=p cattleshed/cattlegrid
 
   rm -rf /var/crash/*cattleshed.*.crash
   rm -rf /var/crash/*kennel.*.crash
