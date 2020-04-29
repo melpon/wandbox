@@ -1,18 +1,3 @@
-#include <functional>
-#include <iterator>
-#include <map>
-#include <string>
-#include <vector>
-
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <boost/asio.hpp>
-#include <boost/fusion/adapted/std_pair.hpp>
-#include <boost/optional.hpp>
-#include <boost/spirit/include/qi.hpp>
-
 #include <dirent.h>
 #include <fcntl.h>
 #include <getopt.h>
@@ -21,6 +6,9 @@
 #include <linux/securebits.h>
 #include <pwd.h>
 #include <sched.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/capability.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
@@ -30,6 +18,17 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#include <boost/asio.hpp>
+#include <boost/format.hpp>
+#include <boost/fusion/adapted/std_pair.hpp>
+#include <boost/optional.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <functional>
+#include <iterator>
+#include <random>
+#include <string>
+#include <vector>
 
 namespace wandbox {
 namespace jail {
@@ -96,6 +95,7 @@ struct proc_arg_t {
   std::vector<device_file> devices;
   bool kill_grandchilds;
   int pipefd[2];
+  unsigned newuid;
   char** argv;
 };
 __attribute__((noreturn)) void exit_error(const char* str) {
@@ -134,6 +134,25 @@ int rm_rf(const char* name) {
     _exit(1);
   }
 }
+int chown_r(const char* name, unsigned uid, unsigned gid) {
+  static bool (*const f)(unsigned, unsigned, DIR*) = [](unsigned uid,
+                                                        unsigned gid, DIR* d) {
+    if (!d) return true;
+    bool failed = false;
+    while (auto p = readdir(d)) {
+      if (strcmp(p->d_name, ".") == 0 || strcmp(p->d_name, "..") == 0) continue;
+      failed |=
+          fchownat(dirfd(d), p->d_name, uid, gid, AT_SYMLINK_NOFOLLOW) == -1;
+      int fd = openat(dirfd(d), p->d_name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
+      if (fd == -1) continue;
+      failed |= !f(uid, gid, fdopendir(fd));
+    }
+    closedir(d);
+    return !failed;
+  };
+  chown(name, uid, gid);
+  return f(uid, gid, opendir(name)) ? 0 : -1;
+}
 std::string catpath(const std::string& dir, const std::string& file) {
   if (file.empty()) return dir;
   if (dir.empty()) return file;
@@ -143,8 +162,9 @@ std::string catpath(const std::string& dir, const std::string& file) {
 }
 int proc(void* arg_) {
   prctl(PR_SET_PDEATHSIG, SIGKILL);
-  close(static_cast<proc_arg_t*>(arg_)->pipefd[0]);
-  const auto argv = static_cast<proc_arg_t*>(arg_)->argv;
+  const auto& arg = *static_cast<proc_arg_t*>(arg_);
+  close(arg.pipefd[0]);
+  const auto& argv = arg.argv;
 
   // activate loopback interface
   {
@@ -157,8 +177,15 @@ int proc(void* arg_) {
     if (ioctl(fd, SIOCSIFFLAGS, &ifr)) close(fd), exit_error("SIOCSIFFLAGS");
   }
 
+  // adjust uid/gid
+  if (chown(".", arg.newuid, arg.newuid) == -1) exit_error("chown .");
+  if (setuid(arg.newuid) == -1 || setgid(arg.newuid) == -1)
+    exit_error("setuid");
+  if (chmod(".", 0755) == -1) exit_error("chmod .");
+  if (chown_r(".", arg.newuid, arg.newuid) == -1) exit_error("chown -r .");
+
   // prepare root directory
-  const auto& rootdir = static_cast<proc_arg_t*>(arg_)->rootdir;
+  const auto& rootdir = arg.rootdir;
   if (mount("/", "/", "none", MS_PRIVATE | MS_REC, nullptr) == -1)
     exit_error("mount --make-rprivate /");
   mkdir_p(rootdir.c_str());
@@ -166,7 +193,7 @@ int proc(void* arg_) {
     exit_error(("mount -t tmpfs " + rootdir).c_str());
 
   // mount binds
-  for (const auto& m : static_cast<proc_arg_t*>(arg_)->mounts) {
+  for (const auto& m : arg.mounts) {
     const auto& d = m.realdir;
     const auto e = catpath(rootdir, m.mountpoint);
     mkdir_p(e.c_str());
@@ -179,7 +206,7 @@ int proc(void* arg_) {
   }
 
   // create device files
-  for (const auto& d : static_cast<proc_arg_t*>(arg_)->devices) {
+  for (const auto& d : arg.devices) {
     const auto& f = catpath(rootdir, d.filename);
     std::vector<char> x(f.begin(), f.end());
     mkdir_p(dirname(&x[0]));
@@ -198,8 +225,8 @@ int proc(void* arg_) {
             MS_REMOUNT | MS_RDONLY | MS_BIND | MS_NOSUID, nullptr) == -1)
     exit_error("mount -o remount,ro,bind,nosuid /");
   if (chroot(rootdir.c_str()) == -1) exit_error(("chroot " + rootdir).c_str());
-  if (chdir(static_cast<proc_arg_t*>(arg_)->startdir.c_str()) == -1)
-    exit_error(("chdir " + static_cast<proc_arg_t*>(arg_)->startdir).c_str());
+  if (chdir(arg.startdir.c_str()) == -1)
+    exit_error(("chdir " + arg.startdir).c_str());
   {
     sigset_t sigs;
     sigfillset(&sigs);
@@ -207,9 +234,8 @@ int proc(void* arg_) {
   }
   if (const int pid = fork()) {
     if (pid == -1) exit_error("fork");
-    const int st = wait_and_forward_signals(
-        pid, !static_cast<proc_arg_t*>(arg_)->kill_grandchilds);
-    const int fd = static_cast<proc_arg_t*>(arg_)->pipefd[1];
+    const int st = wait_and_forward_signals(pid, !arg.kill_grandchilds);
+    const int fd = arg.pipefd[1];
     if (write(fd, &st, sizeof(st)) == -1) exit_error("write");
     close(fd);
   } else {
@@ -241,14 +267,14 @@ int main(int argc, char** argv) {
   if (kill(getppid(), 0) < 0) raise(SIGKILL);
 
   char stack[stacksize];
-  proc_arg_t args = {".", "/", {}, {}, false, {-1, -1}, nullptr};
+  proc_arg_t args = {".", "/", {}, {}, false, {-1, -1}, getuid(), nullptr};
 
   {
     static const option opts[] = {
         {"mounts", 1, nullptr, 'm'},  {"rwmounts", 1, nullptr, 'w'},
         {"devices", 1, nullptr, 'd'}, {"rootdir", 1, nullptr, 'r'},
         {"chdir", 1, nullptr, 'c'},   {"kill", 0, nullptr, 'k'},
-        {nullptr, 0, nullptr, 0},
+        {"uids", 1, nullptr, 'u'},    {nullptr, 0, nullptr, 0},
     };
     for (int opt;
          (opt = getopt_long(argc, argv, "m:d:u:g:h:", opts, nullptr)) != -1;)
@@ -300,6 +326,16 @@ int main(int argc, char** argv) {
             args.devices.emplace_back(std::move(x));
           }
         } break;
+        case 'u': {
+          namespace qi = boost::spirit::qi;
+          const auto* ite = optarg;
+          const auto end = ite + strlen(optarg);
+          std::pair<unsigned, unsigned> uids;
+          qi::parse(ite, end, (qi::uint_ > ':' > qi::uint_), uids);
+          std::minstd_rand g((getpid() << 16) ^ std::time(nullptr));
+          args.newuid = std::uniform_int_distribution<unsigned>(uids.first,
+                                                                uids.second)(g);
+        } break;
         case 'r':
           args.rootdir = optarg;
           break;
@@ -321,6 +357,7 @@ int main(int argc, char** argv) {
   {
     cap_t caps = cap_get_proc();
     cap_value_t cap_list[] = {CAP_SYS_ADMIN, CAP_SYS_CHROOT, CAP_MKNOD,
+                              CAP_SETUID,    CAP_SETGID,     CAP_CHOWN,
                               CAP_NET_ADMIN};
     if (cap_set_flag(caps, CAP_EFFECTIVE,
                      sizeof(cap_list) / sizeof(cap_list[0]), cap_list,

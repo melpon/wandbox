@@ -40,7 +40,7 @@ ssh $REMOTE /bin/bash -c "
 
     pushd $APP-$ENV
       if [ "$APP" = "cattleshed" ]; then
-        setcap cap_sys_admin,cap_sys_chroot,cap_mknod,cap_net_admin=p bin/cattlegrid
+        setcap cap_sys_admin,cap_chown,cap_setuid,cap_setgid,cap_sys_chroot,cap_mknod,cap_net_admin=p bin/cattlegrid
       fi
       if [ "$APP" = "kennel" ]; then
         # データ置き場を作る
