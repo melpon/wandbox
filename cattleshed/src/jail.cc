@@ -95,6 +95,7 @@ struct proc_arg_t {
   std::vector<device_file> devices;
   bool kill_grandchilds;
   int pipefd[2];
+  int ppid;
   unsigned newuid;
   char** argv;
 };
@@ -161,10 +162,10 @@ std::string catpath(const std::string& dir, const std::string& file) {
   return dir + "/" + file;
 }
 int proc(void* arg_) {
-  prctl(PR_SET_PDEATHSIG, SIGKILL);
   const auto& arg = *static_cast<proc_arg_t*>(arg_);
   close(arg.pipefd[0]);
   const auto& argv = arg.argv;
+  const auto olduid = getuid();
 
   // activate loopback interface
   {
@@ -181,6 +182,7 @@ int proc(void* arg_) {
   if (chown(".", arg.newuid, arg.newuid) == -1) exit_error("chown .");
   if (setuid(arg.newuid) == -1 || setgid(arg.newuid) == -1)
     exit_error("setuid");
+  setgroups(0, &olduid);
   if (chmod(".", 0755) == -1) exit_error("chmod .");
   if (chown_r(".", arg.newuid, arg.newuid) == -1) exit_error("chown -r .");
 
@@ -234,6 +236,10 @@ int proc(void* arg_) {
   }
   if (const int pid = fork()) {
     if (pid == -1) exit_error("fork");
+    if (setresuid(olduid, -1, -1) == -1) exit_error("setresuid");
+    if (prctl(PR_SET_PDEATHSIG, SIGKILL) == -1)
+      exit_error("prctl SET_PDEATHSIG");
+    if (kill(arg.ppid, 0) < 0) raise(SIGKILL);
     const int st = wait_and_forward_signals(pid, !arg.kill_grandchilds);
     const int fd = arg.pipefd[1];
     if (write(fd, &st, sizeof(st)) == -1) exit_error("write");
@@ -267,7 +273,8 @@ int main(int argc, char** argv) {
   if (kill(getppid(), 0) < 0) raise(SIGKILL);
 
   char stack[stacksize];
-  proc_arg_t args = {".", "/", {}, {}, false, {-1, -1}, getuid(), nullptr};
+  proc_arg_t args = {".",      "/",      {},       {},     false,
+                     {-1, -1}, getpid(), getuid(), nullptr};
 
   {
     static const option opts[] = {
