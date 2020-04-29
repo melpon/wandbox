@@ -82,7 +82,7 @@ fi
 
 # 無限 fork でどうなるか確認する
 OUTPUT_SIGNAL=`curl -f -H "Content-type: application/json" -d @assets/test_fork.json  http://localhost:3600/api/compile.json | jq -r .signal`
-if [ "$OUTPUT_SIGNAL" != "CPU time limit exceeded" ]; then
+if [ "$OUTPUT_SIGNAL" != "Killed" ]; then
   echo "failed test fork" 1>&2
   exit 1
 fi
@@ -101,7 +101,7 @@ fi
 
 # 無限 fork その２
 OUTPUT_SIGNAL=`curl -f -H "Content-type: application/json" -d @assets/test_fork2.json  http://localhost:3600/api/compile.json | jq -r .signal`
-if [ "$OUTPUT_SIGNAL" != "CPU time limit exceeded" ]; then
+if [ "$OUTPUT_SIGNAL" != "File size limit exceeded" ]; then
   echo "failed test fork2" 1>&2
   exit 1
 fi
