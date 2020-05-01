@@ -190,7 +190,7 @@
     "--data=134217728",
     "--fsize=134217728",
     "--nofile=256",
-    "--nproc=16",
+    "--nproc=32",
     "--",
     "@CATTLESHED_BINDIR@/cattlegrid",
     "--uids=10000:1000000000",
