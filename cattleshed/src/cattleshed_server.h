@@ -178,7 +178,11 @@ class GetVersionHandler {
     try {
       OnAccept(std::move(request_));
       lock.lock();
+    } catch (std::exception& e) {
+      SPDLOG_ERROR("OnAccept failed: what={}", e.what());
+      lock.lock();
     } catch (...) {
+      SPDLOG_ERROR("OnAccept failed");
       lock.lock();
     }
   }
@@ -734,7 +738,11 @@ class RunJobHandler {
     try {
       OnAccept();
       lock.lock();
+    } catch (std::exception& e) {
+      SPDLOG_ERROR("OnAccept failed: what={}", e.what());
+      lock.lock();
     } catch (...) {
+      SPDLOG_ERROR("OnAccept failed");
       lock.lock();
     }
 
@@ -765,7 +773,11 @@ class RunJobHandler {
       try {
         OnReadDoneOrError();
         lock.lock();
+      } catch (std::exception& e) {
+        SPDLOG_ERROR("OnReadDoneOrError failed: what={}", e.what());
+        lock.lock();
       } catch (...) {
+        SPDLOG_ERROR("OnReadDoneOrError failed");
         lock.lock();
       }
 
@@ -780,7 +792,11 @@ class RunJobHandler {
     try {
       OnRead(std::move(request_));
       lock.lock();
+    } catch (std::exception& e) {
+      SPDLOG_ERROR("OnRead failed: what={}", e.what());
+      lock.lock();
     } catch (...) {
+      SPDLOG_ERROR("OnRead failed");
       lock.lock();
     }
 
