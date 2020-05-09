@@ -184,7 +184,8 @@ if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; t
         -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/grpc$_POSTFIX \
         -DgRPC_BUILD_CSHARP_EXT=OFF \
         $_OPTS
-      make -j$JOBS
+      # なんかセグフォで死ぬことがある（再度実行すると成功する）っぽいので、２回実行する
+      make -j$JOBS || make -j$JOBS
       make install
       # boringssl のヘッダーも入れておく
       cp -r $SOURCE_DIR/grpc/third_party/boringssl-with-bazel/src/include/openssl $INSTALL_DIR/grpc/include/openssl
