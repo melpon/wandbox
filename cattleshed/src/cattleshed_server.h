@@ -36,8 +36,8 @@ class GetVersionHandler
   GetVersionHandler(cattleshed::Cattleshed::AsyncService* service,
                     std::shared_ptr<boost::asio::io_context> ioc,
                     std::shared_ptr<boost::asio::signal_set> sigs,
-                    const wandbox::server_config& config)
-      : service_(service), ioc_(ioc), sigs_(sigs), config_(&config) {}
+                    const wandbox::server_config* config)
+      : service_(service), ioc_(ioc), sigs_(sigs), config_(config) {}
 
  private:
   struct VersionRunner {
@@ -346,8 +346,8 @@ class RunJobHandler
   RunJobHandler(cattleshed::Cattleshed::AsyncService* service,
                 std::shared_ptr<boost::asio::io_context> ioc,
                 std::shared_ptr<boost::asio::signal_set> sigs,
-                const wandbox::server_config& config)
-      : ioc_(ioc), sigs_(sigs), service_(service), config_(&config) {}
+                const wandbox::server_config* config)
+      : ioc_(ioc), sigs_(sigs), service_(service), config_(config) {}
   ~RunJobHandler() { SPDLOG_TRACE("[0x{}] deleted", (void*)this); }
 
  public:
@@ -1254,9 +1254,9 @@ class CattleshedServer {
 
     // ハンドラの登録
     server_.AddResponseWriterHandler<GetVersionHandler>(&service_, ioc_, sigs_,
-                                                        config_);
+                                                        &config_);
     server_.AddReaderWriterHandler<RunJobHandler>(&service_, ioc_, sigs_,
-                                                  config_);
+                                                  &config_);
 
     server_.Start(builder, threads);
   }
