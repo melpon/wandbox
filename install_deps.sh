@@ -149,7 +149,7 @@ if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; t
   # RELEASE_MODE=1 の場合は tsan, asan は入れない
   _BUILDTYPE="release tsan asan"
   if [ $RELEASE_MODE -eq 1 ]; then
-    _BUILDTYPE="release"
+    _BUILDTYPE="release asan"
   fi
   for buildtype in $_BUILDTYPE; do
     case "$buildtype" in
