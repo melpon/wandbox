@@ -31,7 +31,7 @@ fi
 
 PREFIX="/opt/wandbox/$APP-$ENV"
 
-./install_tools.sh
+./install_deps.sh
 
 if [ "$APP" = "kennel" ]; then
   pushd kennel2
