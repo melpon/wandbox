@@ -41,9 +41,9 @@ if [ "$APP" = "kennel" ]; then
   popd
 elif [ "$APP" = "cattleshed" ]; then
   pushd cattleshed
-    rm -rf _build/release
-    ./cmake.sh --prefix $PREFIX --$ENV
-    sudo $INSTALL_DIR/cmake/bin/cmake --install _build/release
+    rm -rf _build/asan
+    ./cmake.sh --prefix $PREFIX --$ENV --asan
+    sudo $INSTALL_DIR/cmake/bin/cmake --install _build/asan
   popd
 fi
 
