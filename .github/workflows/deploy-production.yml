@@ -36,7 +36,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: _install
-        key: install-deps
+        key: install-deps-0001
     - name: Install deps
       run: ./install_deps.sh
     - name: Package cattleshed
