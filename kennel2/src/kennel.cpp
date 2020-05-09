@@ -605,7 +605,7 @@ class kennel : public cppcms::application {
       });
       client->SetOnReadDone([client](grpc::Status status) {
         SPDLOG_DEBUG("[client] OnReadDone");
-        client->Shutdown();
+        client->Close();
       });
       client->Connect();
       client->Write(std::move(request));
@@ -972,7 +972,7 @@ class kennel : public cppcms::application {
       });
       client->SetOnReadDone([client](grpc::Status status) {
         SPDLOG_DEBUG("[client] OnReadDone");
-        client->Shutdown();
+        client->Close();
       });
       client->Connect();
       client->Write(std::move(request));

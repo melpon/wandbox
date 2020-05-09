@@ -93,6 +93,13 @@ if [ ! -e $SPDLOG_VERSION_FILE -o "$SPDLOG_VERSION" != "`cat $SPDLOG_VERSION_FIL
   SPDLOG_CHANGED=1
 fi
 
+GGRPC_VERSION="0.1.0"
+GGRPC_VERSION_FILE="$INSTALL_DIR/ggrpc.version"
+GGRPC_CHANGED=0
+if [ ! -e $GGRPC_VERSION_FILE -o "$GGRPC_VERSION" != "`cat $GGRPC_VERSION_FILE`" ]; then
+  GGRPC_CHANGED=1
+fi
+
 if [ -z "$JOBS" ]; then
   # Linux
   JOBS=`nproc 2>/dev/null`
@@ -408,3 +415,10 @@ if [ $SPDLOG_CHANGED -eq 1 -o  ! -e $INSTALL_DIR/spdlog/include ]; then
   git clone --branch v$SPDLOG_VERSION --depth 1 https://github.com/gabime/spdlog.git $INSTALL_DIR/spdlog
 fi
 echo $SPDLOG_VERSION > $SPDLOG_VERSION_FILE
+
+# ggrpc
+if [ $GGRPC_CHANGED -eq 1 -o  ! -e $INSTALL_DIR/ggrpc/include/server.h ]; then
+  rm -rf $INSTALL_DIR/ggrpc
+  git clone --branch $GGRPC_VERSION --depth 1 https://github.com/melpon/ggrpc.git $INSTALL_DIR/ggrpc
+fi
+echo $GGRPC_VERSION > $GGRPC_VERSION_FILE
