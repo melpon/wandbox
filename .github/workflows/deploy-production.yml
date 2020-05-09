@@ -38,7 +38,7 @@ jobs:
         path: _install
         key: install-deps
     - name: Install deps
-      run: ./install_deps.sh --release
+      run: ./install_deps.sh
     - name: Package cattleshed
       run: |
         ./package.sh cattleshed production
