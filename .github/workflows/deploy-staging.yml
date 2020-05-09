@@ -36,9 +36,9 @@ jobs:
       uses: actions/cache@v1
       with:
         path: _install
-        key: install-tools
-    - name: Install tools
-      run: ./install_tools.sh --release
+        key: install-deps
+    - name: Install deps
+      run: ./install_deps.sh --release
     - name: Package cattleshed
       run: |
         ./package.sh cattleshed staging
