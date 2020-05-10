@@ -436,6 +436,7 @@ class RunJobHandler
     guard.Success();
   }
   void OnRun() {
+    program_runner_.reset();
     auto context = Context();
     if (context) {
       context->Finish(grpc::Status::OK);
