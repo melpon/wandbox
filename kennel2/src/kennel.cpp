@@ -294,7 +294,7 @@ class kennel : public cppcms::application {
         service, [&promise](std::vector<cattleshed::GetVersionResponse> resp) {
           promise.set_value(std::move(resp));
         });
-    auto status = future.wait_for(std::chrono::seconds(60));
+    auto status = future.wait_for(std::chrono::seconds(120));
     if (status == std::future_status::timeout) {
       throw std::exception();
     }
@@ -908,7 +908,7 @@ class kennel : public cppcms::application {
         client->WritesDone();
 
         // send_run_job が終わるまで待つ
-        auto status = future.wait_for(std::chrono::seconds(60));
+        auto status = future.wait_for(std::chrono::seconds(120));
         if (status == std::future_status::timeout) {
           throw std::exception();
         }
