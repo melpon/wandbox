@@ -621,5 +621,17 @@
     , "url": "https://twitter.com/nekketsuuu"
     , "due_date": "2021-04-29T23:59:59+09:00"
     }
+  , { "name": "LouiS0616"
+    , "url": ""
+    , "due_date": "2021-06-02T23:59:59+09:00"
+    }
+  , { "name": "@volanja"
+    , "url": "https://twitter.com/volanja"
+    , "due_date": "2021-06-02T23:59:59+09:00"
+    }
+  , { "name": "大鎌広"
+    , "url": "https://twitter.com/volanja"
+    , "due_date": "2021-06-02T23:59:59+09:00"
+    }
   ]
 }
