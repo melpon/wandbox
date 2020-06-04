@@ -2,153 +2,153 @@ const LANGUAGE_MODE = [
   {
     language: "Bash script",
     extensions: ["sh"],
-    mode: "text/x-sh"
+    mode: "text/x-sh",
   },
   {
     language: "C",
     extensions: ["h", "c"],
-    mode: "text/x-csrc"
+    mode: "text/x-csrc",
   },
   {
     language: "C++",
     extensions: ["h", "hpp", "cc", "cpp", "cxx"],
-    mode: "text/x-c++src"
+    mode: "text/x-c++src",
   },
   {
     language: "C#",
     extensions: ["cs"],
-    mode: "text/x-csharp"
+    mode: "text/x-csharp",
   },
   {
     language: "CPP",
     extensions: ["c", "cpp"],
-    mode: "text/x-csrc"
+    mode: "text/x-csrc",
   },
   {
     language: "CoffeeScript",
     extensions: ["coffee"],
-    mode: "text/x-coffeescript"
+    mode: "text/x-coffeescript",
   },
   {
     language: "Crystal",
     extensions: ["cr"],
-    mode: "text/x-crystal"
+    mode: "text/x-crystal",
   },
   {
     language: "D",
     extensions: ["d"],
-    mode: "text/x-d"
+    mode: "text/x-d",
   },
   {
     language: "Elixir",
     extensions: ["ex", "exs"],
-    mode: "text/x-elixir"
+    mode: "text/x-elixir",
   },
   {
     language: "Erlang",
     extensions: ["erl"],
-    mode: "text/x-erlang"
+    mode: "text/x-erlang",
   },
   {
     language: "F#",
     extensions: ["fs"],
-    mode: "text/x-fsharp"
+    mode: "text/x-fsharp",
   },
   {
     language: "Go",
     extensions: ["go"],
-    mode: "text/x-go"
+    mode: "text/x-go",
   },
   {
     language: "Groovy",
     extensions: ["groovy"],
-    mode: "text/x-groovy"
+    mode: "text/x-groovy",
   },
   {
     language: "Haskell",
     extensions: ["hs"],
-    mode: "text/x-haskell"
+    mode: "text/x-haskell",
   },
   {
     language: "Java",
     extensions: ["java"],
-    mode: "text/x-java"
+    mode: "text/x-java",
   },
   {
     language: "JavaScript",
     extensions: ["js"],
-    mode: "text/javascript"
+    mode: "text/javascript",
   },
   {
     language: "Lisp",
     extensions: ["lisp", "cl", "el"],
-    mode: "text/x-common-lisp"
+    mode: "text/x-common-lisp",
   },
   {
     language: "Lua",
     extensions: ["lua"],
-    mode: "text/x-lua"
+    mode: "text/x-lua",
   },
   {
     language: "OCaml",
     extensions: ["ml"],
-    mode: "text/x-ocaml"
+    mode: "text/x-ocaml",
   },
   {
     language: "OpenSSL",
     extensions: [],
-    mode: "text/x-sh"
+    mode: "text/x-sh",
   },
   {
     language: "PHP",
     extensions: ["php"],
-    mode: "text/x-php"
+    mode: "text/x-php",
   },
   {
     language: "Pascal",
     extensions: ["pas"],
-    mode: "text/x-pascal"
+    mode: "text/x-pascal",
   },
   {
     language: "Perl",
     extensions: ["pl"],
-    mode: "text/x-perl"
+    mode: "text/x-perl",
   },
   {
     language: "Pony",
     extensions: ["pony"],
-    mode: "text/x-pony"
+    mode: "text/x-pony",
   },
   {
     language: "Python",
     extensions: ["py"],
-    mode: "text/x-python"
+    mode: "text/x-python",
   },
   {
     language: "Ruby",
     extensions: ["rb"],
-    mode: "text/x-ruby"
+    mode: "text/x-ruby",
   },
   {
     language: "Rust",
     extensions: ["rs"],
-    mode: "text/x-rustsrc"
+    mode: "text/x-rustsrc",
   },
   {
     language: "Scala",
     extensions: ["scala"],
-    mode: "text/x-scala"
+    mode: "text/x-scala",
   },
   {
     language: "Swift",
     extensions: ["swift"],
-    mode: "text/x-swift"
+    mode: "text/x-swift",
   },
   {
     language: "Vim script",
     extensions: ["vim"],
-    mode: "text/x-csrc"
-  }
+    mode: "text/x-csrc",
+  },
 ];
 
 export function resolveLanguageMode(

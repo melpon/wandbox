@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { Wandbox } from "../pages/Wandbox";
 
-const AppRouter: React.FC<{}> = (): React.ReactElement => {
+const AppRouter: React.FC = (): React.ReactElement => {
   return (
     <BrowserRouter>
       <Switch>

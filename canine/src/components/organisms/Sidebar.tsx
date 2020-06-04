@@ -7,7 +7,7 @@ import Grid from "@material-ui/core/Grid";
 import {
   CompilerList,
   SelectSwitchOption,
-  CompilerInfo
+  CompilerInfo,
 } from "~/hooks/compilerList";
 import { PermlinkData } from "~/hooks/permlink";
 import { useCompile } from "~/hooks/compile";
@@ -24,32 +24,32 @@ import { RawCompilerOption } from "./Sidebar/RawCompilerOption";
 const useStyles = makeStyles((theme: Theme) => ({
   root: {},
   paperTitle: {
-    paddingLeft: "8px"
+    paddingLeft: "8px",
   },
   languageList: {
     paddingTop: "0px",
-    paddingBottom: "0px"
+    paddingBottom: "0px",
   },
   languageListItem: {
-    paddingLeft: "16px"
+    paddingLeft: "16px",
   },
   compilerList: {
     paddingTop: "0px",
-    paddingBottom: "0px"
+    paddingBottom: "0px",
   },
   compilerListItem: {
-    paddingLeft: "16px"
+    paddingLeft: "16px",
   },
   compilerListItemText: {
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
-    overflowX: "hidden"
+    overflowX: "hidden",
   },
   compilerOptionContainer: {
     paddingLeft: "16px",
     paddingRight: "16px",
-    paddingBottom: "16px"
-  }
+    paddingBottom: "16px",
+  },
 }));
 
 interface SidebarProps {
@@ -66,7 +66,7 @@ function optionsToSwitch(
   compilerInfo: CompilerInfo
 ): { [name: string]: string | boolean } {
   const options = optionsStr.split(",");
-  let switches: { [name: string]: string | boolean } = {};
+  const switches: { [name: string]: string | boolean } = {};
   compilerInfo.switches.forEach((sw): void => {
     if (sw.type === "single") {
       const ssw = sw.switch as SingleSwitch;
@@ -110,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
     currentCompilerName,
     currentSwitches,
     compilerOptionRaw,
-    runtimeOptionRaw
+    runtimeOptionRaw,
   } = compilerContext;
   const onSelectLanguage = React.useCallback((language): void => {
     compilerContext.setCurrentLanguage(language);
@@ -129,9 +129,9 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
   const onChangeChecked = React.useCallback(
     (switchName: string, checked: boolean): void => {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      compilerContext.setCurrentSwitches(opts => ({
+      compilerContext.setCurrentSwitches((opts) => ({
         ...opts,
-        [switchName]: checked
+        [switchName]: checked,
       }));
     },
     []
@@ -139,9 +139,9 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
   const onChangeSelected = React.useCallback(
     (switchName: string, selected: string): void => {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      compilerContext.setCurrentSwitches(opts => ({
+      compilerContext.setCurrentSwitches((opts) => ({
         ...opts,
-        [switchName]: selected
+        [switchName]: selected,
       }));
     },
     []

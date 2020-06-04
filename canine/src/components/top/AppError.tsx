@@ -11,20 +11,20 @@ import { useError } from "~/hooks/error";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles((theme: Theme) => ({
   error: {
-    backgroundColor: theme.palette.error.dark
+    backgroundColor: theme.palette.error.dark,
   },
   icon: {
     fontSize: 20,
     opacity: 0.9,
-    marginRight: theme.spacing(1)
+    marginRight: theme.spacing(1),
   },
   message: {
     display: "flex",
-    alignItems: "center"
-  }
+    alignItems: "center",
+  },
 }));
 
-const AppError: React.FC<{}> = (props): React.ReactElement => {
+const AppError: React.FC = (props): React.ReactElement => {
   const [error, setError] = useError();
 
   const onClose = useCallback((): void => setError(null), []);
@@ -36,13 +36,13 @@ const AppError: React.FC<{}> = (props): React.ReactElement => {
       <Snackbar
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "left"
+          horizontal: "left",
         }}
         open={error !== null}
         autoHideDuration={6000}
         onClose={onClose}
         ContentProps={{
-          "aria-describedby": "message-id"
+          "aria-describedby": "message-id",
         }}
       >
         <SnackbarContent

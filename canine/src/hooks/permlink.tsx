@@ -9,7 +9,7 @@ export interface PermlinkPostData {
 function resolvePermlinkPostData(json: AnyJson): PermlinkPostData {
   const map = json as JsonMap;
   return {
-    permlink: map.permlink as string
+    permlink: map.permlink as string,
   };
 }
 
@@ -19,10 +19,10 @@ export function usePostPermlink(
 ): [
   PermlinkPostData | null,
   number,
-  ((url: string | null, opts: RequestInit) => void)
+  (url: string | null, opts: RequestInit) => void
 ] {
   const headers = {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   };
   return useFetchJSON<PermlinkPostData>(
     url,
@@ -77,9 +77,9 @@ function resolvePermlinkData(permlinkId: string, json: AnyJson): PermlinkData {
       description: param.description as string,
       githubUser: param.github_user as string,
       isPrivate: param.is_private as boolean,
-      compilerInfo: resolveCompilerInfo(param["compiler-info"])
+      compilerInfo: resolveCompilerInfo(param["compiler-info"]),
     },
-    results: (map.results as unknown) as ResultData[]
+    results: (map.results as unknown) as ResultData[],
   };
 }
 
@@ -89,10 +89,10 @@ export function useGetPermlink(
 ): [
   PermlinkData | null,
   number,
-  ((url: string | null, opts: RequestInit) => void)
+  (url: string | null, opts: RequestInit) => void
 ] {
   const headers = {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   };
   return useFetchJSON<PermlinkData>(
     null,

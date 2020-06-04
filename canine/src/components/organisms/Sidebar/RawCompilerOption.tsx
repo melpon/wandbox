@@ -12,11 +12,11 @@ import { CodeMirror } from "~/components/organisms/CodeMirror";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
   paperTitle: {
-    paddingLeft: "8px"
+    paddingLeft: "8px",
   },
   optionTitle: {
-    paddingLeft: "10px"
-  }
+    paddingLeft: "10px",
+  },
 }));
 
 interface RawCompilerOptionProps {
@@ -42,7 +42,7 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
     readOnly,
     onChangeCompilerOptionRaw,
     onChangeRuntimeOptionRaw,
-    onCtrlEnter
+    onCtrlEnter,
   } = props;
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const onExpandRuntimeOptionRaw = React.useCallback((): void => {
@@ -72,8 +72,8 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
                   extraKeys: {
                     "Ctrl-Enter": (): void => {
                       onCtrlEnter();
-                    }
-                  }
+                    },
+                  },
                 }}
                 onBeforeChange={onChangeCompilerOptionRaw}
                 style="input"
@@ -102,8 +102,8 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
                   extraKeys: {
                     "Ctrl-Enter": (): void => {
                       onCtrlEnter();
-                    }
-                  }
+                    },
+                  },
                 }}
                 onBeforeChange={onChangeRuntimeOptionRaw}
                 style="input"

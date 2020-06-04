@@ -9,13 +9,13 @@ export function createEditorSourceData(
   return [
     {
       filename: null as string | null,
-      text: code
-    }
+      text: code,
+    },
   ].concat(
     ...codes.map(
       (code): EditorSourceData => ({
         filename: code.file,
-        text: code.code
+        text: code.code,
       })
     )
   );

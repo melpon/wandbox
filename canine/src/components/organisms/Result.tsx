@@ -9,29 +9,29 @@ import { PermlinkData } from "~/hooks/permlink";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    backgroundColor: "#000000"
+    backgroundColor: "#000000",
   },
   compilerMessageS: {
-    color: "#eeeeee"
+    color: "#eeeeee",
   },
   compilerMessageE: {
-    color: "#e01234"
+    color: "#e01234",
   },
   stdout: {
-    color: "#eeeeee"
+    color: "#eeeeee",
   },
   stderr: {
-    color: "#e01234"
+    color: "#e01234",
   },
   control: {
-    color: "#12e034"
+    color: "#12e034",
   },
   signal: {
-    color: "#e01234"
+    color: "#e01234",
   },
   exitcode: {
-    color: "#12e034"
-  }
+    color: "#12e034",
+  },
 }));
 
 interface ResultProps {
@@ -43,7 +43,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement => {
   const classes = useStyles();
   const rs = useContainer(ResultContext);
   const results = permlinkData === null ? rs.results : permlinkData.results;
-  let mergedResults: ResultData[] = [];
+  const mergedResults: ResultData[] = [];
   let preview: ResultData | null = null;
   for (const r of results) {
     const isMessage =
@@ -56,7 +56,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement => {
     if (isMessage && preview !== null && preview.type === r.type) {
       mergedResults[mergedResults.length - 1] = {
         type: r.type,
-        data: preview.data + r.data
+        data: preview.data + r.data,
       };
     } else {
       mergedResults.push(r);
@@ -72,7 +72,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement => {
       StdErr: classes.stderr,
       Control: classes.control,
       Signal: classes.signal,
-      ExitCode: classes.exitcode
+      ExitCode: classes.exitcode,
     }),
     []
   );

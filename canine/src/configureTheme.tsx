@@ -9,15 +9,15 @@ export const configureTheme = (env: string): Theme => {
     production: {
       palette: {
         primary: indigo,
-        secondary: pink
-      }
+        secondary: pink,
+      },
     },
     development: {
       palette: {
         primary: indigo,
-        secondary: pink
-      }
-    }
+        secondary: pink,
+      },
+    },
   };
   if (!(env in t)) {
     return createMuiTheme(t["development"]);

@@ -36,7 +36,7 @@ function useCompilerContext(): CompilerContextState {
     setCurrentCompilerName,
     setCurrentSwitches,
     setCompilerOptionRaw,
-    setRuntimeOptionRaw
+    setRuntimeOptionRaw,
   };
 }
 

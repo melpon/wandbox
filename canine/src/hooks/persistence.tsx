@@ -88,7 +88,7 @@ export function usePersistence(
       const item = {
         sources: editor.sources,
         currentTab: editor.currentTab,
-        stdin: editor.stdin
+        stdin: editor.stdin,
       };
       localStorage.setItem(EDITOR_CODE_KEY, JSON.stringify(item));
     }
@@ -98,7 +98,7 @@ export function usePersistence(
         opened: editor.settings.opened,
         smartIndent: editor.settings.smartIndent,
         tabKey: editor.settings.tabKey,
-        tabWidth: editor.settings.tabWidth
+        tabWidth: editor.settings.tabWidth,
       };
       localStorage.setItem(EDITOR_SETTINGS_KEY, JSON.stringify(item));
     }
@@ -108,7 +108,7 @@ export function usePersistence(
         currentCompilerName: compiler.currentCompilerName,
         currentSwitches: compiler.currentSwitches,
         compilerOptionRaw: compiler.compilerOptionRaw,
-        runtimeOptionRaw: compiler.runtimeOptionRaw
+        runtimeOptionRaw: compiler.runtimeOptionRaw,
       };
       localStorage.setItem(COMPILER_KEY, JSON.stringify(item));
     }
@@ -116,6 +116,6 @@ export function usePersistence(
 
   return {
     save,
-    load
+    load,
   };
 }

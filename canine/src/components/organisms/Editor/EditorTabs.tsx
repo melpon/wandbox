@@ -13,8 +13,8 @@ import { EditorTab, RenamingSource } from "./EditorTab";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const useStyles = makeStyles(() => ({
   tabRoot: {
-    textTransform: "initial"
-  }
+    textTransform: "initial",
+  },
 }));
 
 interface EditorTabsProps {
@@ -47,7 +47,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
         // 0番目は source.filename == null になっていて、UI 上で編集不可なので、
         // 適当に空文字を入れておく
         filename: source.filename || "",
-        originalFilename: source.filename || ""
+        originalFilename: source.filename || "",
       })
     );
     setRenamingSources(rs);
@@ -67,7 +67,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
         (r): RenamingSource => ({
           ...r,
           renaming: false,
-          filename: r.originalFilename
+          filename: r.originalFilename,
         })
       );
 
@@ -89,7 +89,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
         (r, i): RenamingSource => ({
           ...r,
           renaming: i === index,
-          filename: r.originalFilename
+          filename: r.originalFilename,
         })
       );
       setRenamingSources(rs);
@@ -110,7 +110,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       rs[index] = {
         ...rs[index],
         renaming: false,
-        filename: rs[index].originalFilename
+        filename: rs[index].originalFilename,
       };
       setRenamingSources(rs);
     },
@@ -123,7 +123,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       rs[index] = {
         ...rs[index],
         renaming: false,
-        filename: rs[index].originalFilename
+        filename: rs[index].originalFilename,
       };
       setRenamingSources(rs);
     },
@@ -156,7 +156,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
                 onClickTabClose,
                 onChangeRenamingFilename,
                 onCancelRenamingFilename,
-                onSubmitRenamingFilename
+                onSubmitRenamingFilename,
               }}
             />
           );

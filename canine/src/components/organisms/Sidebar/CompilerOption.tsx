@@ -16,32 +16,32 @@ import { CompilerInfo, SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
 const useStyles = makeStyles((theme: Theme) => ({
   root: {},
   paperTitle: {
-    paddingLeft: "8px"
+    paddingLeft: "8px",
   },
   languageList: {
     paddingTop: "0px",
-    paddingBottom: "0px"
+    paddingBottom: "0px",
   },
   languageListItem: {
-    paddingLeft: "16px"
+    paddingLeft: "16px",
   },
   compilerList: {
     paddingTop: "0px",
-    paddingBottom: "0px"
+    paddingBottom: "0px",
   },
   compilerListItem: {
-    paddingLeft: "16px"
+    paddingLeft: "16px",
   },
   compilerListItemText: {
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
-    overflowX: "hidden"
+    overflowX: "hidden",
   },
   compilerOptionContainer: {
     paddingLeft: "16px",
     paddingRight: "16px",
-    paddingBottom: "16px"
-  }
+    paddingBottom: "16px",
+  },
 }));
 
 interface CompilerOptionProps {
@@ -61,7 +61,7 @@ const CompilerOption: React.FC<CompilerOptionProps> = (
     compilerInfo,
     readOnly,
     onChangeChecked,
-    onChangeSelected
+    onChangeSelected,
   } = props;
 
   return (

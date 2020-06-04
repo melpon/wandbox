@@ -34,7 +34,7 @@ function useResultContext(): ResultContextState {
     results,
     clear,
     add,
-    setResults
+    setResults,
   };
 }
 

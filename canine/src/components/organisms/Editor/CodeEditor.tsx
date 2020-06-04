@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import {
   CodeMirror,
   CodeMirrorOptions,
-  CodeMirrorType
+  CodeMirrorType,
 } from "~/components/organisms/CodeMirror";
 import {
   resolveLanguageMode,
-  importLanguageMode
+  importLanguageMode,
 } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
 import { CompilerContextState } from "~/contexts/CompilerContext";
@@ -50,29 +50,29 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
 
   const settings = editor.settings;
   const options = React.useMemo((): CodeMirrorOptions => {
-    let options = {
+    const options = {
       keyMap: settings.editor,
       smartIndent: settings.smartIndent,
       tabSize: parseInt(settings.tabWidth, 10),
       extraKeys: {
-        "Ctrl-Enter": onCtrlEnter
-      }
+        "Ctrl-Enter": onCtrlEnter,
+      },
     };
 
     if (settings.tabKey === "tab") {
       return {
         ...options,
-        indentWithTabs: true
+        indentWithTabs: true,
       };
     } else {
       return {
         ...options,
         extraKeys: {
           ...options.extraKeys,
-          Tab: insertTabSpace
+          Tab: insertTabSpace,
         },
         indentUnit: parseInt(settings.tabKey, 10),
-        indentWithTabs: true
+        indentWithTabs: true,
       };
     }
   }, [settings, insertTabSpace, onCtrlEnter]);
@@ -118,7 +118,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
         lineNumbers: true,
         theme: "material",
         mode: mode,
-        ...options
+        ...options,
       }}
       onBeforeChange={onBeforeChange}
     />

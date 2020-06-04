@@ -1,4 +1,5 @@
 import React from "react";
+import type * as codemirror from "codemirror";
 import { Controlled as OrigCodeMirror } from "react-codemirror2";
 
 import "codemirror/lib/codemirror.css";
@@ -30,7 +31,11 @@ export interface CodeMirrorOptions {
 export interface CodeMirrorProps {
   value: string;
   options: CodeMirrorOptions;
-  onBeforeChange: (editor: CodeMirrorType, data: object, value: string) => void;
+  onBeforeChange: (
+    editor: codemirror.Editor,
+    data: codemirror.EditorChange,
+    value: string
+  ) => void;
   style: "editor" | "input";
 }
 

@@ -56,7 +56,7 @@ function useSettings(): EditorSettingsData {
       setEditor,
       setTabKey,
       setTabWidth,
-      setSmartIndent
+      setSmartIndent,
     }),
     [
       opened,
@@ -68,7 +68,7 @@ function useSettings(): EditorSettingsData {
       setEditor,
       setTabKey,
       setTabWidth,
-      setSmartIndent
+      setSmartIndent,
     ]
   );
 }
@@ -76,7 +76,7 @@ function useSettings(): EditorSettingsData {
 function useEditorContext(): EditorContextState {
   const [currentTab, setCurrentTab] = React.useState<number>(0);
   const [sources, setSources] = React.useState<EditorSourceData[]>([
-    { filename: null, text: "" }
+    { filename: null, text: "" },
   ]);
   const [stdin, setStdin] = React.useState<string>("");
   const settings = useSettings();
@@ -161,7 +161,7 @@ function useEditorContext(): EditorContextState {
     setSources,
     setText,
     setFilename,
-    setStdin
+    setStdin,
   };
 }
 

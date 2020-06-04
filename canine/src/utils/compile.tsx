@@ -35,11 +35,11 @@ export function createBody(
     codes: editor.sources
       .filter((s): boolean => s.filename !== null)
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      .map(s => ({ file: s.filename, code: s.text })),
+      .map((s) => ({ file: s.filename, code: s.text })),
     options: options.join(","),
     stdin: editor.stdin,
     "compiler-option-raw": compiler.compilerOptionRaw,
-    "runtime-option-raw": compiler.runtimeOptionRaw
+    "runtime-option-raw": compiler.runtimeOptionRaw,
   };
 }
 export function compile(
@@ -57,7 +57,7 @@ export function compile(
     method: "POST",
     body: JSON.stringify(body),
     mode: "cors",
-    headers: { "content-type": "application/json" }
+    headers: { "content-type": "application/json" },
   })
     .then(
       (resp): ReadableStream => {

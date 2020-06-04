@@ -50,8 +50,8 @@ function resolveSwitch(json: AnyJson): Switch {
         name: obj.name as string,
         default: obj.default as boolean,
         displayFlags: obj["display-flags"] as string,
-        displayName: obj["display-name"] as string
-      }
+        displayName: obj["display-name"] as string,
+      },
     };
   } else if (obj.type === "select") {
     return {
@@ -65,11 +65,11 @@ function resolveSwitch(json: AnyJson): Switch {
             return {
               name: obj.name as string,
               displayFlags: obj["display-flags"] as string,
-              displayName: obj["display-name"] as string
+              displayName: obj["display-name"] as string,
             };
           }
-        )
-      }
+        ),
+      },
     };
   } else {
     throw "error";
@@ -87,7 +87,7 @@ export function resolveCompilerInfo(json: AnyJson): CompilerInfo {
     compilerOptionRaw: obj["compiler-option-raw"] as boolean,
     runtimeOptionRaw: obj["runtime-option-raw"] as boolean,
     displayCompileCommand: obj["display-compile-command"] as string,
-    switches: (obj.switches as JsonArray).map(resolveSwitch)
+    switches: (obj.switches as JsonArray).map(resolveSwitch),
   };
 }
 
@@ -96,7 +96,7 @@ export function useCompilerList(
   onError: (error: string) => void
 ): CompilerList | null {
   const headers = {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   };
 
   const resolver = React.useCallback((json): CompilerInfo[] => {
@@ -118,7 +118,7 @@ export function useCompilerList(
     return null;
   }
 
-  let languages: { [lang: string]: CompilerInfo[] } = {};
+  const languages: { [lang: string]: CompilerInfo[] } = {};
   for (const info of compilerInfos) {
     if (info.language in languages) {
       languages[info.language].push(info);
@@ -129,6 +129,6 @@ export function useCompilerList(
 
   return {
     compilers: compilerInfos,
-    languages: languages
+    languages: languages,
   };
 }

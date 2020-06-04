@@ -23,22 +23,22 @@ import { ResultContext } from "~/contexts/ResultContext";
 const useStyles = makeStyles(() => ({
   sidebar: {
     paddingLeft: "15px",
-    paddingTop: "15px"
+    paddingTop: "15px",
   },
   contents: {
     paddingLeft: "15px",
-    paddingTop: "15px"
+    paddingTop: "15px",
   },
   permlink: {
-    minHeight: "50px"
-  }
+    minHeight: "50px",
+  },
 }));
 
 interface WandboxRouterProps {
   permlinkId?: string;
 }
 
-const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
+const Wandbox: React.FC = (): React.ReactElement | null => {
   const { match } = useReactRouter<WandboxRouterProps>();
   const permlinkId =
     match.params.permlinkId === undefined ? null : match.params.permlinkId;
@@ -94,7 +94,7 @@ const Wandbox: React.FC<{}> = (): React.ReactElement | null => {
 
   // データに変化があった3秒後に設定を保存する
   React.useEffect((): (() => void) => {
-    var timerID = setTimeout((): void => {
+    const timerID = setTimeout((): void => {
       save();
     }, 3000);
 

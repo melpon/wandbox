@@ -1,11 +1,7 @@
 import React from "react";
 
-export type AnyJson = boolean | number | string | null | JsonArray | JsonMap;
-export interface JsonMap {
-  [key: string]: AnyJson;
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface JsonArray extends Array<AnyJson> {}
+export type AnyJson = string | number | boolean | null | JsonMap | AnyJson[];
+export type JsonMap = { [property: string]: AnyJson };
 
 type Resolver<T> = (resp: AnyJson | string | Blob | FormData) => T;
 
@@ -70,7 +66,7 @@ export function useFetch<T>(
   defaultOpts: RequestInit,
   resolver: Resolver<T>,
   onError: (error: string) => void
-): [T | null, number, ((url: string | null, opts: RequestInit) => void)] {
+): [T | null, number, (url: string | null, opts: RequestInit) => void] {
   const [response, setResponse] = React.useState<T | null>(null);
   const [counter, setCounter] = React.useState<number>(0);
   const [fetchCounter, setFetchCounter] = React.useState<number>(0);
@@ -96,7 +92,7 @@ export function useFetch<T>(
       try {
         const payload = await fetch(url, {
           ...opts,
-          signal: abortController.signal
+          signal: abortController.signal,
         });
 
         if (payload.status !== 200) {
@@ -144,7 +140,7 @@ export function useFetchJSON<T>(
   opts: RequestInit,
   resolver: (resp: AnyJson) => T,
   onError: (error: string) => void
-): [T | null, number, ((url: string | null, opts: RequestInit) => void)] {
+): [T | null, number, (url: string | null, opts: RequestInit) => void] {
   return useFetch<T>("json", url, opts, resolver as Resolver<T>, onError);
 }
 
@@ -156,7 +152,7 @@ export function useFetchText<T>(
   opts: RequestInit,
   resolver: (resp: string) => T,
   onError: (error: string) => void
-): [T | null, number, ((url: string | null, opts: RequestInit) => void)] {
+): [T | null, number, (url: string | null, opts: RequestInit) => void] {
   return useFetch<T>("text", url, opts, resolver as Resolver<T>, onError);
 }
 
@@ -168,7 +164,7 @@ export function useFetchBlob<T>(
   opts: RequestInit,
   resolver: (resp: Blob) => T,
   onError: (error: string) => void
-): [T | null, number, ((url: string | null, opts: RequestInit) => void)] {
+): [T | null, number, (url: string | null, opts: RequestInit) => void] {
   return useFetch("blob", url, opts, resolver as Resolver<T>, onError);
 }
 
@@ -180,6 +176,6 @@ export function useFetchFormData<T>(
   opts: RequestInit,
   resolver: (resp: FormData) => T,
   onError: (error: string) => void
-): [T | null, number, ((url: string | null, opts: RequestInit) => void)] {
+): [T | null, number, (url: string | null, opts: RequestInit) => void] {
   return useFetch("blob", url, opts, resolver as Resolver<T>, onError);
 }

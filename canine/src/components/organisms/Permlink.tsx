@@ -13,7 +13,7 @@ import {
   CompilerList,
   CompilerInfo,
   SingleSwitch,
-  SelectSwitch
+  SelectSwitch,
 } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
 import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
@@ -24,8 +24,8 @@ const useStyles = makeStyles(() => ({
   share: {},
   edit: {},
   hidden: {
-    visibility: "hidden"
-  }
+    visibility: "hidden",
+  },
 }));
 
 export interface PermlinkProps {
@@ -60,7 +60,7 @@ const Permlink: React.FC<PermlinkProps> = (
     const body = JSON.stringify({
       ...json,
       results: result.results,
-      login: false
+      login: false,
     });
 
     doPermlink(null, { body: body });
@@ -93,7 +93,7 @@ const Permlink: React.FC<PermlinkProps> = (
       runtimeOptionRaw,
       code,
       codes,
-      stdin
+      stdin,
     } = permlinkData.parameter;
 
     // CompilerContext への設定
@@ -128,7 +128,7 @@ const Permlink: React.FC<PermlinkProps> = (
       // optionList は文字列のリストなので、
       // これを頑張って {[name: string]: string | boolean} に変換する必要がある。
       const optionList = options.split(",");
-      let switches: { [name: string]: boolean | string } = {};
+      const switches: { [name: string]: boolean | string } = {};
       for (const sw of targetCompilerInfo.switches) {
         if (sw.type === "single") {
           // single の場合は、スイッチの中にオプション名が存在したら

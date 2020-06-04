@@ -68,19 +68,21 @@ interface ErrorContextType {
 const ErrorContext = React.createContext<ErrorContextType>({
   state: {
     valid: false,
-    value: ""
+    value: "",
   },
-  setState: (): void => {}
+  setState: (): void => {
+    // do nothing
+  },
 });
 
-const Error: React.FC<{}> = (props): React.ReactElement => {
+const Error: React.FC = (props): React.ReactElement => {
   const [state, setState] = React.useState<ErrorState>({
     valid: false,
-    value: ""
+    value: "",
   });
   const context = {
     state: state,
-    setState: setState
+    setState: setState,
   };
 
   return (
@@ -98,7 +100,7 @@ export function useError(): [string | null, (error: string | null) => void] {
     (error: string | null): void => {
       context.setState({
         valid: error !== null,
-        value: error === null ? "" : error
+        value: error === null ? "" : error,
       });
     },
     [context]
