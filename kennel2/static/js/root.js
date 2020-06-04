@@ -182,12 +182,6 @@ $(function() {
     }
   }
 
-  // expand window if using permlink
-  if (USING_PERMLINK) {
-    editor.expand(true).change();
-    result_container.expand(true).change();
-  }
-
   // deserialize if code exists.
   var code = JSON_CODE;
   if (code != null) {
@@ -204,7 +198,7 @@ $(function() {
       runtime_option_raw: code['runtime-option-raw'],
     });
 
-    result_container.set_code(compiler, code.code, code.codes || [], code.stdin, code.outputs);
+    result_container.set_code(compiler, code.code, code.codes || [], code.stdin, code.results);
 
     set_author(code.author);
   }
@@ -301,6 +295,7 @@ function Compiler(compiler_id, compile_options_id, ctrl_enter) {
          smartIndent: false,
          extraKeys: {
            'Ctrl-Enter': ctrl_enter,
+           'Cmd-Enter': ctrl_enter,
          },
        });
        $(e).data('editor', editor);
@@ -462,6 +457,10 @@ Editor.prototype._to_editor = function(elem) {
         if (self.onrun)
           self.onrun();
       },
+      'Cmd-Enter': function() {
+        if (self.onrun)
+          self.onrun();
+      },
       Tab: insert_tab_space,
     },
   });
@@ -535,24 +534,6 @@ Editor.prototype._initialize = function() {
     self.contents().each(function(i) {
       self.editor($(this)).setOption('tabSize', tabSize);
     });
-    if (self.editor_changed)
-      self.editor_changed();
-  });
-
-  $(this.settings_id).find('input.expand-editor').change(function(e) {
-    var editor = $('.wandbox-smart-editor');
-    if ($(e.target).prop('checked')) {
-      editor.addClass('wandbox-expand');
-    } else {
-      editor.removeClass('wandbox-expand');
-    }
-
-    // send refresh signal to update scrollbar state
-    var code_mirror = editor.data('editor');
-    if (code_mirror) {
-      code_mirror.refresh();
-    }
-
     if (self.editor_changed)
       self.editor_changed();
   });
@@ -721,19 +702,12 @@ Editor.prototype.setLanguage = function(lang) {
   });
 }
 
-Editor.prototype.expand = function(value) {
-  var eexpand = $(this.settings_id).find('input.expand-editor');
-  eexpand.prop('checked', value);
-  return eexpand;
-}
-
 Editor.prototype.serialize = function() {
   return {
     keybinding: $(this.settings_id).find('select.wandbox-select').val(),
     spaces_or_tab: $(this.settings_id).find('select.wandbox-spaces-or-tab').val(),
     tab_width: $(this.settings_id).find('select.wandbox-tab-width').val(),
     smart_indent: $(this.settings_id).find('input.smart-indent').prop('checked'),
-    expand_editor: $(this.settings_id).find('input.expand-editor').prop('checked'),
   };
 }
 
@@ -750,13 +724,10 @@ Editor.prototype.deserialize = function(settings) {
   var esmart = $(this.settings_id).find('input.smart-indent');
   esmart.prop('checked', settings.smart_indent);
 
-  var eexpand = this.expand(settings.expand_editor);
-
   ekey.change();
   esot.change();
   etabw.change();
   esmart.change();
-  eexpand.change();
 }
 
 /* result_container */
@@ -772,12 +743,6 @@ function ResultContainer(id, settings_id) {
   $(this.settings_id).find('input.nowrap-output-window').change(function(e) {
     var content = $(self.id + ' > .tab-content');
     $(e.target).prop('checked') ? content.addClass('nowrap') : content.removeClass('nowrap')
-    if (self.result_changed)
-        self.result_changed();
-  });
-  $(this.settings_id).find('input.expand-output-window').change(function(e) {
-    var content = $(self.id + ' > .tab-content');
-    $(e.target).prop('checked') ? content.addClass('expand') : content.removeClass('expand')
     if (self.result_changed)
         self.result_changed();
   });
@@ -843,16 +808,9 @@ ResultContainer.prototype.set_code = function(compiler, code, codes, stdin, outp
   result_window.set_code(compiler, code, codes, stdin, outputs);
 }
 
-ResultContainer.prototype.expand = function(value) {
-  var eexpand = $(this.settings_id).find('input.expand-output-window');
-  eexpand.prop('checked', value);
-  return eexpand;
-}
-
 ResultContainer.prototype.serialize = function() {
   return {
     nowrap: $(this.settings_id).find('input.nowrap-output-window').prop('checked'),
-    expand: $(this.settings_id).find('input.expand-output-window').prop('checked'),
   };
 }
 
@@ -860,10 +818,7 @@ ResultContainer.prototype.deserialize = function(settings) {
   var enowrap = $(this.settings_id).find('input.nowrap-output-window');
   enowrap.prop('checked', settings.nowrap);
 
-  var eexpand = this.expand(settings.expand);
-
   enowrap.change();
-  eexpand.change();
 }
 
 /* result_window() */
@@ -931,7 +886,7 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdi
   pm.addClass('disable');
 
   outputs = $.map(outputs, function(e) {
-    return { type: e.type, output: e.output };
+    return { type: e.type, data: e.output };
   });
 
   var data = {
@@ -942,20 +897,20 @@ ResultWindow.prototype.post_permlink = function(compiler_info, code, codes, stdi
     options: compiler_info.compile_options,
     'compiler-option-raw': compiler_info.compiler_option_raw,
     'runtime-option-raw': compiler_info.runtime_option_raw,
-    outputs: outputs,
+    results: outputs,
     login: LOGIN_NAME != null,
   };
 
   $.post(URL_PERMLINK, JSON.stringify(data),
     function(json) {
-      if (!json.success) {
+      if (json.permlink === undefined) {
         pm.removeClass('disable');
         return;
       }
 
       pm.remove();
 
-      var url = URL_PERMLINK + '/' + json.link;
+      var url = URL_PERMLINK + '/' + json.permlink;
       $('<a href="' + url + '" target="_blank" id="permlink">URL</a>')
         .appendTo(self._permlink());
 
@@ -1131,12 +1086,16 @@ ResultWindow.prototype.post_code = function(compiler, code, codes, stdin) {
     p.html(ansi_up.ansi_to_html(p.attr('data-text')));
     preview_paragraph = p;
 
-    output[0].scrollTop = output[0].scrollHeight;
-
     if (data.type == 'Control' && data.message == 'Finish') {
         finalize();
     }
   };
+  src.onreceived = function() {
+    var output = self._output_window()
+
+    output[0].scrollTop = output[0].scrollHeight;
+  };
+
 
   src.onerror = function() {
     finalize();
@@ -1149,7 +1108,7 @@ ResultWindow.prototype.set_code = function(compiler, code, codes, stdin, outputs
   this.code_window(compiler_info, code, codes, stdin);
   $.each(outputs, function(n,e) {
     var type = e.type;
-    var output = e.output;
+    var output = e.data;
     var ansi_up = new AnsiUp();
     $('<pre>').addClass(type)
               .attr('data-type', type)
@@ -1173,6 +1132,7 @@ function Stdin(stdin_id, ctrl_enter) {
          smartIndent: false,
          extraKeys: {
            'Ctrl-Enter': ctrl_enter,
+           'Cmd-Enter': ctrl_enter,
          },
        });
        $(e).data('editor', editor);

@@ -195,18 +195,21 @@ public:
             << cppdb::exec;
 
         auto link_id = stat.last_insert_id();
-        //std::clog << link_id << std::endl;
+        //std::clog << "link_id: " << link_id << std::endl;
 
         int order = 1;
         stat = sql <<
             "INSERT INTO link_output (link_id, \"order\", type, output) "
             "VALUES (?, ?, ?, ?)";
-        for (auto&& output: code["outputs"].array()) {
+        for (auto&& output: code["results"].array()) {
+            //std::clog << "order: " << order << std::endl;
+            //std::clog << "type: " << output["type"].str() << std::endl;
+            //std::clog << "data: " << output["data"].str() << std::endl;
             stat
                 << link_id
                 << order
                 << output["type"].str()
-                << output["output"].str()
+                << output["data"].str()
                 << cppdb::exec;
             stat.reset();
             order += 1;
@@ -272,8 +275,8 @@ public:
         {
             int n = 0;
             while (r.next()) {
-                value["outputs"][n]["type"] = r.get<std::string>("type");
-                value["outputs"][n]["output"] = r.get<std::string>("output");
+                value["results"][n]["type"] = r.get<std::string>("type");
+                value["results"][n]["data"] = r.get<std::string>("output");
                 n += 1;
             }
         }
@@ -339,16 +342,29 @@ public:
     }
     std::string get_github_access_token(std::string wandbox_access_token) {
         cppdb::result r;
-        r = sql <<
-            "SELECT github_access_token "
-            "FROM github_user "
-            "WHERE wandbox_access_token=?"
-            << wandbox_access_token
-            << cppdb::row;
+        r = sql << "SELECT github_access_token "
+                   "FROM github_user "
+                   "WHERE wandbox_access_token=?"
+                << wandbox_access_token << cppdb::row;
         if (r.empty()) {
-            return "";
+          return "";
         }
         return r.get<std::string>("github_access_token");
+    }
+
+    std::string get_github_username(std::string wandbox_access_token) {
+      if (wandbox_access_token.empty()) {
+        return "";
+      }
+      cppdb::result r;
+      r = sql << "SELECT username "
+                 "FROM github_user "
+                 "WHERE wandbox_access_token=?"
+              << wandbox_access_token << cppdb::row;
+      if (r.empty()) {
+        return "";
+      }
+      return r.get<std::string>("username");
     }
 
     struct usercode_info {

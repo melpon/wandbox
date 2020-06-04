@@ -79,6 +79,7 @@ var PostEventSource = function (url, obj) {
               }
             }
           }
+          eventsource.dispatchEvent('received', null);
 
           // don't need to poll again, because we're long-loading
         } else if (eventsource.readyState !== eventsource.CLOSED) {

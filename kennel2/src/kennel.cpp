@@ -1,18 +1,21 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <random>
 #include <algorithm>
-#include "libs.h"
-#include "root.h"
-#include "nojs_root.h"
-#include "user.h"
-#include "protocol.h"
+#include <fstream>
+#include <future>
+#include <iostream>
+#include <random>
+#include <sstream>
+
+#include <CLI/CLI.hpp>
+
+#include "cattleshed_client.h"
 #include "eventsource.h"
-#include "ndjson.h"
-#include "permlink.h"
 #include "http_client.h"
-#include "../../cattleshed/src/syslogstream.cc"
+#include "libs.h"
+#include "ndjson.h"
+#include "nojs_root.h"
+#include "permlink.h"
+#include "root.h"
+#include "user.h"
 
 namespace cppcms {
     template<>
@@ -30,206 +33,323 @@ namespace cppcms {
 }
 
 class kennel : public cppcms::application {
-public:
-    kennel(cppcms::service &srv) : cppcms::application(srv) {
-        // static file serving is for debugging
-        // use Apache, nginx and so on in production
-        dispatcher().assign("/static/(([a-zA-Z0-9_\\-]+/)*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))", &kennel::serve_file, this, 1, 4);
-        dispatcher().assign("/static/(js/jquery.cookie.(js))", &kennel::serve_file, this, 1, 2);
-        dispatcher().assign("/static/(js/jquery.url.(js))", &kennel::serve_file, this, 1, 2);
-        mapper().assign("static", "/static");
+ public:
+  kennel(cppcms::service& srv) : cppcms::application(srv) {
+    // static file serving is for debugging
+    // use Apache, nginx and so on in production
+    dispatcher().assign(
+        "/static/(([a-zA-Z0-9_\\-]+/"
+        ")*+([a-zA-Z0-9_\\-]+)\\.(js|css|png|gif))",
+        &kennel::serve_file, this, 1, 4);
+    dispatcher().assign("/static/(js/jquery.cookie.(js))", &kennel::serve_file,
+                        this, 1, 2);
+    dispatcher().assign("/static/(js/jquery.url.(js))", &kennel::serve_file,
+                        this, 1, 2);
+    mapper().assign("static", "/static");
 
-        dispatcher().assign("/compile/?", &kennel::compile, this);
-        mapper().assign("compile", "/compile");
+    dispatcher().assign("/compile/?", &kennel::compile, this);
+    mapper().assign("compile", "/compile");
 
-        dispatcher().assign("/permlink/?", &kennel::post_permlink, this);
-        mapper().assign("permlink", "/permlink");
+    dispatcher().assign("/permlink/?", &kennel::post_permlink, this);
+    mapper().assign("permlink", "/permlink");
 
-        dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink, this, 1);
-        mapper().assign("get-permlink", "/permlink/{1}");
+    dispatcher().assign("/permlink/([a-zA-Z0-9]+)/?", &kennel::get_permlink,
+                        this, 1);
+    mapper().assign("get-permlink", "/permlink/{1}");
 
-        dispatcher().assign("/login/github/callback", &kennel::get_github_callback, this);
+    dispatcher().assign("/login/github/callback", &kennel::get_github_callback,
+                        this);
 
-        dispatcher().assign("/api/user.json", &kennel::api_user, this);
-        dispatcher().assign("/api/list.json", &kennel::api_list, this);
-        dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
-        dispatcher().assign("/api/compile.ndjson", &kennel::api_compile_ndjson, this);
-        dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink, this, 1);
-        dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this, 1);
-        mapper().assign("api-template", "/api/template/");
+    dispatcher().assign("/api/user.json", &kennel::api_user, this);
+    dispatcher().assign("/api/list.json", &kennel::api_list, this);
+    dispatcher().assign("/api/compile.json", &kennel::api_compile, this);
+    dispatcher().assign("/api/compile.ndjson", &kennel::api_compile_ndjson,
+                        this);
+    dispatcher().assign("/api/permlink/?", &kennel::api_post_permlink, this);
+    dispatcher().assign("/api/permlink/([a-zA-Z0-9]+)/?", &kennel::api_permlink,
+                        this, 1);
+    dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this,
+                        1);
+    mapper().assign("api-template", "/api/template/");
 
-        dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this, 1);
-        mapper().assign("nojs-compile", "/nojs/{1}/compile");
-        dispatcher().assign("/nojs/(.+?)/permlink/([a-zA-Z0-9]+)/?", &kennel::nojs_get_permlink, this, 1, 2);
-        mapper().assign("nojs-get-permlink", "/nojs/{1}/permlink/{2}");
-        dispatcher().assign("/nojs/([a-zA-Z0-9_\\-\\.]+)/?", &kennel::nojs_root, this, 1);
-        mapper().assign("nojs-root", "/nojs/{1}");
-        dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
-        mapper().assign("nojs-list", "/nojs");
+    dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this,
+                        1);
+    mapper().assign("nojs-compile", "/nojs/{1}/compile");
+    dispatcher().assign("/nojs/(.+?)/permlink/([a-zA-Z0-9]+)/?",
+                        &kennel::nojs_get_permlink, this, 1, 2);
+    mapper().assign("nojs-get-permlink", "/nojs/{1}/permlink/{2}");
+    dispatcher().assign("/nojs/([a-zA-Z0-9_\\-\\.]+)/?", &kennel::nojs_root,
+                        this, 1);
+    mapper().assign("nojs-root", "/nojs/{1}");
+    dispatcher().assign("/nojs/?", &kennel::nojs_list, this);
+    mapper().assign("nojs-list", "/nojs");
 
-        dispatcher().assign("/signout/?", &kennel::signout, this);
-        mapper().assign("signout", "/signout");
+    dispatcher().assign("/signout/?", &kennel::signout, this);
+    mapper().assign("signout", "/signout");
 
-        dispatcher().assign("/user/(.+?)/?", &kennel::user, this, 1);
-        mapper().assign("user", "/user/{1}");
+    dispatcher().assign("/user/(.+?)/?", &kennel::user, this, 1);
+    mapper().assign("user", "/user/{1}");
 
-        dispatcher().assign("/?", &kennel::root, this);
-        if (srv.settings()["application"]["map_root"].str().empty()) {
-            mapper().assign("root", "/");
+    dispatcher().assign("/?", &kennel::root, this);
+    if (srv.settings()["application"]["map_root"].str().empty()) {
+      mapper().assign("root", "/");
+    } else {
+      mapper().assign("root", "");
+    }
+  }
+
+ private:
+  static CattleshedClientManager* get_cattleshed_client_manager(
+      cppcms::service& srv, int n) {
+    static std::map<int, std::unique_ptr<CattleshedClientManager>> cmmap;
+    auto it = cmmap.find(n);
+    if (it != cmmap.end()) {
+      return it->second.get();
+    }
+
+    auto host = srv.settings()["application"]["cattleshed"][n]["host"].str();
+    auto port =
+        (int)srv.settings()["application"]["cattleshed"][n]["port"].number();
+    auto channel = grpc::CreateChannel(host + ":" + std::to_string(port),
+                                       grpc::InsecureChannelCredentials());
+    SPDLOG_INFO("Create gRPC channel to {}", host + ":" + std::to_string(port));
+    std::unique_ptr<CattleshedClientManager> cm(
+        new CattleshedClientManager(channel, 1));
+    auto p = cm.get();
+    cmmap.insert(std::make_pair(n, std::move(cm)));
+    return p;
+  }
+
+  cppcms::json::value json_post_data() {
+    auto p = request().raw_post_data();
+    std::stringbuf sb(std::ios_base::in);
+    sb.pubsetbuf(static_cast<char*>(p.first), p.second);
+    std::istream is(&sb);
+    cppcms::json::value value;
+    value.load(is, true, nullptr);
+    return value;
+  }
+
+  cppcms::json::value get_compiler_infos_or_cache() {
+    cppcms::json::value json;
+    if (!cache().fetch_data("compiler_infos", json)) {
+      if (!cache().fetch_data("compiler_infos_persist", json)) {
+        json = default_compiler_infos();
+        cache().store_data("compiler_infos", json, 600);
+        cache().store_data("compiler_infos_persist", json, -1);
+      } else {
+        cache().store_data("compiler_infos", json, 600);
+        cache().store_data("compiler_infos_persist", json, -1);
+
+        auto context = get_context();
+        get_compiler_infos_async(
+            service(),
+            [context](std::vector<cattleshed::GetVersionResponse> responses) {
+              std::vector<cppcms::json::value> jsons;
+              for (const auto& resp : responses) {
+                jsons.push_back(kennel::version_response_to_json(resp));
+              }
+              auto json = kennel::merge_compiler_infos(jsons);
+              context->cache().store_data("compiler_infos", json, 600);
+              context->cache().store_data("compiler_infos_persist", json, -1);
+            });
+      }
+    }
+    return json;
+  }
+
+ public:
+  static cppcms::json::value& default_compiler_infos() {
+    static cppcms::json::value value;
+    return value;
+  }
+  static cppcms::json::value merge_compiler_infos(
+      const std::vector<cppcms::json::value>& infos) {
+    std::vector<cppcms::json::value> compilers;
+    cppcms::json::object templates;
+    for (auto i = 0; i < static_cast<int>(infos.size()); i++) {
+      for (const auto& info : infos[i]["compilers"].array()) {
+        auto name = info["name"];
+        auto it = std::find_if(
+            compilers.begin(), compilers.end(),
+            [name](cppcms::json::value& v) { return v["name"] == name; });
+
+        if (it != compilers.end()) {
+          // update
+          *it = info;
+          (*it)["provider"].number(i);
         } else {
-            mapper().assign("root", "");
+          // new
+          cppcms::json::value value = info;
+          value.object()["provider"].number(i);
+          compilers.push_back(std::move(value));
         }
+      }
+      for (const auto& info : infos[i]["templates"].object()) {
+        templates[info.first] = info.second;
+      }
     }
+    cppcms::json::value r;
+    r.set("compilers", compilers);
+    r.set("templates", templates);
+    return r;
+  }
 
-private:
-    cppcms::json::value json_post_data() {
-        auto p = request().raw_post_data();
-        std::stringbuf sb(std::ios_base::in);
-        sb.pubsetbuf(static_cast<char*>(p.first), p.second);
-        std::istream is(&sb);
-        cppcms::json::value value;
-        value.load(is, true, nullptr);
-        return value;
-    }
+  // cattleshed::GetVersionResponse を頑張って JSON にする
+  static cppcms::json::value version_response_to_json(
+      const cattleshed::GetVersionResponse& resp) {
+    cppcms::json::value compilers = cppcms::json::array();
+    for (int i = 0; i < resp.compiler_info_size(); i++) {
+      cppcms::json::value info;
 
-    cppcms::json::value get_compiler_infos_or_cache() {
-        cppcms::json::value json;
-        if (!cache().fetch_data("compiler_infos", json)) {
-            if (!cache().fetch_data("compiler_infos_persist", json)) {
-                json = default_compiler_infos();
-                cache().store_data("compiler_infos", json, 600);
-                cache().store_data("compiler_infos_persist", json, -1);
-            } else {
-                cache().store_data("compiler_infos", json, 600);
-                cache().store_data("compiler_infos_persist", json, -1);
+      const cattleshed::CompilerInfo& c = resp.compiler_info(i);
+      info["name"] = c.name();
+      info["version"] = c.version();
+      info["language"] = c.language();
+      info["display-name"] = c.display_name();
+      info["templates"] = cppcms::json::array();
+      for (int j = 0; j < c.templates_size(); j++) {
+        info["templates"].array().push_back(c.templates(j));
+      }
+      info["compiler-option-raw"] = c.compiler_option_raw();
+      info["runtime-option-raw"] = c.runtime_option_raw();
+      info["display-compile-command"] = c.display_compile_command();
+      cppcms::json::value switches = cppcms::json::array();
+      for (int j = 0; j < c.switches_size(); j++) {
+        cppcms::json::value sw;
 
-                booster::function<cppcms::json::value (std::vector<cppcms::json::value>&)> merge_compiler_infos = &kennel::merge_compiler_infos;
-                auto context = get_context();
-                get_compiler_infos_async([context, merge_compiler_infos](std::vector<cppcms::json::value>& jsons) {
-                    // On old gcc (4.6) bug.
-                    // error: ‘this’ was not captured for this lambda function
-                    // auto json = kennel::merge_compiler_infos(jsons);
-                    auto json = merge_compiler_infos(jsons);
-                    context->cache().store_data("compiler_infos", json, 600);
-                    context->cache().store_data("compiler_infos_persist", json, -1);
-                });
-            }
-        }
-        return json;
-    }
-
-public:
-    static cppcms::json::value& default_compiler_infos() {
-        static cppcms::json::value value;
-        return value;
-    }
-    static std::vector<cppcms::json::value> get_compiler_infos(cppcms::service& service) {
-        std::vector<protocol> protos = {
-            protocol{"Version", ""},
-        };
-        std::vector<cppcms::json::value> values;
-        auto size = service.settings()["application"]["cattleshed"].array().size();
-
-        for (auto i = 0; i < static_cast<int>(size); i++) {
-            std::string json;
-            send_command(service, i, protos, [&json](const booster::system::error_code& e, const protocol& proto) {
-                if (e)
-                    return (void)(std::clog << e.message() << std::endl);
-                json = proto.contents;
-            }, 1);
-            std::stringstream ss(json);
-            cppcms::json::value value;
-            value.load(ss, true, nullptr);
-            values.push_back(value);
-        }
-        return values;
-    }
-    static cppcms::json::value merge_compiler_infos(const std::vector<cppcms::json::value>& infos) {
-        std::vector<cppcms::json::value> compilers;
-        cppcms::json::object templates;
-        for (auto i = 0; i < static_cast<int>(infos.size()); i++) {
-            for (const auto& info: infos[i]["compilers"].array()) {
-                auto name = info["name"];
-                auto it = std::find_if(compilers.begin(), compilers.end(), [name](cppcms::json::value& v) { return v["name"] == name; });
-
-                if (it != compilers.end()) {
-                    // update
-                    *it = info;
-                    (*it)["provider"].number(i);
-                } else {
-                    // new
-                    cppcms::json::value value = info;
-                    value.object()["provider"].number(i);
-                    compilers.push_back(std::move(value));
-                }
-            }
-            for (const auto& info: infos[i]["templates"].object()) {
-                templates[info.first] = info.second;
-            }
-        }
-        cppcms::json::value r;
-        r.set("compilers", compilers);
-        r.set("templates", templates);
-        return r;
-    }
-
-private:
-    std::vector<cppcms::json::value> get_compiler_infos() {
-        return get_compiler_infos(service());
-    }
-    template<class F>
-    void get_compiler_infos_async(const F& callback) {
-        std::vector<protocol> protos = {
-            protocol{"Version", ""},
-        };
-        typedef booster::shared_ptr<cppcms::json::value> json_ptr;
-        typedef booster::shared_ptr<std::vector<booster::shared_ptr<cppcms::json::value>>> result_type;
-        auto results = result_type(new result_type::value_type());
-        auto size = service().settings()["application"]["cattleshed"].array().size();
-        results->resize(size);
-
-        for (auto i = 0; i < static_cast<int>(size); i++) {
-            send_command_async(service(), i, protos, [callback, results, i](const booster::system::error_code& e, const protocol& proto) {
-                if (e)
-                    return (void)(std::clog << e.message() << std::endl);
-                std::stringstream ss(proto.contents);
-                json_ptr value(new cppcms::json::value());
-                value->load(ss, true, nullptr);
-                //value->save(std::clog, cppcms::json::readable);
-                (*results)[i] = value;
-                auto completed = std::all_of(results->begin(), results->end(), [](const json_ptr& v) { return v; });
-                if (completed) {
-                    std::vector<cppcms::json::value> jsons(results->size());
-                    for (auto i = 0; i < static_cast<int>(jsons.size()); i++) {
-                        jsons[i] = std::move(*(*results)[i]);
-                    }
-                    callback(jsons);
-                }
-            }, 1);
-        }
-    }
-
-    bool ensure_method_get() {
-        if (request().request_method() == "HEAD") {
-            return true;
-        }
-        if (request().request_method() == "GET") {
-            return true;
-        }
-
-        if (request().request_method() == "OPTIONS") {
-            response().status(200);
-            response().allow("OPTIONS, GET, HEAD");
-            response().set_header("Access-Control-Allow-Origin", "*");
-            auto headers = request().getenv("HTTP_ACCESS_CONTROL_REQUEST_HEADERS");
-            if (!headers.empty())
-                response().set_header("Access-Control-Allow-Headers", headers);
-            return false;
+        const cattleshed::Switch& s = c.switches(j);
+        if (s.data_case() == cattleshed::Switch::kSingle) {
+          const cattleshed::SingleSwitch& ss = s.single();
+          sw["type"] = "single";
+          sw["name"] = ss.name();
+          sw["default"] = ss.default_value();
+          sw["display-name"] = ss.display_name();
+          sw["display-flags"] = ss.display_flags();
         } else {
-            response().status(405);
-            response().allow("OPTIONS, GET, HEAD");
-            return false;
+          const cattleshed::SelectSwitch& ss = s.select();
+          sw["type"] = "select";
+          sw["default"] = ss.default_value();
+          sw["options"] = cppcms::json::array();
+          for (int k = 0; k < ss.options_size(); k++) {
+            cppcms::json::value option;
+            const cattleshed::SelectSwitchOption& opt = ss.options(k);
+            option["name"] = opt.name();
+            option["display-name"] = opt.display_name();
+            option["display-flags"] = opt.display_flags();
+            sw["options"].array().push_back(option);
+          }
         }
+
+        switches.array().push_back(sw);
+      }
+      info["switches"] = switches;
+
+      compilers.array().push_back(info);
+    }
+
+    cppcms::json::value templates = cppcms::json::object();
+    for (int i = 0; i < resp.templates_size(); i++) {
+      cppcms::json::value tmpl;
+      {
+        const cattleshed::Template& t = resp.templates(i);
+        tmpl["name"] = t.name();
+        tmpl["code"] = t.default_source();
+        if (t.sources_size() != 0) {
+          for (int j = 0; j < t.sources_size(); j++) {
+            cppcms::json::value code;
+            code["file"] = t.sources(j).file_name();
+            code["code"] = t.sources(j).source();
+            tmpl["codes"].array().push_back(code);
+          }
+        }
+        if (!t.stdin().empty()) {
+          tmpl["stdin"] = t.stdin();
+        }
+        if (!t.compiler_options().empty()) {
+          tmpl["options"] = t.compiler_options();
+        }
+        if (!t.compiler_option_raw().empty()) {
+          tmpl["compiler_option_raw"] = t.compiler_option_raw();
+        }
+        if (!t.runtime_option_raw().empty()) {
+          tmpl["runtime_option_raw"] = t.runtime_option_raw();
+        }
+      }
+      templates.object()[tmpl["name"].str()] = tmpl;
+    }
+
+    cppcms::json::value r;
+    r["compilers"] = compilers;
+    r["templates"] = templates;
+    return r;
+  }
+
+  static std::vector<cattleshed::GetVersionResponse> get_compiler_infos(
+      cppcms::service& service) {
+    std::promise<std::vector<cattleshed::GetVersionResponse>> promise;
+    std::future<std::vector<cattleshed::GetVersionResponse>> future =
+        promise.get_future();
+    get_compiler_infos_async(
+        service, [&promise](std::vector<cattleshed::GetVersionResponse> resp) {
+          promise.set_value(std::move(resp));
+        });
+    auto status = future.wait_for(std::chrono::seconds(300));
+    if (status == std::future_status::timeout) {
+      throw std::exception();
+    }
+    return future.get();
+  }
+
+ private:
+  static void get_compiler_infos_async(
+      cppcms::service& service,
+      std::function<void(std::vector<cattleshed::GetVersionResponse>)>
+          callback) {
+    auto results =
+        std::make_shared<std::vector<cattleshed::GetVersionResponse>>();
+    auto count = std::make_shared<int>(0);
+    auto size = service.settings()["application"]["cattleshed"].array().size();
+    for (auto i = 0; i < static_cast<int>(size); i++) {
+      auto cm = get_cattleshed_client_manager(service, i);
+      auto client = cm->CreateGetVersionClient();
+      client->SetOnResponse(
+          [callback, results, client, count, size](
+              cattleshed::GetVersionResponse resp, grpc::Status status) {
+            if (status.ok()) {
+              results->push_back(resp);
+            }
+            *count += 1;
+            if (*count == size) {
+              callback(std::move(*results));
+            }
+          });
+      cattleshed::GetVersionRequest req;
+      client->Request(req);
+    }
+  }
+
+  bool ensure_method_get() {
+    if (request().request_method() == "HEAD") {
+      return true;
+    }
+    if (request().request_method() == "GET") {
+      return true;
+    }
+
+    if (request().request_method() == "OPTIONS") {
+      response().status(200);
+      response().allow("OPTIONS, GET, HEAD");
+      response().set_header("Access-Control-Allow-Origin", "*");
+      auto headers = request().getenv("HTTP_ACCESS_CONTROL_REQUEST_HEADERS");
+      if (!headers.empty())
+        response().set_header("Access-Control-Allow-Headers", headers);
+      return false;
+    } else {
+      response().status(405);
+      response().allow("OPTIONS, GET, HEAD");
+      return false;
+    }
     }
 
     bool ensure_method_post() {
@@ -364,25 +484,28 @@ private:
         response().set_redirect_header(root_ss.str());
     }
 
-    static std::vector<protocol> make_protocols(const cppcms::json::value& value) {
-        std::vector<protocol> protos = {
-            protocol{"Control", "compiler=" + value["compiler"].str()},
-            protocol{"StdIn", value.get("stdin", "")},
-            protocol{"CompilerOptionRaw", value.get("compiler-option-raw", "")},
-            protocol{"RuntimeOptionRaw", value.get("runtime-option-raw", "")},
-            protocol{"Source", value["code"].str()},
-            protocol{"CompilerOption", value.get("options", "")},
-        };
-        const auto& codes = value.find("codes");
-        if (!codes.is_undefined()) {
-            for (const auto& code: codes.array()) {
-                protos.push_back(protocol{"SourceFileName", code["file"].str()});
-                protos.push_back(protocol{"Source", code["code"].str()});
-            }
+    static cattleshed::RunJobRequest make_run_job_request(
+        const cppcms::json::value& value, cattleshed::Issuer issuer) {
+      cattleshed::RunJobRequest request;
+      auto start = request.mutable_start();
+      start->set_compiler(value["compiler"].str());
+      start->set_stdin(value.get("stdin", ""));
+      start->set_compiler_option_raw(value.get("compiler-option-raw", ""));
+      start->set_runtime_option_raw(value.get("compiler-option-raw", ""));
+      start->set_default_source(value["code"].str());
+      start->set_compiler_options(value.get("options", ""));
+      *start->mutable_issuer() = std::move(issuer);
+      const auto& codes = value.find("codes");
+      if (!codes.is_undefined()) {
+        for (const auto& code : codes.array()) {
+          auto source = start->add_sources();
+          source->set_file_name(code["file"].str());
+          source->set_source(code["code"].str());
         }
-        protos.push_back(protocol{"Control", "run"});
-        return protos;
+      }
+      return request;
     }
+
     static cppcms::json::value form_to_json(const cppcms::http::request::form_type& form) {
         cppcms::json::value result;
         auto set_if_exists = [&result, &form](const std::string& result_key, const std::string& form_key) {
@@ -430,35 +553,63 @@ private:
             c.set_twitter(std::move(title), std::move(description));
         }
     }
+    static cattleshed::Issuer make_issuer(cppcms::http::request& req,
+                                          std::string github_username) {
+      cattleshed::Issuer issuer;
+      issuer.set_remote_addr(req.remote_addr());
+      issuer.set_real_ip(req.getenv("HTTP_X_REAL_IP"));
+      issuer.set_forwarded_for(req.getenv("HTTP_X_FORWARDED_FOR"));
+      issuer.set_path_info(req.path_info());
+      issuer.set_github_username(github_username);
+      return issuer;
+    }
 
     void compile() {
-        if (!ensure_method_post()) {
-            return;
-        }
+      if (!ensure_method_post()) {
+        return;
+      }
 
-        auto value = json_post_data();
-        auto protos = make_protocols(value);
-        auto compiler = value["compiler"].str();
-        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
-        // find compiler info.
-        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
-            [&compiler](cppcms::json::value& v) {
-                return v["name"].str() == compiler;
-            });
-        // error if the compiler is not found
-        if (it == compiler_infos.array().end()) {
-            throw std::exception();
-        }
-        auto index = static_cast<std::size_t>((*it)["provider"].number());
+      auto value = json_post_data();
+      auto compiler = value["compiler"].str();
+      auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
+      // find compiler info.
+      auto it = std::find_if(compiler_infos.array().begin(),
+                             compiler_infos.array().end(),
+                             [&compiler](cppcms::json::value& v) {
+                               return v["name"].str() == compiler;
+                             });
+      // error if the compiler is not found
+      if (it == compiler_infos.array().end()) {
+        throw std::exception();
+      }
+      auto index = static_cast<std::size_t>((*it)["provider"].number());
 
-        auto es = booster::shared_ptr<eventsource>(new eventsource(release_context()));
-        es->send_header();
-        send_command_async(service(), index, protos, [es](const booster::system::error_code& e, const protocol& proto) {
-            if (e)
-                return (void)(std::clog << e.message() << std::endl);
-            es->send_data(proto.command + ":" + proto.contents, true);
-            //std::clog << proto.command << ":" << proto.contents << std::endl;
-        });
+      permlink pl(service());
+      auto issuer = make_issuer(
+          request(), pl.get_github_username(session()["access_token"]));
+      auto request = make_run_job_request(value, std::move(issuer));
+
+      auto es =
+          booster::shared_ptr<eventsource>(new eventsource(release_context()));
+      es->send_header();
+
+      SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
+
+      auto cm = get_cattleshed_client_manager(service(), index);
+      auto client = cm->CreateRunJobClient();
+      client->SetOnRead([client, es](cattleshed::RunJobResponse resp) {
+        SPDLOG_DEBUG("[client] OnRead: {}", resp.DebugString());
+
+        es->send_data(response_type_to_string(resp.type()) + ":" + resp.data(),
+                      true);
+      });
+      client->SetOnReadDone([client](grpc::Status status) {
+        SPDLOG_DEBUG("[client] OnReadDone");
+        client->Close();
+      });
+      client->Connect();
+      client->Write(std::move(request));
+      client->WritesDone();
     }
     static std::string make_random_name(std::size_t length) {
         std::string name;
@@ -511,8 +662,14 @@ private:
 
         response().content_type("application/json");
         cppcms::json::value result;
-        result["success"] = true;
-        result["link"] = permlink_name;
+        result["permlink"] = permlink_name;
+
+        auto settings = service().settings()["application"];
+        auto scheme = settings["scheme"].str();
+        auto domain = settings["domain"].str();
+        auto root = settings["map_root"].str();
+        result["url"] = scheme + "://" + domain + root + "/permlink/" + permlink_name;
+
         result.save(response().out(), cppcms::json::compact);
     }
     void get_permlink(std::string permlink_name) {
@@ -606,6 +763,11 @@ private:
         resp.save(response().out(), cppcms::json::compact);
     }
 
+    void api_post_permlink() {
+        response().set_header("Access-Control-Allow-Origin", "*");
+        post_permlink();
+    }
+
     void api_list() {
         if (!ensure_method_get()) {
             return;
@@ -616,34 +778,76 @@ private:
         get_compiler_infos_or_cache()["compilers"].save(response().out(), cppcms::json::compact);
     }
 
-    static void update_compile_result(cppcms::json::value& result, const protocol& proto) {
-        static auto append = [](cppcms::json::value& v, const std::string& str) {
-            if (v.is_undefined())
-                v = str;
-            else
-                v.str() += str;
-        };
-        if (false) {
-        } else if (proto.command == "CompilerMessageS") {
-            append(result["compiler_output"], proto.contents);
-            append(result["compiler_message"], proto.contents);
-        } else if (proto.command == "CompilerMessageE") {
-            append(result["compiler_error"], proto.contents);
-            append(result["compiler_message"], proto.contents);
-        } else if (proto.command == "StdOut") {
-            append(result["program_output"], proto.contents);
-            append(result["program_message"], proto.contents);
-        } else if (proto.command == "StdErr") {
-            append(result["program_error"], proto.contents);
-            append(result["program_message"], proto.contents);
-        } else if (proto.command == "ExitCode") {
-            append(result["status"], proto.contents);
-        } else if (proto.command == "Signal") {
-            append(result["signal"], proto.contents);
-        } else {
-            //append(result["error"], proto.contents);
-        }
+    static void update_compile_result(cppcms::json::value& result,
+                                      const cattleshed::RunJobResponse& resp) {
+      static auto append = [](cppcms::json::value& v, const std::string& str) {
+        if (v.is_undefined())
+          v = str;
+        else
+          v.str() += str;
+      };
+      if (resp.type() == cattleshed::RunJobResponse::CONTROL) {
+      } else if (resp.type() == cattleshed::RunJobResponse::COMPILER_STDOUT) {
+        append(result["compiler_output"], resp.data());
+        append(result["compiler_message"], resp.data());
+      } else if (resp.type() == cattleshed::RunJobResponse::COMPILER_STDERR) {
+        append(result["compiler_error"], resp.data());
+        append(result["compiler_message"], resp.data());
+      } else if (resp.type() == cattleshed::RunJobResponse::STDOUT) {
+        append(result["program_output"], resp.data());
+        append(result["program_message"], resp.data());
+      } else if (resp.type() == cattleshed::RunJobResponse::STDERR) {
+        append(result["program_error"], resp.data());
+        append(result["program_message"], resp.data());
+      } else if (resp.type() == cattleshed::RunJobResponse::EXIT_CODE) {
+        append(result["status"], resp.data());
+      } else if (resp.type() == cattleshed::RunJobResponse::SIGNAL) {
+        append(result["signal"], resp.data());
+      } else {
+        //append(result["error"], resp.data());
+      }
     }
+    static std::string response_type_to_string(
+        cattleshed::RunJobResponse::Type type) {
+      switch (type) {
+        case cattleshed::RunJobResponse::CONTROL:
+          return "Control";
+        case cattleshed::RunJobResponse::COMPILER_STDOUT:
+          return "CompilerMessageS";
+        case cattleshed::RunJobResponse::COMPILER_STDERR:
+          return "CompilerMessageE";
+        case cattleshed::RunJobResponse::STDOUT:
+          return "StdOut";
+        case cattleshed::RunJobResponse::STDERR:
+          return "StdErr";
+        case cattleshed::RunJobResponse::EXIT_CODE:
+          return "ExitCode";
+        case cattleshed::RunJobResponse::SIGNAL:
+          return "Signal";
+        default:
+          return "";
+      }
+    }
+    static cattleshed::RunJobResponse::Type string_to_response_type(
+        std::string str) {
+      if (str == "Control") {
+        return cattleshed::RunJobResponse::CONTROL;
+      } else if (str == "CompilerMessageS") {
+        return cattleshed::RunJobResponse::COMPILER_STDOUT;
+      } else if (str == "CompilerMessageE") {
+        return cattleshed::RunJobResponse::COMPILER_STDERR;
+      } else if (str == "StdOut") {
+        return cattleshed::RunJobResponse::STDOUT;
+      } else if (str == "StdErr") {
+        return cattleshed::RunJobResponse::STDERR;
+      } else if (str == "ExitCode") {
+        return cattleshed::RunJobResponse::EXIT_CODE;
+      } else if (str == "Signal") {
+        return cattleshed::RunJobResponse::SIGNAL;
+      }
+      return cattleshed::RunJobResponse::CONTROL;
+    }
+
     void api_compile() {
         if (!ensure_method_post()) {
             return;
@@ -658,7 +862,6 @@ private:
     cppcms::json::value api_compile_internal(cppcms::json::value value) {
         auto compiler = value["compiler"].str();
         auto save = value.get("save", false);
-        auto protos = make_protocols(value);
         auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
         // find compiler info.
         auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
@@ -671,27 +874,49 @@ private:
         }
         auto index = (*it)["provider"].number();
 
+        std::promise<void> promise;
+        std::future<void> future = promise.get_future();
+
         cppcms::json::value result;
         cppcms::json::value outputs;
         outputs.array({});
-        send_command(service(), index, protos, [this, &result, &outputs, save](const booster::system::error_code& e, const protocol& proto) {
-            if (e)
-                return (void)(std::clog << e.message() << std::endl);
 
-            update_compile_result(result, proto);
+        permlink pl(service());
+        auto issuer = make_issuer(
+            request(), pl.get_github_username(session()["access_token"]));
+        auto request = make_run_job_request(value, std::move(issuer));
 
-            if (save) {
+        SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
+
+        auto cm = get_cattleshed_client_manager(service(), index);
+        auto client = cm->CreateRunJobClient();
+        client->SetOnRead(
+            [&result, &outputs, save](cattleshed::RunJobResponse resp) {
+              update_compile_result(result, resp);
+
+              if (save) {
                 cppcms::json::value v;
-                v["type"] = proto.command;
-                v["output"] = proto.contents;
+                v["type"] = response_type_to_string(resp.type());
+                v["data"] = resp.data();
                 outputs.array().push_back(v);
-            }
-        });
+              }
+            });
+        client->SetOnReadDone(
+            [&promise](grpc::Status status) { promise.set_value(); });
+        client->Connect();
+        client->Write(std::move(request));
+        client->WritesDone();
+
+        // send_run_job が終わるまで待つ
+        auto status = future.wait_for(std::chrono::seconds(300));
+        if (status == std::future_status::timeout) {
+          throw std::exception();
+        }
 
         if (save) {
             permlink pl(service());
             std::string permlink_name = make_random_name(16);
-            value["outputs"] = outputs;
+            value["results"] = outputs;
             pl.make_permlink(permlink_name, value, *it, cppcms::json::value());
             result["permlink"] = permlink_name;
 
@@ -705,52 +930,53 @@ private:
         return result;
     }
     void api_compile_ndjson() {
-        if (!ensure_method_post()) {
-            return;
-        }
+      if (!ensure_method_post()) {
+        return;
+      }
 
-        auto value = json_post_data();
-        auto protos = make_protocols(value);
-        auto compiler = value["compiler"].str();
-        auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
-        auto save = value.get("save", false);
-        // find compiler info.
-        auto it = std::find_if(compiler_infos.array().begin(), compiler_infos.array().end(),
-            [&compiler](cppcms::json::value& v) {
-                return v["name"].str() == compiler;
-            });
-        // error if the compiler is not found
-        if (it == compiler_infos.array().end()) {
-            throw std::exception();
-        }
-        auto index = static_cast<std::size_t>((*it)["provider"].number());
+      auto value = json_post_data();
+      auto compiler = value["compiler"].str();
+      auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
+      // find compiler info.
+      auto it = std::find_if(compiler_infos.array().begin(),
+                             compiler_infos.array().end(),
+                             [&compiler](cppcms::json::value& v) {
+                               return v["name"].str() == compiler;
+                             });
+      // error if the compiler is not found
+      if (it == compiler_infos.array().end()) {
+        throw std::exception();
+      }
+      auto index = static_cast<std::size_t>((*it)["provider"].number());
 
-        booster::shared_ptr<cppcms::json::value> outputs(new cppcms::json::value());
-        outputs->array({});
+      auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
+      nd->send_header();
+      nd->context->response().set_header("Access-Control-Allow-Origin", "*");
 
-        auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
-        nd->send_header();
-        nd->context->response().set_header("Access-Control-Allow-Origin", "*");
-        send_command_async(service(), index, protos, [nd, save, outputs, value](const booster::system::error_code& e, const protocol& proto) {
-            if (e)
-                return (void)(std::clog << e.message() << std::endl);
-            cppcms::json::value json;
-            json["type"] = proto.command;
-            json["data"] = proto.contents;
-            nd->send(json, true);
-            //std::clog << proto.command << ":" << proto.contents << std::endl;
+      permlink pl(service());
+      auto issuer = make_issuer(
+          request(), pl.get_github_username(session()["access_token"]));
+      auto request = make_run_job_request(value, std::move(issuer));
 
-            if (save) {
-                cppcms::json::value v;
-                v["type"] = proto.command;
-                v["output"] = proto.contents;
-                outputs->array().push_back(v);
+      SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
 
-                if (proto.command == "Control" && proto.contents == "Finish") {
-                    // TODO
-                }
-            }
-        });
+      auto cm = get_cattleshed_client_manager(service(), index);
+      auto client = cm->CreateRunJobClient();
+      client->SetOnRead([nd](cattleshed::RunJobResponse resp) {
+        SPDLOG_DEBUG("[client] OnRead: {}", resp.DebugString());
+
+        cppcms::json::value v;
+        v["type"] = response_type_to_string(resp.type());
+        v["data"] = resp.data();
+        nd->send(v, true);
+      });
+      client->SetOnReadDone([client](grpc::Status status) {
+        SPDLOG_DEBUG("[client] OnReadDone");
+        client->Close();
+      });
+      client->Connect();
+      client->Write(std::move(request));
+      client->WritesDone();
     }
     void api_permlink(std::string permlink_name) {
         if (!ensure_method_get()) {
@@ -759,19 +985,32 @@ private:
 
         permlink pl(service());
         auto value = pl.get_permlink(permlink_name);
-        cppcms::json::value outputs;
-        for (auto&& output: value["outputs"].array()) {
-            update_compile_result(outputs, protocol{output["type"].str(), output["output"].str()});
-        }
-        value.object().erase("outputs");
-
         cppcms::json::value result;
-        result["parameter"] = value;
-        result["result"] = outputs;
+        cppcms::json::value results;
+
+        result.object({});
+        results.array({});
+
+        // １件も出力が存在しない場合は results フィールドそのものが存在しなくなるのでチェックする
+        if (value.object().find("results") != value.object().end()) {
+          for (auto&& output: value["results"].array()) {
+            cattleshed::RunJobResponse resp;
+            resp.set_type(string_to_response_type(output["type"].str()));
+            resp.set_data(output["data"].str());
+            update_compile_result(result, resp);
+          }
+          results = value["results"].array();
+          value.object().erase("results");
+        }
+
+        cppcms::json::value resp;
+        resp["parameter"] = value;
+        resp["result"] = result;
+        resp["results"] = results;
 
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
-        result.save(response().out(), cppcms::json::readable);
+        resp.save(response().out());
     }
 
     void api_template(std::string template_name) {
@@ -951,10 +1190,13 @@ private:
         permlink pl(service());
         auto result = pl.get_permlink(permlink_name);
 
-        for (auto&& output: result["outputs"].array()) {
-            update_compile_result(result, protocol{output["type"].str(), output["output"].str()});
+        for (auto&& output: result["results"].array()) {
+          cattleshed::RunJobResponse resp;
+          resp.set_type(string_to_response_type(output["type"].str()));
+          resp.set_data(output["data"].str());
+          update_compile_result(result, resp);
         }
-        result.object().erase("outputs");
+        result.object().erase("results");
 
         auto info = result["compiler-info"];
         c.compiler_info = info;
@@ -1048,33 +1290,69 @@ public:
 };
 
 int main(int argc, char** argv) try {
-    std::shared_ptr<std::streambuf> logbuf(std::clog.rdbuf(), [](void*){});
+  CLI::App app("kennel");
 
-    {
-        const auto ite = std::find(argv, argv+argc, std::string("--syslog"));
-        if (ite != argv+argc) {
-            std::clog.rdbuf(new wandbox::syslogstreambuf("kennel2", LOG_PID, LOG_DAEMON, LOG_DEBUG));
-            std::rotate(ite, ite+1, argv+argc);
-            --argc;
-        }
-    }
+  spdlog::level::level_enum log_level = spdlog::level::info;
+  auto log_level_map =
+      std::vector<std::pair<std::string, spdlog::level::level_enum>>(
+          {{"trace", spdlog::level::trace},
+           {"debug", spdlog::level::debug},
+           {"info", spdlog::level::info},
+           {"warning", spdlog::level::warn},
+           {"error", spdlog::level::err},
+           {"critical", spdlog::level::critical},
+           {"off", spdlog::level::off}});
+  app.add_option("--log-level", log_level, "Log severity level threshold")
+      ->transform(CLI::CheckedTransformer(log_level_map, CLI::ignore_case));
 
-    cppcms::service service(argc, argv);
+  std::string config_file;
+  app.add_option("-c,--config", config_file, "config file")
+      ->check(CLI::ExistingFile)
+      ->required();
 
-    permlink pl(service);
-    pl.init();
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::ParseError& e) {
+    return app.exit(e);
+  }
 
-    std::clog << "start get_compiler_infos()" << std::endl;
-    auto jsons = kennel::get_compiler_infos(service);
-    auto json = kennel::merge_compiler_infos(jsons);
-    kennel::default_compiler_infos() = json;
-    std::clog << "finish get_compiler_infos()" << std::endl;
+  spdlog::set_level(log_level);
 
-    service.applications_pool().mount(
-        cppcms::applications_factory<kennel_root>()
-    );
-    service.run();
-} catch (std::exception const &e) {
-    std::cerr << e.what() << std::endl;
+  cppcms::json::value config_json;
+  std::ifstream ifs(config_file.c_str());
+
+  int line_number = 0;
+  if (!config_json.load(ifs, true, &line_number)) {
+    SPDLOG_ERROR("Error reading configuration file {} in line:{}", config_file,
+                 line_number);
+    throw - 1;
+  }
+
+  cppcms::service service(config_json);
+
+  permlink pl(service);
+  pl.init();
+
+  SPDLOG_INFO("start get_compiler_infos()");
+  auto responses = kennel::get_compiler_infos(service);
+  std::vector<cppcms::json::value> jsons;
+  for (const auto& resp : responses) {
+    jsons.push_back(kennel::version_response_to_json(resp));
+  }
+  auto json = kennel::merge_compiler_infos(jsons);
+
+  SPDLOG_INFO("finish get_compiler_infos()");
+  {
+    std::stringstream ss;
+    json.save(ss, cppcms::json::readable);
+    SPDLOG_TRACE("contents: {}", ss.str());
+  }
+  kennel::default_compiler_infos() = json;
+
+  service.applications_pool().mount(
+      cppcms::applications_factory<kennel_root>());
+  service.run();
+} catch (std::exception const& e) {
+  SPDLOG_ERROR("app error: {}", e.what());
 }
 

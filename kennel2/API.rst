@@ -169,7 +169,7 @@ This API accepts only "application/json" in a "Content-Type" header.
 Parameter
 ^^^^^^^^^
 
-Same as `POST /compile.json`_ Parameter. But `save` option is not implemented now.
+Same as `POST /compile.json`_ Parameter without `save` option.
 
 Result
 ^^^^^^
@@ -213,6 +213,41 @@ Sample
   {"data":"hoge\n","type":"StdOut"}
   {"data":"0","type":"ExitCode"}
   {"data":"Finish","type":"Control"}
+
+POST /permlink
+-------------------
+
+Save ``/compile.ndjson`` results.
+
+This API accepts only "application/json" in a "Content-Type" header.
+
+Parameter
+^^^^^^^^^
+
+compiler [String]
+  Used compiler name.
+code [String]
+  Compiled code.
+codes [Array of Object{"file":[String], "code":[String]}] (optional, default is an empty array)
+  Additional codes.
+options [String] (optional, default is an empty string)
+  Used options for a compiler joined by comma.
+stdin [String] (optional, default is an empty string)
+  Stdin
+compiler-option-raw [String] (optional, default is an empty string)
+  Compile-time any additional options joined by line-break.
+runtime-option-raw [String] (optional, default is an empty string)
+  Run-time any additional options joined by line-break.
+results [Array of Object{"type":[String], "data": [String]}]
+  Results returned by ``/compile.ndjson``
+
+Result
+^^^^^^
+
+permlink [String]
+  ``permlink`` is you can pass to `GET /permlink/:link`_.
+url [String]
+  URL to display on browser.
 
 GET /permlink/:link
 -------------------

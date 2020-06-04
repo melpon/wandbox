@@ -1,0 +1,154 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5ce0d53..ca2b824 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,7 +19,7 @@ include(CheckFunctionExists)
+ include(CheckCXXSourceCompiles)
+ include(CheckLibraryExists)
+ include(CPack)
+-enable_testing()
++# enable_testing()
+ 
+ #############################################################################
+ #
+@@ -473,6 +473,7 @@ endif()
+ 
+ if(NOT DISABLE_SHARED)
+ 	add_library(cppcms SHARED ${CPPCMS_SOURCES})
++	set_target_properties(cppcms PROPERTIES CXX_STANDARD 11)
+ 	set(CPPCMS_LIB cppcms)
+ else(NOT DISABLE_SHARED)
+ 	set(CPPCMS_LIB cppcms-static)
+@@ -480,6 +481,7 @@ endif(NOT DISABLE_SHARED)
+ 
+ if(NOT DISABLE_STATIC)
+ 	add_library(cppcms-static STATIC ${CPPCMS_SOURCES})
++	set_target_properties(cppcms-static PROPERTIES CXX_STANDARD 11)
+ endif(NOT DISABLE_STATIC)
+ 
+ if(DISABLE_SHARED OR DISABLE_STATIC)
+@@ -686,8 +688,8 @@ endif(NOT DISABLE_SHARED)
+ 
+ 
+ 
+-add_executable(hello_world src/hello_world.cpp skin1.cpp skin2.cpp)
+-target_link_libraries(hello_world ${CPPCMS_LIB})
++# add_executable(hello_world src/hello_world.cpp skin1.cpp skin2.cpp)
++# target_link_libraries(hello_world ${CPPCMS_LIB})
+ 
+ if(NOT DISABLE_TCPCACHE)
+ 	add_executable(cppcms_scale src/cache_server_main.cpp)
+@@ -697,8 +699,8 @@ if(NOT DISABLE_TCPCACHE)
+ 	endif()
+ endif()
+ 
+-add_executable(cppcms_make_key src/make_key.cpp)
+-target_link_libraries(cppcms_make_key ${CPPCMS_LIB})
++# add_executable(cppcms_make_key src/make_key.cpp)
++# target_link_libraries(cppcms_make_key ${CPPCMS_LIB})
+ 
+ add_executable(cppcms_config_find_param src/cppcms_config_find_param.cpp src/json.cpp)
+ if(DISABLE_SHARED)
+@@ -764,17 +766,17 @@ if(NOT IS_WINDOWS)
+ 	set(ALL_TESTS ${ALL_TESTS} cppcms_service_test)
+ endif()
+ 
+-foreach(TEST ${ALL_TESTS})
+-	add_executable(${TEST} tests/${TEST}.cpp)
+-	target_link_libraries(${TEST} ${CPPCMS_LIB})
+-endforeach()
+-
+-add_executable(external_session_test tests/external_session_test.c)
+-target_link_libraries(external_session_test ${CPPCMS_LIB})
+-set(ALL_TESTS ${ALL_TESTS} external_session_test)
+-if(NOT DISABLE_GZIP)
+-	target_link_libraries(response_test ${ZLIB})
+-endif()
++# foreach(TEST ${ALL_TESTS})
++# 	add_executable(${TEST} tests/${TEST}.cpp)
++# 	target_link_libraries(${TEST} ${CPPCMS_LIB})
++# endforeach()
++#
++# add_executable(external_session_test tests/external_session_test.c)
++# target_link_libraries(external_session_test ${CPPCMS_LIB})
++# set(ALL_TESTS ${ALL_TESTS} external_session_test)
++# if(NOT DISABLE_GZIP)
++# 	target_link_libraries(response_test ${ZLIB})
++# endif()
+ 
+ #####################################
+ # End of tests
+@@ -803,7 +805,7 @@ endif(MSVC AND NOT DISABLE_STATIC)
+ 
+ configure_file(config.cmake.h cppcms/config.h)
+ 
+-set(CPPCMS_INSTALL_TARGETS ${CPPCMS_LIBS} cppcms_config_find_param cppcms_make_key)
++set(CPPCMS_INSTALL_TARGETS ${CPPCMS_LIBS} cppcms_config_find_param)
+ if(NOT DISABLE_TCPCACHE)
+ 	set(CPPCMS_INSTALL_TARGETS ${CPPCMS_INSTALL_TARGETS} cppcms_scale)
+ endif()
+diff --git a/booster/CMakeLists.txt b/booster/CMakeLists.txt
+index 4f81833..11bcd05 100644
+--- a/booster/CMakeLists.txt
++++ b/booster/CMakeLists.txt
+@@ -11,7 +11,7 @@ project(booster)
+ include(CheckFunctionExists)
+ include(CheckCXXSourceCompiles)
+ include(CheckLibraryExists)
+-enable_testing()
++#enable_testing()
+ #
+ # Most important includes
+ #
+@@ -570,6 +570,7 @@ if(NOT DISABLE_SHARED)
+ 	set_target_properties(booster PROPERTIES COMPILE_DEFINITIONS "${BOOSTER_SHARED_DEFS}")
+ 	set_target_properties(booster PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+ 	set_target_properties(booster PROPERTIES OUTPUT_NAME "booster${BOOSTER_SUFFIX}")
++	set_target_properties(booster PROPERTIES CXX_STANDARD 11)
+ 
+ endif(NOT DISABLE_SHARED)	
+ 
+@@ -579,6 +580,7 @@ if(NOT DISABLE_STATIC)
+ 	set_target_properties(booster-static PROPERTIES COMPILE_DEFINITIONS "${BOOST_STATIC_DEFS}")
+ 	set_target_properties(booster-static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+ 	set_target_properties(booster-static PROPERTIES OUTPUT_NAME "booster${BOOSTER_SUFFIX}")
++	set_target_properties(booster-static PROPERTIES CXX_STANDARD 11)
+ endif(NOT DISABLE_STATIC)
+ 
+ install(DIRECTORY booster DESTINATION include
+@@ -665,13 +667,13 @@ else()
+ endif()
+ 
+ macro(add_booster_param_test MODULE TEST PARAMETER)
+-	set(TEST_SRC "lib/${MODULE}/test/test_${TEST}.cpp")
+-	set(TEST_NAME "test_${MODULE}_${TEST}")
+-	add_executable(${TEST_NAME} ${TEST_SRC})
+-	target_link_libraries(${TEST_NAME} ${BOOSTER_LIB})
+-	set_target_properties(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS "${EXE_COM_DEFS}")
+-	add_test(${TEST_NAME} ${TEST_NAME} ${PARAMETER})
+-	set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT 20)
++	# set(TEST_SRC "lib/${MODULE}/test/test_${TEST}.cpp")
++	# set(TEST_NAME "test_${MODULE}_${TEST}")
++	# add_executable(${TEST_NAME} ${TEST_SRC})
++	# target_link_libraries(${TEST_NAME} ${BOOSTER_LIB})
++	# set_target_properties(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS "${EXE_COM_DEFS}")
++	# add_test(${TEST_NAME} ${TEST_NAME} ${PARAMETER})
++	# set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT 20)
+ endmacro()
+ 
+ macro(add_booster_test MODULE TEST)
+@@ -722,7 +724,7 @@ if(NOT DISABLE_ICU_LOCALE)
+ 	add_booster_test(locale formatting)
+ 	add_booster_test(locale icu_vs_os_timezone)
+ 	if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+-		set_target_properties(test_locale_formatting PROPERTIES COMPILE_FLAGS "-O0")
++		# set_target_properties(test_locale_formatting PROPERTIES COMPILE_FLAGS "-O0")
+ 	endif()
+ endif()
+ 
+@@ -755,5 +757,3 @@ install(TARGETS ${LINK_LIBS}
+ 	LIBRARY DESTINATION ${LIBDIR}
+ 	ARCHIVE DESTINATION ${LIBDIR}
+ 	PUBLIC_HEADER DESTINATION include/booster)
+-
+-

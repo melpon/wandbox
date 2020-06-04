@@ -1,0 +1,111 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5e81b09..d94bb84 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -231,16 +231,16 @@ set(CPPDB_SRC
+ 	${INTERNAL_SOURCES}
+ 	)
+ 
+-add_library(cppdb SHARED ${CPPDB_SRC})
++#add_library(cppdb SHARED ${CPPDB_SRC})
+ add_library(cppdb-static STATIC ${CPPDB_SRC})
+-set_target_properties(cppdb PROPERTIES COMPILE_DEFINITIONS CPPDB_EXPORTS)
++#set_target_properties(cppdb PROPERTIES COMPILE_DEFINITIONS CPPDB_EXPORTS)
+ 
+-if(NOT WIN32)
+-	if(DL_LIB)
+-		target_link_libraries(cppdb ${DL_LIB})
+-	endif()
+-	target_link_libraries(cppdb ${PTHREAD_LIB})
+-endif()
++#if(NOT WIN32)
++#	if(DL_LIB)
++#		target_link_libraries(cppdb ${DL_LIB})
++#	endif()
++#	target_link_libraries(cppdb ${PTHREAD_LIB})
++#endif()
+ 
+ # Link and backends configuration
+ 
+@@ -250,49 +250,50 @@ set(INST_LIBS)
+ 
+ foreach(LIB ${BACKEND_LIBRARIES} cppdb)
+ 	
+-	set(INST_LIBS ${INST_LIBS} ${LIB} ${LIB}-static)
++#	set(INST_LIBS ${INST_LIBS} ${LIB} ${LIB}-static)
++	set(INST_LIBS ${INST_LIBS} ${LIB}-static)
+ 
+-	if(WIN32)
+-		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_SOVERSION} SOVERSION ${CPPDB_SOVERSION})
+-	else()
+-		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_VERSION} SOVERSION ${CPPDB_SOVERSION})
+-	endif()
++#	if(WIN32)
++#		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_SOVERSION} SOVERSION ${CPPDB_SOVERSION})
++#	else()
++#		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_VERSION} SOVERSION ${CPPDB_SOVERSION})
++#	endif()
+ 
+     
+-	set_target_properties(${LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+-	set_target_properties(${LIB} PROPERTIES OUTPUT_NAME "${LIB}")
++#	set_target_properties(${LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
++#	set_target_properties(${LIB} PROPERTIES OUTPUT_NAME "${LIB}")
+ 	set_target_properties(${LIB}-static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+ 	set_target_properties(${LIB}-static PROPERTIES OUTPUT_NAME "${LIB}")
+ 	set_target_properties(${LIB}-static PROPERTIES PREFIX "lib") # Make sure import and normal library do not collide
+ 
+  endforeach()
+ 
+-foreach(LIB ${BACKEND_LIBRARIES})
+-	set_target_properties(${LIB} PROPERTIES COMPILE_DEFINITIONS CPPDB_DRIVER_EXPORTS)
+-	target_link_libraries(${LIB} cppdb)
+-endforeach()
+-
+-foreach(LIB ${INTERNAL_LIBRARIES})
+-	target_link_libraries(cppdb ${LIB})
+-endforeach()
++#foreach(LIB ${BACKEND_LIBRARIES})
++#	set_target_properties(${LIB} PROPERTIES COMPILE_DEFINITIONS CPPDB_DRIVER_EXPORTS)
++#	target_link_libraries(${LIB} cppdb)
++#endforeach()
++#
++#foreach(LIB ${INTERNAL_LIBRARIES})
++#	target_link_libraries(cppdb ${LIB})
++#endforeach()
+ 
+ # tests
+ 
+-add_executable(test_perf test/test_perf.cpp)
+-add_executable(test_basic test/test_basic.cpp)
+-add_executable(test_backend test/test_backend.cpp)
+-add_executable(test_caching test/test_caching.cpp)
+-add_executable(example examples/example1.cpp)
+-
+-set_target_properties(	test_perf test_backend test_basic test_caching example 
+-			PROPERTIES 
+-				COMPILE_DEFINITIONS CPPDB_EXPORTS)
+-
+-target_link_libraries(test_perf cppdb)
+-target_link_libraries(test_basic cppdb)
+-target_link_libraries(test_backend cppdb)
+-target_link_libraries(test_caching cppdb)
+-target_link_libraries(example cppdb)
++#add_executable(test_perf test/test_perf.cpp)
++#add_executable(test_basic test/test_basic.cpp)
++#add_executable(test_backend test/test_backend.cpp)
++#add_executable(test_caching test/test_caching.cpp)
++#add_executable(example examples/example1.cpp)
++#
++#set_target_properties(	test_perf test_backend test_basic test_caching example 
++#			PROPERTIES 
++#				COMPILE_DEFINITIONS CPPDB_EXPORTS)
++#
++#target_link_libraries(test_perf cppdb)
++#target_link_libraries(test_basic cppdb)
++#target_link_libraries(test_backend cppdb)
++#target_link_libraries(test_caching cppdb)
++#target_link_libraries(example cppdb)
+ 
+ install(TARGETS ${INST_LIBS} 
+ 	RUNTIME DESTINATION bin

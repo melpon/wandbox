@@ -1,25 +1,25 @@
 { "application" :
-    { "database": "sqlite3:db=@databasedir@/kennel_production.sqlite;@pool_size=10"
-    , "static_dir": "@staticdir@"
-    , "scheme": "https"
-    , "domain": "wandbox.org"
+    { "database": "sqlite3:db=@KENNEL_DATABASEDIR@/kennel_production.sqlite;@pool_size=10"
+    , "static_dir": "@KENNEL_STATICDIR@"
+    , "scheme": "@KENNEL_SCHEME@"
+    , "domain": "@KENNEL_DOMAIN@"
     , "map_root": ""
     , "dispatch_root": ""
     , "cattleshed":
-        [{ "host" : "153.121.40.132"
-         , "port" : 2012
+        [{ "host" : "@KENNEL_CATTLESHED_HOST@"
+         , "port" : @KENNEL_CATTLESHED_PORT@
          }]
-    , "google_analytics": "@googleanalytics@"
-    , "sponsors": "@sponsorsfile@"
+    , "google_analytics": "@KENNEL_GOOGLEANALYTICS@"
+    , "sponsors": "@KENNEL_SPONSORSFILE@"
     , "github":
-      { "client_id": "@githubclient@"
-      , "client_secret_file": "@databasedir@/.github_secret"
+      { "client_id": "@KENNEL_GITHUBCLIENT@"
+      , "client_secret_file": "@KENNEL_DATABASEDIR@/.github_secret"
       }
     }
 , "service" :
-    { "api" : "fastcgi"
+    { "api" : "@KENNEL_SERVICE_API@"
     , "host" : "127.0.0.1"
-    , "port" : 3500
+    , "port" : @KENNEL_SERVICE_PORT@
     }
 , "gzip" :
     { "enable": false
@@ -29,9 +29,11 @@
     }
 , "session" :
     { "location": "client"
+    , "expire": "renew"
+    , "timeout": 2592000
     , "client":
         { "encryptor": "aes"
-        , "key_file": "@databasedir@/.session.key"
+        , "key_file": "@KENNEL_DATABASEDIR@/.session.key"
         }
     }
 }

@@ -140,7 +140,6 @@ footer {
 
 .wandbox-smart-editor {
   margin: 0px;
-  min-height: 300px;
 }
 .wandbox-smart-editor .CodeMirror pre {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', 'Courier New', monospace;
@@ -149,16 +148,10 @@ footer {
 }
 
 .wandbox-legacy-editor {
-  height: 300px;
   font-family: "Courier New", monospace;
 }
 
-.wandbox-smart-editor.wandbox-expand .CodeMirror {
-  min-height: 300px;
-  height: auto;
-}
 .wandbox-smart-editor.wandbox-expand .CodeMirror-scroll {
-  min-height: 300px;
   overflow-y: hidden;
   overflow-x: auto;
 }
@@ -252,10 +245,7 @@ footer {
 }
 .output-window {
   margin: 0px;
-
   background-color: #000000;
-  height: 300px;
-  overflow-y: scroll;
 }
 .output-window pre {
   margin: 0px 0px 10px;
@@ -265,6 +255,7 @@ footer {
   color: #ffffff;
   border: 0px;
   font-family: "Courier New", monospace;
+  white-space: pre-wrap;
 }
 .output-window .CompilerMessageE {
   color: #ff0000;
@@ -281,13 +272,8 @@ footer {
   color: #ff00ff;
 }
 
-.expand .output-window {
-  min-height: 300px;
-  height: auto;
-}
-
 .nowrap .output-window pre {
-  word-wrap: normal;
+  white-space: pre;
 }
 
 .wandbox-current-compiler-text {
@@ -439,6 +425,9 @@ footer {
 
 .wandbox-sponsors ul {
   padding-left: 0px;
+  display: flex;
+  justify-content:space-around;
+  flex-flow: wrap;
 }
 
 .wandbox-sponsors li {
@@ -447,6 +436,8 @@ footer {
   overflow-y: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  display: inline-block;
+  margin: 3px;
 }
 
 .wandbox-personal-sponsors {
@@ -514,4 +505,34 @@ footer {
 }
 .wandbox-datetime {
   display: inline;
+}
+
+/* remove nest scroll */
+.wandbox-smart-editor,
+.wandbox-legacy-editor,
+.wandbox-smart-editor .CodeMirror,
+.wandbox-smart-editor.wandbox-expand .CodeMirror,
+.wandbox-smart-editor.wandbox-expand .CodeMirror-scroll,
+.output-window,
+.expand .output-window {
+    min-height: 300px;
+    height: auto;
+}
+@media (min-width: 992px) {
+  .output-window {
+      overflow-y: scroll;
+  }
+}
+
+/* fit to view height */
+@media (min-width: 992px) {
+  .wandbox-smart-editor,
+  .wandbox-legacy-editor,
+  .wandbox-smart-editor .CodeMirror,
+  .wandbox-smart-editor.wandbox-expand .CodeMirror,
+  .wandbox-smart-editor.wandbox-expand .CodeMirror-scroll,
+  .output-window,
+  .expand .output-window {
+      height: calc(50vh - 16rem);
+  }
 }
