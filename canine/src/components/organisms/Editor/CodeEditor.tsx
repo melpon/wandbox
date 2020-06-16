@@ -111,7 +111,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
 
   return (
     <CodeMirror
-      style="editor"
+      className="wb-editor"
       value={source.text}
       options={{
         readOnly: permlinkData !== null,

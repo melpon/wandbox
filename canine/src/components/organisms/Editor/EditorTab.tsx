@@ -1,11 +1,10 @@
 import React from "react";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import TextField from "@material-ui/core/TextField";
-import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
-import EditIcon from "@material-ui/icons/Edit";
-import ClearIcon from "@material-ui/icons/Clear";
-import CheckIcon from "@material-ui/icons/Check";
+import Nav from "react-bootstrap/Nav";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import { FileEarmarkText, Pencil, Check } from "react-bootstrap-icons";
 
 import { EditorSourceData } from "~/contexts/EditorContext";
 
@@ -20,6 +19,8 @@ interface EditorTabProps {
   source: EditorSourceData;
   readonly: boolean;
   renamingSource: RenamingSource | null;
+  active: boolean;
+  onChangeTabs: (index: number) => void;
   onClickTabEdit: (index: number) => void;
   onClickTabClose: (index: number) => void;
   onChangeRenamingFilename: (index: number, filename: string) => void;
@@ -27,47 +28,55 @@ interface EditorTabProps {
   onSubmitRenamingFilename: (index: number) => void;
 }
 
-const EditorTab = React.forwardRef<HTMLDivElement, EditorTabProps>(
-  (props, ref): React.ReactElement => {
-    const {
-      index,
-      source,
-      readonly,
-      renamingSource,
-      onClickTabEdit,
-      onClickTabClose,
-      onChangeRenamingFilename,
-      onCancelRenamingFilename,
-      onSubmitRenamingFilename,
-      ...others
-    } = props;
+const EditorTab: React.FC<EditorTabProps> = (props) => {
+  const {
+    index,
+    source,
+    readonly,
+    renamingSource,
+    active,
+    onChangeTabs,
+    onClickTabEdit,
+    onClickTabClose,
+    onChangeRenamingFilename,
+    onCancelRenamingFilename,
+    onSubmitRenamingFilename,
+  } = props;
 
-    return (
-      <div ref={ref} {...others}>
-        <InsertDriveFileIcon />
+  return (
+    <Nav.Item key={index}>
+      <Nav.Link
+        eventKey={`wb-editor-${index}`}
+        onClick={() => onChangeTabs(index)}
+      >
         {((): React.ReactElement => {
           if (renamingSource === null || !renamingSource.renaming) {
             return (
               <React.Fragment>
-                <Typography variant="body1">{source.filename || ""}</Typography>
-                {source.filename === null || readonly ? null : (
+                <FileEarmarkText />
+                {source.filename || ""}
+                {source.filename === null || readonly || !active ? null : (
                   <React.Fragment>
-                    <IconButton
-                      onClick={(e): void => {
+                    <Button
+                      variant="link"
+                      onClick={(e: React.MouseEvent): void => {
                         onClickTabEdit(index);
                         e.stopPropagation();
                       }}
                     >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
+                      <Pencil />
+                    </Button>
+                    <button
+                      type="button"
+                      className="close"
+                      aria-label="Close"
                       onClick={(e): void => {
                         onClickTabClose(index);
                         e.stopPropagation();
                       }}
                     >
-                      <ClearIcon />
-                    </IconButton>
+                      <span aria-hidden="true">&times;</span>
+                    </button>
                   </React.Fragment>
                 )}
               </React.Fragment>
@@ -75,28 +84,44 @@ const EditorTab = React.forwardRef<HTMLDivElement, EditorTabProps>(
           } else {
             return (
               <React.Fragment>
-                <TextField
-                  label="Filename"
-                  value={renamingSource.filename}
-                  onClick={(e): void => e.stopPropagation()}
-                  onChange={(e): void =>
-                    onChangeRenamingFilename(index, e.target.value)
-                  }
-                />
-                <ClearIcon
-                  onClick={(): void => onCancelRenamingFilename(index)}
-                />
-                <CheckIcon
-                  onClick={(): void => onSubmitRenamingFilename(index)}
-                />
+                <Row>
+                  <Col sm="auto">
+                    <Form.Control
+                      type="text"
+                      value={renamingSource.filename}
+                      onClick={(e: React.MouseEvent): void =>
+                        e.stopPropagation()
+                      }
+                      onChange={(e): void =>
+                        onChangeRenamingFilename(index, e.target.value)
+                      }
+                    />
+                  </Col>
+                  <Col sm="auto" style={{ padding: 0 }}>
+                    <Button
+                      variant="link"
+                      onClick={(): void => onCancelRenamingFilename(index)}
+                    >
+                      &times;
+                    </Button>
+                  </Col>
+                  <Col sm="auto" style={{ padding: 0 }}>
+                    <Button
+                      variant="link"
+                      onClick={(): void => onSubmitRenamingFilename(index)}
+                    >
+                      <Check />
+                    </Button>
+                  </Col>
+                </Row>
               </React.Fragment>
             );
           }
         })()}
-      </div>
-    );
-  }
-);
+      </Nav.Link>
+    </Nav.Item>
+  );
+};
 
 EditorTab.displayName = "EditorTab";
 

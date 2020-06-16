@@ -1,6 +1,6 @@
 import React from "react";
 import { useContainer } from "unstated-next";
-import Button from "@material-ui/core/Button";
+import Button from "react-bootstrap/Button";
 
 import { CompilerList } from "~/hooks/compilerList";
 import { CompilerContext } from "~/contexts/CompilerContext";
@@ -29,12 +29,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const disabled = permlinkData !== null || currentCompilerName === "";
 
   return (
-    <Button
-      onClick={onRun}
-      disabled={disabled}
-      variant="contained"
-      color="primary"
-    >
+    <Button onClick={onRun} disabled={disabled} variant="primary">
       Run
     </Button>
   );

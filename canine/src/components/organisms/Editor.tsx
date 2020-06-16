@@ -1,7 +1,7 @@
 import React from "react";
 import { useContainer } from "unstated-next";
-import Paper from "@material-ui/core/Paper";
-import Grid from "@material-ui/core/Grid";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 import { EditorContext } from "~/contexts/EditorContext";
 import { CompilerContext } from "~/contexts/CompilerContext";
@@ -24,31 +24,37 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const { settings } = editor;
   return (
-    <Paper>
-      <Grid container>
-        <Grid item style={{ overflowX: "scroll", flex: 1 }}>
-          <EditorTabs editor={editor} permlinkData={permlinkData} />
-          <CodeEditor
-            {...{ editor, compiler, compilerList, result, permlinkData }}
-          />
-        </Grid>
-        {((): React.ReactElement => {
-          if (settings.opened) {
-            return (
-              <Grid item style={{ width: 200 }}>
-                <EditorSettings settings={settings} />
-              </Grid>
-            );
-          } else {
-            return (
-              <Grid item style={{ width: "auto" }}>
-                <EditorSettings settings={settings} />
-              </Grid>
-            );
-          }
-        })()}
-      </Grid>
-    </Paper>
+    <Row>
+      <Col sm={settings.opened ? 10 : true}>
+        <Row>
+          <Col>
+            <EditorTabs editor={editor} permlinkData={permlinkData} />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <CodeEditor
+              {...{ editor, compiler, compilerList, result, permlinkData }}
+            />
+          </Col>
+        </Row>
+      </Col>
+      {((): React.ReactElement => {
+        if (settings.opened) {
+          return (
+            <Col sm="2">
+              <EditorSettings settings={settings} />
+            </Col>
+          );
+        } else {
+          return (
+            <Col sm="auto">
+              <EditorSettings settings={settings} />
+            </Col>
+          );
+        }
+      })()}
+    </Row>
   );
 };
 

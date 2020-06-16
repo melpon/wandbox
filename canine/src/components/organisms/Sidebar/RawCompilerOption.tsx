@@ -1,23 +1,9 @@
 import React from "react";
-import { Theme } from "@material-ui/core/styles/createMuiTheme";
-import makeStyles from "@material-ui/styles/makeStyles";
-import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import Divider from "@material-ui/core/Divider";
+import Button from "react-bootstrap/Button";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 import { CodeMirror } from "~/components/organisms/CodeMirror";
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unused-vars
-const useStyles = makeStyles((theme: Theme) => ({
-  paperTitle: {
-    paddingLeft: "8px",
-  },
-  optionTitle: {
-    paddingLeft: "10px",
-  },
-}));
 
 interface RawCompilerOptionProps {
   compilerOptionRaw: string | null;
@@ -35,7 +21,6 @@ interface RawCompilerOptionProps {
 const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
   props
 ): React.ReactElement => {
-  const classes = useStyles();
   const {
     compilerOptionRaw,
     runtimeOptionRaw,
@@ -50,19 +35,19 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
   }, []);
 
   return (
-    <Paper>
-      <Typography variant="h6" className={classes.paperTitle}>
-        Raw Options
-      </Typography>
-      <Divider />
+    <div style={{ backgroundColor: "#fff" }}>
+      <Row>
+        <Col>
+          <h6>Raw Options</h6>
+        </Col>
+      </Row>
+      <hr />
 
-      <Grid container spacing={2}>
-        <Grid item sm={12}>
+      <Row>
+        <Col>
           {compilerOptionRaw === null ? null : (
-            <React.Fragment>
-              <Typography variant="caption" className={classes.optionTitle}>
-                Compiler Option:
-              </Typography>
+            <>
+              <h6>Compiler Option:</h6>
               <CodeMirror
                 value={compilerOptionRaw}
                 options={{
@@ -76,23 +61,23 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
                   },
                 }}
                 onBeforeChange={onChangeCompilerOptionRaw}
-                style="input"
+                className="wb-input"
               />
-            </React.Fragment>
+            </>
           )}
-        </Grid>
-        <Grid item sm={12}>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
           {runtimeOptionRaw === null && !expanded ? (
             readOnly ? null : (
-              <Button onClick={onExpandRuntimeOptionRaw}>
+              <Button variant="light" onClick={onExpandRuntimeOptionRaw}>
                 Runtime options...
               </Button>
             )
           ) : (
-            <React.Fragment>
-              <Typography variant="caption" className={classes.optionTitle}>
-                Runtime Option:
-              </Typography>
+            <>
+              <h6>Runtime Option:</h6>
               <CodeMirror
                 value={runtimeOptionRaw === null ? "" : runtimeOptionRaw}
                 options={{
@@ -106,13 +91,13 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
                   },
                 }}
                 onBeforeChange={onChangeRuntimeOptionRaw}
-                style="input"
+                className="wb-input"
               />
-            </React.Fragment>
+            </>
           )}
-        </Grid>
-      </Grid>
-    </Paper>
+        </Col>
+      </Row>
+    </div>
   );
 };
 

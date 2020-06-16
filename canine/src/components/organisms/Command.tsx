@@ -1,6 +1,5 @@
 import React from "react";
 import { useContainer } from "unstated-next";
-import Grid from "@material-ui/core/Grid";
 
 import { reduceCompileOptions } from "~/utils/reduceCompileOptions";
 import { CompilerList, CompilerInfo } from "~/hooks/compilerList";
@@ -56,13 +55,7 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
     return `$ ${command} ${options.join(" ")} ${rawOptions}`;
   }, [compiler, compilerList]);
 
-  return (
-    <Grid container>
-      <Grid item>
-        <code>{command}</code>
-      </Grid>
-    </Grid>
-  );
+  return <code>{command}</code>;
 };
 
 export { Command };

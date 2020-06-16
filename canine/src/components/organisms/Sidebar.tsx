@@ -1,8 +1,8 @@
 import React from "react";
 import { useContainer } from "unstated-next";
-import { Theme } from "@material-ui/core/styles/createMuiTheme";
-import makeStyles from "@material-ui/styles/makeStyles";
-import Grid from "@material-ui/core/Grid";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 import {
   CompilerList,
@@ -19,38 +19,6 @@ import { ChooseLanguage } from "./Sidebar/ChooseLanguage";
 import { ChooseCompiler } from "./Sidebar/ChooseCompiler";
 import { CompilerOption } from "./Sidebar/CompilerOption";
 import { RawCompilerOption } from "./Sidebar/RawCompilerOption";
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-unused-vars
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {},
-  paperTitle: {
-    paddingLeft: "8px",
-  },
-  languageList: {
-    paddingTop: "0px",
-    paddingBottom: "0px",
-  },
-  languageListItem: {
-    paddingLeft: "16px",
-  },
-  compilerList: {
-    paddingTop: "0px",
-    paddingBottom: "0px",
-  },
-  compilerListItem: {
-    paddingLeft: "16px",
-  },
-  compilerListItemText: {
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    overflowX: "hidden",
-  },
-  compilerOptionContainer: {
-    paddingLeft: "16px",
-    paddingRight: "16px",
-    paddingBottom: "16px",
-  },
-}));
 
 interface SidebarProps {
   //editor: EditorState,
@@ -100,7 +68,6 @@ function optionsToSwitch(
 }
 
 const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
-  const classes = useStyles();
   const { compilerList, permlinkData } = props;
   const editorContext = useContainer(EditorContext);
   const compilerContext = useContainer(CompilerContext);
@@ -207,72 +174,80 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
   const readOnly = permlinkData !== null;
 
   return (
-    <Grid container className={classes.root} spacing={2}>
+    <Container>
       {/* choose language */}
-      <Grid item sm={12}>
-        <ChooseLanguage
-          language={language}
-          languages={languages}
-          readOnly={readOnly}
-          onSelectLanguage={onSelectLanguage}
-          onDeselectLanguage={onDeselectLanguage}
-        />
-      </Grid>
+      <Row>
+        <Col>
+          <ChooseLanguage
+            language={language}
+            languages={languages}
+            readOnly={readOnly}
+            onSelectLanguage={onSelectLanguage}
+            onDeselectLanguage={onDeselectLanguage}
+          />
+        </Col>
+      </Row>
       {/* choose compiler */}
-      <Grid item sm={12}>
-        {permlinkData === null && currentLanguage === "" ? null : (
-          <ChooseCompiler
-            compilerInfo={compilerInfo}
-            compilerInfos={compilerInfos}
-            readOnly={readOnly}
-            onSelectCompiler={onSelectCompiler}
-            onDeselectCompiler={onDeselectCompiler}
-          />
-        )}
-      </Grid>
+      <Row>
+        <Col>
+          {permlinkData === null && currentLanguage === "" ? null : (
+            <ChooseCompiler
+              compilerInfo={compilerInfo}
+              compilerInfos={compilerInfos}
+              readOnly={readOnly}
+              onSelectCompiler={onSelectCompiler}
+              onDeselectCompiler={onDeselectCompiler}
+            />
+          )}
+        </Col>
+      </Row>
       {/* compiler options */}
-      <Grid item sm={12}>
-        {compilerInfo === null ? null : (
-          <CompilerOption
-            switches={switches}
-            compilerInfo={compilerInfo}
-            readOnly={readOnly}
-            onChangeChecked={onChangeChecked}
-            onChangeSelected={onChangeSelected}
-          />
-        )}
-      </Grid>
+      <Row>
+        <Col>
+          {compilerInfo === null ? null : (
+            <CompilerOption
+              switches={switches}
+              compilerInfo={compilerInfo}
+              readOnly={readOnly}
+              onChangeChecked={onChangeChecked}
+              onChangeSelected={onChangeSelected}
+            />
+          )}
+        </Col>
+      </Row>
       {/* raw compiler options */}
-      <Grid item sm={12}>
-        {compilerInfo === null ? null : (
-          <RawCompilerOption
-            compilerOptionRaw={
-              permlinkData === null
-                ? compilerInfo.compilerOptionRaw
-                  ? compilerOptionRaw
+      <Row>
+        <Col>
+          {compilerInfo === null ? null : (
+            <RawCompilerOption
+              compilerOptionRaw={
+                permlinkData === null
+                  ? compilerInfo.compilerOptionRaw
+                    ? compilerOptionRaw
+                    : null
+                  : permlinkData.parameter.compilerInfo.compilerOptionRaw
+                  ? permlinkData.parameter.compilerOptionRaw
                   : null
-                : permlinkData.parameter.compilerInfo.compilerOptionRaw
-                ? permlinkData.parameter.compilerOptionRaw
-                : null
-            }
-            runtimeOptionRaw={
-              permlinkData === null
-                ? compilerInfo.runtimeOptionRaw || runtimeOptionRaw !== ""
-                  ? runtimeOptionRaw
+              }
+              runtimeOptionRaw={
+                permlinkData === null
+                  ? compilerInfo.runtimeOptionRaw || runtimeOptionRaw !== ""
+                    ? runtimeOptionRaw
+                    : null
+                  : permlinkData.parameter.compilerInfo.runtimeOptionRaw ||
+                    permlinkData.parameter.runtimeOptionRaw !== ""
+                  ? permlinkData.parameter.runtimeOptionRaw
                   : null
-                : permlinkData.parameter.compilerInfo.runtimeOptionRaw ||
-                  permlinkData.parameter.runtimeOptionRaw !== ""
-                ? permlinkData.parameter.runtimeOptionRaw
-                : null
-            }
-            readOnly={readOnly}
-            onChangeCompilerOptionRaw={onChangeCompilerOptionRaw}
-            onChangeRuntimeOptionRaw={onChangeRuntimeOptionRaw}
-            onCtrlEnter={onCtrlEnter}
-          />
-        )}
-      </Grid>
-    </Grid>
+              }
+              readOnly={readOnly}
+              onChangeCompilerOptionRaw={onChangeCompilerOptionRaw}
+              onChangeRuntimeOptionRaw={onChangeRuntimeOptionRaw}
+              onCtrlEnter={onCtrlEnter}
+            />
+          )}
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

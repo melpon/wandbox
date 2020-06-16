@@ -1,14 +1,9 @@
 import React from "react";
-import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
-import IconButton from "@material-ui/core/IconButton";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import SettingsIcon from "@material-ui/icons/SettingsRounded";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import { ChevronRight, Gear } from "react-bootstrap-icons";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
+import Form from "react-bootstrap/Form";
 
 import { EditorSettingsData, EditorType } from "~/contexts/EditorContext";
 
@@ -72,54 +67,73 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
 
   if (!settings.opened) {
     return (
-      <IconButton onClick={onClickOpenSettings}>
-        <SettingsIcon />
-      </IconButton>
+      <Button variant="link" onClick={onClickOpenSettings}>
+        <Gear />
+      </Button>
     );
   }
 
   return (
-    <List>
-      <IconButton onClick={onClickCloseSettings}>
-        <ChevronRightIcon />
-      </IconButton>
-      <Divider />
-      <FormControl style={{ width: "100%" }}>
-        <InputLabel>Key Binding</InputLabel>
-        <Select native value={settings.editor} onChange={onChangeEditor}>
-          <option value="default">default</option>
-          <option value="vim">vim</option>
-          <option value="emacs">emacs</option>
-        </Select>
-      </FormControl>
-      <FormControl style={{ width: "100%" }}>
-        <InputLabel>TAB Key Inserted</InputLabel>
-        <Select native value={settings.tabKey} onChange={onChangeTabKey}>
-          <option value="2">2 Spaces</option>
-          <option value="4">4 Spaces</option>
-          <option value="8">8 Spaces</option>
-          <option value="tab">TAB</option>
-        </Select>
-      </FormControl>
-      <FormControl style={{ width: "100%" }}>
-        <InputLabel>TAB Width</InputLabel>
-        <Select native value={settings.tabWidth} onChange={onChangeTabWidth}>
-          <option value="2">2</option>
-          <option value="4">4</option>
-          <option value="8">8</option>
-        </Select>
-      </FormControl>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={settings.smartIndent}
-            onChange={onChangeSmartIndent}
-            value="smartIndent"
-          />
-        }
-        label="Smart Indent"
-      />
-    </List>
+    <div>
+      <Row>
+        <Col>
+          <Button variant="link" onClick={onClickCloseSettings}>
+            <ChevronRight />
+          </Button>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Form>
+            <Form.Group controlId="wb-keybinding">
+              <Form.Label>Key Binding</Form.Label>
+              <Form.Control
+                as="select"
+                value={settings.editor}
+                onChange={onChangeEditor}
+              >
+                <option value="default">default</option>
+                <option value="vim">vim</option>
+                <option value="emacs">emacs</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="wb-tabkey">
+              <Form.Label>TAB Key Inserted</Form.Label>
+              <Form.Control
+                as="select"
+                value={settings.tabKey}
+                onChange={onChangeTabKey}
+              >
+                <option value="2">2 Spaces</option>
+                <option value="4">4 Spaces</option>
+                <option value="8">8 Spaces</option>
+                <option value="tab">TAB</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="wb-tabwidth">
+              <Form.Label>TAB Width</Form.Label>
+              <Form.Control
+                as="select"
+                value={settings.tabWidth}
+                onChange={onChangeTabWidth}
+              >
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="8">8</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="wb-smartindent">
+              <Form.Check
+                type="checkbox"
+                label="Smart Indent"
+                checked={settings.smartIndent}
+                onChange={onChangeSmartIndent}
+              />
+            </Form.Group>
+          </Form>
+        </Col>
+      </Row>
+    </div>
   );
 };
 

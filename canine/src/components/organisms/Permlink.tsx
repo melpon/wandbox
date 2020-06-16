@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { useContainer } from "unstated-next";
 import useReactRouter from "use-react-router";
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
-import makeStyles from "@material-ui/styles/makeStyles";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
 
 import { ResultContext } from "~/contexts/ResultContext";
 import { EditorContext } from "~/contexts/EditorContext";
@@ -19,15 +19,6 @@ import { useError } from "~/hooks/error";
 import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const useStyles = makeStyles(() => ({
-  share: {},
-  edit: {},
-  hidden: {
-    visibility: "hidden",
-  },
-}));
-
 export interface PermlinkProps {
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
@@ -37,7 +28,6 @@ export interface PermlinkProps {
 const Permlink: React.FC<PermlinkProps> = (
   props
 ): React.ReactElement | null => {
-  const classes = useStyles();
   const { compilerList, permlinkData, clearPermlinkData } = props;
   const { history } = useReactRouter();
   const compiler = useContainer(CompilerContext);
@@ -179,28 +169,22 @@ const Permlink: React.FC<PermlinkProps> = (
     sharing || permlinkData !== null || result.results.length === 0;
   const disabledEdit = permlinkData === null;
   return (
-    <Grid container spacing={2}>
-      <Grid item className={disabledShare ? classes.hidden : undefined}>
-        <Button
-          onClick={onShare}
-          disabled={disabledShare}
-          variant="contained"
-          color="primary"
-        >
-          Share
-        </Button>
-      </Grid>
-      <Grid item className={disabledEdit ? classes.hidden : undefined}>
-        <Button
-          onClick={onEdit}
-          disabled={disabledEdit}
-          variant="contained"
-          color="primary"
-        >
-          Edit
-        </Button>
-      </Grid>
-    </Grid>
+    <Row>
+      <Col sm="auto">
+        <span style={disabledShare ? { visibility: "hidden" } : undefined}>
+          <Button onClick={onShare} disabled={disabledShare} variant="primary">
+            Share
+          </Button>
+        </span>
+      </Col>
+      <Col sm="auto">
+        <span style={disabledEdit ? { visibility: "hidden" } : undefined}>
+          <Button onClick={onEdit} disabled={disabledEdit} variant="primary">
+            Edit
+          </Button>
+        </span>
+      </Col>
+    </Row>
   );
 };
 

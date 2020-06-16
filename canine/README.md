@@ -6,7 +6,7 @@ Wandbox のフロントエンドです。
 
 ### 言語とライブラリ
 
-TypeScript + React + MaterialUI で頑張る。
+TypeScript + React + Bootstrap で頑張る。
 
 拡張子は .ts か .tsx。.ts で済むところを .tsx にしてても気にしないことにする。
 

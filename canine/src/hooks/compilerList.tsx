@@ -1,5 +1,5 @@
 import React from "react";
-import { useFetchJSON, AnyJson, JsonMap, JsonArray } from "./fetch";
+import { useFetchJSON, AnyJson, JsonMap } from "./fetch";
 
 export interface SingleSwitch {
   name: string;
@@ -59,7 +59,7 @@ function resolveSwitch(json: AnyJson): Switch {
       switch: {
         name: obj.name as string,
         default: obj.default as string,
-        options: (obj.options as JsonArray).map(
+        options: (obj.options as AnyJson[]).map(
           (json): SelectSwitchOption => {
             const obj = json as JsonMap;
             return {
@@ -87,7 +87,7 @@ export function resolveCompilerInfo(json: AnyJson): CompilerInfo {
     compilerOptionRaw: obj["compiler-option-raw"] as boolean,
     runtimeOptionRaw: obj["runtime-option-raw"] as boolean,
     displayCompileCommand: obj["display-compile-command"] as string,
-    switches: (obj.switches as JsonArray).map(resolveSwitch),
+    switches: (obj.switches as AnyJson[]).map(resolveSwitch),
   };
 }
 
@@ -100,7 +100,8 @@ export function useCompilerList(
   };
 
   const resolver = React.useCallback((json): CompilerInfo[] => {
-    return (json as JsonArray).map(resolveCompilerInfo);
+    console.log(json);
+    return (json as AnyJson[]).map(resolveCompilerInfo);
   }, []);
 
   const [compilerInfos, , doFetch] = useFetchJSON<CompilerInfo[]>(

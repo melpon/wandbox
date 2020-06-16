@@ -1,21 +1,11 @@
 import React from "react";
-//import { Theme } from "@material-ui/core/styles/createMuiTheme";
-import { makeStyles } from "@material-ui/styles";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import AddBoxIcon from "@material-ui/icons/AddBox";
+import Nav from "react-bootstrap/Nav";
+import { FileEarmarkPlus } from "react-bootstrap-icons";
 
 import { EditorContextState } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { EditorTab, RenamingSource } from "./EditorTab";
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const useStyles = makeStyles(() => ({
-  tabRoot: {
-    textTransform: "initial",
-  },
-}));
 
 interface EditorTabsProps {
   editor: EditorContextState;
@@ -25,7 +15,6 @@ interface EditorTabsProps {
 const EditorTabs: React.FC<EditorTabsProps> = (
   props
 ): React.ReactElement | null => {
-  const classes = useStyles();
   const { editor, permlinkData } = props;
   const [renamingSources, setRenamingSources] = React.useState<
     RenamingSource[]
@@ -53,14 +42,14 @@ const EditorTabs: React.FC<EditorTabsProps> = (
     setRenamingSources(rs);
   }, [editor.sources]);
 
+  const onAddTab = React.useCallback((): void => {
+    editor.addSource("noname");
+  }, [editor]);
+
   const onChangeTabs = React.useCallback(
-    (_e, index: number): void => {
+    (index: number): void => {
       // 追加ボタン
-      if (permlinkData === null && index === editor.sources.length) {
-        editor.addSource("noname");
-      } else {
-        editor.setCurrentTab(index);
-      }
+      editor.setCurrentTab(index);
 
       // 編集中のタブはキャンセルする
       const rs = renamingSources.map(
@@ -131,15 +120,39 @@ const EditorTabs: React.FC<EditorTabsProps> = (
   );
 
   return (
-    <Tabs
-      value={editor.currentTab}
-      onChange={onChangeTabs}
-      indicatorColor="primary"
-      textColor="primary"
-      scrollButtons="auto"
-      variant="scrollable"
-    >
+    <Nav variant="tabs" activeKey={`wb-editor-${editor.currentTab}`}>
       {sources.map(
+        (source, index): React.ReactElement => {
+          return (
+            <EditorTab
+              key={index}
+              {...{
+                index,
+                source,
+                readonly: permlinkData !== null,
+                renamingSource: renamingSources[index] || null,
+                active: index === editor.currentTab,
+                onChangeTabs,
+                onClickTabEdit,
+                onClickTabClose,
+                onChangeRenamingFilename,
+                onCancelRenamingFilename,
+                onSubmitRenamingFilename,
+              }}
+            />
+          );
+        }
+      )}
+
+      {/* Permlink の場合はタブの追加不可 */}
+      {permlinkData === null ? (
+        <Nav.Item>
+          <Nav.Link onClick={onAddTab}>
+            <FileEarmarkPlus />
+          </Nav.Link>
+        </Nav.Item>
+      ) : null}
+      {/*sources.map(
         (source, index): React.ReactElement => {
           return (
             <Tab
@@ -161,13 +174,8 @@ const EditorTabs: React.FC<EditorTabsProps> = (
             />
           );
         }
-      )}
-
-      {/* Permlink の場合はタブの追加不可 */}
-      {permlinkData === null ? (
-        <Tab key={editor.sources.length} icon={<AddBoxIcon />} />
-      ) : null}
-    </Tabs>
+      )*/}
+    </Nav>
   );
 };
 
