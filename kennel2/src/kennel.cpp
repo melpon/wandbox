@@ -313,7 +313,7 @@ class kennel : public cppcms::application {
     for (auto i = 0; i < static_cast<int>(size); i++) {
       auto cm = get_cattleshed_client_manager(service, i);
       auto client = cm->CreateGetVersionClient();
-      client->SetOnResponse(
+      client->SetOnFinish(
           [callback, results, client, count, size](
               cattleshed::GetVersionResponse resp, grpc::Status status) {
             if (status.ok()) {
@@ -325,7 +325,7 @@ class kennel : public cppcms::application {
             }
           });
       cattleshed::GetVersionRequest req;
-      client->Request(req);
+      client->Connect(req);
     }
   }
 
@@ -603,8 +603,8 @@ class kennel : public cppcms::application {
         es->send_data(response_type_to_string(resp.type()) + ":" + resp.data(),
                       true);
       });
-      client->SetOnReadDone([client](grpc::Status status) {
-        SPDLOG_DEBUG("[client] OnReadDone");
+      client->SetOnFinish([client](grpc::Status status) {
+        SPDLOG_DEBUG("[client] OnFinish");
         client->Close();
       });
       client->Connect();
@@ -901,7 +901,7 @@ class kennel : public cppcms::application {
                 outputs.array().push_back(v);
               }
             });
-        client->SetOnReadDone(
+        client->SetOnFinish(
             [&promise](grpc::Status status) { promise.set_value(); });
         client->Connect();
         client->Write(std::move(request));
@@ -956,9 +956,9 @@ class kennel : public cppcms::application {
       permlink pl(service());
       auto issuer = make_issuer(
           request(), pl.get_github_username(session()["access_token"]));
-      auto request = make_run_job_request(value, std::move(issuer));
+      auto req = make_run_job_request(value, std::move(issuer));
 
-      SPDLOG_DEBUG("[client] send RunJobRequest: {}", request.DebugString());
+      SPDLOG_DEBUG("[client] send RunJobRequest: {}", req.DebugString());
 
       auto cm = get_cattleshed_client_manager(service(), index);
       auto client = cm->CreateRunJobClient();
@@ -970,12 +970,12 @@ class kennel : public cppcms::application {
         v["data"] = resp.data();
         nd->send(v, true);
       });
-      client->SetOnReadDone([client](grpc::Status status) {
-        SPDLOG_DEBUG("[client] OnReadDone");
+      client->SetOnFinish([client](grpc::Status status) {
+        SPDLOG_DEBUG("[client] OnFinish");
         client->Close();
       });
       client->Connect();
-      client->Write(std::move(request));
+      client->Write(std::move(req));
       client->WritesDone();
     }
     void api_permlink(std::string permlink_name) {

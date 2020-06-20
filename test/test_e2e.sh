@@ -53,8 +53,8 @@ if ! diff -u assets/expected_compile _tmp/actual_compile; then
   exit 1
 fi
 
-curl -f -H "Content-type: application/json" -d @assets/test.json  http://localhost:3600/api/compile.ndjson > _tmp/actual_api_compile.ndjson
-if ! diff -u assets/expected_api_compile.json _tmp/actual_api_compile.json; then
+curl -v -f -H "Content-type: application/json" -d @assets/test.json  http://localhost:3600/api/compile.ndjson > _tmp/actual_api_compile.ndjson
+if ! diff -u assets/expected_api_compile.ndjson _tmp/actual_api_compile.ndjson; then
   echo "failed test /api/compile.ndjson" 1>&2
   exit 1
 fi

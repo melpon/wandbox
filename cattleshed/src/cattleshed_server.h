@@ -16,7 +16,7 @@
 #include <time.h>
 
 // ggrpc
-#include <ggrpc/server.h>
+#include <ggrpc/ggrpc.h>
 
 // spdlog
 #include <spdlog/spdlog.h>
