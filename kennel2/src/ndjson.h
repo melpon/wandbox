@@ -11,6 +11,7 @@ class ndjson {
         //std::ostringstream oss;
         //oss << std::hex << buf.size();
         //std::clog << oss.str() << "\r\n" << buf << "\r\n" << std::flush;
+        SPDLOG_INFO(buf);
         context->response().out() << buf;
         if (flush)
             context->response().out() << std::flush;

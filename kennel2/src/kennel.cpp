@@ -949,16 +949,19 @@ class kennel : public cppcms::application {
       }
       auto index = static_cast<std::size_t>((*it)["provider"].number());
 
-      auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
-      nd->send_header();
-      nd->context->response().set_header("Access-Control-Allow-Origin", "*");
-
       permlink pl(service());
+      session();
+      session()["access_token"];
+      pl.get_github_username(session()["access_token"]);
       auto issuer = make_issuer(
           request(), pl.get_github_username(session()["access_token"]));
       auto req = make_run_job_request(value, std::move(issuer));
 
       SPDLOG_DEBUG("[client] send RunJobRequest: {}", req.DebugString());
+
+      auto nd = booster::shared_ptr<ndjson>(new ndjson(release_context()));
+      nd->send_header();
+      nd->context->response().set_header("Access-Control-Allow-Origin", "*");
 
       auto cm = get_cattleshed_client_manager(service(), index);
       auto client = cm->CreateRunJobClient();
