@@ -349,8 +349,8 @@
    "program-duration":3,
    "compile-time-limit":3,
    "kill-wait":2,
-   "output-limit-kill":262144,
-   "output-limit-warn":131072,
+   "output-limit-kill":8192,
+   "output-limit-warn":4096,
   },
  },
 }

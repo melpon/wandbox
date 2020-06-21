@@ -116,5 +116,13 @@ if [ `ps -ef | grep cattlegrid | grep -v grep | wc -l` -ne 0 ]; then
   exit 1
 fi
 
+# 無限出力
+set +e
+OUTPUT_SIGNAL=`curl -f -H "Content-type: application/json" -d @assets/test_outputflood.json  http://localhost:3600/api/compile.json | jq -r .signal`
+if [ "$OUTPUT_SIGNAL" != "File size limit exceeded" ]; then
+  echo "failed test fork2" 1>&2
+  exit 1
+fi
+
 echo "e2e test succeeded"
 
