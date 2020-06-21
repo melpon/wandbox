@@ -16,7 +16,7 @@
 #include <time.h>
 
 // ggrpc
-#include <ggrpc/server.h>
+#include <ggrpc/ggrpc.h>
 
 // spdlog
 #include <spdlog/spdlog.h>
@@ -924,8 +924,9 @@ class RunJobHandler
         if (ec) {
           pipe_.close();
           if (handler_) {
-            boost::asio::post(ioc_->get_executor(), std::move(handler_));
+            auto handler = std::move(handler_);
             handler_ = {};
+            handler();
           }
           return;
         }
@@ -1108,18 +1109,18 @@ class RunJobHandler
     }
 
     void OnForward() {
-      //SPDLOG_TRACE("OnForward: pipes[0] is {}",
-      //             pipes_[0]->Closed() ? "closed" : "opened");
-      //SPDLOG_TRACE("OnForward: pipes[1] is {}",
-      //             pipes_[1]->Closed() ? "closed" : "opened");
-      //SPDLOG_TRACE("OnForward: pipes[2] is {}",
-      //             pipes_[2]->Closed() ? "closed" : "opened");
-      //SPDLOG_TRACE("OnForward: pipes[3] is {}",
-      //             pipes_[3]->Closed() ? "closed" : "opened");
+      SPDLOG_TRACE("OnForward: pipes[0] is {}",
+                   pipes_[0]->Closed() ? "closed" : "opened");
+      SPDLOG_TRACE("OnForward: pipes[1] is {}",
+                   pipes_[1]->Closed() ? "closed" : "opened");
+      SPDLOG_TRACE("OnForward: pipes[2] is {}",
+                   pipes_[2]->Closed() ? "closed" : "opened");
+      SPDLOG_TRACE("OnForward: pipes[3] is {}",
+                   pipes_[3]->Closed() ? "closed" : "opened");
 
       if (not std::all_of(pipes_.begin(), pipes_.end(),
                           [](std::shared_ptr<PipeForwarderBase> p) {
-                            return p->Closed();
+                              return p->Closed();
                           })) {
         // まだ全部の Forward が終わってないので更に待つ
         return;

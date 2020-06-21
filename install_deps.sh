@@ -93,7 +93,7 @@ if [ ! -e $SPDLOG_VERSION_FILE -o "$SPDLOG_VERSION" != "`cat $SPDLOG_VERSION_FIL
   SPDLOG_CHANGED=1
 fi
 
-GGRPC_VERSION="0.1.1"
+GGRPC_VERSION="0.4.0"
 GGRPC_VERSION_FILE="$INSTALL_DIR/ggrpc.version"
 GGRPC_CHANGED=0
 if [ ! -e $GGRPC_VERSION_FILE -o "$GGRPC_VERSION" != "`cat $GGRPC_VERSION_FILE`" ]; then
@@ -149,7 +149,7 @@ if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; t
   # RELEASE_MODE=1 の場合は tsan, asan は入れない
   _BUILDTYPE="release tsan asan"
   if [ $RELEASE_MODE -eq 1 ]; then
-    _BUILDTYPE="release asan"
+    _BUILDTYPE="release"
   fi
   for buildtype in $_BUILDTYPE; do
     case "$buildtype" in

@@ -9,7 +9,7 @@
 #include <thread>
 
 // ggrpc
-#include <ggrpc/client.h>
+#include <ggrpc/ggrpc.h>
 
 // spdlog
 #include <spdlog/spdlog.h>

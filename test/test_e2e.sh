@@ -53,8 +53,8 @@ if ! diff -u assets/expected_compile _tmp/actual_compile; then
   exit 1
 fi
 
-curl -f -H "Content-type: application/json" -d @assets/test.json  http://localhost:3600/api/compile.ndjson > _tmp/actual_api_compile.ndjson
-if ! diff -u assets/expected_api_compile.json _tmp/actual_api_compile.json; then
+curl -v -f -H "Content-type: application/json" -d @assets/test.json  http://localhost:3600/api/compile.ndjson > _tmp/actual_api_compile.ndjson
+if ! diff -u assets/expected_api_compile.ndjson _tmp/actual_api_compile.ndjson; then
   echo "failed test /api/compile.ndjson" 1>&2
   exit 1
 fi
@@ -113,6 +113,14 @@ fi
 if [ `ps -ef | grep cattlegrid | grep -v grep | wc -l` -ne 0 ]; then
   ps -ef | grep cattlegrid | grep -v grep
   echo "failed test fork" 1>&2
+  exit 1
+fi
+
+# 無限出力
+set +e
+OUTPUT_SIGNAL=`curl -f -H "Content-type: application/json" -d @assets/test_outputflood.json  http://localhost:3600/api/compile.json | jq -r .signal`
+if [ "$OUTPUT_SIGNAL" != "File size limit exceeded" ]; then
+  echo "failed test fork2" 1>&2
   exit 1
 fi
 
