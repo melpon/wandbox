@@ -1,7 +1,7 @@
 import React from "react";
 import Nav from "react-bootstrap/Nav";
-import { FileEarmarkPlus } from "react-bootstrap-icons";
 
+import { FileEarmarkPlus } from "~/components/atoms/icons";
 import { EditorContextState } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";

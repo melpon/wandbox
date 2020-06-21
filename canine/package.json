@@ -21,7 +21,6 @@
     "css-loader": "^3.5.3",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.1",
-    "react-bootstrap-icons": "^1.0.2-alpha4",
     "react-codemirror2": "^7.2.0",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
