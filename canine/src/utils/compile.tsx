@@ -53,7 +53,7 @@ export function compile(
     return;
   }
 
-  fetch("https://wandbox.org/api/compile.ndjson", {
+  fetch(`${process.env.WANDBOX_URL_PREFIX}/api/compile.ndjson`, {
     method: "POST",
     body: JSON.stringify(body),
     mode: "cors",
@@ -67,6 +67,7 @@ export function compile(
     .then((stream): void => {
       const reader = stream.getReader();
       const read = (
+        // eslint-disable-next-line @typescript-eslint/ban-types
         read: Function,
         result: ReadableStreamReadResult<AnyJson>
       ): void => {

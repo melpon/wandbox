@@ -32,7 +32,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     match.params.permlinkId === undefined ? null : match.params.permlinkId;
   const [, setError] = useError();
   const compilerList = useCompilerList(
-    "https://wandbox.org/api/list.json",
+    `${process.env.WANDBOX_URL_PREFIX}/api/list.json`,
     setError
   );
 
@@ -50,7 +50,10 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       return;
     }
 
-    doGetPermlink(`https://wandbox.org/api/permlink/${permlinkId}`, {});
+    doGetPermlink(
+      `${process.env.WANDBOX_URL_PREFIX}/api/permlink/${permlinkId}`,
+      {}
+    );
   }, [permlinkId]);
 
   useEffect((): void => {

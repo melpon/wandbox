@@ -37,7 +37,7 @@ const Permlink: React.FC<PermlinkProps> = (
   const [sharing, setSharing] = React.useState<boolean>(false);
 
   const [permlinkResp, permlinkFetchId, doPermlink] = usePostPermlink(
-    "https://wandbox.org/api/permlink",
+    `${process.env.WANDBOX_URL_PREFIX}/api/permlink`,
     setError
   );
 
