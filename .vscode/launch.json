@@ -1,0 +1,27 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) [tsan][cattleshed] 起動",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cattleshed/_build/tsan/cattleshed",
+            "args": ["-c", "${workspaceFolder}/cattleshed/_build/tsan/cattleshed.conf", "-c", "${workspaceFolder}/test/assets/compilers.default"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "gdb の再フォーマットを有効にする",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
