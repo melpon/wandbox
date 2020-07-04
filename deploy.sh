@@ -3,7 +3,7 @@
 PROG=$0
 
 function show_help() {
-  echo "$PROG <remote> <kennel | cattleshed> <staging | production>"
+  echo "$PROG <remote> <kennel | cattleshed | canine> <staging | production>"
 }
 
 if [ $# -lt 3 ]; then
@@ -20,7 +20,7 @@ PACKAGE_DIR="`pwd`/_package"
 
 set -ex
 
-if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
+if [ "$APP" != "kennel" -a "$APP" != "cattleshed" -a "$APP" != "canine" ]; then
   show_help
   exit 1
 fi
@@ -53,7 +53,12 @@ ssh $REMOTE /bin/bash -c "
       fi
     popd
   popd
-  cp /opt/wandbox/$APP-$ENV/etc/$APP.service /etc/systemd/system/$APP-$ENV.service
-  systemctl enable $APP-$ENV
-  systemctl restart $APP-$ENV
+  if [ "$APP" = "cattleshed" -o "$APP" = "kennel" ]; then
+    cp /opt/wandbox/$APP-$ENV/etc/$APP.service /etc/systemd/system/$APP-$ENV.service
+    systemctl enable $APP-$ENV
+    systemctl restart $APP-$ENV
+  fi
+  if [ "$APP" = "canine" ]; then
+    systemctl restart nginx
+  fi
 "

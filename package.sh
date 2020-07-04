@@ -3,7 +3,7 @@
 PROG=$0
 
 function show_help() {
-  echo "$PROG <kennel | cattleshed> <staging | production>"
+  echo "$PROG <kennel | cattleshed | canine> <staging | production>"
 }
 
 if [ $# -lt 2 ]; then
@@ -19,7 +19,7 @@ INSTALL_DIR="`pwd`/_install"
 
 set -ex
 
-if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
+if [ "$APP" != "kennel" -a "$APP" != "cattleshed" -a "$APP" != "canine" ]; then
   show_help
   exit 1
 fi
@@ -44,6 +44,13 @@ elif [ "$APP" = "cattleshed" ]; then
     rm -rf _build/release
     ./cmake.sh --prefix $PREFIX --$ENV
     sudo $INSTALL_DIR/cmake/bin/cmake --install _build/release
+  popd
+elif [ "$APP" = "canine" ]; then
+  pushd canine
+    npm ci
+    npm run dist
+    mkdir -p $PREFIX
+    cp -r dist/* $PREFIX/
   popd
 fi
 
