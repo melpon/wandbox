@@ -39,8 +39,8 @@ var config = {
     },
   },
   output: {
-    filename: "js/[name].js",
-    chunkFilename: "js/[name].bundle.js",
+    filename: "static/js/[name].js",
+    chunkFilename: "static/js/[name].bundle.js",
     path: path.resolve(__dirname, "dist"),
   },
   resolve: {
@@ -59,7 +59,7 @@ var config = {
     : []
   ).concat([
     new MiniCssExtractPlugin({
-      filename: "css/[name].css",
+      filename: "static/css/[name].css",
     }),
     new CopyPlugin({
       patterns: [
