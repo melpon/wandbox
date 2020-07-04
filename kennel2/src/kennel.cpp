@@ -229,6 +229,7 @@ class kennel : public cppcms::application {
         } else {
           const cattleshed::SelectSwitch& ss = s.select();
           sw["type"] = "select";
+          sw["name"] = ss.name();
           sw["default"] = ss.default_value();
           sw["options"] = cppcms::json::array();
           for (int k = 0; k < ss.options_size(); k++) {

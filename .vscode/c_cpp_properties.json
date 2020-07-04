@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/cattleshed/_build/tsan/proto",
+                "${workspaceFolder}/_install/boost/include",
+                "${workspaceFolder}/_install/ggrpc/include",
+                "${workspaceFolder}/_install/spdlog/include",
+                "${workspaceFolder}/_install/CLI11/include",
+                "${workspaceFolder}/_install/cppcms/include",
+                "${workspaceFolder}/_install/cppdb/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
