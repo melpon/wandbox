@@ -16,6 +16,8 @@ set(KENNEL_CATTLESHED_PORT 50051)
 set(KENNEL_SCHEME "http")
 set(KENNEL_DOMAIN "localhost:3600")
 set(KENNEL_SERVICE_API "http")
+set(KENNEL_IPLIMIT_DURATION 3)
+set(KENNEL_IPLIMIT_SIZE 1000)
 
 add_subdirectory(../cattleshed cattleshed)
 add_subdirectory(../kennel2 kennel2)

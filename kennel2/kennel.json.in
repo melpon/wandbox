@@ -15,6 +15,10 @@
       { "client_id": "@KENNEL_GITHUBCLIENT@"
       , "client_secret_file": "@KENNEL_DATABASEDIR@/.github_secret"
       }
+    , "iplimit":
+      { "duration": @KENNEL_IPLIMIT_DURATION@
+      , "size": @KENNEL_IPLIMIT_SIZE@
+      }
     }
 , "service" :
     { "api" : "@KENNEL_SERVICE_API@"

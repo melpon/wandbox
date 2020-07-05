@@ -30,6 +30,28 @@ namespace cppcms {
             serialized_object = ss.str();
         }
     };
+    template <>
+    struct serialization_traits<unsigned long> {
+      static void load(const std::string& serialized_object,
+                       unsigned long& real_object) {
+        real_object = std::stoul(serialized_object);
+      }
+      static void save(const unsigned long& real_object,
+                       std::string& serialized_object) {
+        serialized_object = std::to_string(real_object);
+      }
+    };
+    template <>
+    struct serialization_traits<unsigned long long> {
+      static void load(const std::string& serialized_object,
+                       unsigned long long& real_object) {
+        real_object = std::stoull(serialized_object);
+      }
+      static void save(const unsigned long long& real_object,
+                       std::string& serialized_object) {
+        serialized_object = std::to_string(real_object);
+      }
+    };
 }
 
 class kennel : public cppcms::application {
@@ -375,6 +397,44 @@ class kennel : public cppcms::application {
         }
     }
 
+    bool check_ip() {
+      auto content_size = request().raw_post_data().second;
+      if (content_size == 0) {
+        SPDLOG_WARN("empty content");
+        response().status(400);
+        return false;
+      }
+      auto ip = request().getenv("HTTP_X_REAL_IP");
+      if (ip.empty()) {
+        SPDLOG_WARN("X-Real-IP is empty");
+        response().status(400);
+        return false;
+      }
+
+      // limit_duration 秒以内に合計で limit_size バイト以上のデータが送信されてきた場合、
+      // その IP のユーザを limit_duration 秒間ブロックする。
+      // ブロック中に再度アクセスしてきた場合、その時点から limit_duration 秒間のブロックとなる。
+      auto settings = service().settings()["application"];
+      int limit_duration = (int)settings["iplimit"]["duration"].number();
+      int limit_size = (int)settings["iplimit"]["size"].number();
+
+      auto key = "ip-" + ip + "-totalsize";
+      uint64_t total_size = 0;
+      cache().fetch_data(key, total_size);
+
+      auto new_total_size = total_size + content_size;
+      cache().store_data(key, new_total_size, limit_duration);
+
+      if (new_total_size > limit_size) {
+        SPDLOG_INFO("!!! Blocked. IP={}, size={}, total={} bytes", ip,
+                    content_size, new_total_size);
+        response().status(400);
+        return false;
+      }
+
+      return true;
+    }
+
     cppcms::json::value authenticate(std::string access_token) {
         if (access_token.empty()) {
             return cppcms::json::value();
@@ -570,6 +630,10 @@ class kennel : public cppcms::application {
         return;
       }
 
+      if (!check_ip()) {
+        return;
+      }
+
       auto value = json_post_data();
       auto compiler = value["compiler"].str();
       auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
@@ -630,6 +694,10 @@ class kennel : public cppcms::application {
     void post_permlink() {
         if (!ensure_method_post()) {
             return;
+        }
+
+        if (!check_ip()) {
+          return;
         }
 
         auto value = json_post_data();
@@ -854,6 +922,10 @@ class kennel : public cppcms::application {
             return;
         }
 
+        if (!check_ip()) {
+          return;
+        }
+
         auto result = api_compile_internal(json_post_data());
 
         response().content_type("application/json");
@@ -932,6 +1004,10 @@ class kennel : public cppcms::application {
     }
     void api_compile_ndjson() {
       if (!ensure_method_post()) {
+        return;
+      }
+
+      if (!check_ip()) {
         return;
       }
 

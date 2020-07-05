@@ -61,6 +61,17 @@ if(NOT KENNEL_SERVICE_PORT)
   set(KENNEL_SERVICE_PORT 3500)
 endif()
 
+if(NOT KENNEL_IPLIMIT_DURATION)
+  # 秒
+  set(KENNEL_IPLIMIT_DURATION 600)
+endif()
+
+if(NOT KENNEL_IPLIMIT_SIZE)
+  # bytes
+  # 1 * 1024 * 1024 = 1MB = 1048576
+  set(KENNEL_IPLIMIT_SIZE 1048576)
+endif()
+
 # --- cattleshed.pb.cc などの生成
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/proto")
