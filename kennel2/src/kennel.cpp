@@ -432,7 +432,7 @@ class kennel : public cppcms::application {
         info["expired_at"] = now_time + limit_duration;
       }
 
-      auto new_total_size = (size_t)info["total_size"] + content_size;
+      auto new_total_size = (size_t)info["total_size"].number() + content_size;
       info["total_size"] = new_total_size;
       cache().store_data(key, info, limit_duration);
 
