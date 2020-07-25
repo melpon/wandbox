@@ -40,8 +40,8 @@ See [CodePen](http://codepen.io/iomash/pen/KwBEJG) for Wandbox with jBatch in ac
 ### Boost.SML
 
 
-[Boost.SML document](https://boost-experimental.github.io/sml/examples.html) is using Wandbox on [background](https://github.com/boost-experimental/sml/blob/758ceb8646cb2eb56f2e121021c29fab55f24e92/js/cpp.js#L51)
+[Boost.SML document](https://boost-ext.github.io/sml/examples.html) is using Wandbox on [background](https://github.com/boost-experimental/sml/blob/758ceb8646cb2eb56f2e121021c29fab55f24e92/js/cpp.js#L51)
 
 ### Boost.DI
 
-[Boost.DI document](https://boost-experimental.github.io/di/examples.html) is also using Wandbox on background.
+[Boost.DI document](https://boost-ext.github.io/di/examples.html) is also using Wandbox on background.
