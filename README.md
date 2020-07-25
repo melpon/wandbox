@@ -45,8 +45,3 @@ See [CodePen](http://codepen.io/iomash/pen/KwBEJG) for Wandbox with jBatch in ac
 ### Boost.DI
 
 [Boost.DI document](https://boost-experimental.github.io/di/examples.html) is also using Wandbox on background.
-
-### Stensal
-
-[Stensal](https://stensal.com/) is a C/C++ SDK tool to help developers find the cause of segmentation faults in a more intuitive way.
-It is using Wandbox on background.
