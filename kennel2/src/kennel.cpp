@@ -564,7 +564,7 @@ class kennel : public cppcms::application {
       start->set_compiler(value["compiler"].str());
       start->set_stdin(value.get("stdin", ""));
       start->set_compiler_option_raw(value.get("compiler-option-raw", ""));
-      start->set_runtime_option_raw(value.get("compiler-option-raw", ""));
+      start->set_runtime_option_raw(value.get("runtime-option-raw", ""));
       start->set_default_source(value["code"].str());
       start->set_compiler_options(value.get("options", ""));
       *start->mutable_issuer() = std::move(issuer);
