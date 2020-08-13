@@ -207,7 +207,7 @@ Sample
     "compiler": "gcc-head",
     "compiler-option-raw": "-Dx=hogefuga\n-O3"
   }
-  $ curl -H "Content-type: application/json" -d @test.json  https://wandbox.org/api/compile.json
+  $ curl -H "Content-type: application/json" -d @test.json  https://wandbox.org/api/compile.ndjson
   {"data":"Start","type":"Control"}
   {"data":"prog.cc: In function 'int main()':\n<command-line>: warning: unused variable 'hogefuga' [-Wunused-variable]\nprog.cc:2:18: note: in expansion of macro 'x'\n int main() { int x = 0; std::cout << \"hoge\" << std::endl; }\n                  ^\n","type":"CompilerMessageE"}
   {"data":"hoge\n","type":"StdOut"}
