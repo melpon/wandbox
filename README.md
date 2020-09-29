@@ -28,7 +28,7 @@ Boost Software License 1.0
 
 ### wandbox.org が落ちたんだけどどこに連絡すればいいですか？
 
-[@melponn](https://twitter.com/melponn) に連絡してください。
+[@melponn](https://twitter.com/melponn) にリプライしてください。
 
 ### 脆弱性を見つけたんだけどどこに連絡すればいいですか？
 
