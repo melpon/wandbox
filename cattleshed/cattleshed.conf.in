@@ -136,6 +136,7 @@
     "--nproc=32",
     "--",
     "@CATTLESHED_BINDIR@/cattlegrid",
+    "--uids=10000:1000000000",
     "--rootdir=./jail",
     "--mount=/bin,/etc,/lib,/lib32,/lib64,/usr/bin,/usr/lib,/usr/lib32,/usr/include,/opt/wandbox,/usr/share",
     "--rwmount=/tmp=./jail/tmp,/home/jail=./store",
