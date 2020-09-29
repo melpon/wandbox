@@ -1,14 +1,10 @@
 # Wandbox
 
-Wandbox is a social compilation service. The service is here: https://wandbox.org/
+[Wandbox](https://wandbox.org/) はオンラインコンパイラサービスです。 
 
-You can also access via API: https://github.com/melpon/wandbox/blob/master/kennel2/API.rst
+API からもアクセスできます。 https://github.com/melpon/wandbox/blob/master/kennel2/API.rst
 
-These programs are licensed by Boost Software License 1.0.
-
-## Wandbox on Your Editor
-
-You can use Wandbox on your editor.
+## 好きなエディタから Wandbox を実行する
 
 Vim: https://github.com/rhysd/wandbox-vim
 
@@ -16,32 +12,20 @@ Emacs: https://github.com/kosh04/emacs-wandbox
 
 xyzzy: https://gist.github.com/kikairoya/7544234
 
-## Wandbox as a Background Infrastructure
+## License
 
-You can use Wandbox API from another services (that is, Wandbox API's HTTP response header has `Access-Control-Allow-Origin: *`).
+Boost Software License 1.0
 
-Following services are using Wandbox on background.
+## FAQ
 
-### jBatch
+### コンパイラを追加して欲しい場合はどうすればいいですか？
 
-jBatch developer, Boris Schaeling says:
+[wandbox-builder](https://github.com/melpon/wandbox-builder) に Pull Request を送ってください。
 
-[jBatch](http://iomash.com/) comes with a `wandbox` command to access the API more easily. To compile and run a Python program with Wandbox and append the program's output to a webpage, use:
+### Wandbox に機能を追加して欲しい場合はどうすればいいですか？
 
-```
-<script type="text/jbatch">
-  wandbox run --compiler python-2.7.3 --code 'print("Hello, world!")' | appendTo body
-</script>
-```
+このリポジトリに Pull Request を送ってください。
 
-See [CodePen](http://codepen.io/iomash/pen/KwBEJG) for Wandbox with jBatch in action.
+### wandbox.org が落ちたんだけどどこに連絡すればいいですか？
 
-
-### Boost.SML
-
-
-[Boost.SML document](https://boost-ext.github.io/sml/examples.html) is using Wandbox on [background](https://github.com/boost-experimental/sml/blob/758ceb8646cb2eb56f2e121021c29fab55f24e92/js/cpp.js#L51)
-
-### Boost.DI
-
-[Boost.DI document](https://boost-ext.github.io/di/examples.html) is also using Wandbox on background.
+[@melponn](https://twitter.com/melponn) に連絡してください。
