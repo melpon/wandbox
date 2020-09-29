@@ -13,6 +13,8 @@
 #include <aio.h>
 #include <locale.h>
 #include <sys/eventfd.h>
+#include <sys/inotify.h>
+#include <sys/stat.h>
 #include <time.h>
 
 // ggrpc
@@ -406,14 +408,14 @@ class RunJobHandler
     // ここは sandbox の外なのですごく気をつける必要がある
     program_writer_.reset(
         new ProgramWriter(ioc_, *config_, *it, req_start_, sigs_));
-    program_writer_->AsyncWriteProgram(std::bind(&RunJobHandler::OnWriteProgram,
-                                                 this, std::placeholders::_1,
-                                                 std::placeholders::_2));
+    program_writer_->AsyncWriteProgram(
+        std::bind(&RunJobHandler::OnWriteProgram, this, std::placeholders::_1,
+                  std::placeholders::_2, std::placeholders::_3));
     guard.Success();
   }
 
   void OnWriteProgram(const boost::system::error_code& ec,
-                      std::shared_ptr<DIR> workdir) {
+                      std::shared_ptr<DIR> workdir, std::string workdirpath) {
     FinishGuard guard(this);
 
     if (ec) {
@@ -431,7 +433,8 @@ class RunJobHandler
       context->Write(resp);
     };
     program_runner_.reset(new ProgramRunner(ioc_, *config_, req_start_, sigs_,
-                                            workdir, target_compiler, send));
+                                            workdir, workdirpath,
+                                            target_compiler, send));
     program_runner_->AsyncRun(std::bind(&RunJobHandler::OnRun, this));
     guard.Success();
   }
@@ -448,9 +451,10 @@ class RunJobHandler
  private:
   class ProgramWriter {
    public:
-    void AsyncWriteProgram(std::function<void(const boost::system::error_code&,
-                                              std::shared_ptr<DIR>)>
-                               cb) {
+    void AsyncWriteProgram(
+        std::function<void(const boost::system::error_code&,
+                           std::shared_ptr<DIR>, std::string)>
+            cb) {
       cb_ = std::move(cb);
 
       std::string date;
@@ -477,7 +481,7 @@ class RunJobHandler
           if (e.code().value() != ENOTDIR) {
             cb_(boost::system::error_code(e.code().value(),
                                           boost::system::generic_category()),
-                nullptr);
+                nullptr, "");
             return;
           }
         }
@@ -494,7 +498,7 @@ class RunJobHandler
         SPDLOG_ERROR("[0x{}] failed to create log directory '{}'", (void*)this,
                      logdirname);
         cb_(boost::system::error_code(errno, boost::system::generic_category()),
-            nullptr);
+            nullptr, "");
         return;
       }
 
@@ -504,7 +508,7 @@ class RunJobHandler
         SPDLOG_ERROR("[0x{}] failed to create working directory '{}'",
                      (void*)this, unique_name);
         cb_(boost::system::error_code(errno, boost::system::generic_category()),
-            nullptr);
+            nullptr, "");
         return;
       }
 
@@ -559,6 +563,7 @@ class RunJobHandler
       }
 
       workdir_ = workdir;
+      workdirpath_ = unique_name;
       logdir_ = logdirbase;
       loginfoname_ = unique_name + ".json";
       {
@@ -738,9 +743,10 @@ class RunJobHandler
 
    private:
     void Complete(boost::system::error_code ec) {
-      boost::asio::post(ioc_->get_executor(),
-                        [ec, cb = std::move(cb_),
-                         workdir = std::move(workdir_)]() { cb(ec, workdir); });
+      boost::asio::post(
+          ioc_->get_executor(),
+          [ec, cb = std::move(cb_), workdir = std::move(workdir_),
+           workdirpath = workdirpath_]() { cb(ec, workdir, workdirpath); });
     }
 
     std::shared_ptr<DIR> logdir_;
@@ -753,10 +759,11 @@ class RunJobHandler
     wandbox::compiler_trait target_compiler_;
     const cattleshed::RunJobRequest::Start* req_;
     std::function<void(const boost::system::error_code& error,
-                       std::shared_ptr<DIR>)>
+                       std::shared_ptr<DIR>, std::string)>
         cb_;
     const wandbox::server_config* config_;
     std::shared_ptr<DIR> workdir_;
+    std::string workdirpath_;
 
     struct SourceFile {
       std::string name;
@@ -959,7 +966,7 @@ class RunJobHandler
                   const wandbox::server_config& config,
                   const cattleshed::RunJobRequest::Start& req,
                   std::shared_ptr<boost::asio::signal_set> sigs,
-                  std::shared_ptr<DIR> workdir,
+                  std::shared_ptr<DIR> workdir, std::string workdirpath,
                   const wandbox::compiler_trait& target_compiler,
                   std::function<void(const cattleshed::RunJobResponse&)> send)
         : ioc_(ioc),
@@ -967,6 +974,7 @@ class RunJobHandler
           req_(&req),
           sigs_(sigs),
           workdir_(std::move(workdir)),
+          workdirpath_(std::move(workdirpath)),
           target_compiler_(target_compiler),
           send_(std::move(send)),
           kill_timer_(*ioc) {
@@ -1052,6 +1060,43 @@ class RunJobHandler
              cattleshed::RunJobResponse::STDOUT,
              cattleshed::RunJobResponse::STDERR, jail().program_duration}};
       }
+
+      auto handle_error = [&]() {
+        cattleshed::RunJobResponse resp;
+        resp.set_type(cattleshed::RunJobResponse::CONTROL);
+        resp.set_data("Start");
+        send_(resp);
+        resp.set_data("Finish");
+        send_(resp);
+        cb_();
+      };
+
+      // inotify で監視
+      int in_fd = inotify_init();
+      if (in_fd < 0) {
+        SPDLOG_ERROR("failed to inotify_init: {}", errno);
+        handle_error();
+        return;
+      }
+      in_desc_.reset(new boost::asio::posix::stream_descriptor(*ioc_, in_fd));
+      in_wd_ = inotify_add_watch(in_fd, (workdirpath_ + "/store").c_str(),
+                                 IN_CREATE | IN_CLOSE_WRITE);
+      if (in_wd_ < 0) {
+        SPDLOG_ERROR("failed to inotify_add_watch: {}", errno);
+        handle_error();
+        return;
+      }
+
+      SPDLOG_INFO("inotify_add_watch path={}", workdirpath_ + "/store");
+
+      in_event_buf_.resize(8192);
+      in_create_count_ = 0;
+      in_write_bytes_ = 0;
+
+      in_desc_->async_read_some(
+          boost::asio::buffer(in_event_buf_),
+          std::bind(&ProgramRunner::OnNotify, this, std::placeholders::_1,
+                    std::placeholders::_2));
 
       // 開始
       cattleshed::RunJobResponse resp;
@@ -1169,6 +1214,61 @@ class RunJobHandler
       std::static_pointer_cast<StatusForwarder>(pipes_[3])->Kill(SIGKILL);
     }
 
+    void OnNotify(const boost::system::error_code& ec,
+                  std::size_t bytes_transferred) {
+      if (ec) {
+        return;
+      }
+
+      uint8_t* ptr = in_event_buf_.data();
+      while (ptr < in_event_buf_.data() + bytes_transferred) {
+        auto event = (const inotify_event*)ptr;
+        ptr += sizeof(inotify_event) + event->len;
+
+        if (event->wd != in_wd_) {
+          SPDLOG_WARN("Unknown watch descriptor: expected={} actual={}", in_wd_,
+                      event->wd);
+          continue;
+        }
+
+        if (event->mask & IN_CREATE) {
+          SPDLOG_TRACE("[0x{}] IN_CREATE: {}", (void*)this,
+                       std::string(event->name));
+          in_create_count_ += 1;
+          if (in_create_count_ >= 20) {
+            SPDLOG_INFO("[0x{}] Too many create file, send SIGKILL",
+                        (void*)this);
+            std::static_pointer_cast<StatusForwarder>(pipes_[3])->Kill(SIGKILL);
+            in_desc_.reset();
+            return;
+          }
+        }
+        if (event->mask & IN_CLOSE_WRITE) {
+          // ユーザが違うので stat で読めない
+          //SPDLOG_TRACE("[0x{}] IN_CLOSE_WRITE: {}", (void*)this,
+          //             std::string(event->name));
+          //struct stat st;
+          //int r = ::stat((workdirpath_ + "/store/" + event->name).c_str(), &st);
+          //SPDLOG_TRACE("[0x{}] r={}, size={}", (void*)this, r, st.st_size);
+          //if (r < 0) {
+          //  continue;
+          //}
+          //in_write_bytes_ += st.st_size;
+          ////if (in_write_bytes_ >= jail().max_open_files) {
+          //if (in_write_bytes_ >= 2000000) {
+          //  SPDLOG_INFO("[0x{}] Too many write data, send SIGKILL",
+          //              (void*)this);
+          //  std::static_pointer_cast<StatusForwarder>(pipes_[3])->Kill(SIGKILL);
+          //}
+        }
+      }
+
+      in_desc_->async_read_some(
+          boost::asio::buffer(in_event_buf_),
+          std::bind(&ProgramRunner::OnNotify, this, std::placeholders::_1,
+                    std::placeholders::_2));
+    }
+
     void Completed() {
       if (WIFEXITED(laststatus_)) {
         cattleshed::RunJobResponse resp;
@@ -1201,6 +1301,7 @@ class RunJobHandler
     const wandbox::server_config* config_;
     const cattleshed::RunJobRequest::Start* req_;
     std::shared_ptr<DIR> workdir_;
+    std::string workdirpath_;
     std::shared_ptr<boost::asio::signal_set> sigs_;
     wandbox::compiler_trait target_compiler_;
     std::function<void(const cattleshed::RunJobResponse&)> send_;
@@ -1213,6 +1314,13 @@ class RunJobHandler
     CommandType current_;
     std::shared_ptr<WriteLimitCounter> limitter_;
     int laststatus_ = 0;
+
+    // inotify
+    int in_wd_ = 0;
+    std::vector<uint8_t> in_event_buf_;
+    std::shared_ptr<boost::asio::posix::stream_descriptor> in_desc_;
+    int64_t in_create_count_ = 0;
+    int64_t in_write_bytes_ = 0;
   };
 
  private:

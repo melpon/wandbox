@@ -135,5 +135,12 @@ $CURL -f -H "Content-type: application/json" -d @assets/test_iplimit.json  http:
 sleep 4
 $CURL -f -H "Content-type: application/json" -d @assets/test_iplimit.json  http://localhost:3600/api/compile.json
 
+# 大量のファイル書き込みで SIGKILL が発生するか確認
+OUTPUT_SIGNAL=`$CURL -f -H "Content-type: application/json" -d @assets/test_storage.json  http://localhost:3600/api/compile.json | jq -r .signal`
+if [ "$OUTPUT_SIGNAL" != "Killed" ]; then
+  echo "failed test storage" 1>&2
+  exit 1
+fi
+
 echo "e2e test succeeded"
 

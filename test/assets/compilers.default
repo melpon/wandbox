@@ -96,6 +96,32 @@
                 "/bin/bash", 
                 "prog.sh"
             ]
+        },
+        {
+            "templates": [], 
+            "compiler-option-raw": false, 
+            "version-command": [
+                "/usr/bin/python3", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "switches": [], 
+            "display-compile-command": "python3 prog.py", 
+            "initial-checked": [], 
+            "jail-name": "test", 
+            "display-name": "CPython HEAD", 
+            "runtime-option-raw": true, 
+            "compile-command": [
+                "/bin/true"
+            ], 
+            "name": "cpython", 
+            "language": "Python3", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "run-command": [
+                "/usr/bin/python3", 
+                "prog.py"
+            ]
         }
     ]
 }
