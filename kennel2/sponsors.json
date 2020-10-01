@@ -579,7 +579,7 @@
     }
   , { "name": "Tommy6"
     , "url": ""
-    , "due_date": "2020-08-27T23:59:59+09:00"
+    , "due_date": "2021-10-02T23:59:59+09:00"
     }
   , { "name": "イズカワタカノブ"
     , "url": "https://twitter.com/soundkitchen"
@@ -640,6 +640,10 @@
   , { "name": "ガチKGB"
     , "url": ""
     , "due_date": "2021-08-02T23:59:59+09:00"
+    }
+  , { "name": "三重野賢人"
+    , "url": "https://twitter.com/djann9071"
+    , "due_date": "2021-10-02T23:59:59+09:00"
     }
   ]
 }
