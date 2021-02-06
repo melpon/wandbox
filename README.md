@@ -48,6 +48,5 @@ Boost Software License 1.0
 
 ### 寄付は受け付けていますか？
 
-受け付けています。 [Wandboxの企業・個人スポンサーを募集しています](https://gist.github.com/melpon/8f5d7a8e991ed466d09cf887bd8d92ce)
-
-(どこかのタイミングで GitHub Sponsors に移行したい)
+現在は受け付けていません。
+どこかのタイミングで GitHub Sponsors を試してみる予定です。
