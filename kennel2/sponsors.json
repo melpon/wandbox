@@ -5,7 +5,7 @@
     }
   , { "name": "株式会社フィックスターズ"
     , "url": "http://www.fixstars.com/"
-    , "due_date": "2021-03-25T23:59:59+09:00"
+    , "due_date": "2022-03-25T23:59:59+09:00"
     }
   , { "name": "株式会社アカツキ"
     , "url": "https://aktsk.jp/"
@@ -231,7 +231,7 @@
     }
   , { "name": "Siv3D"
     , "url": "https://siv3d.github.io/"
-    , "due_date": "2021-03-16T23:59:59+09:00"
+    , "due_date": "2023-03-16T23:59:59+09:00"
     }
   , { "name": "s.t."
     , "url": "https://twitter.com/simizut22"
@@ -643,7 +643,7 @@
     }
   , { "name": "三重野賢人"
     , "url": "https://twitter.com/djann9071"
-    , "due_date": "2021-10-02T23:59:59+09:00"
+    , "due_date": "2022-03-05T23:59:59+09:00"
     }
   ]
 }
