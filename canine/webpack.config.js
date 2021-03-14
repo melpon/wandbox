@@ -79,7 +79,7 @@ var config = {
       "process.env.WANDBOX_URL_PREFIX": JSON.stringify(
         process.env.NODE_ENV === undefined ||
           process.env.NODE_ENV === "development"
-          ? "https://wandbox.org"
+          ? "https://staging.wandbox.org"
           : // 空文字にしておけば /api/list.json みたいになる
             ""
       ),
