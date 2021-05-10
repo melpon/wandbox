@@ -197,7 +197,7 @@ echo $GRPC_VERSION > $GRPC_VERSION_FILE
 # boost
 if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_filesystem.a ]; then
   _VERSION_UNDERSCORE=${BOOST_VERSION//./_}
-  _URL=https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${_VERSION_UNDERSCORE}.tar.gz
+  _URL=https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source/boost_${_VERSION_UNDERSCORE}.tar.gz
   _FILE=$SOURCE_DIR/boost_${_VERSION_UNDERSCORE}.tar.gz
   if [ ! -e $_FILE ]; then
     echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
