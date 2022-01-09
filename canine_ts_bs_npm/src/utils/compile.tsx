@@ -53,7 +53,7 @@ export function compile(
     return;
   }
 
-  fetch(`${process.env.NEXT_PUBLIC_WANDBOX_URL_PREFIX}/api/compile.ndjson`, {
+  fetch(`${process.env.WANDBOX_URL_PREFIX}/api/compile.ndjson`, {
     method: "POST",
     body: JSON.stringify(body),
     mode: "cors",

@@ -1,4 +1,5 @@
-import React, { createContext, useContext } from "react";
+import React from "react";
+import { createContainer } from "unstated-next";
 import { normalizePath } from "~/utils/normalizePath";
 
 export interface EditorSourceData {
@@ -72,7 +73,7 @@ function useSettings(): EditorSettingsData {
   );
 }
 
-function useEditorContextState(): EditorContextState {
+function useEditorContext(): EditorContextState {
   const [currentTab, setCurrentTab] = React.useState<number>(0);
   const [sources, setSources] = React.useState<EditorSourceData[]>([
     { filename: null, text: "" },
@@ -164,10 +165,5 @@ function useEditorContextState(): EditorContextState {
   };
 }
 
-const EditorContext = createContext<EditorContextState | null>(null);
-
-function useEditorContext(): EditorContextState {
-  return useContext(EditorContext) as EditorContextState;
-}
-
-export { EditorContext, useEditorContextState, useEditorContext };
+const EditorContext = createContainer(useEditorContext);
+export { EditorContext };

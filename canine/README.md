@@ -1,65 +1,34 @@
-# Canine
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-Wandbox のフロントエンドです。
+## Getting Started
 
-## 方針
+First, run the development server:
 
-### 言語とライブラリ
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-TypeScript + React + Bootstrap で頑張る。
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-拡張子は .ts か .tsx。.ts で済むところを .tsx にしてても気にしないことにする。
+You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
-### 推奨エディタ
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.tsx`.
 
-VS Code。以下のプラグインを入れておく。
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
-- Debugger for Chrome
-- ESLint
+## Learn More
 
-このディレクトリをルートとして開けば、VS Code のプラグイン設定が入った状態で動作する。
+To learn more about Next.js, take a look at the following resources:
 
-### コンポーネントを Atomic Design っぽく分ける
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-`components/` 以下は Atomic Design みたいな感じで使う
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-- `atoms/` - Atomic Design の Atom と同じ意味
-- `molecules/` - Atom やライブラリの組み合わせて汎用的に使えそうなコンポーネント。アプリケーションに依存しない
-- `organisms/` - ページ内で利用するコンポーネント。アプリケーション依存で構わない。
-- `pages/` - ルーターによって分けられた各ページのルート
-- `top/`  - ルートコンポーネントや、ルーターによって分けられる前の全てのページで共通に使用されるコンポーネント
+## Deploy on Vercel
 
-### default export
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-既存の default export されたライブラリを利用するのは問題ないが、こちらでは default export するスクリプトを書かないこと。
-[eslint-plugin-import](https://github.com/benmosher/eslint-plugin-import) に default export を禁止するプラグインがあるが、依存を増やしたくないのでやめておく。
-
-## TODO
-
-公開まで必須なもの:
-
-- [x] パーマリンク
-- [x] パーマリンク時のreadonly化
-- [x] パーマリンクから編集画面への遷移
-- [x] 見た目を整える
-- [x] エディタ設定の保存
-- [x] コードの自動保存
-- [x] デプロイの仕組みを作る
-- [ ] 標準入力
-- [ ] 出力ウィンドウの設定と保存
-- [ ] テンプレートのロード
-- [ ] GitHub連携を作る
-- [ ] ユーザ用のページを作る
-- [ ] Twitterカード
-- [ ] タイトルと詳細の入力
-- [ ] スポンサー表示
-
-後でやりたいもの:
-
-- [ ] i18n
-- [ ] HEAD コンパイラのビルド日時
-- [ ] お知らせ
-- [ ] 標準入力とrawコンパイルオプションのバイナリ入力
-- [ ] 各設定の保存/ロード
-- [ ] 外部リンク（GitHub, エディタなど）
-- [ ] コンパイラ要求用フォーム
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.

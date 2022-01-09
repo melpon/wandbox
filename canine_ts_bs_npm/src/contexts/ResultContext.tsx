@@ -1,4 +1,5 @@
-import React, { createContext, useContext } from "react";
+import React from "react";
+import { createContainer } from "unstated-next";
 
 type ResultType =
   | "Control"
@@ -22,7 +23,7 @@ export interface ResultContextState {
   setResults: (results: ResultData[]) => void;
 }
 
-function useResultContextState(): ResultContextState {
+function useResultContext(): ResultContextState {
   const [results, setResults] = React.useState<ResultData[]>([]);
   const clear = React.useCallback((): void => setResults([]), []);
   const add = React.useCallback((result): void => {
@@ -37,10 +38,5 @@ function useResultContextState(): ResultContextState {
   };
 }
 
-const ResultContext = createContext<ResultContextState | null>(null);
-
-function useResultContext(): ResultContextState {
-  return useContext(ResultContext) as ResultContextState;
-}
-
-export { ResultContext, useResultContextState, useResultContext };
+const ResultContext = createContainer(useResultContext);
+export { ResultContext };

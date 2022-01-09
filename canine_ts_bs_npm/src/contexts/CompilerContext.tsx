@@ -1,4 +1,5 @@
-import React, { createContext, useContext } from "react";
+import React from "react";
+import { createContainer } from "unstated-next";
 
 export interface CompilerContextState {
   currentLanguage: string;
@@ -15,7 +16,7 @@ export interface CompilerContextState {
   setRuntimeOptionRaw: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function useCompilerContextState(): CompilerContextState {
+function useCompilerContext(): CompilerContextState {
   const [currentLanguage, setCurrentLanguage] = React.useState<string>("");
   const [currentCompilerName, setCurrentCompilerName] = React.useState<string>(
     ""
@@ -39,10 +40,5 @@ function useCompilerContextState(): CompilerContextState {
   };
 }
 
-const CompilerContext = createContext<CompilerContextState | null>(null);
-
-function useCompilerContext() : CompilerContextState {
-  return useContext(CompilerContext) as CompilerContextState;
-}
-
-export { CompilerContext, useCompilerContextState, useCompilerContext};
+const CompilerContext = createContainer(useCompilerContext);
+export { CompilerContext };
