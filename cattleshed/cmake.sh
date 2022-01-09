@@ -18,7 +18,7 @@ CMAKE_OPTS=""
 while [ $# -ne 0 ]; do
   case "$1" in
     "--help" )
-      echo "$0 [--tsan] [--asan] [--staging] [--production] [--prefix <dir>] [--help]"
+      echo "$0 [--tsan] [--asan] [--staging] [--master] [--prefix <dir>] [--help]"
       exit 0
       ;;
 
@@ -27,14 +27,14 @@ while [ $# -ne 0 ]; do
       shift 1
       ;;
 
-    "--staging" )
+    "--develop" )
       CMAKE_OPTS=" \
-        -DCATTLESHED_STOREDIR=/tmp/cattleshed-staging-log
-        -DCATTLESHED_BASEDIR=/tmp/cattleshed-staging
+        -DCATTLESHED_STOREDIR=/tmp/cattleshed-develop-log
+        -DCATTLESHED_BASEDIR=/tmp/cattleshed-develop
         -DCATTLESHED_LISTEN_PORT=50052
       "
       ;;
-    "--production" )
+    "--master" )
       CMAKE_OPTS=" \
       "
       ;;

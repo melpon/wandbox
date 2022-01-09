@@ -18,7 +18,7 @@ CMAKE_OPTS=""
 while [ $# -ne 0 ]; do
   case "$1" in
     "--help" )
-      echo "$0 [--tsan] [--asan] [--staging] [--production] [--prefix <dir>] [--help]"
+      echo "$0 [--tsan] [--asan] [--develop] [--master] [--prefix <dir>] [--help]"
       exit 0
       ;;
 
@@ -27,16 +27,16 @@ while [ $# -ne 0 ]; do
       shift 1
       ;;
 
-    "--staging" )
+    "--develop" )
       CMAKE_OPTS=" \
         -DKENNEL_GOOGLEANALYTICS=UA-56896607-3 \
         -DKENNEL_GITHUBCLIENT=f9d429d939d997e6b08e \
-        -DKENNEL_DOMAIN=staging.wandbox.org \
+        -DKENNEL_DOMAIN=develop.wandbox.org \
         -DKENNEL_CATTLESHED_PORT=50052 \
         -DKENNEL_SERVICE_PORT=3501 \
       "
       ;;
-    "--production" )
+    "--master" )
       CMAKE_OPTS=" \
         -DKENNEL_GOOGLEANALYTICS=UA-56896607-3 \
         -DKENNEL_GITHUBCLIENT=f9d429d939d997e6b08e \

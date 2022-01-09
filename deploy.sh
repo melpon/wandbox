@@ -3,7 +3,7 @@
 PROG=$0
 
 function show_help() {
-  echo "$PROG <remote> <kennel | cattleshed> <staging | production>"
+  echo "$PROG <remote> <kennel | cattleshed> <develop | master>"
 }
 
 if [ $# -lt 3 ]; then
@@ -25,7 +25,7 @@ if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
   exit 1
 fi
 
-if [ "$ENV" != "staging" -a "$ENV" != "production" ]; then
+if [ "$ENV" != "develop" -a "$ENV" != "master" ]; then
   show_help
   exit 1
 fi
@@ -46,7 +46,7 @@ ssh $REMOTE /bin/bash -c "
         # データ置き場を作る
         mkdir -p var/lib/kennel
         # セッションキー
-        if [ "$ENV" = "staging" ]; then
+        if [ "$ENV" = "develop" ]; then
           echo "0123456789abcdef0123456789abcdef" > var/lib/kennel/.session.key
         fi
         chown -R wandbox:wandbox var/
