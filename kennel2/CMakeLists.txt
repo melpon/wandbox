@@ -109,8 +109,9 @@ add_custom_command(
   OUTPUT
     ${SKIN_KENNEL}
   COMMAND
-    $<TARGET_FILE:CppCMS::cppcms_tmpl_cc>
+    python2
   ARGS
+    $<TARGET_FILE:CppCMS::cppcms_tmpl_cc>
     ${_SKIN_KENNEL_SOURCES}
     -o ${SKIN_KENNEL}
   DEPENDS
