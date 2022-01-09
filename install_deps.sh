@@ -241,7 +241,7 @@ if [ $ICU_CHANGED -eq 1 -o ! -e $INSTALL_DIR/icu/lib/libicudata.a ]; then
   rm -rf $BUILD_DIR/icu-build
   mkdir $BUILD_DIR/icu-build
   pushd $BUILD_DIR/icu-build
-    $SOURCE_DIR/icu/source/configure \
+    CC=gcc CXX=g++ $SOURCE_DIR/icu/source/configure \
       --prefix=$INSTALL_DIR/icu \
       --disable-tests \
       --disable-samples \
