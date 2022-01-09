@@ -3,8 +3,8 @@ Description=Backend of Sandbox Compiler
 
 [Service]
 Type=simple
-User=cattleshed
-Group=cattleshed
+User=ubuntu
+Group=ubuntu
 WorkingDirectory=@CMAKE_INSTALL_PREFIX@
 Restart=on-failure
 ExecStart=@CATTLESHED_BINDIR@/cattleshed -c @CATTLESHED_SYSCONFDIR@/cattleshed.conf @CATTLESHED_SERVICE_ARGS@

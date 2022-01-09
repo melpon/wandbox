@@ -49,7 +49,7 @@ ssh $REMOTE /bin/bash -c "
         if [ "$ENV" = "develop" ]; then
           echo "0123456789abcdef0123456789abcdef" > var/lib/kennel/.session.key
         fi
-        chown -R wandbox:wandbox var/
+        chown -R ubuntu:ubuntu var/
       fi
     popd
   popd

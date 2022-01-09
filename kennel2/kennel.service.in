@@ -4,8 +4,8 @@ Description=Frontend of Sandbox Compiler
 [Service]
 ExecStart=@CMAKE_INSTALL_PREFIX@/bin/kennel -c @CMAKE_INSTALL_PREFIX@/etc/kennel.json
 Restart=on-failure
-User=wandbox
-Group=wandbox
+User=ubuntu
+Group=ubuntu
 
 [Install]
 WantedBy=multi-user.target
