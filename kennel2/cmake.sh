@@ -18,7 +18,7 @@ CMAKE_OPTS=""
 while [ $# -ne 0 ]; do
   case "$1" in
     "--help" )
-      echo "$0 [--tsan] [--asan] [--staging] [--production] [--prefix <dir>] [--help]"
+      echo "$0 [--tsan] [--asan] [--develop] [--master] [--prefix <dir>] [--help]"
       exit 0
       ;;
 
@@ -27,16 +27,16 @@ while [ $# -ne 0 ]; do
       shift 1
       ;;
 
-    "--staging" )
+    "--develop" )
       CMAKE_OPTS=" \
         -DKENNEL_GOOGLEANALYTICS=UA-56896607-3 \
         -DKENNEL_GITHUBCLIENT=f9d429d939d997e6b08e \
-        -DKENNEL_DOMAIN=staging.wandbox.org \
+        -DKENNEL_DOMAIN=develop.wandbox.org \
         -DKENNEL_CATTLESHED_PORT=50052 \
         -DKENNEL_SERVICE_PORT=3501 \
       "
       ;;
-    "--production" )
+    "--master" )
       CMAKE_OPTS=" \
         -DKENNEL_GOOGLEANALYTICS=UA-56896607-3 \
         -DKENNEL_GITHUBCLIENT=f9d429d939d997e6b08e \
@@ -71,6 +71,7 @@ pushd $BUILD_DIR
     -DSPDLOG_ROOT_DIR="$INSTALL_DIR/spdlog" \
     -DCLI11_ROOT_DIR="$INSTALL_DIR/CLI11" \
     -DGGRPC_ROOT_DIR="$INSTALL_DIR/ggrpc" \
+    -DICU_ROOT="$INSTALL_DIR/icu" \
     -DCMAKE_PREFIX_PATH="$INSTALL_DIR/boost;$INSTALL_DIR/cppcms;$INSTALL_DIR/cppdb;$INSTALL_DIR/curl;$INSTALL_DIR/sqlite3;$INSTALL_DIR/pcre;$INSTALL_DIR/icu;$GRPC_DIR" \
     -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX \
     -DCMAKE_MODULE_PATH=$MODULE_PATH \

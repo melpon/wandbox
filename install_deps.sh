@@ -241,7 +241,7 @@ if [ $ICU_CHANGED -eq 1 -o ! -e $INSTALL_DIR/icu/lib/libicudata.a ]; then
   rm -rf $BUILD_DIR/icu-build
   mkdir $BUILD_DIR/icu-build
   pushd $BUILD_DIR/icu-build
-    $SOURCE_DIR/icu/source/configure \
+    CC=gcc CXX=g++ $SOURCE_DIR/icu/source/configure \
       --prefix=$INSTALL_DIR/icu \
       --disable-tests \
       --disable-samples \
@@ -255,7 +255,7 @@ echo $ICU_VERSION > $ICU_VERSION_FILE
 
 # pcre
 if [ $PCRE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/pcre/lib/libpcre.a ]; then
-  _URL=https://ftp.pcre.org/pub/pcre/pcre-$PCRE_VERSION.zip
+  _URL=https://jaist.dl.sourceforge.net/project/pcre/pcre/$PCRE_VERSION/pcre-$PCRE_VERSION.tar.gz
   _FILE=$SOURCE_DIR/pcre-$PCRE_VERSION.zip
   if [ ! -e $_FILE ]; then
     echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake

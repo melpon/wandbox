@@ -3,7 +3,7 @@
 PROG=$0
 
 function show_help() {
-  echo "$PROG <kennel | cattleshed> <staging | production>"
+  echo "$PROG <kennel | cattleshed> <develop | master>"
 }
 
 if [ $# -lt 2 ]; then
@@ -24,12 +24,12 @@ if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
   exit 1
 fi
 
-if [ "$ENV" != "staging" -a "$ENV" != "production" ]; then
+if [ "$ENV" != "develop" -a "$ENV" != "master" ]; then
   show_help
   exit 1
 fi
 
-PREFIX="/opt/wandbox/$APP-$ENV"
+PREFIX="/opt/wandbox-data/release/$APP-$ENV"
 
 ./install_deps.sh
 

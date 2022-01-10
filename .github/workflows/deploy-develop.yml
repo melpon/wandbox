@@ -1,0 +1,54 @@
+name: Deploy develop.wandbox.org
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Register SSH key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p $HOME/.ssh
+        echo "$SSH_PRIVATE_KEY" > $HOME/.ssh/id_ed25519
+        chmod 600 $HOME/.ssh/id_ed25519
+    - name: Add SSH config
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        echo "Host wandbox" >> $HOME/.ssh/config
+        echo "    HostName $SSH_HOST" >> $HOME/.ssh/config
+        echo "    User $SSH_USER" >> $HOME/.ssh/config
+        echo "    ServerAliveInterval 60" >> $HOME/.ssh/config
+        echo "    TCPKeepAlive yes" >> $HOME/.ssh/config
+        ssh-keyscan -H $SSH_HOST >> $HOME/.ssh/known_hosts
+    - name: apt install
+      run: sudo apt-get install -y libcap-dev
+    - name: Get cached tools
+      id: cache-tools
+      uses: actions/cache@v2
+      with:
+        path: _install
+        key: install-deps
+    - name: Install deps
+      run: ./install_deps.sh --release
+    - name: Package cattleshed
+      run: |
+        ./package.sh cattleshed develop
+    - name: Package kennel
+      run: |
+        ./package.sh kennel develop
+    - name: Deploy cattleshed to develop.wandbox.org
+      run: |
+        ./deploy.sh wandbox cattleshed develop
+    - name: Deploy kennel to develop.wandbox.org
+      run: |
+        ./deploy.sh wandbox kennel develop

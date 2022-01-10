@@ -46,7 +46,7 @@ if(NOT KENNEL_GITHUBCLIENT)
 endif()
 
 if(NOT KENNEL_CATTLESHED_HOST)
-  set(KENNEL_CATTLESHED_HOST "153.121.40.132")
+  set(KENNEL_CATTLESHED_HOST "127.0.0.1")
 endif()
 
 if(NOT KENNEL_CATTLESHED_PORT)
@@ -109,8 +109,9 @@ add_custom_command(
   OUTPUT
     ${SKIN_KENNEL}
   COMMAND
-    $<TARGET_FILE:CppCMS::cppcms_tmpl_cc>
+    python2
   ARGS
+    $<TARGET_FILE:CppCMS::cppcms_tmpl_cc>
     ${_SKIN_KENNEL_SOURCES}
     -o ${SKIN_KENNEL}
   DEPENDS
