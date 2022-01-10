@@ -33,8 +33,8 @@ fi
 scp $PACKAGE_DIR/$APP-$ENV.tar.gz $REMOTE:/tmp/$APP-$ENV.tar.gz
 ssh $REMOTE /bin/bash -c "
   set -ex
-  mkdir -p /opt/wandbox
-  pushd /opt/wandbox
+  mkdir -p /opt/wandbox-data/release
+  pushd /opt/wandbox-data/release
     tar xf /tmp/$APP-$ENV.tar.gz
     rm /tmp/$APP-$ENV.tar.gz
 
@@ -53,7 +53,7 @@ ssh $REMOTE /bin/bash -c "
       fi
     popd
   popd
-  cp /opt/wandbox/$APP-$ENV/etc/$APP.service /etc/systemd/system/$APP-$ENV.service
+  cp /opt/wandbox-data/release/$APP-$ENV/etc/$APP.service /etc/systemd/system/$APP-$ENV.service
   systemctl enable $APP-$ENV
   systemctl restart $APP-$ENV
 "

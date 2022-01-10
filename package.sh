@@ -29,7 +29,7 @@ if [ "$ENV" != "develop" -a "$ENV" != "master" ]; then
   exit 1
 fi
 
-PREFIX="/opt/wandbox/$APP-$ENV"
+PREFIX="/opt/wandbox-data/release/$APP-$ENV"
 
 ./install_deps.sh
 

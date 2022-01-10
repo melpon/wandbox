@@ -20,34 +20,35 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > $HOME/.ssh/id_ed25519
         chmod 600 $HOME/.ssh/id_ed25519
     - name: Add SSH config
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
       run: |
-        echo "Host kennel-root" >> $HOME/.ssh/config
-        echo "    HostName 49.212.130.73" >> $HOME/.ssh/config
-        echo "    User root" >> $HOME/.ssh/config
-        ssh-keyscan -H 49.212.130.73 >> $HOME/.ssh/known_hosts
-        echo "Host cattleshed-root" >> $HOME/.ssh/config
-        echo "    HostName 153.121.40.132" >> $HOME/.ssh/config
-        echo "    User root" >> $HOME/.ssh/config
-        ssh-keyscan -H 153.121.40.132 >> $HOME/.ssh/known_hosts
+        echo "Host wandbox" >> $HOME/.ssh/config
+        echo "    HostName $SSH_HOST" >> $HOME/.ssh/config
+        echo "    User $SSH_USER" >> $HOME/.ssh/config
+        echo "    ServerAliveInterval 60" >> $HOME/.ssh/config
+        echo "    TCPKeepAlive yes" >> $HOME/.ssh/config
+        ssh-keyscan -H $SSH_HOST >> $HOME/.ssh/known_hosts
     - name: apt install
       run: sudo apt-get install -y libcap-dev
     - name: Get cached tools
       id: cache-tools
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: _install
-        key: install-deps-0001
+        key: install-deps
     - name: Install deps
       run: ./install_deps.sh --release
     - name: Package cattleshed
       run: |
-        ./package.sh cattleshed production
+        ./package.sh cattleshed master
     - name: Package kennel
       run: |
-        ./package.sh kennel production
+        ./package.sh kennel master
     - name: Deploy cattleshed to wandbox.org
       run: |
-        ./deploy.sh cattleshed-root cattleshed production
+        ./deploy.sh wandbox cattleshed master
     - name: Deploy kennel to wandbox.org
       run: |
-        ./deploy.sh kennel-root kennel production
+        ./deploy.sh wandbox kennel master
