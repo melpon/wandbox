@@ -39,7 +39,7 @@ if(NOT CATTLESHED_LISTEN_PORT)
 endif()
 
 if(NOT CATTLESHED_SERVICE_ARGS)
-  set(CATTLESHED_SERVICE_ARGS "-c /opt/wandbox/cattleshed-conf/compilers.default")
+  set(CATTLESHED_SERVICE_ARGS "-c /opt/wandbox-data/release/cattleshed-conf/compilers.default")
 endif()
 
 # --- cattleshed.pb.cc などの生成
