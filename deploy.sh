@@ -3,7 +3,11 @@
 PROG=$0
 
 function show_help() {
+<<<<<<< HEAD
   echo "$PROG <remote> <kennel | cattleshed> <develop | master>"
+=======
+  echo "$PROG <remote> <kennel | cattleshed | canine> <staging | production>"
+>>>>>>> canine
 }
 
 if [ $# -lt 3 ]; then
@@ -20,7 +24,7 @@ PACKAGE_DIR="`pwd`/_package"
 
 set -ex
 
-if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
+if [ "$APP" != "kennel" -a "$APP" != "cattleshed" -a "$APP" != "canine" ]; then
   show_help
   exit 1
 fi

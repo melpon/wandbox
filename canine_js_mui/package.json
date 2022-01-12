@@ -1,0 +1,70 @@
+{
+  "name": "canine",
+  "version": "0.0.1",
+  "main": "src/main.js",
+  "private": true,
+  "scripts": {
+    "start": "webpack-serve --config webpack.config.js",
+    "build:dev": "webpack --mode development",
+    "build": "NODE_ENV=production webpack --mode production",
+    "lint": "eslint src",
+    "flow": "flow",
+    "test": "jest",
+    "test.watch": "jest --watch"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0",
+    "@babel/preset-env": "7.0.0",
+    "@babel/preset-flow": "7.0.0",
+    "@babel/preset-react": "7.0.0",
+    "babel-eslint": "^8.2.6",
+    "babel-jest": "^23.4.2",
+    "babel-loader": "^8.0.0",
+    "connect-history-api-fallback": "^1.5.0",
+    "css-loader": "^1.0.0",
+    "eslint": "^5.4.0",
+    "eslint-config-prettier": "^2.10.0",
+    "eslint-plugin-prettier": "^2.6.2",
+    "eslint-plugin-react": "^7.11.1",
+    "fetch-mock": "^6.5.2",
+    "flow-bin": "^0.77.0",
+    "jest": "^23.5.0",
+    "koa-connect": "^2.0.1",
+    "prettier": "^1.14.2",
+    "react-test-renderer": "^16.4.2",
+    "redux-mock-store": "^1.5.3",
+    "style-loader": "^0.21.0",
+    "updates": "^4.2.1",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-serve": "^2.0.2"
+  },
+  "dependencies": {
+    "@material-ui/core": "^1.5.1",
+    "@material-ui/icons": "^2.0.3",
+    "@reach/router": "^1.1.1",
+    "ansi_up": "^3.0.0",
+    "can-ndjson-stream": "^1.0.0",
+    "codemirror": "^5.40.0",
+    "codemirror-mode-elixir": "^1.1.1",
+    "core-js": "^2.5.7",
+    "moment": "^2.22.2",
+    "moment-timezone": "^0.5.21",
+    "react": "^16.4.2",
+    "react-codemirror2": "^5.1.0",
+    "react-dom": "^16.4.2",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-logger": "^3.0.6",
+    "redux-promise": "^0.6.0",
+    "regenerator-runtime": "^0.12.1"
+  },
+  "jest": {
+    "moduleDirectories": [
+      "src",
+      "node_modules"
+    ]
+  }
+}

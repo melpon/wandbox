@@ -1,0 +1,32 @@
+{
+  "name": "canine",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && next export",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@codemirror/basic-setup": "^0.18.2",
+    "@codemirror/lang-cpp": "^0.18.0",
+    "@codemirror/theme-one-dark": "^0.18.1",
+    "bootstrap": "4.6.0",
+    "can-ndjson-stream": "^1.0.2",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "next": "11.0.1",
+    "react": "17.0.2",
+    "react-bootstrap": "^1.6.1",
+    "react-bootstrap-icons": "^1.5.0",
+    "react-dom": "17.0.2",
+    "sass": "^1.35.1"
+  },
+  "devDependencies": {
+    "@types/react": "17.0.11",
+    "eslint": "7.29.0",
+    "eslint-config-next": "11.0.1",
+    "typescript": "4.3.4"
+  }
+}
