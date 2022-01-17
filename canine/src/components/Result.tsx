@@ -1,7 +1,10 @@
 import React from "react";
-import { useContainer } from "unstated-next";
 
-import { ResultContext, ResultData } from "~/contexts/ResultContext";
+import {
+  ResultContext,
+  ResultData,
+  useResultContext,
+} from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
 
 interface ResultProps {
@@ -10,7 +13,7 @@ interface ResultProps {
 
 const Result: React.FC<ResultProps> = (props): React.ReactElement => {
   const { permlinkData } = props;
-  const rs = useContainer(ResultContext);
+  const rs = useResultContext();
   const results = permlinkData === null ? rs.results : permlinkData.results;
   const mergedResults: ResultData[] = [];
   let preview: ResultData | null = null;
@@ -48,17 +51,15 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement => {
 
   return (
     <code>
-      {mergedResults.map(
-        (r, index): React.ReactElement => {
-          const className = typeClassNames[r.type];
+      {mergedResults.map((r, index): React.ReactElement => {
+        const className = typeClassNames[r.type];
 
-          return (
-            <pre key={index} className={className}>
-              {r.data}
-            </pre>
-          );
-        }
-      )}
+        return (
+          <pre key={index} className={className}>
+            {r.data}
+          </pre>
+        );
+      })}
     </code>
   );
 };

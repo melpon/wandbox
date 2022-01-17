@@ -73,8 +73,8 @@ const codeMirrorDefaultExtensions: Extension[] = [
   rectangularSelection(),
   highlightActiveLine(),
   highlightSelectionMatches(),
-  oneDarkTheme,
-  oneDarkHighlightStyle,
+  //oneDarkTheme,
+  //oneDarkHighlightStyle,
   //cpp(),
 ];
 
@@ -104,6 +104,7 @@ export interface CodeMirror6Option {
 }
 
 export interface CodeMirror6Props {
+  className?: string;
   initialText: string;
   option: CodeMirror6Option;
   onViewCreated: (view: EditorView) => void;
@@ -131,7 +132,7 @@ function optionToExtension(option: CodeMirror6Option): Extension[] {
 }
 
 const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
-  const { initialText, option, onViewCreated } = props;
+  const { className, initialText, option, onViewCreated } = props;
 
   const ref = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<EditorView | null>(null);
@@ -165,7 +166,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
     });
   }, [option]);
 
-  return <div ref={ref}></div>;
+  return <div className={className} ref={ref}></div>;
 };
 
 export { CodeMirror6 };

@@ -15,6 +15,7 @@ import { ResultContextState } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useCompile } from "~/hooks/compile";
+import { CodeMirror6 } from "../CodeMirror6";
 
 interface CodeEditorProps {
   editor: EditorContextState;
@@ -28,6 +29,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   const { editor, compiler, compilerList, result, permlinkData } = props;
   const { currentLanguage, currentCompilerName } = compiler;
 
+  /*
   const insertTabSpace = React.useCallback((cm: CodeMirrorType): void => {
     const cursor = cm.getCursor()["ch"];
     const indentUnit = cm.getOption("indentUnit");
@@ -121,6 +123,22 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
         ...options,
       }}
       onBeforeChange={onBeforeChange}
+    />
+  );
+  */
+  return (
+    <CodeMirror6
+      className="wb-editor flex-grow-1"
+      initialText="Hello"
+      option={{
+        tabSize: parseInt(editor.settings.tabWidth, 10),
+        indentUnit:
+          editor.settings.tabKey !== "tab"
+            ? parseInt(editor.settings.tabKey, 10)
+            : undefined,
+        indentWithTabs: editor.settings.tabKey === "tab",
+      }}
+      onViewCreated={() => {}}
     />
   );
 };

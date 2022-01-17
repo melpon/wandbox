@@ -3,7 +3,7 @@ import { normalizePath } from "~/utils/normalizePath";
 
 export interface EditorSourceData {
   filename: string | null;
-  text: string;
+  id: string;
 }
 
 export type EditorType = "default" | "vim" | "emacs";
@@ -24,16 +24,20 @@ export interface EditorSettingsData {
 }
 
 export interface EditorContextState {
+  title: string;
+  description: string;
   currentTab: number;
   sources: EditorSourceData[];
   stdin: string;
   settings: EditorSettingsData;
 
+  setTitle: React.Dispatch<React.SetStateAction<string>>;
+  setDescription: React.Dispatch<React.SetStateAction<string>>;
   setCurrentTab: React.Dispatch<React.SetStateAction<number>>;
   addSource: (filename: string) => number;
   removeSource: (tab: number) => void;
+  getId: (tab: number) => string;
   setSources: (sources: EditorSourceData[]) => void;
-  setText: (tab: number, text: string) => void;
   setFilename: (tab: number, filename: string) => void;
   setStdin: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -73,11 +77,14 @@ function useSettings(): EditorSettingsData {
 }
 
 function useEditorContextState(): EditorContextState {
+  const [title, setTitle] = React.useState<string>("");
+  const [description, setDescription] = React.useState<string>("");
   const [currentTab, setCurrentTab] = React.useState<number>(0);
   const [sources, setSources] = React.useState<EditorSourceData[]>([
-    { filename: null, text: "" },
+    { filename: null, id: "wb-editor-main" },
   ]);
   const [stdin, setStdin] = React.useState<string>("");
+  const [counter, setCounter] = React.useState<number>(0);
   const settings = useSettings();
 
   const addSource = React.useCallback(
@@ -93,11 +100,15 @@ function useEditorContextState(): EditorContextState {
         resolvedFilename = `${filename}-${n}`;
         n += 1;
       }
-      const newSources = [...sources, { filename: resolvedFilename, text: "" }];
+      const newSources = [
+        ...sources,
+        { filename: resolvedFilename, id: `wb-editor-${counter}` },
+      ];
       setSources(newSources);
+      setCounter(counter + 1);
       return sources.length;
     },
-    [sources]
+    [sources, counter]
   );
   const removeSource = React.useCallback(
     (tab: number): void => {
@@ -117,14 +128,13 @@ function useEditorContextState(): EditorContextState {
     [currentTab, sources]
   );
 
-  const setText = React.useCallback(
-    (tab: number, text: string): void => {
-      const newSources = [...sources];
-      newSources[tab] = { ...newSources[tab], text: text };
-      setSources(newSources);
+  const getId = React.useCallback(
+    (tab: number): string => {
+      return sources[tab].id;
     },
     [sources]
   );
+
   const setFilename = React.useCallback(
     (tab: number, filename: string): void => {
       // デフォルトタブは名前変更できない
@@ -150,15 +160,19 @@ function useEditorContextState(): EditorContextState {
   );
 
   return {
+    title,
+    description,
     currentTab,
     sources,
     stdin,
     settings,
+    setTitle,
+    setDescription,
     setCurrentTab,
     addSource,
     removeSource,
     setSources,
-    setText,
+    getId,
     setFilename,
     setStdin,
   };

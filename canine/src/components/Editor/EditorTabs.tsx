@@ -1,7 +1,7 @@
 import React from "react";
 import Nav from "react-bootstrap/Nav";
+import { FileEarmarkPlus } from "react-bootstrap-icons";
 
-import { FileEarmarkPlus } from "~/components/atoms/icons";
 import { EditorContextState } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
@@ -120,29 +120,31 @@ const EditorTabs: React.FC<EditorTabsProps> = (
   );
 
   return (
-    <Nav variant="tabs" activeKey={`wb-editor-${editor.currentTab}`}>
-      {sources.map(
-        (source, index): React.ReactElement => {
-          return (
-            <EditorTab
-              key={index}
-              {...{
-                index,
-                source,
-                readonly: permlinkData !== null,
-                renamingSource: renamingSources[index] || null,
-                active: index === editor.currentTab,
-                onChangeTabs,
-                onClickTabEdit,
-                onClickTabClose,
-                onChangeRenamingFilename,
-                onCancelRenamingFilename,
-                onSubmitRenamingFilename,
-              }}
-            />
-          );
-        }
-      )}
+    <Nav
+      className="wb-editortabs"
+      variant="tabs"
+      activeKey={`wb-editor-${editor.currentTab}`}
+    >
+      {sources.map((source, index): React.ReactElement => {
+        return (
+          <EditorTab
+            key={index}
+            {...{
+              index,
+              source,
+              readonly: permlinkData !== null,
+              renamingSource: renamingSources[index] || null,
+              active: index === editor.currentTab,
+              onChangeTabs,
+              onClickTabEdit,
+              onClickTabClose,
+              onChangeRenamingFilename,
+              onCancelRenamingFilename,
+              onSubmitRenamingFilename,
+            }}
+          />
+        );
+      })}
 
       {/* Permlink の場合はタブの追加不可 */}
       {permlinkData === null ? (

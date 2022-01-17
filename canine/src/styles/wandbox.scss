@@ -1,14 +1,90 @@
+// 通常の背景色
+$color-white: #ffffff;
+// ヘッダーの背景色や黒字用のテキスト色
+$color-white2: #f6f8fa;
+// ボーダー色
+$color-gray: #d0d7de;
+// 弱いテキスト色
+$color-gray2: #57606a;
+// ヘッダー背景や白地用のテキスト色
+$color-primary: #24292f;
+// リンク色
+$color-blue: #0969da;
+// タグの背景色
+$color-blue2: #ddf4ff;
+// プライマリボタン色
+$color-green: #2da44e;
+// 緑ボタンのボーダーとして使う色
+// $color-btn-primary-border: rgba(27, 31, 36, 0.15);
+
+$primary: $color-primary;
+$secondary: $color-white2;
+$link-color: $color-blue;
+$navbar-dark-color:                 rgba($color-white2, .55) !default;
+$navbar-dark-hover-color:           rgba($color-white2, .75) !default;
+$navbar-dark-active-color:          $color-white2 !default;
+$navbar-dark-disabled-color:        rgba($color-white2, .25) !default;
+$navbar-dark-toggler-icon-bg:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke='#{$navbar-dark-color}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>") !default;
+$navbar-dark-toggler-border-color:  rgba($color-white2, .1) !default;
+
+$font-size-base: 0.875rem;
+
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  0px: 0,
+  2px: $spacer * .125,
+  4px: $spacer * .25,
+  6px: $spacer * .375,
+  8px: $spacer * .5,
+  12px: $spacer * .75,
+  16px: $spacer,
+  20px: $spacer * 1.25,
+  24px: $spacer * 1.5,
+  32px: $spacer * 2,
+  48px: $spacer * 3,
+  64px: $spacer * 4,
+);
+
 @import '~bootstrap/scss/bootstrap';
 
-.wb-editor .CodeMirror {
-  min-height: 300px;
-  height: auto;
-  width: 100%;
+p, h1, h2, h3, h4, h5, h6 {
+  padding: 0;
+  margin: 0;
 }
-.wb-editor .CodeMirror-scroll {
+.modal {
+  .btn {
+    min-width: 72px;
+  }
+}
+
+.cm-editor {
   min-height: 300px;
-  overflow-y: scroll;
-  overflow-x: scroll;
+  height: 100%;
+}
+#wb-main {
+  .cm-focused {
+    outline: none;
+  }
+}
+
+
+#wb-main {
+  .nav-link.active {
+    background-color: #f6f8fa;
+  }
+}
+
+.wb-editortabs {
+  border: none;
+  .nav-link {
+    isolation: isolate;
+  }
+}
+
+.wb-editor {
+  border: $color-gray solid 1px;
+  border-radius: 0px 8px 8px 8px;
 }
 
 .wb-input .CodeMirror {
@@ -23,13 +99,43 @@
   overflow-x: scroll;
 }
 
-.wb-compilerlist .wb-item {
-  > p {
+.wb-languagelist {
+  > div:first-child {
+    background-color: $color-white2;
+    font-weight: bold;
+    padding: 8px 8px;
+  }
+  .list-group-item {
+    padding: 4px 16px;
+  }
+}
+.wb-languagelist-selected {
+  > div > p {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow-x: hidden;
-    display: inline-block;
-    width: 80%;
-    margin: 0;
+  }
+}
+
+.wb-compilerlist {
+  > div:first-child {
+    background-color: $color-white2;
+    font-weight: bold;
+    padding: 8px 8px;
+  }
+
+  .list-group-item {
+    padding: 4px 16px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+  }
+}
+.wb-compilerlist-selected {
+  > div > p {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    flex-basis: calc(100% - 28px);
   }
 }

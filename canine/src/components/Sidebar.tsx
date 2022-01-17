@@ -173,80 +173,66 @@ const Sidebar: React.FC<SidebarProps> = (props): React.ReactElement => {
   const readOnly = permlinkData !== null;
 
   return (
-    <Container>
+    <div className="d-flex flex-column gap-16px" style={{ width: 280 }}>
       {/* choose language */}
-      <Row>
-        <Col>
-          <ChooseLanguage
-            language={language}
-            languages={languages}
-            readOnly={readOnly}
-            onSelectLanguage={onSelectLanguage}
-            onDeselectLanguage={onDeselectLanguage}
-          />
-        </Col>
-      </Row>
+      <ChooseLanguage
+        language={language}
+        languages={languages}
+        readOnly={readOnly}
+        onSelectLanguage={onSelectLanguage}
+        onDeselectLanguage={onDeselectLanguage}
+      />
+
       {/* choose compiler */}
-      <Row>
-        <Col>
-          {permlinkData === null && currentLanguage === "" ? null : (
-            <ChooseCompiler
-              compilerInfo={compilerInfo}
-              compilerInfos={compilerInfos}
-              readOnly={readOnly}
-              onSelectCompiler={onSelectCompiler}
-              onDeselectCompiler={onDeselectCompiler}
-            />
-          )}
-        </Col>
-      </Row>
+      {permlinkData === null && currentLanguage === "" ? null : (
+        <ChooseCompiler
+          compilerInfo={compilerInfo}
+          compilerInfos={compilerInfos}
+          readOnly={readOnly}
+          onSelectCompiler={onSelectCompiler}
+          onDeselectCompiler={onDeselectCompiler}
+        />
+      )}
+
       {/* compiler options */}
-      <Row>
-        <Col>
-          {compilerInfo === null ? null : (
-            <CompilerOption
-              switches={switches}
-              compilerInfo={compilerInfo}
-              readOnly={readOnly}
-              onChangeChecked={onChangeChecked}
-              onChangeSelected={onChangeSelected}
-            />
-          )}
-        </Col>
-      </Row>
+      {compilerInfo === null ? null : (
+        <CompilerOption
+          switches={switches}
+          compilerInfo={compilerInfo}
+          readOnly={readOnly}
+          onChangeChecked={onChangeChecked}
+          onChangeSelected={onChangeSelected}
+        />
+      )}
       {/* raw compiler options */}
-      <Row>
-        <Col>
-          {compilerInfo === null ? null : (
-            <RawCompilerOption
-              compilerOptionRaw={
-                permlinkData === null
-                  ? compilerInfo.compilerOptionRaw
-                    ? compilerOptionRaw
-                    : null
-                  : permlinkData.parameter.compilerInfo.compilerOptionRaw
-                  ? permlinkData.parameter.compilerOptionRaw
-                  : null
-              }
-              runtimeOptionRaw={
-                permlinkData === null
-                  ? compilerInfo.runtimeOptionRaw || runtimeOptionRaw !== ""
-                    ? runtimeOptionRaw
-                    : null
-                  : permlinkData.parameter.compilerInfo.runtimeOptionRaw ||
-                    permlinkData.parameter.runtimeOptionRaw !== ""
-                  ? permlinkData.parameter.runtimeOptionRaw
-                  : null
-              }
-              readOnly={readOnly}
-              onChangeCompilerOptionRaw={onChangeCompilerOptionRaw}
-              onChangeRuntimeOptionRaw={onChangeRuntimeOptionRaw}
-              onCtrlEnter={onCtrlEnter}
-            />
-          )}
-        </Col>
-      </Row>
-    </Container>
+      {compilerInfo === null ? null : (
+        <RawCompilerOption
+          compilerOptionRaw={
+            permlinkData === null
+              ? compilerInfo.compilerOptionRaw
+                ? compilerOptionRaw
+                : null
+              : permlinkData.parameter.compilerInfo.compilerOptionRaw
+              ? permlinkData.parameter.compilerOptionRaw
+              : null
+          }
+          runtimeOptionRaw={
+            permlinkData === null
+              ? compilerInfo.runtimeOptionRaw || runtimeOptionRaw !== ""
+                ? runtimeOptionRaw
+                : null
+              : permlinkData.parameter.compilerInfo.runtimeOptionRaw ||
+                permlinkData.parameter.runtimeOptionRaw !== ""
+              ? permlinkData.parameter.runtimeOptionRaw
+              : null
+          }
+          readOnly={readOnly}
+          onChangeCompilerOptionRaw={onChangeCompilerOptionRaw}
+          onChangeRuntimeOptionRaw={onChangeRuntimeOptionRaw}
+          onCtrlEnter={onCtrlEnter}
+        />
+      )}
+    </div>
   );
 };
 

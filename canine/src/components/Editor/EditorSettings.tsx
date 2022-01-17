@@ -65,74 +65,67 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
     [settings]
   );
 
-  if (!settings.opened) {
-    return (
-      <Button variant="link" onClick={onClickOpenSettings}>
-        <Gear />
-      </Button>
-    );
-  }
+  //if (!settings.opened) {
+  //  return (
+  //    <Button variant="link" onClick={onClickOpenSettings}>
+  //      <Gear />
+  //    </Button>
+  //  );
+  //}
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <Button variant="link" onClick={onClickCloseSettings}>
-            <ChevronRight />
-          </Button>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Form>
-            <Form.Group controlId="wb-keybinding">
-              <Form.Label>Key Binding</Form.Label>
-              <Form.Control
-                as="select"
-                value={settings.editor}
-                onChange={onChangeEditor}
-              >
-                <option value="default">default</option>
-                <option value="vim">vim</option>
-                <option value="emacs">emacs</option>
-              </Form.Control>
-            </Form.Group>
-            <Form.Group controlId="wb-tabkey">
-              <Form.Label>TAB Key Inserted</Form.Label>
-              <Form.Control
-                as="select"
-                value={settings.tabKey}
-                onChange={onChangeTabKey}
-              >
-                <option value="2">2 Spaces</option>
-                <option value="4">4 Spaces</option>
-                <option value="8">8 Spaces</option>
-                <option value="tab">TAB</option>
-              </Form.Control>
-            </Form.Group>
-            <Form.Group controlId="wb-tabwidth">
-              <Form.Label>TAB Width</Form.Label>
-              <Form.Control
-                as="select"
-                value={settings.tabWidth}
-                onChange={onChangeTabWidth}
-              >
-                <option value="2">2</option>
-                <option value="4">4</option>
-                <option value="8">8</option>
-              </Form.Control>
-            </Form.Group>
-            <Form.Group controlId="wb-smartindent">
-              <Form.Check
-                type="checkbox"
-                label="Smart Indent"
-                checked={settings.smartIndent}
-                onChange={onChangeSmartIndent}
-              />
-            </Form.Group>
-          </Form>
-        </Col>
-      </Row>
+    <div className="d-flex flex-column align-items-stretch gap-8px">
+      <Form.Group controlId="wb-keybinding">
+        <Form.Label>Key Binding</Form.Label>
+        <div className="px-8px">
+          <Form.Control
+            as="select"
+            value={settings.editor}
+            onChange={onChangeEditor}
+          >
+            <option value="default">default</option>
+            <option value="vim">vim</option>
+            <option value="emacs">emacs</option>
+          </Form.Control>
+        </div>
+      </Form.Group>
+      <Form.Group controlId="wb-tabkey">
+        <Form.Label>TAB Key Inserted</Form.Label>
+        <div className="px-8px">
+          <Form.Control
+            as="select"
+            value={settings.tabKey}
+            onChange={onChangeTabKey}
+          >
+            <option value="2">2 Spaces</option>
+            <option value="4">4 Spaces</option>
+            <option value="8">8 Spaces</option>
+            <option value="tab">TAB</option>
+          </Form.Control>
+        </div>
+      </Form.Group>
+      <Form.Group controlId="wb-tabwidth">
+        <Form.Label>TAB Width</Form.Label>
+        <div className="px-8px">
+          <Form.Control
+            as="select"
+            value={settings.tabWidth}
+            onChange={onChangeTabWidth}
+          >
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+          </Form.Control>
+        </div>
+      </Form.Group>
+      <Form.Group controlId="wb-smartindent">
+        <Form.Check
+          type="checkbox"
+          label="Smart Indent"
+          checked={settings.smartIndent}
+          onChange={onChangeSmartIndent}
+        />
+      </Form.Group>
     </div>
   );
 };

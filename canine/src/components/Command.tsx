@@ -1,9 +1,11 @@
 import React from "react";
-import { useContainer } from "unstated-next";
 
 import { reduceCompileOptions } from "~/utils/reduceCompileOptions";
 import { CompilerList, CompilerInfo } from "~/hooks/compilerList";
-import { CompilerContext } from "~/contexts/CompilerContext";
+import {
+  CompilerContext,
+  useCompilerContext,
+} from "~/contexts/CompilerContext";
 import { PermlinkData } from "~/hooks/permlink";
 
 export interface CommandProps {
@@ -17,7 +19,7 @@ function rawToOptions(raw: string): string {
 
 const Command: React.FC<CommandProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
-  const compiler = useContainer(CompilerContext);
+  const compiler = useCompilerContext();
 
   const command = React.useMemo((): string => {
     let info: CompilerInfo;
@@ -25,6 +27,7 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
       const infoUndef = compilerList.compilers.find(
         (c): boolean => c.name === compiler.currentCompilerName
       );
+      console.log(compiler.currentCompilerName, infoUndef);
       if (infoUndef === undefined) {
         return "";
       }

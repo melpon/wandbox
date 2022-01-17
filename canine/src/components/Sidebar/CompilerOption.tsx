@@ -25,15 +25,10 @@ const CompilerOption: React.FC<CompilerOptionProps> = (
   } = props;
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <h6>Options</h6>
-        </Col>
-      </Row>
-      <hr />
-      {compilerInfo.switches.map(
-        (sw): React.ReactElement => {
+    <div className="d-flex flex-column gap-8px">
+      <h6>Options</h6>
+      <div className="px-8px d-flex flex-column gap-4px">
+        {compilerInfo.switches.map((sw): React.ReactElement => {
           if (sw.type === "single") {
             const ssw = sw.switch as SingleSwitch;
             // checkbox
@@ -42,21 +37,20 @@ const CompilerOption: React.FC<CompilerOptionProps> = (
                 ? (switches[ssw.name] as boolean)
                 : ssw.default;
             return (
-              <Row key={ssw.name}>
-                <Col>
-                  <Form.Group controlId={`compileroption-single-${ssw.name}`}>
-                    <Form.Check
-                      type="checkbox"
-                      disabled={readOnly}
-                      checked={checked}
-                      label={ssw.displayName}
-                      onChange={(
-                        e: React.ChangeEvent<HTMLInputElement>
-                      ): void => onChangeChecked(ssw.name, e.target.checked)}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
+              <Form.Group
+                key={ssw.name}
+                controlId={`compileroption-single-${ssw.name}`}
+              >
+                <Form.Check
+                  type="checkbox"
+                  disabled={readOnly}
+                  checked={checked}
+                  label={ssw.displayName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                    onChangeChecked(ssw.name, e.target.checked)
+                  }
+                />
+              </Form.Group>
             );
           } else if (sw.type === "select") {
             const ssw = sw.switch as SelectSwitch;
@@ -78,41 +72,38 @@ const CompilerOption: React.FC<CompilerOptionProps> = (
               return name;
             })();
             return (
-              <Row key={ssw.name}>
-                <Col>
-                  <Form.Group controlId={`compileroption-select-${ssw.name}`}>
-                    <Form.Control
-                      as="select"
-                      disabled={readOnly}
-                      value={value}
-                      onChange={(
-                        e: React.ChangeEvent<{
-                          name?: string;
-                          value: unknown;
-                        }>
-                      ): void =>
-                        onChangeSelected(ssw.name, e.target.value as string)
-                      }
-                    >
-                      {[...ssw.options].reverse().map(
-                        (opt): React.ReactElement => {
-                          return (
-                            <option key={opt.name} value={opt.name}>
-                              {opt.displayName}
-                            </option>
-                          );
-                        }
-                      )}
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-              </Row>
+              <Form.Group
+                key={ssw.name}
+                controlId={`compileroption-select-${ssw.name}`}
+              >
+                <Form.Control
+                  as="select"
+                  disabled={readOnly}
+                  value={value}
+                  onChange={(
+                    e: React.ChangeEvent<{
+                      name?: string;
+                      value: unknown;
+                    }>
+                  ): void =>
+                    onChangeSelected(ssw.name, e.target.value as string)
+                  }
+                >
+                  {[...ssw.options].reverse().map((opt): React.ReactElement => {
+                    return (
+                      <option key={opt.name} value={opt.name}>
+                        {opt.displayName}
+                      </option>
+                    );
+                  })}
+                </Form.Control>
+              </Form.Group>
             );
           } else {
             throw "error";
           }
-        }
-      )}
+        })}
+      </div>
     </div>
   );
 };

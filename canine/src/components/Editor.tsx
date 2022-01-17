@@ -1,12 +1,14 @@
 import React from "react";
-import { useContainer } from "unstated-next";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-import { EditorContext } from "~/contexts/EditorContext";
-import { CompilerContext } from "~/contexts/CompilerContext";
+import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
+import {
+  CompilerContext,
+  useCompilerContext,
+} from "~/contexts/CompilerContext";
 import { CompilerList } from "~/hooks/compilerList";
-import { ResultContext } from "~/contexts/ResultContext";
+import { ResultContext, useResultContext } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorSettings } from "./Editor/EditorSettings";
@@ -18,43 +20,37 @@ export interface EditorProps {
 }
 
 const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
-  const editor = useContainer(EditorContext);
-  const compiler = useContainer(CompilerContext);
-  const result = useContainer(ResultContext);
+  const editor = useEditorContext();
+  const compiler = useCompilerContext();
+  const result = useResultContext();
   const { compilerList, permlinkData } = props;
   const { settings } = editor;
   return (
-    <Row>
-      <Col sm={settings.opened ? 10 : true}>
-        <Row>
-          <Col>
-            <EditorTabs editor={editor} permlinkData={permlinkData} />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <CodeEditor
-              {...{ editor, compiler, compilerList, result, permlinkData }}
-            />
-          </Col>
-        </Row>
-      </Col>
-      {((): React.ReactElement => {
-        if (settings.opened) {
-          return (
-            <Col sm="2">
-              <EditorSettings settings={settings} />
-            </Col>
-          );
-        } else {
-          return (
-            <Col sm="auto">
-              <EditorSettings settings={settings} />
-            </Col>
-          );
-        }
-      })()}
-    </Row>
+    <div className="d-flex flex-column">
+      <div className="d-flex gap-8px align-items-start">
+        <div className="d-flex flex-column flex-grow-1">
+          <EditorTabs editor={editor} permlinkData={permlinkData} />
+          {/*
+          <CodeMirror6
+            className="flex-grow-1"
+            initialText="Hello"
+            option={{
+              tabSize: parseInt(editor.settings.tabWidth, 10),
+              indentUnit:
+                editor.settings.tabKey !== "tab"
+                  ? parseInt(editor.settings.tabKey, 10)
+                  : undefined,
+              indentWithTabs: editor.settings.tabKey === "tab",
+            }}
+            onViewCreated={() => {}}
+          />
+          */}
+          <CodeEditor
+            {...{ editor, compiler, compilerList, result, permlinkData }}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

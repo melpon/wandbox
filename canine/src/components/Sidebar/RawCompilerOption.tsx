@@ -21,7 +21,14 @@ interface RawCompilerOptionProps {
 const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
   props
 ): React.ReactElement => {
-  return <textarea></textarea>
+  return (
+    <div className="d-flex flex-column gap-8px">
+      <h6>Raw Options</h6>
+      <div className="px-8px d-flex flex-column gap-4px">
+        <textarea></textarea>
+      </div>
+    </div>
+  );
   //const {
   //  compilerOptionRaw,
   //  runtimeOptionRaw,

@@ -4,8 +4,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { FileEarmarkText, Pencil, Check, X } from "react-bootstrap-icons";
 
-import { FileEarmarkText, Pencil, Check } from "~/components/atoms/icons";
 import { EditorSourceData } from "~/contexts/EditorContext";
 
 export interface RenamingSource {
@@ -48,16 +48,21 @@ const EditorTab: React.FC<EditorTabProps> = (props) => {
       <Nav.Link
         eventKey={`wb-editor-${index}`}
         onClick={() => onChangeTabs(index)}
+        style={{ height: 40 }}
+        className="py-0 pe-4px"
       >
-        {((): React.ReactElement => {
-          if (renamingSource === null || !renamingSource.renaming) {
-            return (
-              <React.Fragment>
+        <div className="d-flex gap-16px h-100 align-items-center">
+          {renamingSource === null || !renamingSource.renaming ? (
+            <>
+              <div className="d-flex gap-4px align-items-center">
                 <FileEarmarkText />
                 {source.filename || ""}
+              </div>
+              <div className="d-flex align-items-center">
                 {source.filename === null || readonly || !active ? null : (
-                  <React.Fragment>
+                  <>
                     <Button
+                      className="px-4px"
                       variant="link"
                       onClick={(e: React.MouseEvent): void => {
                         onClickTabEdit(index);
@@ -66,58 +71,56 @@ const EditorTab: React.FC<EditorTabProps> = (props) => {
                     >
                       <Pencil />
                     </Button>
-                    <button
-                      type="button"
-                      className="close"
-                      aria-label="Close"
+                    <Button
+                      className="px-4px"
+                      variant="link"
                       onClick={(e): void => {
                         onClickTabClose(index);
                         e.stopPropagation();
                       }}
                     >
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </React.Fragment>
+                      <X />
+                    </Button>
+                  </>
                 )}
-              </React.Fragment>
-            );
-          } else {
-            return (
-              <React.Fragment>
-                <Row>
-                  <Col sm="auto">
-                    <Form.Control
-                      type="text"
-                      value={renamingSource.filename}
-                      onClick={(e: React.MouseEvent): void =>
-                        e.stopPropagation()
-                      }
-                      onChange={(e): void =>
-                        onChangeRenamingFilename(index, e.target.value)
-                      }
-                    />
-                  </Col>
-                  <Col sm="auto" style={{ padding: 0 }}>
-                    <Button
-                      variant="link"
-                      onClick={(): void => onCancelRenamingFilename(index)}
-                    >
-                      &times;
-                    </Button>
-                  </Col>
-                  <Col sm="auto" style={{ padding: 0 }}>
-                    <Button
-                      variant="link"
-                      onClick={(): void => onSubmitRenamingFilename(index)}
-                    >
-                      <Check />
-                    </Button>
-                  </Col>
-                </Row>
-              </React.Fragment>
-            );
-          }
-        })()}
+              </div>
+            </>
+          ) : (
+            <>
+              <Form.Control
+                type="text"
+                value={renamingSource.filename}
+                onClick={(e: React.MouseEvent): void => e.stopPropagation()}
+                onKeyDown={(e: React.KeyboardEvent): void => {
+                  if (e.key === "Enter") {
+                    onSubmitRenamingFilename(index);
+                  } else if (e.key === "Escape") {
+                    onCancelRenamingFilename(index);
+                  }
+                }}
+                onChange={(e): void =>
+                  onChangeRenamingFilename(index, e.target.value)
+                }
+              />
+              <div className="d-flex align-items-center">
+                <Button
+                  className="px-4px"
+                  variant="link"
+                  onClick={(): void => onCancelRenamingFilename(index)}
+                >
+                  <X />
+                </Button>
+                <Button
+                  className="px-4px"
+                  variant="link"
+                  onClick={(): void => onSubmitRenamingFilename(index)}
+                >
+                  <Check />
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </Nav.Link>
     </Nav.Item>
   );

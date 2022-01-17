@@ -19,6 +19,8 @@ import { useEditorContext } from "~/contexts/EditorContext";
 import { useCompilerContext } from "~/contexts/CompilerContext";
 import { useResultContext } from "~/contexts/ResultContext";
 import { EditorSettings } from "~/components/Editor/EditorSettings";
+import { Title } from "~/components/Title";
+import { Button } from "react-bootstrap";
 
 interface WandboxRouterProps {
   permlinkId?: string;
@@ -66,7 +68,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setPermlinkData(null);
   }, [setPermlinkData]);
 
-  // 設定データのロード（初回に一回だけ読み込む）
   const editor = useEditorContext();
   const compiler = useCompilerContext();
   const result = useResultContext();
@@ -76,6 +77,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     result,
     permlinkId !== null
   );
+  // 設定データのロード（初回に一回だけ読み込む）
   React.useEffect((): void => {
     load();
   }, []);
@@ -100,33 +102,17 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   }
 
   return (
-    <Container fluid>
-      <Row>
-        <Header />
-      </Row>
-      <Row>
-        <Col xs={12} sm={2}>
-          <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
-        </Col>
-        <Col xs={12} sm={10}>
-          <Row>
-            <CodeMirror6
-              initialText="Hello"
-              option={{
-                tabSize: parseInt(editor.settings.tabWidth, 10),
-                indentUnit:
-                  editor.settings.tabKey !== "tab"
-                    ? parseInt(editor.settings.tabKey, 10)
-                    : undefined,
-                indentWithTabs: editor.settings.tabKey === "tab",
-              }}
-              onViewCreated={() => {}}
-            />
-          </Row>
-          <Row>
-            <EditorSettings settings={editor.settings} />
-          </Row>
-        </Col>
+    <div id="wb-main" className="d-flex flex-column">
+      <Header />
+      <div className="pt-24px px-16px d-flex gap-16px">
+        <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
+        <div className="flex-grow-1 d-flex flex-column gap-8px">
+          <Title />
+          <Editor compilerList={compilerList} permlinkData={permlinkData} />
+          <Command compilerList={compilerList} permlinkData={permlinkData} />
+          <Run compilerList={compilerList} permlinkData={permlinkData} />
+          <Result permlinkData={permlinkData} />
+        </div>
         {/*
         <Col xs={12} sm={10}>
           <Row>
@@ -161,8 +147,8 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
           </Row>
         </Col>
         */}
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 };
 
