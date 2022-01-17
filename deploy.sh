@@ -3,11 +3,7 @@
 PROG=$0
 
 function show_help() {
-<<<<<<< HEAD
   echo "$PROG <remote> <kennel | cattleshed> <develop | master>"
-=======
-  echo "$PROG <remote> <kennel | cattleshed | canine> <staging | production>"
->>>>>>> canine
 }
 
 if [ $# -lt 3 ]; then
