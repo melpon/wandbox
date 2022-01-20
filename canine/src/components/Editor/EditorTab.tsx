@@ -51,7 +51,7 @@ const EditorTab: React.FC<EditorTabProps> = (props) => {
         style={{ height: 40 }}
         className="py-0 pe-4px"
       >
-        <div className="d-flex gap-16px h-100 align-items-center">
+        <div className="d-flex gap-4px h-100 align-items-center">
           {renamingSource === null || !renamingSource.renaming ? (
             <>
               <div className="d-flex gap-4px align-items-center">

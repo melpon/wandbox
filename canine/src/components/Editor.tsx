@@ -13,6 +13,8 @@ import { PermlinkData } from "~/hooks/permlink";
 import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorSettings } from "./Editor/EditorSettings";
 import { EditorTabs } from "./Editor/EditorTabs";
+import { CodeMirror6 } from "./CodeMirror6";
+import { Button } from "react-bootstrap";
 
 export interface EditorProps {
   compilerList: CompilerList;
@@ -26,11 +28,10 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const { settings } = editor;
   return (
-    <div className="d-flex flex-column">
-      <div className="d-flex gap-8px align-items-start">
-        <div className="d-flex flex-column flex-grow-1">
-          <EditorTabs editor={editor} permlinkData={permlinkData} />
-          {/*
+    <div className="d-flex justify-content-stretch gap-8px">
+      <div className="d-flex flex-column flex-grow-1">
+        <EditorTabs editor={editor} permlinkData={permlinkData} />
+        {/*
           <CodeMirror6
             className="flex-grow-1"
             initialText="Hello"
@@ -45,11 +46,39 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
             onViewCreated={() => {}}
           />
           */}
-          <CodeEditor
-            {...{ editor, compiler, compilerList, result, permlinkData }}
+        {editor.sources.map((_, tab) => {
+          return (
+            <CodeEditor
+              {...{
+                tab,
+                show: tab == editor.currentTab,
+                editor,
+                compiler,
+                compilerList,
+                result,
+                permlinkData,
+              }}
+            />
+          );
+        })}
+      </div>
+      {editor.stdinOpened && (
+        <div className="d-flex flex-column">
+          <Button
+            variant="link"
+            className="wb-stdinbutton wb-stdinactive align-self-end"
+            onClick={() => editor.setStdinOpened(!editor.stdinOpened)}
+          >
+            Stdin
+          </Button>
+          <CodeMirror6
+            className="wb-stdin flex-grow-1"
+            initialText=""
+            option={{}}
+            onViewCreated={() => {}}
           />
         </div>
-      </div>
+      )}
     </div>
   );
 };

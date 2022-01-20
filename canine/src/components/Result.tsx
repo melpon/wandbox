@@ -50,17 +50,46 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement => {
   );
 
   return (
-    <code>
-      {mergedResults.map((r, index): React.ReactElement => {
-        const className = typeClassNames[r.type];
+    <div className="wb-result d-flex flex-column">
+      <code className="wb-console flex-grow-1 p-16px">
+        {mergedResults.map((r, index): React.ReactElement | null => {
+          if (
+            r.type === "Control" ||
+            r.type === "Signal" ||
+            r.type === "ExitCode"
+          ) {
+            return null;
+          }
+          const className = typeClassNames[r.type];
 
-        return (
-          <pre key={index} className={className}>
-            {r.data}
-          </pre>
-        );
-      })}
-    </code>
+          return (
+            <pre key={index} className={className}>
+              {r.data}
+            </pre>
+          );
+        })}
+      </code>
+      <div className="wb-info">
+        {mergedResults.map((r, index): React.ReactElement | null => {
+          if (r.type === "Control") {
+            return null;
+          }
+
+          if (r.type !== "Signal" && r.type !== "ExitCode") {
+            return null;
+          }
+
+          return (
+            <div className="d-flex align-items-center gap-8px">
+              <div className="wb-name">
+                {r.type === "Signal" ? "Signal: " : "Exit Code: "}
+              </div>
+              <div className="wb-value">{r.data}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 

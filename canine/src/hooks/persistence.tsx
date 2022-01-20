@@ -2,6 +2,7 @@ import React from "react";
 import { EditorContextState } from "~/contexts/EditorContext";
 import { CompilerContextState } from "~/contexts/CompilerContext";
 import { ResultContextState } from "~/contexts/ResultContext";
+import { EditorView } from "@codemirror/view";
 
 interface Persistence {
   load: () => void;
@@ -85,12 +86,27 @@ export function usePersistence(
   // セーブ
   const save = React.useCallback((): void => {
     if (!permlinkMode) {
-      const item = {
-        sources: editor.sources,
-        currentTab: editor.currentTab,
-        stdin: editor.stdin,
-      };
-      localStorage.setItem(EDITOR_CODE_KEY, JSON.stringify(item));
+      // view の中身を text に移動
+      let hasError = false;
+      const sources = editor.sources.map((s) => {
+        if (s.view === undefined) {
+          hasError = true;
+          return;
+        }
+        return {
+          ...s,
+          view: undefined,
+          text: (s.view as EditorView).state.toString(),
+        };
+      });
+      if (!hasError) {
+        const item = {
+          sources: sources,
+          currentTab: editor.currentTab,
+          stdin: editor.stdin,
+        };
+        localStorage.setItem(EDITOR_CODE_KEY, JSON.stringify(item));
+      }
     }
     {
       const item = {

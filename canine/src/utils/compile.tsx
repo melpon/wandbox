@@ -11,10 +11,10 @@ export function createBody(
   compiler: CompilerContextState,
   compilerList: CompilerList
 ): JsonMap | null {
-  const defaultEditor = editor.sources.find(
+  const defaultEditorTab = editor.sources.findIndex(
     (s): boolean => s.filename === null
   );
-  if (defaultEditor === undefined) {
+  if (defaultEditorTab === -1) {
     // something wrong
     return null;
   }
@@ -31,11 +31,11 @@ export function createBody(
 
   return {
     compiler: compiler.currentCompilerName,
-    code: defaultEditor.text,
+    code: editor.getSourceText(defaultEditorTab),
     codes: editor.sources
       .filter((s): boolean => s.filename !== null)
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      .map((s) => ({ file: s.filename, code: s.text })),
+      .map((s, tab) => ({ file: s.filename, code: editor.getSourceText(tab) })),
     options: options.join(","),
     stdin: editor.stdin,
     "compiler-option-raw": compiler.compilerOptionRaw,
@@ -59,11 +59,9 @@ export function compile(
     mode: "cors",
     headers: { "content-type": "application/json" },
   })
-    .then(
-      (resp): ReadableStream => {
-        return ndjsonStream(resp.body);
-      }
-    )
+    .then((resp): ReadableStream => {
+      return ndjsonStream(resp.body);
+    })
     .then((stream): void => {
       const reader = stream.getReader();
       const read = (

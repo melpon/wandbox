@@ -18,6 +18,8 @@ import { useCompile } from "~/hooks/compile";
 import { CodeMirror6 } from "../CodeMirror6";
 
 interface CodeEditorProps {
+  tab: number;
+  show: boolean;
   editor: EditorContextState;
   compiler: CompilerContextState;
   compilerList: CompilerList;
@@ -26,7 +28,8 @@ interface CodeEditorProps {
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
-  const { editor, compiler, compilerList, result, permlinkData } = props;
+  const { tab, show, editor, compiler, compilerList, result, permlinkData } =
+    props;
   const { currentLanguage, currentCompilerName } = compiler;
 
   /*
@@ -128,7 +131,9 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   */
   return (
     <CodeMirror6
-      className="wb-editor flex-grow-1"
+      className={`wb-editor flex-grow-1 ${
+        editor.stdinOpened ? "wb-stdinactive" : ""
+      } ${show ? "" : "d-none"}`}
       initialText="Hello"
       option={{
         tabSize: parseInt(editor.settings.tabWidth, 10),
@@ -138,7 +143,9 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
             : undefined,
         indentWithTabs: editor.settings.tabKey === "tab",
       }}
-      onViewCreated={() => {}}
+      onViewCreated={(view) => {
+        editor.setView(tab, view);
+      }}
     />
   );
 };

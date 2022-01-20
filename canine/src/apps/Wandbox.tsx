@@ -104,7 +104,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   return (
     <div id="wb-main" className="d-flex flex-column">
       <Header />
-      <div className="pt-24px px-16px d-flex gap-16px">
+      <div className="pt-24px px-32px d-flex gap-16px">
         <Sidebar compilerList={compilerList} permlinkData={permlinkData} />
         <div className="flex-grow-1 d-flex flex-column gap-8px">
           <Title />

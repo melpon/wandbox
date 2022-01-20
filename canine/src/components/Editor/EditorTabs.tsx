@@ -1,11 +1,12 @@
 import React from "react";
 import Nav from "react-bootstrap/Nav";
-import { FileEarmarkPlus } from "react-bootstrap-icons";
+import { FileEarmarkPlus, Gear } from "react-bootstrap-icons";
 
 import { EditorContextState } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { EditorTab, RenamingSource } from "./EditorTab";
+import { Button } from "react-bootstrap";
 
 interface EditorTabsProps {
   editor: EditorContextState;
@@ -120,41 +121,42 @@ const EditorTabs: React.FC<EditorTabsProps> = (
   );
 
   return (
-    <Nav
-      className="wb-editortabs"
-      variant="tabs"
-      activeKey={`wb-editor-${editor.currentTab}`}
-    >
-      {sources.map((source, index): React.ReactElement => {
-        return (
-          <EditorTab
-            key={index}
-            {...{
-              index,
-              source,
-              readonly: permlinkData !== null,
-              renamingSource: renamingSources[index] || null,
-              active: index === editor.currentTab,
-              onChangeTabs,
-              onClickTabEdit,
-              onClickTabClose,
-              onChangeRenamingFilename,
-              onCancelRenamingFilename,
-              onSubmitRenamingFilename,
-            }}
-          />
-        );
-      })}
+    <div className="d-flex justify-content-between">
+      <Nav
+        className="wb-editortabs flex-grow-1"
+        variant="tabs"
+        activeKey={`wb-editor-${editor.currentTab}`}
+      >
+        {sources.map((source, index): React.ReactElement => {
+          return (
+            <EditorTab
+              key={index}
+              {...{
+                index,
+                source,
+                readonly: permlinkData !== null,
+                renamingSource: renamingSources[index] || null,
+                active: index === editor.currentTab,
+                onChangeTabs,
+                onClickTabEdit,
+                onClickTabClose,
+                onChangeRenamingFilename,
+                onCancelRenamingFilename,
+                onSubmitRenamingFilename,
+              }}
+            />
+          );
+        })}
 
-      {/* Permlink の場合はタブの追加不可 */}
-      {permlinkData === null ? (
-        <Nav.Item>
-          <Nav.Link onClick={onAddTab}>
-            <FileEarmarkPlus />
-          </Nav.Link>
-        </Nav.Item>
-      ) : null}
-      {/*sources.map(
+        {/* Permlink の場合はタブの追加不可 */}
+        {permlinkData === null ? (
+          <Nav.Item>
+            <Nav.Link onClick={onAddTab}>
+              <FileEarmarkPlus />
+            </Nav.Link>
+          </Nav.Item>
+        ) : null}
+        {/*sources.map(
         (source, index): React.ReactElement => {
           return (
             <Tab
@@ -177,7 +179,17 @@ const EditorTabs: React.FC<EditorTabsProps> = (
           );
         }
       )*/}
-    </Nav>
+      </Nav>
+      {!editor.stdinOpened && (
+        <Button
+          variant="link"
+          className="wb-stdinbutton align-self-end"
+          onClick={() => editor.setStdinOpened(!editor.stdinOpened)}
+        >
+          Stdin
+        </Button>
+      )}
+    </div>
   );
 };
 

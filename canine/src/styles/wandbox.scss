@@ -82,8 +82,30 @@ p, h1, h2, h3, h4, h5, h6 {
   }
 }
 
+.wb-stdinbutton {
+  text-decoration: none;
+  background-color: $color-white2;
+  border: $color-gray solid 1px;
+  border-bottom: $color-white2 solid 1px;
+  border-radius: 4px 4px 0px 0px;
+  margin-bottom: -1px;
+  height: 40px;
+}
+.wb-stdinbutton.wb-stdinactive {
+  isolation: isolate;
+}
+
+.wb-stdin {
+  border: $color-gray solid 1px;
+  border-radius: 8px 0px 8px 8px;
+  min-width: 244px;
+}
+
 .wb-editor {
   border: $color-gray solid 1px;
+  border-radius: 0px 0px 8px 8px;
+}
+.wb-editor.wb-stdinactive {
   border-radius: 0px 8px 8px 8px;
 }
 
@@ -137,5 +159,54 @@ p, h1, h2, h3, h4, h5, h6 {
     text-overflow: ellipsis;
     overflow-x: hidden;
     flex-basis: calc(100% - 28px);
+  }
+}
+
+.wb-command {
+  border: $color-gray solid 1px;
+  color: $color-primary;
+}
+
+.wb-result {
+  border-radius: 8px;
+  width: calc(100vw - 346px);
+
+  .wb-console {
+    background-color: $color-primary;
+    //overflow-x: scroll;
+    border-radius: 8px 8px 0px 0px;
+    > pre {
+      white-space: pre-wrap;
+    }
+    .wb-result-compilermessages {
+    }
+    .wb-result-compilermessagee {
+    }
+    .wb-result-stdout {
+    }
+    .wb-result-stderr {
+    }
+    .wb-result-control {
+    }
+    .wb-result-signal {
+    }
+    .wb-result-exitcode {
+    }
+  }
+
+  .wb-info {
+    padding: 4px 16px;
+    border: $color-primary solid 1px;
+    background-color: $color-white2;
+    border-radius: 0px 0px 8px 8px;
+    .wb-name {
+      border-radius: 2px;
+      background-color: $color-white;
+      color: $color-gray2;
+      font-size: 14px;
+    }
+    //.wb-value {
+    //  color: $color-white2;
+    //}
   }
 }

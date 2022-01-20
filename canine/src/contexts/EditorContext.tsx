@@ -1,9 +1,11 @@
+import { EditorView } from "@codemirror/basic-setup";
 import React, { createContext, useContext } from "react";
 import { normalizePath } from "~/utils/normalizePath";
 
 export interface EditorSourceData {
   filename: string | null;
-  id: string;
+  text?: string;
+  view?: EditorView;
 }
 
 export type EditorType = "default" | "vim" | "emacs";
@@ -29,6 +31,7 @@ export interface EditorContextState {
   currentTab: number;
   sources: EditorSourceData[];
   stdin: string;
+  stdinOpened: boolean;
   settings: EditorSettingsData;
 
   setTitle: React.Dispatch<React.SetStateAction<string>>;
@@ -36,10 +39,12 @@ export interface EditorContextState {
   setCurrentTab: React.Dispatch<React.SetStateAction<number>>;
   addSource: (filename: string) => number;
   removeSource: (tab: number) => void;
-  getId: (tab: number) => string;
   setSources: (sources: EditorSourceData[]) => void;
+  getSourceText: (tab: number) => string;
   setFilename: (tab: number, filename: string) => void;
+  setView: (tab: number, view: EditorView) => void;
   setStdin: React.Dispatch<React.SetStateAction<string>>;
+  setStdinOpened: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function useSettings(): EditorSettingsData {
@@ -81,9 +86,10 @@ function useEditorContextState(): EditorContextState {
   const [description, setDescription] = React.useState<string>("");
   const [currentTab, setCurrentTab] = React.useState<number>(0);
   const [sources, setSources] = React.useState<EditorSourceData[]>([
-    { filename: null, id: "wb-editor-main" },
+    { filename: null },
   ]);
   const [stdin, setStdin] = React.useState<string>("");
+  const [stdinOpened, setStdinOpened] = React.useState<boolean>(false);
   const [counter, setCounter] = React.useState<number>(0);
   const settings = useSettings();
 
@@ -100,10 +106,7 @@ function useEditorContextState(): EditorContextState {
         resolvedFilename = `${filename}-${n}`;
         n += 1;
       }
-      const newSources = [
-        ...sources,
-        { filename: resolvedFilename, id: `wb-editor-${counter}` },
-      ];
+      const newSources = [...sources, { filename: resolvedFilename }];
       setSources(newSources);
       setCounter(counter + 1);
       return sources.length;
@@ -128,9 +131,9 @@ function useEditorContextState(): EditorContextState {
     [currentTab, sources]
   );
 
-  const getId = React.useCallback(
+  const getSourceText = React.useCallback(
     (tab: number): string => {
-      return sources[tab].id;
+      return (sources[tab].view as EditorView).state.doc.toString();
     },
     [sources]
   );
@@ -158,6 +161,14 @@ function useEditorContextState(): EditorContextState {
     },
     [sources]
   );
+  const setView = React.useCallback(
+    (tab: number, view: EditorView) => {
+      const newSources = [...sources];
+      newSources[tab] = { ...newSources[tab], view: view };
+      setSources(newSources);
+    },
+    [sources]
+  );
 
   return {
     title,
@@ -165,6 +176,7 @@ function useEditorContextState(): EditorContextState {
     currentTab,
     sources,
     stdin,
+    stdinOpened,
     settings,
     setTitle,
     setDescription,
@@ -172,9 +184,11 @@ function useEditorContextState(): EditorContextState {
     addSource,
     removeSource,
     setSources,
-    getId,
+    getSourceText,
     setFilename,
+    setView,
     setStdin,
+    setStdinOpened,
   };
 }
 

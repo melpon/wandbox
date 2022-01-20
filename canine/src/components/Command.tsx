@@ -58,7 +58,7 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
     return `$ ${command} ${options.join(" ")} ${rawOptions}`;
   }, [compiler, compilerList]);
 
-  return <code>{command}</code>;
+  return <code className="wb-command px-8px">{command}</code>;
 };
 
 export { Command };

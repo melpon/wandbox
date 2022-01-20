@@ -405,11 +405,11 @@ class kennel : public cppcms::application {
         return false;
       }
       auto ip = request().getenv("HTTP_X_REAL_IP");
-      if (ip.empty()) {
-        SPDLOG_WARN("X-Real-IP is empty");
-        response().status(400);
-        return false;
-      }
+      //if (ip.empty()) {
+      //  SPDLOG_WARN("X-Real-IP is empty");
+      //  response().status(400);
+      //  return false;
+      //}
 
       // limit_duration 秒以内に合計で limit_size バイト以上のデータが送信されてきた場合、
       // その IP のユーザを最初のアクセス時間から limit_duration 秒経過した時点までブロックする。
