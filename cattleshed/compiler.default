@@ -1,0 +1,34 @@
+{
+    "switches": {},
+    "compilers": [
+        {
+            "name": "bash",
+            "displayable": true,
+            "language": "Bash script",
+            "output-file": "prog.sh",
+            "compiler-option-raw": false,
+            "compile-command": [
+                "/bin/true"
+            ],
+            "version-command": [
+                "/bin/sh",
+                "-c",
+                "/bin/bash --version | head -n 1 | cut -d' ' -f4"
+            ],
+            "switches": [],
+            "initial-checked": [],
+            "display-name": "bash",
+            "display-compile-command": "bash prog.sh",
+            "run-command": [
+                "/bin/bash",
+                "prog.sh"
+            ],
+            "runtime-option-raw": true,
+            "jail-name": "melpon2-default",
+            "templates": [
+                "bash"
+            ]
+        }
+    ],
+    "templates": {}
+}

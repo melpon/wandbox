@@ -1,0 +1,40 @@
+name = "remix-cloudflare-workers"
+type = "javascript"
+
+zone_id = ""
+account_id = ""
+route = ""
+workers_dev = true
+
+kv_namespaces = [ 
+  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" }
+]
+
+[vars]
+WANDBOX_URL_PREFIX = "http://139.180.192.155"
+WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08"
+
+[site]
+bucket = "./public"
+entry-point = "."
+
+[build]
+command = "npm run build:worker"
+watch_dir = "build/index.js"
+
+[build.upload]
+format="service-worker"
+
+[env.wandbox]
+name = "wandbox"
+kv_namespaces = [ 
+  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" }
+]
+
+[env.wandbox.vars]
+WANDBOX_URL_PREFIX = "https://develop.wandbox.org"
+WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08"
+
+# [secrets.wandbox]
+# WANDBOX_GITHUB_CLIENT_SECRET
+# WANDBOX_KV_COOKIE_SECRET

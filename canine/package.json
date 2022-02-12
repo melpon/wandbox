@@ -1,0 +1,53 @@
+{
+  "private": true,
+  "name": "canine",
+  "description": "",
+  "license": "",
+  "scripts": {
+    "build": "remix build",
+    "dev": "remix watch",
+    "dev:css": "sass --load-path=node_modules styles/:app/styles/ --watch ",
+    "postinstall": "remix setup cloudflare-workers",
+    "build:worker": "esbuild --define:process.env.NODE_ENV='\"production\"' --minify --bundle --sourcemap --outdir=dist ./worker",
+    "dev:worker": "esbuild --define:process.env.NODE_ENV='\"development\"' --bundle --sourcemap --outdir=dist ./worker",
+    "start": "miniflare --build-command \"npm run dev:worker\" --binding WANDBOX_URL_PREFIX=\"http://139.180.192.155\" --binding WANDBOX_GITHUB_CLIENT_ID=50835a4ce149db7aeedc --binding WANDBOX_GITHUB_CLIENT_SECRET=9d7a83fcb5f0ff7cd0c209206e1b9e1b4dcecd3e --binding WANDBOX_KV_COOKIE_SECRET=12345678  --watch",
+    "deploy": "npm run build && wrangler publish --env wandbox",
+    "deploy:tail": "npm run build && wrangler publish --env wandbox && wrangler tail --env wandbox --format pretty"
+  },
+  "dependencies": {
+    "@codemirror/basic-setup": "^0.19.1",
+    "@codemirror/lang-cpp": "^0.19.1",
+    "@codemirror/lang-java": "^0.19.1",
+    "@codemirror/lang-javascript": "^0.19.7",
+    "@codemirror/lang-php": "^0.19.1",
+    "@codemirror/lang-python": "^0.19.4",
+    "@codemirror/lang-rust": "^0.19.1",
+    "@codemirror/legacy-modes": "^0.19.0",
+    "@remix-run/cloudflare-workers": "^1.1.1",
+    "@remix-run/react": "^1.1.1",
+    "bootstrap": "^5.1.3",
+    "can-ndjson-stream": "^1.0.2",
+    "date-fns": "^2.28.0",
+    "react": "^17.0.2",
+    "react-bootstrap": "^2.1.1",
+    "react-bootstrap-icons": "^1.7.2",
+    "react-dom": "^17.0.2",
+    "remix": "^1.1.1",
+    "sass": "^1.49.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^2.2.2",
+    "@remix-run/dev": "^1.1.1",
+    "@types/react": "^17.0.24",
+    "@types/react-dom": "^17.0.9",
+    "@types/twitter-for-web": "^0.0.2",
+    "esbuild": "0.13.14",
+    "miniflare": "2.0.0-next.3",
+    "typescript": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "sideEffects": false,
+  "main": "dist/worker.js"
+}
