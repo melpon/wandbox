@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { PermlinkData } from "~/hooks/permlink";
 import { formatDistanceToNow } from "date-fns";
-import { useSidebarContext } from "~/contexts/SidebarContext";
+import { useAppDispatch } from "~/store";
+import { wandboxSlice } from "~/features/slice";
 
 export interface AuthorProps {
   permlinkData: PermlinkData;
@@ -34,20 +35,23 @@ async function getGithubUser(username: string): Promise<GithubUser | null> {
 }
 
 const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
-  const sidebar = useSidebarContext();
   const [user, setUser] = useState<GithubUser | null>(null);
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
   useEffect(() => {
     const username = permlinkData.parameter.githubUser;
     if (username.length === 0) {
       // Permlink の履歴を追加
       // username がある場合、GitHub から情報の取得が終わってから追加する
-      sidebar.history.pushPermlink(
-        permlinkData.permlinkId,
-        null,
-        permlinkData.parameter.compilerInfo.language,
-        permlinkData.parameter.compilerInfo.displayName,
-        permlinkData.parameter.title,
-        permlinkData.parameter.createdAt
+      dispatch(
+        actions.pushPermlink({
+          permlinkId: permlinkData.permlinkId,
+          githubUser: null,
+          currentLanguage: permlinkData.parameter.compilerInfo.language,
+          currentCompilerName: permlinkData.parameter.compilerInfo.displayName,
+          title: permlinkData.parameter.title,
+          permlinkCreatedAt: permlinkData.parameter.createdAt,
+        })
       );
       return;
     }
@@ -68,13 +72,15 @@ const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
       return;
     }
     // Permlink の履歴を追加
-    sidebar.history.pushPermlink(
-      permlinkData.permlinkId,
-      user,
-      permlinkData.parameter.compilerInfo.language,
-      permlinkData.parameter.compilerInfo.displayName,
-      permlinkData.parameter.title,
-      permlinkData.parameter.createdAt
+    dispatch(
+      actions.pushPermlink({
+        permlinkId: permlinkData.permlinkId,
+        githubUser: user,
+        currentLanguage: permlinkData.parameter.compilerInfo.language,
+        currentCompilerName: permlinkData.parameter.compilerInfo.displayName,
+        title: permlinkData.parameter.title,
+        permlinkCreatedAt: permlinkData.parameter.createdAt,
+      })
     );
   }, [user]);
 

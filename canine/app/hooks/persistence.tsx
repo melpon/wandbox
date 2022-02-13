@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { EditorView } from "@codemirror/view";
-import { SidebarContextState } from "~/contexts/SidebarContext";
 import {
   EditorSourceData,
   ResultData,
@@ -23,7 +22,6 @@ const SIDEBAR_KEY = "wandbox.sidebar";
 export function usePersistence(
   dispatch: AppDispatch,
   state: WandboxState,
-  sidebar: SidebarContextState,
   initialPermlinkMode: boolean
 ): Persistence {
   // 最初に開いたページが permlink だった場合、
@@ -104,9 +102,9 @@ export function usePersistence(
 
     // SIDEBAR_KEY のロード
     const item = JSON.parse(localStorage.getItem(SIDEBAR_KEY) || "{}");
-    sidebar.setLocked(item.locked || false);
-    sidebar.setOpened(item.opened || false);
-  }, [state, sidebar]);
+    dispatch(actions.setHistoryLocked(item.locked || false));
+    dispatch(actions.setHistoryOpened(item.opened || false));
+  }, [state]);
 
   // セーブ
   const save = React.useCallback((): void => {
@@ -162,11 +160,11 @@ export function usePersistence(
     localStorage.setItem(
       SIDEBAR_KEY,
       JSON.stringify({
-        locked: sidebar.locked,
-        opened: sidebar.opened,
+        locked: state.historyLocked,
+        opened: state.historyOpened,
       })
     );
-  }, [state, sidebar]);
+  }, [state]);
 
   return {
     save,

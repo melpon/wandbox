@@ -15,7 +15,6 @@ import { useNavigate } from "remix";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useError } from "~/hooks/error";
 import { usePersistence } from "~/hooks/persistence";
-import { useSidebarContext } from "~/contexts/SidebarContext";
 import { AppState, useAppDispatch, useAppStore } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 
@@ -29,19 +28,18 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const state = useSelector(({ wandbox }: AppState) => wandbox);
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
-  const sidebar = useSidebarContext();
-  const doCompile = useCompile(dispatch, state, sidebar, compilerList);
+  const doCompile = useCompile(dispatch, state, compilerList);
   const navigate = useNavigate();
   const [, setError] = useError();
-  const { save } = usePersistence(dispatch, state, sidebar, false);
+  const { save } = usePersistence(dispatch, state, false);
   const [editCompleted, setEditCompleted] = useState(false);
 
   const onRun = React.useCallback((): void => {
     dispatch(actions.setRunning(true));
     dispatch(actions.setSharable(true));
-    sidebar.history.prepareRun(state);
+    dispatch(actions.prepareRun());
     doCompile();
-  }, [state, sidebar, doCompile]);
+  }, [state, doCompile]);
 
   //const disabled = permlinkData !== null || currentCompilerName === "";
 

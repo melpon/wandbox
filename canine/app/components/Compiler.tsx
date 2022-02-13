@@ -13,7 +13,6 @@ import { ChooseLanguage } from "./Compiler/ChooseLanguage";
 import { ChooseCompiler } from "./Compiler/ChooseCompiler";
 import { CompilerOption } from "./Compiler/CompilerOption";
 import { RawCompilerOption } from "./Compiler/RawCompilerOption";
-import { useSidebarContext } from "~/contexts/SidebarContext";
 import { AppState, useAppDispatch, useAppStore } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 
@@ -66,7 +65,6 @@ function optionsToSwitch(
 
 const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
-  const sidebarContext = useSidebarContext();
   const {
     currentLanguage,
     currentCompilerName,
@@ -132,7 +130,7 @@ const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
     },
     []
   );
-  const doCompile = useCompile(dispatch, state, sidebarContext, compilerList);
+  const doCompile = useCompile(dispatch, state, compilerList);
   const onCtrlEnter = React.useCallback((): void => {
     doCompile();
   }, [doCompile]);

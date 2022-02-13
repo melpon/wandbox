@@ -96,10 +96,8 @@ export function useCompilerList(
   const headers = {
     "Content-Type": "application/json",
   };
-  console.log(url);
 
   const resolver = React.useCallback((json): CompilerInfo[] => {
-    console.log(json);
     return (json as AnyJson[]).map(resolveCompilerInfo);
   }, []);
 

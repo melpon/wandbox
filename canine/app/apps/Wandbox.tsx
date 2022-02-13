@@ -21,9 +21,10 @@ import { Button } from "react-bootstrap";
 import { useParams } from "remix";
 import { Author } from "~/components/Author";
 import Sidebar from "~/components/react-sidebar/Sidebar";
-import { useSidebarContext } from "~/contexts/SidebarContext";
 import { Gear, LayoutSidebarReverse, X } from "react-bootstrap-icons";
 import { AppState, useAppDispatch, useAppStore } from "~/store";
+import { wandboxSlice } from "~/features/slice";
+import { loadHistory, saveHistory } from "~/features/actions";
 
 interface WandboxRouterProps {
   permlinkId?: string;
@@ -68,20 +69,19 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
 
   const state = useSelector(({ wandbox }: AppState) => wandbox);
   const dispatch = useAppDispatch();
-  const sidebar = useSidebarContext();
+  const actions = wandboxSlice.actions;
   const { load, save } = usePersistence(
     dispatch,
     state,
-    sidebar,
     permlinkId !== undefined
   );
   // 設定データのロード（初回に一回だけ読み込む）
-  React.useEffect((): void => {
+  useEffect((): void => {
     load();
   }, []);
 
   // データに変化があった3秒後に設定を保存する
-  React.useEffect((): (() => void) => {
+  useEffect((): (() => void) => {
     const timerID = setTimeout((): void => {
       save();
     }, 3000);
@@ -91,9 +91,21 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     };
   }, [save]);
   // それとは別に、設定周りの変更があったら即座に保存する
-  React.useEffect((): void => {
+  useEffect((): void => {
     save();
   }, [state.editorSettings]);
+
+  // 履歴情報のロード
+  useEffect(() => {
+    const [history, storageExists] = loadHistory();
+    dispatch(actions.initHistory({ history, storageExists }));
+  }, []);
+
+  // 履歴の差分が出たら Local Storage に保存する
+  useEffect(() => {
+    const storageExists = saveHistory(state.history, state.storageExists);
+    dispatch(actions.setStorageExists(storageExists));
+  }, [state.history]);
 
   if (compilerList === null) {
     return null;
@@ -112,9 +124,9 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
           <h5>History</h5>
           <Button
             variant="link"
-            active={sidebar.locked}
+            active={state.historyLocked}
             onClick={() => {
-              sidebar.setLocked(!sidebar.locked);
+              dispatch(actions.setHistoryLocked(!state.historyLocked));
             }}
           >
             <LayoutSidebarReverse />
@@ -123,15 +135,15 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         <Button
           variant="link"
           onClick={() => {
-            sidebar.setOpened(false);
-            sidebar.setLocked(false);
+            dispatch(actions.setHistoryOpened(false));
+            dispatch(actions.setHistoryLocked(false));
           }}
         >
           <X />
         </Button>
       </div>
       <div className="flex-grow-1">
-        {sidebar.history.data.histories.map((x) => {
+        {state.history.histories.map((x) => {
           if (x.type === "permlink") {
             return (
               <div
@@ -154,6 +166,21 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
                 {x.githubUser && <p>{`@${x.githubUser.login}`}</p>}
               </div>
             );
+          } else if (x.type === "run") {
+            return (
+              <div
+                key={`wb-history-${x.id}`}
+                className="d-flex flex-column"
+                style={{ border: "#eeeeee solid 1px" }}
+              >
+                <p>
+                  {formatDistanceToNow(x.createdAt * 1000, { addSuffix: true })}
+                </p>
+                <p>{x.editor.title}</p>
+                <p>{x.compiler.currentLanguage}</p>
+                <p>{x.compiler.currentCompilerName}</p>
+              </div>
+            );
           }
         })}
       </div>
@@ -164,10 +191,12 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     <div id="wb-main" className="d-flex flex-column">
       <Header />
       <Sidebar
-        open={sidebar.opened}
-        docked={sidebar.locked}
+        open={state.historyOpened}
+        docked={state.historyLocked}
         sidebar={sidebarContent}
-        onSetOpen={sidebar.setOpened}
+        onSetOpen={(open) => {
+          dispatch(actions.setHistoryOpened(open));
+        }}
         pullRight={true}
         rootClassName="wb-sidebar"
         contentClassName="py-24px px-32px d-flex gap-16px"

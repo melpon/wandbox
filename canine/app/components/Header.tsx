@@ -3,17 +3,23 @@ import { useSelector } from "react-redux";
 import Navbar from "react-bootstrap/Navbar";
 import { Modal, Nav, NavDropdown } from "react-bootstrap";
 import { EditorSettings } from "./Editor/EditorSettings";
-import { useSidebarContext } from "~/contexts/SidebarContext";
-import { AppState } from "~/store";
+import { AppState, useAppDispatch } from "~/store";
+import { wandboxSlice } from "~/features/slice";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = (): React.ReactElement => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const state = useSelector(({ wandbox }: AppState) => wandbox);
-  const sidebar = useSidebarContext();
+  const { historyOpened, editorSettings } = useSelector(
+    ({ wandbox: { historyOpened, editorSettings } }: AppState) => ({
+      historyOpened,
+      editorSettings,
+    })
+  );
   const { githubUser } = WANDBOX_LOADER_DATA;
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
 
   return (
     <Navbar
@@ -32,11 +38,11 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
             </NavDropdown.Item>
             <NavDropdown.Item
               onClick={() => {
-                if (sidebar.opened) {
-                  sidebar.setOpened(false);
-                  sidebar.setLocked(false);
+                if (historyOpened) {
+                  dispatch(actions.setHistoryOpened(false));
+                  dispatch(actions.setHistoryLocked(false));
                 } else {
-                  sidebar.setOpened(true);
+                  dispatch(actions.setHistoryOpened(true));
                 }
               }}
             >
@@ -80,7 +86,7 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
             aria-label="Close"
             onClick={() => setShowSettings(false)}
           />
-          <EditorSettings settings={state.editorSettings} />
+          <EditorSettings settings={editorSettings} />
         </Modal.Body>
       </Modal>
     </Navbar>

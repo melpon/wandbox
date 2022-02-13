@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { SidebarContextState } from "~/contexts/SidebarContext";
 import { ResultData, wandboxSlice, WandboxState } from "~/features/slice";
 import { AppDispatch } from "~/store";
 import { compile } from "~/utils/compile";
@@ -10,7 +9,6 @@ import { AnyJson } from "./fetch";
 export function useCompile(
   dispatch: AppDispatch,
   state: WandboxState,
-  sidebar: SidebarContextState,
   compilerList: CompilerList
 ): () => void {
   const actions = wandboxSlice.actions;
@@ -20,8 +18,8 @@ export function useCompile(
 
   const onComplete = useCallback(() => {
     dispatch(actions.setRunning(false));
-    sidebar.history.commitRun(state);
-  }, [sidebar, state]);
+    dispatch(actions.commitRun());
+  }, []);
 
   const [, setError] = useError();
   const onError = useCallback(

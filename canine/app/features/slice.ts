@@ -1,7 +1,7 @@
 import { EditorView } from "@codemirror/view";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { normalizePath } from "~/utils/normalizePath";
-import { castDraft } from "immer";
+import { castDraft, castImmutable } from "immer";
 
 export interface EditorSourceData {
   id: string;
@@ -37,6 +37,81 @@ export interface ResultData {
   data: string;
 }
 
+export interface HistoryEditorSourceData {
+  filename: string | null;
+  text: string;
+}
+export interface HistoryCompilerData {
+  currentLanguage: string;
+  currentCompilerName: string;
+  currentSwitches: { [name: string]: string | boolean };
+  compilerOptionRaw: string;
+  runtimeOptionRaw: string;
+}
+export interface HistoryEditorData {
+  sources: HistoryEditorSourceData[];
+  currentTab: number;
+  stdin: string;
+  title: string;
+  description: string;
+}
+export interface HistoryDataQuick {
+  type: "quick";
+  id: number;
+  createdAt: number;
+  compiler: HistoryCompilerData;
+  editor: HistoryEditorData;
+  results: ResultData[];
+}
+export interface HistoryDataRun {
+  type: "run";
+  id: number;
+  createdAt: number;
+  compiler: HistoryCompilerData;
+  editor: HistoryEditorData;
+  results: ResultData[];
+}
+export interface HistoryDataPermlink {
+  type: "permlink";
+  id: number;
+  createdAt: number;
+  permlinkId: string;
+  githubUser: GithubUser | null;
+  // 細かいデータはロードした時に読み込むので、
+  // リスト一覧の表示に必要な情報だけ保存しておく
+  currentLanguage: string;
+  currentCompilerName: string;
+  title: string;
+  permlinkCreatedAt: number;
+}
+
+export type StorageExists = { [id: number]: "" };
+
+export interface HistoryData {
+  quickSaves: HistoryDataQuick[];
+  histories: (HistoryDataRun | HistoryDataPermlink)[];
+  keyCounter: number;
+}
+
+function sourceToHistorySource(
+  sources: EditorSourceData[]
+): HistoryEditorSourceData[] {
+  return sources
+    .map((s) => {
+      if (s.view === undefined && s.text === undefined) {
+        return null;
+      }
+      return {
+        filename: s.filename,
+        text: s.text !== undefined ? s.text : s.view!.state.doc.toString(),
+      };
+    })
+    .filter((s) => s !== null) as HistoryEditorSourceData[];
+}
+
+const WANDBOX_MAX_QUICKSAVE_COUNT = 5;
+const WANDBOX_MAX_HISTORY_COUNT = 50;
+
 const initialState = {
   currentLanguage: "",
   currentCompilerName: "",
@@ -49,7 +124,12 @@ const initialState = {
 
   currentTab: 0,
   tabCounter: 0,
-  sources: [] as EditorSourceData[],
+  sources: [
+    {
+      id: "wandbox-editor-main",
+      filename: null,
+    },
+  ] as EditorSourceData[],
   stdin: "",
   stdinOpened: false,
   editorSettings: {
@@ -63,6 +143,16 @@ const initialState = {
   sharable: false,
 
   results: [] as ResultData[],
+
+  historyOpened: false as boolean,
+  historyLocked: false as boolean,
+  history: {
+    quickSaves: [],
+    histories: [],
+    keyCounter: 0,
+  } as HistoryData,
+  storageExists: {} as StorageExists,
+  tempRunData: null as HistoryDataRun | null,
 };
 
 export type WandboxState = typeof initialState;
@@ -225,6 +315,142 @@ export const wandboxSlice = createSlice({
     },
     setSharable: (state, action: PayloadAction<boolean>) => {
       state.sharable = action.payload;
+    },
+    pushQuickSave: (state) => {
+      const historyData: HistoryDataQuick = {
+        type: "quick",
+        id: state.history.keyCounter,
+        createdAt: Math.floor(Date.now() / 1000),
+        compiler: {
+          currentLanguage: state.currentLanguage,
+          currentCompilerName: state.currentCompilerName,
+          currentSwitches: state.currentSwitches,
+          compilerOptionRaw: state.compilerOptionRaw,
+          runtimeOptionRaw: state.runtimeOptionRaw,
+        },
+        editor: {
+          sources: sourceToHistorySource(state.sources as any),
+          currentTab: state.currentTab,
+          stdin: state.stdin,
+          title: state.title,
+          description: state.description,
+        },
+        results: state.results,
+      };
+      const h = state.history;
+      h.quickSaves.push(historyData);
+      if (h.quickSaves.length > WANDBOX_MAX_QUICKSAVE_COUNT) {
+        h.quickSaves.shift();
+      }
+      h.keyCounter += 1;
+    },
+    prepareRun: (state) => {
+      const historyData: HistoryDataRun = {
+        type: "run",
+        id: state.history.keyCounter,
+        createdAt: Math.floor(Date.now() / 1000),
+        compiler: {
+          currentLanguage: state.currentLanguage,
+          currentCompilerName: state.currentCompilerName,
+          currentSwitches: state.currentSwitches,
+          compilerOptionRaw: state.compilerOptionRaw,
+          runtimeOptionRaw: state.runtimeOptionRaw,
+        },
+        editor: {
+          sources: sourceToHistorySource(state.sources as any),
+          currentTab: state.currentTab,
+          stdin: state.stdin,
+          title: state.title,
+          description: state.description,
+        },
+        // results は最終的に結果が得られた後に設定する
+        results: [],
+      };
+
+      state.tempRunData = historyData;
+    },
+    commitRun: (state) => {
+      if (state.tempRunData === null) {
+        return;
+      }
+
+      const historyData = {
+        ...state.tempRunData,
+        results: state.results,
+      };
+      const h = state.history;
+      h.histories.push(historyData);
+      if (h.histories.length > WANDBOX_MAX_HISTORY_COUNT) {
+        h.histories.shift();
+      }
+      h.keyCounter += 1;
+    },
+    pushPermlink: (
+      state,
+      action: PayloadAction<{
+        permlinkId: string;
+        githubUser: GithubUser | null;
+        currentLanguage: string;
+        currentCompilerName: string;
+        title: string;
+        permlinkCreatedAt: number;
+      }>
+    ) => {
+      const {
+        permlinkId,
+        githubUser,
+        currentLanguage,
+        currentCompilerName,
+        title,
+        permlinkCreatedAt,
+      } = action.payload;
+
+      const historyData: HistoryDataPermlink = {
+        type: "permlink",
+        id: state.history.keyCounter,
+        createdAt: Math.floor(Date.now() / 1000),
+        permlinkId,
+        githubUser,
+        currentLanguage,
+        currentCompilerName,
+        title,
+        permlinkCreatedAt,
+      };
+
+      const h = state.history;
+
+      // 同じ permlink は削除する
+      h.histories = h.histories.filter(
+        (x) => !(x.type === "permlink" && x.permlinkId === permlinkId)
+      );
+
+      h.histories.push(historyData);
+
+      // 最大数を超えたら古いのを削除する
+      if (h.histories.length > WANDBOX_MAX_HISTORY_COUNT) {
+        h.histories.shift();
+      }
+      h.keyCounter += 1;
+    },
+    setHistoryOpened: (state, action: PayloadAction<boolean>) => {
+      state.historyOpened = action.payload;
+    },
+    setHistoryLocked: (state, action: PayloadAction<boolean>) => {
+      state.historyLocked = action.payload;
+    },
+    initHistory: (
+      state,
+      action: PayloadAction<{
+        history: HistoryData;
+        storageExists: StorageExists;
+      }>
+    ) => {
+      const { history, storageExists } = action.payload;
+      state.history = history;
+      state.storageExists = storageExists;
+    },
+    setStorageExists: (state, action: PayloadAction<StorageExists>) => {
+      state.storageExists = action.payload;
     },
   },
   extraReducers: (builder) => {},
