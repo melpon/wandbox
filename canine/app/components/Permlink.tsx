@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import Button from "react-bootstrap/Button";
 
-import { ResultContext, useResultContext } from "~/contexts/ResultContext";
 import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
 import { createBody } from "~/utils/compile";
 import {
@@ -56,7 +55,6 @@ const Permlink: React.FC<PermlinkProps> = (
   const navigate = useNavigate();
   const state = useSelector(({ wandbox }: AppState) => wandbox);
   const editor = useEditorContext();
-  const result = useResultContext();
   const [, setError] = useError();
   const [sharing, setSharing] = React.useState<boolean>(false);
 
@@ -73,12 +71,12 @@ const Permlink: React.FC<PermlinkProps> = (
     }
     const body = JSON.stringify({
       ...json,
-      results: result.results,
+      results: state.results,
       login: false,
     });
 
     doPermlink(null, { body: body });
-  }, [compilerList, editor, state, result]);
+  }, [compilerList, editor, state]);
 
   useEffect((): void => {
     // 初回での更新は弾く

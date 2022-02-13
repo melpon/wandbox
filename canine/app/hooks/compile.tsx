@@ -1,31 +1,29 @@
 import React, { useCallback } from "react";
 import { EditorContextState } from "~/contexts/EditorContext";
-import { ResultContextState, ResultData } from "~/contexts/ResultContext";
 import { SidebarContextState } from "~/contexts/SidebarContext";
-import { WandboxState } from "~/features/slice";
+import { ResultData, wandboxSlice, WandboxState } from "~/features/slice";
+import { AppDispatch } from "~/store";
 import { compile } from "~/utils/compile";
 import { CompilerList } from "./compilerList";
 import { useError } from "./error";
 import { AnyJson } from "./fetch";
 
 export function useCompile(
+  dispatch: AppDispatch,
   editor: EditorContextState,
   state: WandboxState,
   sidebar: SidebarContextState,
-  compilerList: CompilerList,
-  result: ResultContextState
+  compilerList: CompilerList
 ): () => void {
-  const onResult = useCallback(
-    (json: AnyJson): void => {
-      result.add(json as unknown as ResultData);
-    },
-    [result.add]
-  );
+  const actions = wandboxSlice.actions;
+  const onResult = useCallback((json: AnyJson): void => {
+    dispatch(actions.addResult(json as unknown as ResultData));
+  }, []);
 
   const onComplete = useCallback(() => {
     editor.setRunning(false);
-    sidebar.history.commitRun(result);
-  }, [sidebar, editor, result]);
+    sidebar.history.commitRun(state);
+  }, [sidebar, editor, state]);
 
   const [, setError] = useError();
   const onError = useCallback(
@@ -37,16 +35,8 @@ export function useCompile(
   );
 
   const doCompile = useCallback((): void => {
-    result.clear();
+    dispatch(actions.clearResult());
     compile(editor, state, compilerList, onResult, onComplete, onError);
-  }, [
-    editor,
-    result.clear,
-    state,
-    compilerList,
-    onResult,
-    onComplete,
-    onError,
-  ]);
+  }, [editor, state, compilerList, onResult, onComplete, onError]);
   return doCompile;
 }

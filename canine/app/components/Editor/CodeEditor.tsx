@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { resolveLanguage, importLanguage } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
 import { EditorContextState, EditorSourceData } from "~/contexts/EditorContext";
-import { ResultContextState } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useCompile } from "~/hooks/compile";
@@ -17,21 +16,12 @@ interface CodeEditorProps {
   editor: EditorContextState;
   state: WandboxState;
   compilerList: CompilerList;
-  result: ResultContextState;
   permlinkData: PermlinkData | null;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
-  const {
-    sources,
-    tab,
-    show,
-    editor,
-    state,
-    compilerList,
-    result,
-    permlinkData,
-  } = props;
+  const { sources, tab, show, editor, state, compilerList, permlinkData } =
+    props;
   //const { currentLanguage, currentCompilerName } = compiler;
 
   /*

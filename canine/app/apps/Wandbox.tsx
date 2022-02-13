@@ -18,7 +18,6 @@ import { Result } from "~/components/Result";
 import { Run } from "~/components/Run";
 import { CodeMirror6 } from "~/components/CodeMirror6";
 import { useEditorContext } from "~/contexts/EditorContext";
-import { useResultContext } from "~/contexts/ResultContext";
 import { EditorSettings } from "~/components/Editor/EditorSettings";
 import { Title } from "~/components/Title";
 import { Button } from "react-bootstrap";
@@ -72,15 +71,12 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
 
   const editor = useEditorContext();
   const state = useSelector(({ wandbox }: AppState) => wandbox);
-  console.log("wandboxstate", state);
   const dispatch = useAppDispatch();
-  const result = useResultContext();
   const sidebar = useSidebarContext();
   const { load, save } = usePersistence(
     editor,
     dispatch,
     state,
-    result,
     sidebar,
     permlinkId !== undefined
   );

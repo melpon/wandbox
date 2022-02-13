@@ -1,11 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+type ResultType =
+  | "Control"
+  | "CompilerMessageS"
+  | "CompilerMessageE"
+  | "StdOut"
+  | "StdErr"
+  | "ExitCode"
+  | "Signal";
+
+export interface ResultData {
+  type: ResultType;
+  data: string;
+}
+
 const initialState = {
   currentLanguage: "",
   currentCompilerName: "",
   currentSwitches: {} as { [name: string]: string | boolean },
   compilerOptionRaw: "",
   runtimeOptionRaw: "",
+  results: [] as ResultData[],
 };
 
 export type WandboxState = typeof initialState;
@@ -38,6 +53,15 @@ export const wandboxSlice = createSlice({
     },
     setRuntimeOptionRaw: (state, action: PayloadAction<string>) => {
       state.runtimeOptionRaw = action.payload;
+    },
+    clearResult: (state) => {
+      state.results = [];
+    },
+    addResult: (state, action: PayloadAction<ResultData>) => {
+      state.results.push(action.payload);
+    },
+    setResults: (state, action: PayloadAction<ResultData[]>) => {
+      state.results = action.payload;
     },
   },
   extraReducers: (builder) => {},

@@ -9,7 +9,6 @@ import {
   SingleSwitch,
 } from "~/hooks/compilerList";
 import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
-import { ResultContext, useResultContext } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { useCompile } from "~/hooks/compile";
 import { BoxArrowUp } from "react-bootstrap-icons";
@@ -32,19 +31,11 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const state = useSelector(({ wandbox }: AppState) => wandbox);
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
-  const result = useResultContext();
   const sidebar = useSidebarContext();
-  const doCompile = useCompile(editor, state, sidebar, compilerList, result);
+  const doCompile = useCompile(dispatch, editor, state, sidebar, compilerList);
   const navigate = useNavigate();
   const [, setError] = useError();
-  const { save } = usePersistence(
-    editor,
-    dispatch,
-    state,
-    result,
-    sidebar,
-    false
-  );
+  const { save } = usePersistence(editor, dispatch, state, sidebar, false);
   const [editCompleted, setEditCompleted] = useState(false);
 
   const onRun = React.useCallback((): void => {
@@ -146,7 +137,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
     }
     // ResultContext への設定
     {
-      result.setResults(permlinkData.results);
+      dispatch(actions.setResults(permlinkData.results));
     }
 
     // すぐに save() すると値が反映されないので、

@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 import { EditorContextState, EditorSourceData } from "~/contexts/EditorContext";
-import { ResultContextState, ResultData } from "~/contexts/ResultContext";
 import { EditorView } from "@codemirror/view";
 import { SidebarContextState } from "~/contexts/SidebarContext";
-import { wandboxSlice, WandboxState } from "~/features/slice";
+import { ResultData, wandboxSlice, WandboxState } from "~/features/slice";
 import { AppDispatch, useAppDispatch } from "~/store";
 
 interface Persistence {
@@ -21,7 +20,6 @@ export function usePersistence(
   editor: EditorContextState,
   dispatch: AppDispatch,
   state: WandboxState,
-  result: ResultContextState,
   sidebar: SidebarContextState,
   initialPermlinkMode: boolean
 ): Persistence {
@@ -98,14 +96,14 @@ export function usePersistence(
     if (!permlinkMode) {
       const item = localStorage.getItem(RESULT_RESULTS_KEY) || "[]";
       const ar = JSON.parse(item);
-      result.setResults(ar as ResultData[]);
+      dispatch(actions.setResults(ar as ResultData[]));
     }
 
     // SIDEBAR_KEY のロード
     const item = JSON.parse(localStorage.getItem(SIDEBAR_KEY) || "{}");
     sidebar.setLocked(item.locked || false);
     sidebar.setOpened(item.opened || false);
-  }, [editor, state, result, sidebar]);
+  }, [editor, state, sidebar]);
 
   // セーブ
   const save = React.useCallback((): void => {
@@ -153,11 +151,10 @@ export function usePersistence(
         compilerOptionRaw: state.compilerOptionRaw,
         runtimeOptionRaw: state.runtimeOptionRaw,
       };
-      console.log("state2", state);
       localStorage.setItem(COMPILER_KEY, JSON.stringify(item));
     }
     if (!permlinkMode) {
-      localStorage.setItem(RESULT_RESULTS_KEY, JSON.stringify(result.results));
+      localStorage.setItem(RESULT_RESULTS_KEY, JSON.stringify(state.results));
     }
     localStorage.setItem(
       SIDEBAR_KEY,
@@ -166,8 +163,7 @@ export function usePersistence(
         opened: sidebar.opened,
       })
     );
-  }, [editor, state.currentLanguage, result, sidebar]);
-  console.log("state", state);
+  }, [editor, state.currentLanguage, sidebar]);
 
   return {
     save,

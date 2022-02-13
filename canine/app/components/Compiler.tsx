@@ -9,7 +9,6 @@ import {
 import { PermlinkData } from "~/hooks/permlink";
 import { useCompile } from "~/hooks/compile";
 import { useEditorContext } from "~/contexts/EditorContext";
-import { useResultContext } from "~/contexts/ResultContext";
 import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
 import { ChooseLanguage } from "./Compiler/ChooseLanguage";
 import { ChooseCompiler } from "./Compiler/ChooseCompiler";
@@ -69,7 +68,6 @@ function optionsToSwitch(
 const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const editorContext = useEditorContext();
-  const resultContext = useResultContext();
   const sidebarContext = useSidebarContext();
   const {
     currentLanguage,
@@ -137,11 +135,11 @@ const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
     []
   );
   const doCompile = useCompile(
+    dispatch,
     editorContext,
     state,
     sidebarContext,
-    compilerList,
-    resultContext
+    compilerList
   );
   const onCtrlEnter = React.useCallback((): void => {
     doCompile();

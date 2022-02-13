@@ -1,11 +1,9 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import { ResultData } from "~/features/slice";
 
-import {
-  ResultContext,
-  ResultData,
-  useResultContext,
-} from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
+import { AppState } from "~/store";
 
 interface ResultProps {
   permlinkData: PermlinkData | null;
@@ -13,8 +11,8 @@ interface ResultProps {
 
 const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
   const { permlinkData } = props;
-  const rs = useResultContext();
-  const results = permlinkData === null ? rs.results : permlinkData.results;
+  const rs = useSelector(({ wandbox: { results } }: AppState) => results);
+  const results = permlinkData === null ? rs : permlinkData.results;
   const mergedResults: ResultData[] = [];
   let preview: ResultData | null = null;
   for (const r of results) {

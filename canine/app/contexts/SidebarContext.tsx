@@ -6,9 +6,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { WandboxState } from "~/features/slice";
+import { ResultData, WandboxState } from "~/features/slice";
 import { EditorContextState } from "./EditorContext";
-import { ResultContextState, ResultData } from "./ResultContext";
 
 export interface EditorSourceData {
   filename: string | null;
@@ -79,11 +78,10 @@ export interface History {
   data: HistoryData;
   pushQuickSave: (
     state: WandboxState,
-    editorContext: EditorContextState,
-    resultContext: ResultContextState
+    editorContext: EditorContextState
   ) => void;
   prepareRun: (state: WandboxState, editorContext: EditorContextState) => void;
-  commitRun: (resultContext: ResultContextState) => void;
+  commitRun: (state: WandboxState) => void;
   pushPermlink: (
     permlinkId: string,
     githubUser: GithubUser | null,
@@ -172,8 +170,7 @@ function loadHistory(): [HistoryData, StorageExists] {
 function createHistoryDataQuick(
   id: number,
   state: WandboxState,
-  editorContext: EditorContextState,
-  resultContext: ResultContextState
+  editorContext: EditorContextState
 ): HistoryDataQuick {
   const sources = editorContext.sources
     .map((s) => {
@@ -204,7 +201,7 @@ function createHistoryDataQuick(
       title: editorContext.title,
       description: editorContext.description,
     },
-    results: resultContext.results,
+    results: state.results,
   };
 }
 
@@ -317,16 +314,11 @@ function useHistory(): History {
   }, []);
 
   const pushQuickSave = useCallback(
-    (
-      state: WandboxState,
-      editorContext: EditorContextState,
-      resultContext: ResultContextState
-    ) => {
+    (state: WandboxState, editorContext: EditorContextState) => {
       const historyData = createHistoryDataQuick(
         data.keyCounter,
         state,
-        editorContext,
-        resultContext
+        editorContext
       );
       let newQuickSaves = [...data.quickSaves, historyData];
       let newStorageExists = storageExists;
@@ -365,7 +357,7 @@ function useHistory(): History {
   );
 
   const commitRun = useCallback(
-    (resultContext: ResultContextState) => {
+    (state: WandboxState) => {
       console.log("tempRunData", tempRunData);
       if (tempRunData === null) {
         return;
@@ -373,7 +365,7 @@ function useHistory(): History {
 
       const historyData = {
         ...tempRunData,
-        results: resultContext.results,
+        results: state.results,
       };
       let newHistories = [...data.histories, historyData];
       let newStorageExists = storageExists;

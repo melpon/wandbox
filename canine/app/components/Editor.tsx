@@ -5,7 +5,6 @@ import Col from "react-bootstrap/Col";
 
 import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
 import { CompilerList } from "~/hooks/compilerList";
-import { ResultContext, useResultContext } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorSettings } from "./Editor/EditorSettings";
@@ -23,7 +22,6 @@ export interface EditorProps {
 const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const editor = useEditorContext();
   const state = useSelector(({ wandbox }: AppState) => wandbox);
-  const result = useResultContext();
   const { compilerList, permlinkData } = props;
   const { settings } = editor;
   // パーマリンク時は permlinkData からソースデータを作る
@@ -64,7 +62,6 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
                 editor,
                 state,
                 compilerList,
-                result,
                 permlinkData,
               }}
             />
