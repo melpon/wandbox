@@ -1,8 +1,12 @@
 import React, { useMemo } from "react";
-import { EditorContextState, EditorSourceData } from "~/contexts/EditorContext";
 import { EditorView } from "@codemirror/view";
 import { SidebarContextState } from "~/contexts/SidebarContext";
-import { ResultData, wandboxSlice, WandboxState } from "~/features/slice";
+import {
+  EditorSourceData,
+  ResultData,
+  wandboxSlice,
+  WandboxState,
+} from "~/features/slice";
 import { AppDispatch, useAppDispatch } from "~/store";
 
 interface Persistence {
@@ -17,7 +21,6 @@ const COMPILER_KEY = "wandbox.compiler";
 const SIDEBAR_KEY = "wandbox.sidebar";
 
 export function usePersistence(
-  editor: EditorContextState,
   dispatch: AppDispatch,
   state: WandboxState,
   sidebar: SidebarContextState,
@@ -36,19 +39,19 @@ export function usePersistence(
       const item = localStorage.getItem(EDITOR_CODE_KEY) || "{}";
       const map = JSON.parse(item);
       if (map.sources !== undefined) {
-        editor.initSources(map.sources as EditorSourceData[]);
+        dispatch(actions.initSources(map.sources as EditorSourceData[]));
       }
       if (map.currentTab !== undefined) {
-        editor.setCurrentTab(map.currentTab);
+        dispatch(actions.setCurrentTab(map.currentTab));
       }
       if (map.stdin !== undefined) {
-        editor.setStdin(map.stdin);
+        dispatch(actions.setStdin(map.stdin));
       }
       if (map.title !== undefined) {
-        editor.setTitle(map.title);
+        dispatch(actions.setTitle(map.title));
       }
       if (map.description !== undefined) {
-        editor.setDescription(map.description);
+        dispatch(actions.setDescription(map.description));
       }
     }
     // EDITOR_SETTINGS_KEY のロード
@@ -56,19 +59,19 @@ export function usePersistence(
       const item = localStorage.getItem(EDITOR_SETTINGS_KEY) || "{}";
       const map = JSON.parse(item);
       if (map.editor !== undefined) {
-        editor.settings.setEditor(map.editor);
+        dispatch(actions.setEditorSettingsEditor(map.editor));
       }
       if (map.opened !== undefined) {
-        editor.settings.setOpened(map.opened);
+        dispatch(actions.setEditorSettingsOpened(map.opened));
       }
       if (map.smartIndent !== undefined) {
-        editor.settings.setSmartIndent(map.smartIndent);
+        dispatch(actions.setEditorSettingsSmartIndent(map.smartIndent));
       }
       if (map.tabKey !== undefined) {
-        editor.settings.setTabKey(map.tabKey);
+        dispatch(actions.setEditorSettingsTabKey(map.tabKey));
       }
       if (map.tabWidth !== undefined) {
-        editor.settings.setTabWidth(map.tabWidth);
+        dispatch(actions.setEditorSettingsTabWidth(map.tabWidth));
       }
     }
     // COMPILER_KEY のロード
@@ -103,14 +106,14 @@ export function usePersistence(
     const item = JSON.parse(localStorage.getItem(SIDEBAR_KEY) || "{}");
     sidebar.setLocked(item.locked || false);
     sidebar.setOpened(item.opened || false);
-  }, [editor, state, sidebar]);
+  }, [state, sidebar]);
 
   // セーブ
   const save = React.useCallback((): void => {
     if (!permlinkMode) {
       // view の中身を text に移動
       let hasError = false;
-      const sources = editor.sources.map((s) => {
+      const sources = state.sources.map((s) => {
         if (s.view === undefined && s.text === undefined) {
           hasError = true;
           return;
@@ -125,21 +128,21 @@ export function usePersistence(
       if (!hasError) {
         const item = {
           sources: sources,
-          currentTab: editor.currentTab,
-          stdin: editor.stdin,
-          title: editor.title,
-          description: editor.description,
+          currentTab: state.currentTab,
+          stdin: state.stdin,
+          title: state.title,
+          description: state.description,
         };
         localStorage.setItem(EDITOR_CODE_KEY, JSON.stringify(item));
       }
     }
     {
       const item = {
-        editor: editor.settings.editor,
-        opened: editor.settings.opened,
-        smartIndent: editor.settings.smartIndent,
-        tabKey: editor.settings.tabKey,
-        tabWidth: editor.settings.tabWidth,
+        editor: state.editorSettings.editor,
+        opened: state.editorSettings.opened,
+        smartIndent: state.editorSettings.smartIndent,
+        tabKey: state.editorSettings.tabKey,
+        tabWidth: state.editorSettings.tabWidth,
       };
       localStorage.setItem(EDITOR_SETTINGS_KEY, JSON.stringify(item));
     }
@@ -163,7 +166,7 @@ export function usePersistence(
         opened: sidebar.opened,
       })
     );
-  }, [editor, state.currentLanguage, sidebar]);
+  }, [state, sidebar]);
 
   return {
     save,

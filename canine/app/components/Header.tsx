@@ -1,16 +1,17 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import Navbar from "react-bootstrap/Navbar";
 import { Modal, Nav, NavDropdown } from "react-bootstrap";
 import { EditorSettings } from "./Editor/EditorSettings";
-import { useEditorContext } from "~/contexts/EditorContext";
 import { useSidebarContext } from "~/contexts/SidebarContext";
+import { AppState } from "~/store";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = (): React.ReactElement => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const editor = useEditorContext();
+  const state = useSelector(({ wandbox }: AppState) => wandbox);
   const sidebar = useSidebarContext();
   const { githubUser } = WANDBOX_LOADER_DATA;
 
@@ -79,7 +80,7 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
             aria-label="Close"
             onClick={() => setShowSettings(false)}
           />
-          <EditorSettings settings={editor.settings} />
+          <EditorSettings settings={state.editorSettings} />
         </Modal.Body>
       </Modal>
     </Navbar>

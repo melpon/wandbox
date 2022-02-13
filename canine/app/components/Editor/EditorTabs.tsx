@@ -2,21 +2,25 @@ import React from "react";
 import Nav from "react-bootstrap/Nav";
 import { FileEarmarkPlus, Gear } from "react-bootstrap-icons";
 
-import { EditorContextState } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { EditorTab, RenamingSource } from "./EditorTab";
 import { Button } from "react-bootstrap";
+import { wandboxSlice, WandboxState } from "~/features/slice";
+import { useAppDispatch } from "~/store";
+import { addSource } from "~/features/actions";
 
 interface EditorTabsProps {
-  editor: EditorContextState;
+  state: WandboxState;
   permlinkData: PermlinkData | null;
 }
 
 const EditorTabs: React.FC<EditorTabsProps> = (
   props
 ): React.ReactElement | null => {
-  const { editor, permlinkData } = props;
+  const { state, permlinkData } = props;
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
   const [renamingSources, setRenamingSources] = React.useState<
     RenamingSource[]
   >([]);
@@ -24,14 +28,14 @@ const EditorTabs: React.FC<EditorTabsProps> = (
   // パーマリンク時は permlinkData からソースデータを作る
   const sources =
     permlinkData === null
-      ? editor.sources
+      ? state.sources
       : createEditorSourceData(
           permlinkData.parameter.code,
           permlinkData.parameter.codes
         );
 
   React.useEffect((): void => {
-    const rs = editor.sources.map(
+    const rs = state.sources.map(
       (source): RenamingSource => ({
         renaming: false,
         // 0番目は source.filename == null になっていて、UI 上で編集不可なので、
@@ -41,16 +45,16 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       })
     );
     setRenamingSources(rs);
-  }, [editor.sources]);
+  }, [state.sources]);
 
   const onAddTab = React.useCallback((): void => {
-    editor.addSource("noname");
-  }, [editor]);
+    addSource(dispatch, state.sources, "noname");
+  }, [state]);
 
   const onChangeTabs = React.useCallback(
     (index: number): void => {
       // 追加ボタン
-      editor.setCurrentTab(index);
+      dispatch(actions.setCurrentTab(index));
 
       // 編集中のタブはキャンセルする
       const rs = renamingSources.map(
@@ -63,18 +67,15 @@ const EditorTabs: React.FC<EditorTabsProps> = (
 
       setRenamingSources(rs);
     },
-    [editor, renamingSources]
+    [state, renamingSources]
   );
-  const onClickTabClose = React.useCallback(
-    (index: number): void => {
-      editor.removeSource(index);
-    },
-    [editor]
-  );
+  const onClickTabClose = React.useCallback((index: number): void => {
+    dispatch(actions.removeSource(index));
+  }, []);
 
   const onClickTabEdit = React.useCallback(
     (index: number): void => {
-      editor.setCurrentTab(index);
+      dispatch(actions.setCurrentTab(index));
       const rs = renamingSources.map(
         (r, i): RenamingSource => ({
           ...r,
@@ -84,7 +85,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       );
       setRenamingSources(rs);
     },
-    [editor, renamingSources]
+    [state, renamingSources]
   );
   const onChangeRenamingFilename = React.useCallback(
     (index: number, filename: string): void => {
@@ -108,7 +109,12 @@ const EditorTabs: React.FC<EditorTabsProps> = (
   );
   const onSubmitRenamingFilename = React.useCallback(
     (index: number): void => {
-      editor.setFilename(index, renamingSources[index].filename);
+      dispatch(
+        actions.setFilename({
+          tab: index,
+          filename: renamingSources[index].filename,
+        })
+      );
       const rs = [...renamingSources];
       rs[index] = {
         ...rs[index],
@@ -117,7 +123,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       };
       setRenamingSources(rs);
     },
-    [renamingSources, editor]
+    [renamingSources, state]
   );
 
   return (
@@ -125,7 +131,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       <Nav
         className="wb-editortabs flex-grow-1"
         variant="tabs"
-        activeKey={`wb-editor-${editor.currentTab}`}
+        activeKey={`wb-editor-${state.currentTab}`}
       >
         {sources.map((source, index): React.ReactElement => {
           return (
@@ -136,7 +142,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
                 source,
                 readonly: permlinkData !== null,
                 renamingSource: renamingSources[index] || null,
-                active: index === editor.currentTab,
+                active: index === state.currentTab,
                 onChangeTabs,
                 onClickTabEdit,
                 onClickTabClose,
@@ -180,11 +186,11 @@ const EditorTabs: React.FC<EditorTabsProps> = (
         }
       )*/}
       </Nav>
-      {!editor.stdinOpened && (
+      {!state.stdinOpened && (
         <Button
           variant="link"
           className="wb-stdinbutton align-self-end"
-          onClick={() => editor.setStdinOpened(!editor.stdinOpened)}
+          onClick={() => dispatch(actions.setStdinOpened(!state.stdinOpened))}
         >
           Stdin
         </Button>

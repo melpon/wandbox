@@ -1,5 +1,5 @@
+import { EditorSourceData } from "~/features/slice";
 import { PermlinkCode } from "~/hooks/permlink";
-import { EditorSourceData } from "~/contexts/EditorContext";
 
 // PermlinkCode から EditorSourceData に変換する
 export function createEditorSourceData(

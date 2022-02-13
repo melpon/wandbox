@@ -4,8 +4,8 @@ import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Form from "react-bootstrap/Form";
 import { ChevronRight, Gear } from "react-bootstrap-icons";
-
-import { EditorSettingsData, EditorType } from "~/contexts/EditorContext";
+import { EditorSettingsData, EditorType, wandboxSlice } from "~/features/slice";
+import { useAppDispatch } from "~/store";
 
 interface EditorSettingsProps {
   settings: EditorSettingsData;
@@ -15,12 +15,14 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
   props
 ): React.ReactElement => {
   const { settings } = props;
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
 
   const onClickOpenSettings = React.useCallback((): void => {
-    settings.setOpened(true);
+    dispatch(actions.setEditorSettingsOpened(true));
   }, [settings]);
   const onClickCloseSettings = React.useCallback((): void => {
-    settings.setOpened(false);
+    dispatch(actions.setEditorSettingsOpened(false));
   }, [settings]);
   const onChangeEditor = React.useCallback(
     (e): void => {
@@ -38,7 +40,7 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
         //  settings.setEditor(editor);
         //});
       } else {
-        settings.setEditor(editor);
+        dispatch(actions.setEditorSettingsEditor(editor));
       }
     },
     [settings]
@@ -46,21 +48,21 @@ const EditorSettings: React.FC<EditorSettingsProps> = (
   const onChangeTabKey = React.useCallback(
     (e): void => {
       const tabKey = e.target.value;
-      settings.setTabKey(tabKey);
+      dispatch(actions.setEditorSettingsTabKey(tabKey));
     },
     [settings]
   );
   const onChangeTabWidth = React.useCallback(
     (e): void => {
       const tabWidth = e.target.value;
-      settings.setTabWidth(tabWidth);
+      dispatch(actions.setEditorSettingsTabWidth(tabWidth));
     },
     [settings]
   );
   const onChangeSmartIndent = React.useCallback(
     (e): void => {
       const smartIndent = e.target.checked;
-      settings.setSmartIndent(smartIndent);
+      dispatch(actions.setEditorSettingsSmartIndent(smartIndent));
     },
     [settings]
   );

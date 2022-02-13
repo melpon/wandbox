@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { EditorContextState } from "~/contexts/EditorContext";
 import { SidebarContextState } from "~/contexts/SidebarContext";
 import { ResultData, wandboxSlice, WandboxState } from "~/features/slice";
 import { AppDispatch } from "~/store";
@@ -10,7 +9,6 @@ import { AnyJson } from "./fetch";
 
 export function useCompile(
   dispatch: AppDispatch,
-  editor: EditorContextState,
   state: WandboxState,
   sidebar: SidebarContextState,
   compilerList: CompilerList
@@ -21,22 +19,22 @@ export function useCompile(
   }, []);
 
   const onComplete = useCallback(() => {
-    editor.setRunning(false);
+    dispatch(actions.setRunning(false));
     sidebar.history.commitRun(state);
-  }, [sidebar, editor, state]);
+  }, [sidebar, state]);
 
   const [, setError] = useError();
   const onError = useCallback(
     (error) => {
-      editor.setRunning(false);
+      dispatch(actions.setRunning(false));
       setError(error.toString());
     },
-    [editor, setError]
+    [setError]
   );
 
   const doCompile = useCallback((): void => {
     dispatch(actions.clearResult());
-    compile(editor, state, compilerList, onResult, onComplete, onError);
-  }, [editor, state, compilerList, onResult, onComplete, onError]);
+    compile(state, compilerList, onResult, onComplete, onError);
+  }, [state, compilerList, onResult, onComplete, onError]);
   return doCompile;
 }

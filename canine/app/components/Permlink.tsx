@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import Button from "react-bootstrap/Button";
 
-import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
 import { createBody } from "~/utils/compile";
 import {
   CompilerList,
@@ -15,7 +14,8 @@ import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useNavigate } from "remix";
 import { BoxArrowUp, DistributeHorizontal } from "react-bootstrap-icons";
-import { AppState, useAppStore } from "~/store";
+import { AppState, useAppDispatch, useAppStore } from "~/store";
+import { wandboxSlice } from "~/features/slice";
 
 interface TweetButtonProps {
   permlinkId: string;
@@ -54,7 +54,8 @@ const Permlink: React.FC<PermlinkProps> = (
   const { compilerList, permlinkData, clearPermlinkData } = props;
   const navigate = useNavigate();
   const state = useSelector(({ wandbox }: AppState) => wandbox);
-  const editor = useEditorContext();
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
   const [, setError] = useError();
   const [sharing, setSharing] = React.useState<boolean>(false);
 
@@ -65,7 +66,7 @@ const Permlink: React.FC<PermlinkProps> = (
 
   const onShare = React.useCallback((): void => {
     setSharing(true);
-    const json = createBody(editor, state, compilerList);
+    const json = createBody(state, compilerList);
     if (json === null) {
       return;
     }
@@ -76,7 +77,7 @@ const Permlink: React.FC<PermlinkProps> = (
     });
 
     doPermlink(null, { body: body });
-  }, [compilerList, editor, state]);
+  }, [compilerList, state]);
 
   useEffect((): void => {
     // 初回での更新は弾く
@@ -93,8 +94,8 @@ const Permlink: React.FC<PermlinkProps> = (
 
   // コンパイラやエディタの状態が書き換わったら共有不可にする
   useEffect(() => {
-    editor.setSharable(false);
-  }, [state, editor.sources, editor.stdin]);
+    dispatch(actions.setSharable(false));
+  }, [state.sources, state.stdin]);
 
   //const onEdit = React.useCallback((): void => {
   //  if (permlinkData === null) {
@@ -198,7 +199,7 @@ const Permlink: React.FC<PermlinkProps> = (
 
   return (
     <div className="d-flex">
-      {!editor.running && editor.sharable && permlinkData === null && !sharing && (
+      {!state.running && state.sharable && permlinkData === null && !sharing && (
         <Button
           className="d-flex justify-content-center align-items-center"
           style={{ minWidth: 144, fontWeight: 700 }}

@@ -16,9 +16,6 @@ import { Editor } from "~/components/Editor";
 import { Command } from "~/components/Command";
 import { Result } from "~/components/Result";
 import { Run } from "~/components/Run";
-import { CodeMirror6 } from "~/components/CodeMirror6";
-import { useEditorContext } from "~/contexts/EditorContext";
-import { EditorSettings } from "~/components/Editor/EditorSettings";
 import { Title } from "~/components/Title";
 import { Button } from "react-bootstrap";
 import { useParams } from "remix";
@@ -69,12 +66,10 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setPermlinkData(null);
   }, [setPermlinkData]);
 
-  const editor = useEditorContext();
   const state = useSelector(({ wandbox }: AppState) => wandbox);
   const dispatch = useAppDispatch();
   const sidebar = useSidebarContext();
   const { load, save } = usePersistence(
-    editor,
     dispatch,
     state,
     sidebar,
@@ -98,7 +93,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   // それとは別に、設定周りの変更があったら即座に保存する
   React.useEffect((): void => {
     save();
-  }, [state, editor.settings]);
+  }, [state.editorSettings]);
 
   if (compilerList === null) {
     return null;

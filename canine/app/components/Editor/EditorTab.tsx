@@ -5,8 +5,7 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { FileEarmarkText, Pencil, Check, X } from "react-bootstrap-icons";
-
-import { EditorSourceData } from "~/contexts/EditorContext";
+import { EditorSourceData } from "~/features/slice";
 
 export interface RenamingSource {
   renaming: boolean;

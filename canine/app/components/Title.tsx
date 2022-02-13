@@ -1,9 +1,11 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { Button, Form, Modal } from "react-bootstrap";
 import { Pencil } from "react-bootstrap-icons";
 import { useParams } from "remix";
-import { useEditorContext } from "~/contexts/EditorContext";
+import { wandboxSlice } from "~/features/slice";
 import { PermlinkData } from "~/hooks/permlink";
+import { AppState, useAppDispatch } from "~/store";
 
 interface TitleProps {
   className?: string;
@@ -12,7 +14,11 @@ interface TitleProps {
 
 const Title: React.FC<TitleProps> = (props) => {
   const { className, permlinkData } = props;
-  const editor = useEditorContext();
+  const { title, description } = useSelector(
+    ({ wandbox: { title, description } }: AppState) => ({ title, description })
+  );
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
   const [show, setShow] = React.useState<boolean>(false);
   const [editingTitle, setEditingTitle] = React.useState<string>("");
   const [editingDescription, setEditingDescription] =
@@ -27,17 +33,15 @@ const Title: React.FC<TitleProps> = (props) => {
               permlinkData !== null ? "text-info" : ""
             }`}
           >
-            {permlinkData === null
-              ? editor.title
-              : permlinkData.parameter.title}
+            {permlinkData === null ? title : permlinkData.parameter.title}
           </h4>
         </div>
         {permlinkData === null && (
           <Button
             variant="link"
             onClick={() => {
-              setEditingTitle(editor.title);
-              setEditingDescription(editor.description);
+              setEditingTitle(title);
+              setEditingDescription(description);
               setShow(true);
             }}
           >
@@ -48,7 +52,7 @@ const Title: React.FC<TitleProps> = (props) => {
       <div style={{ borderBottom: "#d0d7de solid 1px" }}></div>
       <p style={{ whiteSpace: "pre-wrap" }}>
         {permlinkData === null
-          ? editor.description
+          ? description
           : permlinkData.parameter.description}
       </p>
 
@@ -90,8 +94,8 @@ const Title: React.FC<TitleProps> = (props) => {
           <Button
             variant="primary"
             onClick={() => {
-              editor.setTitle(editingTitle);
-              editor.setDescription(editingDescription);
+              dispatch(actions.setTitle(editingTitle));
+              dispatch(actions.setDescription(editingDescription));
               setShow(false);
             }}
           >

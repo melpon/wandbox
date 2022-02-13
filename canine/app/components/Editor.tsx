@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
 import { CompilerList } from "~/hooks/compilerList";
 import { PermlinkData } from "~/hooks/permlink";
 import { CodeEditor } from "./Editor/CodeEditor";
@@ -12,7 +11,8 @@ import { EditorTabs } from "./Editor/EditorTabs";
 import { CodeMirror6 } from "./CodeMirror6";
 import { Button } from "react-bootstrap";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
-import { AppState, useAppStore } from "~/store";
+import { AppState, useAppDispatch, useAppStore } from "~/store";
+import { wandboxSlice } from "~/features/slice";
 
 export interface EditorProps {
   compilerList: CompilerList;
@@ -20,14 +20,15 @@ export interface EditorProps {
 }
 
 const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
-  const editor = useEditorContext();
   const state = useSelector(({ wandbox }: AppState) => wandbox);
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
   const { compilerList, permlinkData } = props;
-  const { settings } = editor;
+  const { editorSettings: settings } = state;
   // パーマリンク時は permlinkData からソースデータを作る
   const sources =
     permlinkData === null
-      ? editor.sources
+      ? state.sources
       : createEditorSourceData(
           permlinkData.parameter.code,
           permlinkData.parameter.codes
@@ -35,7 +36,7 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   return (
     <div className="d-flex justify-content-stretch gap-8px">
       <div className="d-flex flex-column flex-grow-1">
-        <EditorTabs editor={editor} permlinkData={permlinkData} />
+        <EditorTabs state={state} permlinkData={permlinkData} />
         {/*
           <CodeMirror6
             className="flex-grow-1"
@@ -51,15 +52,14 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
             onViewCreated={() => {}}
           />
           */}
-        {sources.map((source, tab) => {
+        {state.sources.map((source, tab) => {
           return (
             <CodeEditor
               key={source.id}
               {...{
                 sources,
                 tab,
-                show: tab == editor.currentTab,
-                editor,
+                show: tab == state.currentTab,
                 state,
                 compilerList,
                 permlinkData,
@@ -68,12 +68,12 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
           );
         })}
       </div>
-      {editor.stdinOpened && (
+      {state.stdinOpened && (
         <div className="d-flex flex-column">
           <Button
             variant="link"
             className="wb-stdinbutton wb-stdinactive align-self-end"
-            onClick={() => editor.setStdinOpened(!editor.stdinOpened)}
+            onClick={() => dispatch(actions.setStdinOpened(!state.stdinOpened))}
           >
             Stdin
           </Button>
@@ -83,7 +83,7 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
             option={{}}
             onViewCreated={() => {}}
             onChange={() => {
-              editor.setSharable(false);
+              dispatch(actions.setSharable(false));
             }}
           />
         </div>

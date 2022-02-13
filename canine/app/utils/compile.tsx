@@ -1,17 +1,16 @@
 import ndjsonStream from "can-ndjson-stream";
 
-import { EditorContextState } from "~/contexts/EditorContext";
+import { getSourceText } from "~/features/actions";
 import { WandboxState } from "~/features/slice";
 import { CompilerList } from "~/hooks/compilerList";
 import { AnyJson, JsonMap } from "~/hooks/fetch";
 import { getCompileOptions } from "./getCompileOptions";
 
 export function createBody(
-  editor: EditorContextState,
   state: WandboxState,
   compilerList: CompilerList
 ): JsonMap | null {
-  const defaultEditorTab = editor.sources.findIndex(
+  const defaultEditorTab = state.sources.findIndex(
     (s): boolean => s.filename === null
   );
   if (defaultEditorTab === -1) {
@@ -31,27 +30,26 @@ export function createBody(
 
   return {
     compiler: state.currentCompilerName,
-    title: editor.title,
-    description: editor.description,
-    code: editor.getSourceText(defaultEditorTab),
-    codes: editor.sources
-      .map((s, tab) => ({ file: s.filename, code: editor.getSourceText(tab) }))
+    title: state.title,
+    description: state.description,
+    code: getSourceText(state.sources[defaultEditorTab]),
+    codes: state.sources
+      .map((s, tab) => ({ file: s.filename, code: getSourceText(s) }))
       .filter((x) => x.file !== null),
     options: options.join(","),
-    stdin: editor.stdin,
+    stdin: state.stdin,
     "compiler-option-raw": state.compilerOptionRaw,
     "runtime-option-raw": state.runtimeOptionRaw,
   };
 }
 export function compile(
-  editor: EditorContextState,
   state: WandboxState,
   compilerList: CompilerList,
   onRead: (result: AnyJson) => void,
   onComplete: () => void,
   onError: (reason: any) => void
 ): void {
-  const body = createBody(editor, state, compilerList);
+  const body = createBody(state, compilerList);
   if (body === null) {
     return;
   }

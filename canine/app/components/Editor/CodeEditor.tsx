@@ -1,27 +1,28 @@
 import React, { useEffect } from "react";
 import { resolveLanguage, importLanguage } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
-import { EditorContextState, EditorSourceData } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useCompile } from "~/hooks/compile";
 import { CodeMirror6 } from "../CodeMirror6";
 import { Extension } from "@codemirror/state";
-import { WandboxState } from "~/features/slice";
+import { EditorSourceData, wandboxSlice, WandboxState } from "~/features/slice";
+import { useAppDispatch } from "~/store";
 
 interface CodeEditorProps {
   sources: EditorSourceData[];
   tab: number;
   show: boolean;
-  editor: EditorContextState;
   state: WandboxState;
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
-  const { sources, tab, show, editor, state, compilerList, permlinkData } =
-    props;
+  const { sources, tab, show, state, compilerList, permlinkData } = props;
+
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
   //const { currentLanguage, currentCompilerName } = compiler;
 
   /*
@@ -142,27 +143,27 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   return (
     <CodeMirror6
       className={`wb-editor flex-grow-1 ${
-        editor.stdinOpened ? "wb-stdinactive" : ""
+        state.stdinOpened ? "wb-stdinactive" : ""
       } ${show ? "" : "d-none"}`}
       initialText={source.text}
       option={{
         lineNumbers: true,
-        tabSize: parseInt(editor.settings.tabWidth, 10),
+        tabSize: parseInt(state.editorSettings.tabWidth, 10),
         indentUnit:
-          editor.settings.tabKey !== "tab"
-            ? parseInt(editor.settings.tabKey, 10)
+          state.editorSettings.tabKey !== "tab"
+            ? parseInt(state.editorSettings.tabKey, 10)
             : undefined,
-        indentWithTab: editor.settings.tabKey === "tab",
+        indentWithTab: state.editorSettings.tabKey === "tab",
         languageSupport: languageSupport || undefined,
         readOnly: permlinkData !== null,
       }}
       onViewCreated={(view) => {
         if (permlinkData === null) {
-          editor.setView(tab, view);
+          dispatch(actions.setView({ tab, view }));
         }
       }}
       onChange={() => {
-        editor.setSharable(false);
+        dispatch(actions.setSharable(false));
       }}
     />
   );

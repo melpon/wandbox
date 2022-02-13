@@ -8,7 +8,6 @@ import {
   SelectSwitch,
   SingleSwitch,
 } from "~/hooks/compilerList";
-import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
 import { PermlinkData } from "~/hooks/permlink";
 import { useCompile } from "~/hooks/compile";
 import { BoxArrowUp } from "react-bootstrap-icons";
@@ -27,23 +26,22 @@ export interface RunProps {
 
 const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
-  const editor = useEditorContext();
   const state = useSelector(({ wandbox }: AppState) => wandbox);
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
   const sidebar = useSidebarContext();
-  const doCompile = useCompile(dispatch, editor, state, sidebar, compilerList);
+  const doCompile = useCompile(dispatch, state, sidebar, compilerList);
   const navigate = useNavigate();
   const [, setError] = useError();
-  const { save } = usePersistence(editor, dispatch, state, sidebar, false);
+  const { save } = usePersistence(dispatch, state, sidebar, false);
   const [editCompleted, setEditCompleted] = useState(false);
 
   const onRun = React.useCallback((): void => {
-    editor.setRunning(true);
-    editor.setSharable(true);
-    sidebar.history.prepareRun(state, editor);
+    dispatch(actions.setRunning(true));
+    dispatch(actions.setSharable(true));
+    sidebar.history.prepareRun(state);
     doCompile();
-  }, [state, editor, sidebar, doCompile]);
+  }, [state, sidebar, doCompile]);
 
   //const disabled = permlinkData !== null || currentCompilerName === "";
 
@@ -130,10 +128,10 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
 
     // EditorContext への設定
     {
-      editor.setTitle(title);
-      editor.setDescription(description);
-      editor.initSources(createEditorSourceData(code, codes));
-      editor.setStdin(stdin);
+      dispatch(actions.setTitle(title));
+      dispatch(actions.setDescription(description));
+      dispatch(actions.initSources(createEditorSourceData(code, codes)));
+      dispatch(actions.setStdin(stdin));
     }
     // ResultContext への設定
     {
@@ -171,7 +169,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
     <Button
       style={{
         minWidth: 144,
-        visibility: editor.running ? "hidden" : "visible",
+        visibility: state.running ? "hidden" : "visible",
       }}
       onClick={onRun}
       variant="primary"

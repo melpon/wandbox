@@ -7,7 +7,6 @@ import React, {
   useState,
 } from "react";
 import { ResultData, WandboxState } from "~/features/slice";
-import { EditorContextState } from "./EditorContext";
 
 export interface EditorSourceData {
   filename: string | null;
@@ -76,11 +75,8 @@ const WANDBOX_MAX_HISTORY_COUNT = 50;
 
 export interface History {
   data: HistoryData;
-  pushQuickSave: (
-    state: WandboxState,
-    editorContext: EditorContextState
-  ) => void;
-  prepareRun: (state: WandboxState, editorContext: EditorContextState) => void;
+  pushQuickSave: (state: WandboxState) => void;
+  prepareRun: (state: WandboxState) => void;
   commitRun: (state: WandboxState) => void;
   pushPermlink: (
     permlinkId: string,
@@ -169,10 +165,9 @@ function loadHistory(): [HistoryData, StorageExists] {
 
 function createHistoryDataQuick(
   id: number,
-  state: WandboxState,
-  editorContext: EditorContextState
+  state: WandboxState
 ): HistoryDataQuick {
-  const sources = editorContext.sources
+  const sources = state.sources
     .map((s) => {
       if (s.view === undefined && s.text === undefined) {
         return null;
@@ -196,21 +191,17 @@ function createHistoryDataQuick(
     },
     editor: {
       sources: sources,
-      currentTab: editorContext.currentTab,
-      stdin: editorContext.stdin,
-      title: editorContext.title,
-      description: editorContext.description,
+      currentTab: state.currentTab,
+      stdin: state.stdin,
+      title: state.title,
+      description: state.description,
     },
     results: state.results,
   };
 }
 
-function createHistoryDataRun(
-  id: number,
-  state: WandboxState,
-  editorContext: EditorContextState
-): HistoryDataRun {
-  const sources = editorContext.sources
+function createHistoryDataRun(id: number, state: WandboxState): HistoryDataRun {
+  const sources = state.sources
     .map((s) => {
       if (s.view === undefined && s.text === undefined) {
         return null;
@@ -234,10 +225,10 @@ function createHistoryDataRun(
     },
     editor: {
       sources: sources,
-      currentTab: editorContext.currentTab,
-      stdin: editorContext.stdin,
-      title: editorContext.title,
-      description: editorContext.description,
+      currentTab: state.currentTab,
+      stdin: state.stdin,
+      title: state.title,
+      description: state.description,
     },
     // results は最終的に結果が得られた後に設定する
     results: [],
@@ -314,12 +305,8 @@ function useHistory(): History {
   }, []);
 
   const pushQuickSave = useCallback(
-    (state: WandboxState, editorContext: EditorContextState) => {
-      const historyData = createHistoryDataQuick(
-        data.keyCounter,
-        state,
-        editorContext
-      );
+    (state: WandboxState) => {
+      const historyData = createHistoryDataQuick(data.keyCounter, state);
       let newQuickSaves = [...data.quickSaves, historyData];
       let newStorageExists = storageExists;
       if (newQuickSaves.length > WANDBOX_MAX_QUICKSAVE_COUNT) {
@@ -343,12 +330,8 @@ function useHistory(): History {
   );
 
   const prepareRun = useCallback(
-    (state: WandboxState, editorContext: EditorContextState) => {
-      const historyData = createHistoryDataRun(
-        data.keyCounter,
-        state,
-        editorContext
-      );
+    (state: WandboxState) => {
+      const historyData = createHistoryDataRun(data.keyCounter, state);
       setTempRunData(historyData);
       console.log("data", data);
       console.log("historyData", historyData);
