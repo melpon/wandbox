@@ -1,12 +1,9 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
 import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
-import {
-  CompilerContext,
-  useCompilerContext,
-} from "~/contexts/CompilerContext";
 import { CompilerList } from "~/hooks/compilerList";
 import { ResultContext, useResultContext } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
@@ -16,6 +13,7 @@ import { EditorTabs } from "./Editor/EditorTabs";
 import { CodeMirror6 } from "./CodeMirror6";
 import { Button } from "react-bootstrap";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
+import { AppState, useAppStore } from "~/store";
 
 export interface EditorProps {
   compilerList: CompilerList;
@@ -24,7 +22,7 @@ export interface EditorProps {
 
 const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const editor = useEditorContext();
-  const compiler = useCompilerContext();
+  const state = useSelector(({ wandbox }: AppState) => wandbox);
   const result = useResultContext();
   const { compilerList, permlinkData } = props;
   const { settings } = editor;
@@ -36,7 +34,6 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
           permlinkData.parameter.code,
           permlinkData.parameter.codes
         );
-  console.log(sources);
   return (
     <div className="d-flex justify-content-stretch gap-8px">
       <div className="d-flex flex-column flex-grow-1">
@@ -65,7 +62,7 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
                 tab,
                 show: tab == editor.currentTab,
                 editor,
-                compiler,
+                state,
                 compilerList,
                 result,
                 permlinkData,

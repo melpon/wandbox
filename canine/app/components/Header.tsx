@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import Link from "next/link";
 import Navbar from "react-bootstrap/Navbar";
 import { Modal, Nav, NavDropdown } from "react-bootstrap";
 import { EditorSettings } from "./Editor/EditorSettings";
 import { useEditorContext } from "~/contexts/EditorContext";
-import { useCompilerContext } from "~/contexts/CompilerContext";
 import { useSidebarContext } from "~/contexts/SidebarContext";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

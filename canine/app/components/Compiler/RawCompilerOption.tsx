@@ -1,9 +1,4 @@
 import React from "react";
-import Button from "react-bootstrap/Button";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-
-import { CodeMirror } from "~/components/organisms/CodeMirror";
 
 interface RawCompilerOptionProps {
   compilerOptionRaw: string | null;

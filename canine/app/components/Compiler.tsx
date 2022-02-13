@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import {
   CompilerList,
@@ -7,7 +8,6 @@ import {
 } from "~/hooks/compilerList";
 import { PermlinkData } from "~/hooks/permlink";
 import { useCompile } from "~/hooks/compile";
-import { useCompilerContext } from "~/contexts/CompilerContext";
 import { useEditorContext } from "~/contexts/EditorContext";
 import { useResultContext } from "~/contexts/ResultContext";
 import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
@@ -16,6 +16,8 @@ import { ChooseCompiler } from "./Compiler/ChooseCompiler";
 import { CompilerOption } from "./Compiler/CompilerOption";
 import { RawCompilerOption } from "./Compiler/RawCompilerOption";
 import { useSidebarContext } from "~/contexts/SidebarContext";
+import { AppState, useAppDispatch, useAppStore } from "~/store";
+import { wandboxSlice } from "~/features/slice";
 
 interface CompilerProps {
   //editor: EditorState,
@@ -67,7 +69,6 @@ function optionsToSwitch(
 const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const editorContext = useEditorContext();
-  const compilerContext = useCompilerContext();
   const resultContext = useResultContext();
   const sidebarContext = useSidebarContext();
   const {
@@ -76,56 +77,68 @@ const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
     currentSwitches,
     compilerOptionRaw,
     runtimeOptionRaw,
-  } = compilerContext;
+  } = useSelector(
+    ({
+      wandbox: {
+        currentLanguage,
+        currentCompilerName,
+        currentSwitches,
+        compilerOptionRaw,
+        runtimeOptionRaw,
+      },
+    }: AppState) => ({
+      currentLanguage,
+      currentCompilerName,
+      currentSwitches,
+      compilerOptionRaw,
+      runtimeOptionRaw,
+    })
+  );
+  const state = useSelector(({ wandbox }: AppState) => wandbox);
+
+  const actions = wandboxSlice.actions;
+  const dispatch = useAppDispatch();
   const onSelectLanguage = React.useCallback((language): void => {
-    compilerContext.setCurrentLanguage(language);
-    compilerContext.setCurrentCompilerName("");
+    dispatch(actions.setCurrentLanguage(language));
+    dispatch(actions.setCurrentCompilerName(""));
   }, []);
   const onDeselectLanguage = React.useCallback((): void => {
-    compilerContext.setCurrentLanguage("");
-    compilerContext.setCurrentCompilerName("");
+    dispatch(actions.setCurrentLanguage(""));
+    dispatch(actions.setCurrentCompilerName(""));
   }, []);
   const onSelectCompiler = React.useCallback((compiler: CompilerInfo): void => {
-    compilerContext.setCurrentCompilerName(compiler.name);
+    dispatch(actions.setCurrentCompilerName(compiler.name));
   }, []);
   const onDeselectCompiler = React.useCallback((): void => {
-    compilerContext.setCurrentCompilerName("");
+    dispatch(actions.setCurrentCompilerName(""));
   }, []);
   const onChangeChecked = React.useCallback(
     (switchName: string, checked: boolean): void => {
-      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      compilerContext.setCurrentSwitches((opts) => ({
-        ...opts,
-        [switchName]: checked,
-      }));
+      dispatch(actions.setCurrentSwitch({ switchName, value: checked }));
     },
     []
   );
   const onChangeSelected = React.useCallback(
     (switchName: string, selected: string): void => {
-      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      compilerContext.setCurrentSwitches((opts) => ({
-        ...opts,
-        [switchName]: selected,
-      }));
+      dispatch(actions.setCurrentSwitch({ switchName, value: selected }));
     },
     []
   );
   const onChangeCompilerOptionRaw = React.useCallback(
     (cm: unknown, data: unknown, value: string): void => {
-      compilerContext.setCompilerOptionRaw(value);
+      dispatch(actions.setCompilerOptionRaw(value));
     },
     []
   );
   const onChangeRuntimeOptionRaw = React.useCallback(
     (cm: unknown, data: unknown, value: string): void => {
-      compilerContext.setRuntimeOptionRaw(value);
+      dispatch(actions.setRuntimeOptionRaw(value));
     },
     []
   );
   const doCompile = useCompile(
     editorContext,
-    compilerContext,
+    state,
     sidebarContext,
     compilerList,
     resultContext

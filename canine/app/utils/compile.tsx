@@ -1,14 +1,14 @@
 import ndjsonStream from "can-ndjson-stream";
 
-import { CompilerContextState } from "~/contexts/CompilerContext";
 import { EditorContextState } from "~/contexts/EditorContext";
+import { WandboxState } from "~/features/slice";
 import { CompilerList } from "~/hooks/compilerList";
 import { AnyJson, JsonMap } from "~/hooks/fetch";
 import { getCompileOptions } from "./getCompileOptions";
 
 export function createBody(
   editor: EditorContextState,
-  compiler: CompilerContextState,
+  state: WandboxState,
   compilerList: CompilerList
 ): JsonMap | null {
   const defaultEditorTab = editor.sources.findIndex(
@@ -20,17 +20,17 @@ export function createBody(
   }
 
   const info = compilerList.compilers.find(
-    (c): boolean => c.name === compiler.currentCompilerName
+    (c): boolean => c.name === state.currentCompilerName
   );
   if (info === undefined) {
     return null;
   }
 
   // get options
-  const options = getCompileOptions(compiler.currentSwitches, info);
+  const options = getCompileOptions(state.currentSwitches, info);
 
   return {
-    compiler: compiler.currentCompilerName,
+    compiler: state.currentCompilerName,
     title: editor.title,
     description: editor.description,
     code: editor.getSourceText(defaultEditorTab),
@@ -39,19 +39,19 @@ export function createBody(
       .filter((x) => x.file !== null),
     options: options.join(","),
     stdin: editor.stdin,
-    "compiler-option-raw": compiler.compilerOptionRaw,
-    "runtime-option-raw": compiler.runtimeOptionRaw,
+    "compiler-option-raw": state.compilerOptionRaw,
+    "runtime-option-raw": state.runtimeOptionRaw,
   };
 }
 export function compile(
   editor: EditorContextState,
-  compiler: CompilerContextState,
+  state: WandboxState,
   compilerList: CompilerList,
   onRead: (result: AnyJson) => void,
   onComplete: () => void,
   onError: (reason: any) => void
 ): void {
-  const body = createBody(editor, compiler, compilerList);
+  const body = createBody(editor, state, compilerList);
   if (body === null) {
     return;
   }

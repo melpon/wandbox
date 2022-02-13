@@ -1,4 +1,5 @@
 import React, { useContext, useEffect } from "react";
+import { useSelector } from "react-redux";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -17,7 +18,6 @@ import { Result } from "~/components/Result";
 import { Run } from "~/components/Run";
 import { CodeMirror6 } from "~/components/CodeMirror6";
 import { useEditorContext } from "~/contexts/EditorContext";
-import { useCompilerContext } from "~/contexts/CompilerContext";
 import { useResultContext } from "~/contexts/ResultContext";
 import { EditorSettings } from "~/components/Editor/EditorSettings";
 import { Title } from "~/components/Title";
@@ -27,6 +27,7 @@ import { Author } from "~/components/Author";
 import Sidebar from "~/components/react-sidebar/Sidebar";
 import { useSidebarContext } from "~/contexts/SidebarContext";
 import { Gear, LayoutSidebarReverse, X } from "react-bootstrap-icons";
+import { AppState, useAppDispatch, useAppStore } from "~/store";
 
 interface WandboxRouterProps {
   permlinkId?: string;
@@ -70,12 +71,15 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   }, [setPermlinkData]);
 
   const editor = useEditorContext();
-  const compiler = useCompilerContext();
+  const state = useSelector(({ wandbox }: AppState) => wandbox);
+  console.log("wandboxstate", state);
+  const dispatch = useAppDispatch();
   const result = useResultContext();
   const sidebar = useSidebarContext();
   const { load, save } = usePersistence(
     editor,
-    compiler,
+    dispatch,
+    state,
     result,
     sidebar,
     permlinkId !== undefined
@@ -98,7 +102,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   // それとは別に、設定周りの変更があったら即座に保存する
   React.useEffect((): void => {
     save();
-  }, [compiler, editor.settings]);
+  }, [state, editor.settings]);
 
   if (compilerList === null) {
     return null;
@@ -189,7 +193,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
             {permlinkData !== null && <Author permlinkData={permlinkData} />}
           </div>
           <Editor compilerList={compilerList} permlinkData={permlinkData} />
-          {(compiler.currentCompilerName !== "" || permlinkData !== null) && (
+          {(state.currentCompilerName !== "" || permlinkData !== null) && (
             <>
               <Command
                 compilerList={compilerList}

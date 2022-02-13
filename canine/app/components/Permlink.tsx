@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import Button from "react-bootstrap/Button";
 
 import { ResultContext, useResultContext } from "~/contexts/ResultContext";
 import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
-import {
-  CompilerContext,
-  useCompilerContext,
-} from "~/contexts/CompilerContext";
 import { createBody } from "~/utils/compile";
 import {
   CompilerList,
@@ -19,6 +16,7 @@ import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useNavigate } from "remix";
 import { BoxArrowUp, DistributeHorizontal } from "react-bootstrap-icons";
+import { AppState, useAppStore } from "~/store";
 
 interface TweetButtonProps {
   permlinkId: string;
@@ -56,7 +54,7 @@ const Permlink: React.FC<PermlinkProps> = (
 ): React.ReactElement | null => {
   const { compilerList, permlinkData, clearPermlinkData } = props;
   const navigate = useNavigate();
-  const compiler = useCompilerContext();
+  const state = useSelector(({ wandbox }: AppState) => wandbox);
   const editor = useEditorContext();
   const result = useResultContext();
   const [, setError] = useError();
@@ -69,7 +67,7 @@ const Permlink: React.FC<PermlinkProps> = (
 
   const onShare = React.useCallback((): void => {
     setSharing(true);
-    const json = createBody(editor, compiler, compilerList);
+    const json = createBody(editor, state, compilerList);
     if (json === null) {
       return;
     }
@@ -80,7 +78,7 @@ const Permlink: React.FC<PermlinkProps> = (
     });
 
     doPermlink(null, { body: body });
-  }, [compilerList, editor, compiler, result]);
+  }, [compilerList, editor, state, result]);
 
   useEffect((): void => {
     // 初回での更新は弾く
@@ -97,9 +95,8 @@ const Permlink: React.FC<PermlinkProps> = (
 
   // コンパイラやエディタの状態が書き換わったら共有不可にする
   useEffect(() => {
-    console.log(compiler, editor.sources, editor.stdin);
     editor.setSharable(false);
-  }, [compiler, editor.sources, editor.stdin]);
+  }, [state, editor.sources, editor.stdin]);
 
   //const onEdit = React.useCallback((): void => {
   //  if (permlinkData === null) {

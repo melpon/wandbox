@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import Button from "react-bootstrap/Button";
 
 import {
@@ -7,10 +8,6 @@ import {
   SelectSwitch,
   SingleSwitch,
 } from "~/hooks/compilerList";
-import {
-  CompilerContext,
-  useCompilerContext,
-} from "~/contexts/CompilerContext";
 import { EditorContext, useEditorContext } from "~/contexts/EditorContext";
 import { ResultContext, useResultContext } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
@@ -21,6 +18,8 @@ import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useError } from "~/hooks/error";
 import { usePersistence } from "~/hooks/persistence";
 import { useSidebarContext } from "~/contexts/SidebarContext";
+import { AppState, useAppDispatch, useAppStore } from "~/store";
+import { wandboxSlice } from "~/features/slice";
 
 export interface RunProps {
   compilerList: CompilerList;
@@ -30,21 +29,30 @@ export interface RunProps {
 const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const editor = useEditorContext();
-  const compiler = useCompilerContext();
+  const state = useSelector(({ wandbox }: AppState) => wandbox);
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
   const result = useResultContext();
   const sidebar = useSidebarContext();
-  const doCompile = useCompile(editor, compiler, sidebar, compilerList, result);
+  const doCompile = useCompile(editor, state, sidebar, compilerList, result);
   const navigate = useNavigate();
   const [, setError] = useError();
-  const { save } = usePersistence(editor, compiler, result, sidebar, false);
+  const { save } = usePersistence(
+    editor,
+    dispatch,
+    state,
+    result,
+    sidebar,
+    false
+  );
   const [editCompleted, setEditCompleted] = useState(false);
 
   const onRun = React.useCallback((): void => {
     editor.setRunning(true);
     editor.setSharable(true);
-    sidebar.history.prepareRun(compiler, editor);
+    sidebar.history.prepareRun(state, editor);
     doCompile();
-  }, [doCompile]);
+  }, [state, editor, sidebar, doCompile]);
 
   //const disabled = permlinkData !== null || currentCompilerName === "";
 
@@ -75,7 +83,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
         setError("対象の言語は既に削除されています。");
         return;
       }
-      compiler.setCurrentLanguage(compilerInfo.language);
+      dispatch(actions.setCurrentLanguage(compilerInfo.language));
 
       let currentCompilerName: string;
       if (
@@ -89,7 +97,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
       } else {
         currentCompilerName = compilerInfo.name;
       }
-      compiler.setCurrentCompilerName(currentCompilerName);
+      dispatch(actions.setCurrentCompilerName(currentCompilerName));
 
       // PermlinkData の存在しないかもしれないコンパイラ情報ではなく、
       // 必ず存在する方のコンパイラ情報
@@ -122,11 +130,11 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
           }
         }
       }
-      compiler.setCurrentSwitches(switches);
+      dispatch(actions.setCurrentSwitches(switches));
 
       // raw オプションは単に設定するだけ
-      compiler.setCompilerOptionRaw(compilerOptionRaw);
-      compiler.setRuntimeOptionRaw(runtimeOptionRaw);
+      dispatch(actions.setCompilerOptionRaw(compilerOptionRaw));
+      dispatch(actions.setRuntimeOptionRaw(runtimeOptionRaw));
     }
 
     // EditorContext への設定

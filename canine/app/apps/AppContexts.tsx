@@ -1,23 +1,20 @@
 import React from "react";
 
-import {
-  CompilerContext,
-  useCompilerContextState,
-} from "~/contexts/CompilerContext";
 import { EditorContext, useEditorContextState } from "~/contexts/EditorContext";
 import { ResultContext, useResultContextState } from "~/contexts/ResultContext";
 import {
   SidebarContext,
   useSidebarContextState,
 } from "~/contexts/SidebarContext";
+import store from "~/store";
+import { Provider } from "react-redux";
 
 const AppContexts: React.FC = ({ children }): React.ReactElement => {
-  const compilerContext = useCompilerContextState();
   const editorContext = useEditorContextState();
   const resultContext = useResultContextState();
   const sidebarContext = useSidebarContextState();
   return (
-    <CompilerContext.Provider value={compilerContext}>
+    <Provider store={store}>
       <EditorContext.Provider value={editorContext}>
         <ResultContext.Provider value={resultContext}>
           <SidebarContext.Provider value={sidebarContext}>
@@ -25,7 +22,7 @@ const AppContexts: React.FC = ({ children }): React.ReactElement => {
           </SidebarContext.Provider>
         </ResultContext.Provider>
       </EditorContext.Provider>
-    </CompilerContext.Provider>
+    </Provider>
   );
 };
 

@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { CompilerContextState } from "./CompilerContext";
+import { WandboxState } from "~/features/slice";
 import { EditorContextState } from "./EditorContext";
 import { ResultContextState, ResultData } from "./ResultContext";
 
@@ -78,14 +78,11 @@ const WANDBOX_MAX_HISTORY_COUNT = 50;
 export interface History {
   data: HistoryData;
   pushQuickSave: (
-    compilerContext: CompilerContextState,
+    state: WandboxState,
     editorContext: EditorContextState,
     resultContext: ResultContextState
   ) => void;
-  prepareRun: (
-    compilerContext: CompilerContextState,
-    editorContext: EditorContextState
-  ) => void;
+  prepareRun: (state: WandboxState, editorContext: EditorContextState) => void;
   commitRun: (resultContext: ResultContextState) => void;
   pushPermlink: (
     permlinkId: string,
@@ -174,7 +171,7 @@ function loadHistory(): [HistoryData, StorageExists] {
 
 function createHistoryDataQuick(
   id: number,
-  compilerContext: CompilerContextState,
+  state: WandboxState,
   editorContext: EditorContextState,
   resultContext: ResultContextState
 ): HistoryDataQuick {
@@ -194,11 +191,11 @@ function createHistoryDataQuick(
     id,
     createdAt: Math.floor(Date.now() / 1000),
     compiler: {
-      currentLanguage: compilerContext.currentLanguage,
-      currentCompilerName: compilerContext.currentCompilerName,
-      currentSwitches: compilerContext.currentSwitches,
-      compilerOptionRaw: compilerContext.compilerOptionRaw,
-      runtimeOptionRaw: compilerContext.runtimeOptionRaw,
+      currentLanguage: state.currentLanguage,
+      currentCompilerName: state.currentCompilerName,
+      currentSwitches: state.currentSwitches,
+      compilerOptionRaw: state.compilerOptionRaw,
+      runtimeOptionRaw: state.runtimeOptionRaw,
     },
     editor: {
       sources: sources,
@@ -213,7 +210,7 @@ function createHistoryDataQuick(
 
 function createHistoryDataRun(
   id: number,
-  compilerContext: CompilerContextState,
+  state: WandboxState,
   editorContext: EditorContextState
 ): HistoryDataRun {
   const sources = editorContext.sources
@@ -232,11 +229,11 @@ function createHistoryDataRun(
     id,
     createdAt: Math.floor(Date.now() / 1000),
     compiler: {
-      currentLanguage: compilerContext.currentLanguage,
-      currentCompilerName: compilerContext.currentCompilerName,
-      currentSwitches: compilerContext.currentSwitches,
-      compilerOptionRaw: compilerContext.compilerOptionRaw,
-      runtimeOptionRaw: compilerContext.runtimeOptionRaw,
+      currentLanguage: state.currentLanguage,
+      currentCompilerName: state.currentCompilerName,
+      currentSwitches: state.currentSwitches,
+      compilerOptionRaw: state.compilerOptionRaw,
+      runtimeOptionRaw: state.runtimeOptionRaw,
     },
     editor: {
       sources: sources,
@@ -321,13 +318,13 @@ function useHistory(): History {
 
   const pushQuickSave = useCallback(
     (
-      compilerContext: CompilerContextState,
+      state: WandboxState,
       editorContext: EditorContextState,
       resultContext: ResultContextState
     ) => {
       const historyData = createHistoryDataQuick(
         data.keyCounter,
-        compilerContext,
+        state,
         editorContext,
         resultContext
       );
@@ -354,13 +351,10 @@ function useHistory(): History {
   );
 
   const prepareRun = useCallback(
-    (
-      compilerContext: CompilerContextState,
-      editorContext: EditorContextState
-    ) => {
+    (state: WandboxState, editorContext: EditorContextState) => {
       const historyData = createHistoryDataRun(
         data.keyCounter,
-        compilerContext,
+        state,
         editorContext
       );
       setTempRunData(historyData);
@@ -370,7 +364,6 @@ function useHistory(): History {
     [data]
   );
 
-  console.log("tempRunData", tempRunData);
   const commitRun = useCallback(
     (resultContext: ResultContextState) => {
       console.log("tempRunData", tempRunData);

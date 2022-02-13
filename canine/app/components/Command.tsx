@@ -1,12 +1,10 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import { reduceCompileOptions } from "~/utils/reduceCompileOptions";
 import { CompilerList, CompilerInfo } from "~/hooks/compilerList";
-import {
-  CompilerContext,
-  useCompilerContext,
-} from "~/contexts/CompilerContext";
 import { PermlinkData } from "~/hooks/permlink";
+import { AppState } from "~/store";
 
 export interface CommandProps {
   compilerList: CompilerList;
@@ -19,13 +17,32 @@ function rawToOptions(raw: string): string {
 
 const Command: React.FC<CommandProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
-  const compiler = useCompilerContext();
+  const {
+    currentCompilerName,
+    currentSwitches,
+    compilerOptionRaw,
+    runtimeOptionRaw,
+  } = useSelector(
+    ({
+      wandbox: {
+        currentCompilerName,
+        currentSwitches,
+        compilerOptionRaw,
+        runtimeOptionRaw,
+      },
+    }: AppState) => ({
+      currentCompilerName,
+      currentSwitches,
+      compilerOptionRaw,
+      runtimeOptionRaw,
+    })
+  );
 
   const command = React.useMemo((): string => {
     let info: CompilerInfo;
     if (permlinkData === null) {
       const infoUndef = compilerList.compilers.find(
-        (c): boolean => c.name === compiler.currentCompilerName
+        (c): boolean => c.name === currentCompilerName
       );
       if (infoUndef === undefined) {
         return "";
@@ -37,7 +54,7 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
 
     const command = info.displayCompileCommand;
     const options = reduceCompileOptions<string[]>(
-      compiler.currentSwitches,
+      currentSwitches,
       info,
       [],
       (sw, state): string[] => [...state, sw.displayFlags],
@@ -50,12 +67,16 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
       }
     );
     const rawOptions = rawToOptions(
-      info.compilerOptionRaw
-        ? compiler.compilerOptionRaw
-        : compiler.runtimeOptionRaw
+      info.compilerOptionRaw ? compilerOptionRaw : runtimeOptionRaw
     );
     return `$ ${command} ${options.join(" ")} ${rawOptions}`;
-  }, [compiler, compilerList]);
+  }, [
+    currentCompilerName,
+    currentSwitches,
+    compilerOptionRaw,
+    runtimeOptionRaw,
+    compilerList,
+  ]);
 
   return <code className="wb-command px-8px">{command}</code>;
 };

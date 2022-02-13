@@ -1,9 +1,10 @@
 import React, { useMemo } from "react";
 import { EditorContextState, EditorSourceData } from "~/contexts/EditorContext";
-import { CompilerContextState } from "~/contexts/CompilerContext";
 import { ResultContextState, ResultData } from "~/contexts/ResultContext";
 import { EditorView } from "@codemirror/view";
 import { SidebarContextState } from "~/contexts/SidebarContext";
+import { wandboxSlice, WandboxState } from "~/features/slice";
+import { AppDispatch, useAppDispatch } from "~/store";
 
 interface Persistence {
   load: () => void;
@@ -18,7 +19,8 @@ const SIDEBAR_KEY = "wandbox.sidebar";
 
 export function usePersistence(
   editor: EditorContextState,
-  compiler: CompilerContextState,
+  dispatch: AppDispatch,
+  state: WandboxState,
   result: ResultContextState,
   sidebar: SidebarContextState,
   initialPermlinkMode: boolean
@@ -27,6 +29,7 @@ export function usePersistence(
   // COMPILER_KEY, EDITOR_CODE_KEY はセーブ・ロードしない。
   // そのために、初回で渡された permlinkMode を覚えておいて、それを利用する
   const permlinkMode = useMemo(() => initialPermlinkMode, []);
+  const actions = wandboxSlice.actions;
 
   // 以前の状態のロード
   const load = React.useCallback((): void => {
@@ -75,19 +78,19 @@ export function usePersistence(
       const item = localStorage.getItem(COMPILER_KEY) || "{}";
       const map = JSON.parse(item);
       if (map.currentLanguage !== undefined) {
-        compiler.setCurrentLanguage(map.currentLanguage);
+        dispatch(actions.setCurrentLanguage(map.currentLanguage));
       }
       if (map.currentCompilerName !== undefined) {
-        compiler.setCurrentCompilerName(map.currentCompilerName);
+        dispatch(actions.setCurrentCompilerName(map.currentCompilerName));
       }
       if (map.currentSwitches !== undefined) {
-        compiler.setCurrentSwitches(map.currentSwitches);
+        dispatch(actions.setCurrentSwitches(map.currentSwitches));
       }
       if (map.compilerOptionRaw !== undefined) {
-        compiler.setCompilerOptionRaw(map.compilerOptionRaw);
+        dispatch(actions.setCompilerOptionRaw(map.compilerOptionRaw));
       }
       if (map.runtimeOptionRaw !== undefined) {
-        compiler.setRuntimeOptionRaw(map.runtimeOptionRaw);
+        dispatch(actions.setRuntimeOptionRaw(map.runtimeOptionRaw));
       }
     }
 
@@ -102,7 +105,7 @@ export function usePersistence(
     const item = JSON.parse(localStorage.getItem(SIDEBAR_KEY) || "{}");
     sidebar.setLocked(item.locked || false);
     sidebar.setOpened(item.opened || false);
-  }, [editor, compiler, result, sidebar]);
+  }, [editor, state, result, sidebar]);
 
   // セーブ
   const save = React.useCallback((): void => {
@@ -144,12 +147,13 @@ export function usePersistence(
     }
     if (!permlinkMode) {
       const item = {
-        currentLanguage: compiler.currentLanguage,
-        currentCompilerName: compiler.currentCompilerName,
-        currentSwitches: compiler.currentSwitches,
-        compilerOptionRaw: compiler.compilerOptionRaw,
-        runtimeOptionRaw: compiler.runtimeOptionRaw,
+        currentLanguage: state.currentLanguage,
+        currentCompilerName: state.currentCompilerName,
+        currentSwitches: state.currentSwitches,
+        compilerOptionRaw: state.compilerOptionRaw,
+        runtimeOptionRaw: state.runtimeOptionRaw,
       };
+      console.log("state2", state);
       localStorage.setItem(COMPILER_KEY, JSON.stringify(item));
     }
     if (!permlinkMode) {
@@ -162,7 +166,8 @@ export function usePersistence(
         opened: sidebar.opened,
       })
     );
-  }, [editor, compiler, result, sidebar]);
+  }, [editor, state.currentLanguage, result, sidebar]);
+  console.log("state", state);
 
   return {
     save,

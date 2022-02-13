@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { resolveLanguage, importLanguage } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
-import { CompilerContextState } from "~/contexts/CompilerContext";
 import { EditorContextState, EditorSourceData } from "~/contexts/EditorContext";
 import { ResultContextState } from "~/contexts/ResultContext";
 import { PermlinkData } from "~/hooks/permlink";
@@ -9,13 +8,14 @@ import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useCompile } from "~/hooks/compile";
 import { CodeMirror6 } from "../CodeMirror6";
 import { Extension } from "@codemirror/state";
+import { WandboxState } from "~/features/slice";
 
 interface CodeEditorProps {
   sources: EditorSourceData[];
   tab: number;
   show: boolean;
   editor: EditorContextState;
-  compiler: CompilerContextState;
+  state: WandboxState;
   compilerList: CompilerList;
   result: ResultContextState;
   permlinkData: PermlinkData | null;
@@ -27,7 +27,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
     tab,
     show,
     editor,
-    compiler,
+    state,
     compilerList,
     result,
     permlinkData,
@@ -133,7 +133,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   */
   const currentLanguage =
     permlinkData === null
-      ? compiler.currentLanguage
+      ? state.currentLanguage
       : permlinkData.parameter.compilerInfo.language;
 
   const source = sources[tab];
