@@ -95,7 +95,7 @@ const Permlink: React.FC<PermlinkProps> = (
   // コンパイラやエディタの状態が書き換わったら共有不可にする
   useEffect(() => {
     dispatch(actions.setSharable(false));
-  }, [state.sources, state.stdin]);
+  }, [state.sources]);
 
   //const onEdit = React.useCallback((): void => {
   //  if (permlinkData === null) {

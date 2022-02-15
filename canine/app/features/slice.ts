@@ -2,11 +2,12 @@ import { EditorView } from "@codemirror/view";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { normalizePath } from "~/utils/normalizePath";
 import { castDraft, castImmutable } from "immer";
+import { startOfYesterday } from "date-fns";
 
 export interface EditorSourceData {
   id: string;
   filename: string | null;
-  text?: string;
+  text: string;
   view?: EditorView;
 }
 
@@ -105,10 +106,20 @@ function sourceToHistorySource(
       }
       return {
         filename: s.filename,
-        text: s.text !== undefined ? s.text : s.view!.state.doc.toString(),
+        text: s.view !== undefined ? s.view.state.doc.toString() : s.text,
       };
     })
     .filter((s) => s !== null) as HistoryEditorSourceData[];
+}
+
+export function getSourceText(source: EditorSourceData): string {
+  return source.view !== undefined
+    ? source.view.state.doc.toString()
+    : source.text;
+}
+
+export function getStdin(stdin: string, stdinView?: EditorView): string {
+  return stdinView !== undefined ? stdinView!.state.doc.toString() : stdin;
 }
 
 const WANDBOX_MAX_QUICKSAVE_COUNT = 5;
@@ -133,7 +144,8 @@ const initialState = {
       text: "",
     },
   ] as EditorSourceData[],
-  stdin: "",
+  stdin: "" as string,
+  stdinView: undefined as EditorView | undefined,
   stdinOpened: false,
   editorSettings: {
     opened: false,
@@ -244,7 +256,7 @@ export const wandboxSlice = createSlice({
       state.sources.push({
         id: `wb-editor-tab${state.tabCounter}`,
         filename: resolvedFilename,
-        text: text,
+        text: text || "",
       });
       state.tabCounter += 1;
     },
@@ -308,10 +320,12 @@ export const wandboxSlice = createSlice({
     ) => {
       const { tab, view } = action.payload;
       state.sources[tab].view = castDraft(view);
-      state.sources[tab].text = undefined;
     },
     setStdin: (state, action: PayloadAction<string>) => {
       state.stdin = action.payload;
+    },
+    setStdinView: (state, action: PayloadAction<EditorView>) => {
+      state.stdinView = castDraft(action.payload);
     },
     setStdinOpened: (state, action: PayloadAction<boolean>) => {
       state.stdinOpened = action.payload;
@@ -334,7 +348,7 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         sources: sourceToHistorySource(state.sources as any),
         currentTab: state.currentTab,
-        stdin: state.stdin,
+        stdin: getStdin(state.stdin, state.stdinView as any),
         title: state.title,
         description: state.description,
         results: state.results,
@@ -358,7 +372,7 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         sources: sourceToHistorySource(state.sources as any),
         currentTab: state.currentTab,
-        stdin: state.stdin,
+        stdin: getStdin(state.stdin, state.stdinView as any),
         title: state.title,
         description: state.description,
         // results は最終的に結果が得られた後に設定する
@@ -473,15 +487,12 @@ export const wandboxSlice = createSlice({
       state.runtimeOptionRaw = x.runtimeOptionRaw;
       state.currentTab = x.currentTab;
       state.stdin = x.stdin;
+      if (x.stdin.length !== 0) {
+        state.stdinOpened = true;
+      }
       state.title = x.title;
       state.description = x.description;
       state.results = x.results;
-
-      for (const s of state.sources) {
-        if (s.view !== undefined) {
-          s.view.destroy();
-        }
-      }
 
       let counter = 0;
       state.sources = [];

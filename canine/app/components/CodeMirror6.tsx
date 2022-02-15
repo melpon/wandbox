@@ -148,9 +148,10 @@ export interface CodeMirror6Option {
 export interface CodeMirror6Props {
   className?: string;
   style?: React.CSSProperties;
-  initialText?: string;
+  text: string;
   option: CodeMirror6Option;
   onViewCreated: (view: EditorView) => void;
+  onViewDestroyed: (view: EditorView) => void;
   onChange?: (view: EditorView) => void;
 }
 
@@ -188,19 +189,22 @@ function optionToExtension(option: CodeMirror6Option): Extension[] {
 }
 
 const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
-  const { className, style, initialText, option, onViewCreated, onChange } =
-    props;
+  const {
+    className,
+    style,
+    text,
+    option,
+    onViewCreated,
+    onViewDestroyed,
+    onChange,
+  } = props;
 
   const ref = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<EditorView | null>(null);
 
   useLayoutEffect(() => {
-    if (initialText === undefined) {
-      return;
-    }
-
     const startState = EditorState.create({
-      doc: initialText,
+      doc: text,
       extensions: optionToExtension(option),
     });
 
@@ -218,7 +222,27 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
 
     setView(view);
     onViewCreated(view);
-  }, [ref, initialText]);
+
+    return () => {
+      onViewDestroyed(view);
+      view.destroy();
+    };
+  }, [ref]);
+
+  useEffect(() => {
+    if (view === null) {
+      return;
+    }
+
+    // text が書き換わったら view 全体をそのテキストに置き換える
+    view.dispatch({
+      changes: {
+        from: 0,
+        to: view.state.doc.length,
+        insert: text,
+      },
+    });
+  }, [text]);
 
   useEffect(() => {
     if (view === null) {

@@ -1,7 +1,7 @@
 import ndjsonStream from "can-ndjson-stream";
 
 import { getSourceText } from "~/features/actions";
-import { WandboxState } from "~/features/slice";
+import { getStdin, WandboxState } from "~/features/slice";
 import { CompilerList } from "~/hooks/compilerList";
 import { AnyJson, JsonMap } from "~/hooks/fetch";
 import { getCompileOptions } from "./getCompileOptions";
@@ -37,7 +37,7 @@ export function createBody(
       .map((s, tab) => ({ file: s.filename, code: getSourceText(s) }))
       .filter((x) => x.file !== null),
     options: options.join(","),
-    stdin: state.stdin,
+    stdin: getStdin(state.stdin, state.stdinView),
     "compiler-option-raw": state.compilerOptionRaw,
     "runtime-option-raw": state.runtimeOptionRaw,
   };

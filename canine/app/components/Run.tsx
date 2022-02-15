@@ -14,7 +14,6 @@ import { BoxArrowUp } from "react-bootstrap-icons";
 import { useNavigate } from "remix";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useError } from "~/hooks/error";
-import { usePersistence } from "~/hooks/persistence";
 import { AppState, useAppDispatch, useAppStore } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { saveHistory } from "~/features/actions";

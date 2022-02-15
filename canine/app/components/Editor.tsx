@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -32,25 +32,23 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
           permlinkData.parameter.code,
           permlinkData.parameter.codes
         );
+
+  // stdin を閉じる際に view の内容を stdin に反映する
+  useEffect(() => {
+    if (
+      permlinkData !== null ||
+      state.stdinView === undefined ||
+      state.stdinOpened
+    ) {
+      return;
+    }
+    dispatch(actions.setStdin(state.stdinView.state.doc.toString()));
+  }, [state.stdinView, state.stdinOpened]);
+
   return (
     <div className="d-flex justify-content-stretch gap-8px">
       <div className="d-flex flex-column flex-grow-1">
         <EditorTabs state={state} permlinkData={permlinkData} />
-        {/*
-          <CodeMirror6
-            className="flex-grow-1"
-            initialText="Hello"
-            option={{
-              tabSize: parseInt(editor.settings.tabWidth, 10),
-              indentUnit:
-                editor.settings.tabKey !== "tab"
-                  ? parseInt(editor.settings.tabKey, 10)
-                  : undefined,
-              indentWithTabs: editor.settings.tabKey === "tab",
-            }}
-            onViewCreated={() => {}}
-          />
-          */}
         {state.sources.map((source, tab) => {
           return (
             <CodeEditor
@@ -78,9 +76,25 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
           </Button>
           <CodeMirror6
             className="wb-stdin flex-grow-1"
-            initialText=""
-            option={{}}
-            onViewCreated={() => {}}
+            text={
+              permlinkData === null ? state.stdin : permlinkData.parameter.stdin
+            }
+            option={{
+              lineNumbers: true,
+              tabSize: parseInt(state.editorSettings.tabWidth, 10),
+              indentUnit:
+                state.editorSettings.tabKey !== "tab"
+                  ? parseInt(state.editorSettings.tabKey, 10)
+                  : undefined,
+              indentWithTab: state.editorSettings.tabKey === "tab",
+              readOnly: permlinkData !== null,
+            }}
+            onViewCreated={(view) => {
+              if (permlinkData === null) {
+                dispatch(actions.setStdinView(view));
+              }
+            }}
+            onViewDestroyed={(view) => {}}
             onChange={() => {
               dispatch(actions.setSharable(false));
             }}

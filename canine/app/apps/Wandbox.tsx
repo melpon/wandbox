@@ -57,6 +57,10 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     }
 
     setPermlinkData(permlinkResp);
+    // stdin がある場合は標準入力用のエディタを開く
+    if (permlinkResp.parameter.stdin.length !== 0) {
+      dispatch(actions.setStdinOpened(true));
+    }
   }, [permlinkResp]);
 
   const {

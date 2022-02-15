@@ -145,7 +145,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
       className={`wb-editor flex-grow-1 ${
         state.stdinOpened ? "wb-stdinactive" : ""
       } ${show ? "" : "d-none"}`}
-      initialText={source.text}
+      text={source.text}
       option={{
         lineNumbers: true,
         tabSize: parseInt(state.editorSettings.tabWidth, 10),
@@ -162,6 +162,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
           dispatch(actions.setView({ tab, view }));
         }
       }}
+      onViewDestroyed={() => {}}
       onChange={() => {
         dispatch(actions.setSharable(false));
       }}

@@ -8,15 +8,13 @@ import {
   wandboxInitialState,
   wandboxSlice,
   WandboxState,
+  getSourceText,
+  getStdin,
 } from "./slice";
 
 const actions = wandboxSlice.actions;
 
-export function getSourceText(source: EditorSourceData): string {
-  return source.text !== undefined
-    ? source.text
-    : source.view!.state.doc.toString();
-}
+export { getSourceText, getStdin };
 
 export function addSource(
   dispatch: AppDispatch,
