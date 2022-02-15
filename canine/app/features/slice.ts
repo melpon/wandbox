@@ -41,34 +41,36 @@ export interface HistoryEditorSourceData {
   filename: string | null;
   text: string;
 }
-export interface HistoryCompilerData {
+export interface HistoryDataQuick {
+  type: "quick";
+  id: number;
+  createdAt: number;
   currentLanguage: string;
   currentCompilerName: string;
   currentSwitches: { [name: string]: string | boolean };
   compilerOptionRaw: string;
   runtimeOptionRaw: string;
-}
-export interface HistoryEditorData {
   sources: HistoryEditorSourceData[];
   currentTab: number;
   stdin: string;
   title: string;
   description: string;
-}
-export interface HistoryDataQuick {
-  type: "quick";
-  id: number;
-  createdAt: number;
-  compiler: HistoryCompilerData;
-  editor: HistoryEditorData;
   results: ResultData[];
 }
 export interface HistoryDataRun {
   type: "run";
   id: number;
   createdAt: number;
-  compiler: HistoryCompilerData;
-  editor: HistoryEditorData;
+  currentLanguage: string;
+  currentCompilerName: string;
+  currentSwitches: { [name: string]: string | boolean };
+  compilerOptionRaw: string;
+  runtimeOptionRaw: string;
+  sources: HistoryEditorSourceData[];
+  currentTab: number;
+  stdin: string;
+  title: string;
+  description: string;
   results: ResultData[];
 }
 export interface HistoryDataPermlink {
@@ -128,6 +130,7 @@ const initialState = {
     {
       id: "wandbox-editor-main",
       filename: null,
+      text: "",
     },
   ] as EditorSourceData[],
   stdin: "",
@@ -144,8 +147,8 @@ const initialState = {
 
   results: [] as ResultData[],
 
-  historyOpened: false as boolean,
-  historyLocked: false as boolean,
+  sidebarState: "none" as "editorSettings" | "history" | "none",
+  sidebarLocked: false as boolean,
   history: {
     quickSaves: [],
     histories: [],
@@ -153,6 +156,9 @@ const initialState = {
   } as HistoryData,
   storageExists: {} as StorageExists,
   tempRunData: null as HistoryDataRun | null,
+
+  // この値が空文字以外になったらページ遷移する
+  navigate: "",
 };
 
 export type WandboxState = typeof initialState;
@@ -321,20 +327,16 @@ export const wandboxSlice = createSlice({
         type: "quick",
         id: state.history.keyCounter,
         createdAt: Math.floor(Date.now() / 1000),
-        compiler: {
-          currentLanguage: state.currentLanguage,
-          currentCompilerName: state.currentCompilerName,
-          currentSwitches: state.currentSwitches,
-          compilerOptionRaw: state.compilerOptionRaw,
-          runtimeOptionRaw: state.runtimeOptionRaw,
-        },
-        editor: {
-          sources: sourceToHistorySource(state.sources as any),
-          currentTab: state.currentTab,
-          stdin: state.stdin,
-          title: state.title,
-          description: state.description,
-        },
+        currentLanguage: state.currentLanguage,
+        currentCompilerName: state.currentCompilerName,
+        currentSwitches: state.currentSwitches,
+        compilerOptionRaw: state.compilerOptionRaw,
+        runtimeOptionRaw: state.runtimeOptionRaw,
+        sources: sourceToHistorySource(state.sources as any),
+        currentTab: state.currentTab,
+        stdin: state.stdin,
+        title: state.title,
+        description: state.description,
         results: state.results,
       };
       const h = state.history;
@@ -349,20 +351,16 @@ export const wandboxSlice = createSlice({
         type: "run",
         id: state.history.keyCounter,
         createdAt: Math.floor(Date.now() / 1000),
-        compiler: {
-          currentLanguage: state.currentLanguage,
-          currentCompilerName: state.currentCompilerName,
-          currentSwitches: state.currentSwitches,
-          compilerOptionRaw: state.compilerOptionRaw,
-          runtimeOptionRaw: state.runtimeOptionRaw,
-        },
-        editor: {
-          sources: sourceToHistorySource(state.sources as any),
-          currentTab: state.currentTab,
-          stdin: state.stdin,
-          title: state.title,
-          description: state.description,
-        },
+        currentLanguage: state.currentLanguage,
+        currentCompilerName: state.currentCompilerName,
+        currentSwitches: state.currentSwitches,
+        compilerOptionRaw: state.compilerOptionRaw,
+        runtimeOptionRaw: state.runtimeOptionRaw,
+        sources: sourceToHistorySource(state.sources as any),
+        currentTab: state.currentTab,
+        stdin: state.stdin,
+        title: state.title,
+        description: state.description,
         // results は最終的に結果が得られた後に設定する
         results: [],
       };
@@ -432,11 +430,14 @@ export const wandboxSlice = createSlice({
       }
       h.keyCounter += 1;
     },
-    setHistoryOpened: (state, action: PayloadAction<boolean>) => {
-      state.historyOpened = action.payload;
+    setSidebarState: (
+      state,
+      action: PayloadAction<WandboxState["sidebarState"]>
+    ) => {
+      state.sidebarState = action.payload;
     },
-    setHistoryLocked: (state, action: PayloadAction<boolean>) => {
-      state.historyLocked = action.payload;
+    setSidebarLocked: (state, action: PayloadAction<boolean>) => {
+      state.sidebarLocked = action.payload;
     },
     initHistory: (
       state,
@@ -452,9 +453,60 @@ export const wandboxSlice = createSlice({
     setStorageExists: (state, action: PayloadAction<StorageExists>) => {
       state.storageExists = action.payload;
     },
+
+    setNavigate: (state, action: PayloadAction<string>) => {
+      state.navigate = action.payload;
+    },
+    clearNavigate: (state) => {
+      state.navigate = "";
+    },
+
+    loadQuickSave: (
+      state,
+      action: PayloadAction<HistoryDataQuick | HistoryDataRun>
+    ) => {
+      const x = action.payload;
+      state.currentLanguage = x.currentLanguage;
+      state.currentCompilerName = x.currentCompilerName;
+      state.currentSwitches = x.currentSwitches;
+      state.compilerOptionRaw = x.compilerOptionRaw;
+      state.runtimeOptionRaw = x.runtimeOptionRaw;
+      state.currentTab = x.currentTab;
+      state.stdin = x.stdin;
+      state.title = x.title;
+      state.description = x.description;
+      state.results = x.results;
+
+      for (const s of state.sources) {
+        if (s.view !== undefined) {
+          s.view.destroy();
+        }
+      }
+
+      let counter = 0;
+      state.sources = [];
+      for (const source of x.sources) {
+        const id =
+          source.filename === null
+            ? "wb-editor-main"
+            : `wb-editor-tab${counter}`;
+        state.sources.push({
+          id: id,
+          filename: source.filename,
+          text: source.text,
+        });
+        counter += 1;
+      }
+      state.tabCounter = counter;
+
+      if (x.type === "run") {
+        state.sharable = true;
+      }
+    },
   },
   extraReducers: (builder) => {},
 });
 
 export const wandboxReducer = wandboxSlice.reducer;
 export const wandboxActions = wandboxSlice.actions;
+export const wandboxInitialState = initialState;

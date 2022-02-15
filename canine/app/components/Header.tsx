@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import Navbar from "react-bootstrap/Navbar";
 import { Modal, Nav, NavDropdown } from "react-bootstrap";
-import { EditorSettings } from "./Editor/EditorSettings";
 import { AppState, useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 
@@ -10,10 +9,9 @@ import { wandboxSlice } from "~/features/slice";
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = (): React.ReactElement => {
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  const { historyOpened, editorSettings } = useSelector(
-    ({ wandbox: { historyOpened, editorSettings } }: AppState) => ({
-      historyOpened,
+  const { sidebarState, editorSettings } = useSelector(
+    ({ wandbox: { sidebarState, editorSettings } }: AppState) => ({
+      sidebarState,
       editorSettings,
     })
   );
@@ -32,23 +30,32 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
       <Navbar.Toggle />
       <Navbar.Collapse className="justify-content-end">
         <Nav>
-          <NavDropdown title="Tools" align="end">
-            <NavDropdown.Item onClick={() => setShowSettings(true)}>
-              Editor Settings
-            </NavDropdown.Item>
-            <NavDropdown.Item
-              onClick={() => {
-                if (historyOpened) {
-                  dispatch(actions.setHistoryOpened(false));
-                  dispatch(actions.setHistoryLocked(false));
-                } else {
-                  dispatch(actions.setHistoryOpened(true));
-                }
-              }}
-            >
-              History
-            </NavDropdown.Item>
-          </NavDropdown>
+          <Nav.Link
+            active={sidebarState === "editorSettings"}
+            onClick={() => {
+              if (sidebarState === "editorSettings") {
+                dispatch(actions.setSidebarState("none"));
+                dispatch(actions.setSidebarLocked(false));
+              } else {
+                dispatch(actions.setSidebarState("editorSettings"));
+              }
+            }}
+          >
+            Settings
+          </Nav.Link>
+          <Nav.Link
+            active={sidebarState === "history"}
+            onClick={() => {
+              if (sidebarState === "history") {
+                dispatch(actions.setSidebarState("none"));
+                dispatch(actions.setSidebarLocked(false));
+              } else {
+                dispatch(actions.setSidebarState("history"));
+              }
+            }}
+          >
+            Log
+          </Nav.Link>
           <Nav.Link
             target="_blank"
             rel="noopener noreferrer"
@@ -77,18 +84,6 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
           )}
         </Nav>
       </Navbar.Collapse>
-      <Modal show={showSettings} onHide={() => setShowSettings(false)}>
-        <Modal.Body className="d-flex flex-column">
-          <button
-            type="button"
-            className="align-self-end btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-            onClick={() => setShowSettings(false)}
-          />
-          <EditorSettings settings={editorSettings} />
-        </Modal.Body>
-      </Modal>
     </Navbar>
   );
 };

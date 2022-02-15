@@ -6,7 +6,6 @@ import Col from "react-bootstrap/Col";
 import { CompilerList } from "~/hooks/compilerList";
 import { PermlinkData } from "~/hooks/permlink";
 import { CodeEditor } from "./Editor/CodeEditor";
-import { EditorSettings } from "./Editor/EditorSettings";
 import { EditorTabs } from "./Editor/EditorTabs";
 import { CodeMirror6 } from "./CodeMirror6";
 import { Button } from "react-bootstrap";

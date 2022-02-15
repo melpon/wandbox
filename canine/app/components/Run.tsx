@@ -17,6 +17,7 @@ import { useError } from "~/hooks/error";
 import { usePersistence } from "~/hooks/persistence";
 import { AppState, useAppDispatch, useAppStore } from "~/store";
 import { wandboxSlice } from "~/features/slice";
+import { saveHistory } from "~/features/actions";
 
 export interface RunProps {
   compilerList: CompilerList;
@@ -31,8 +32,6 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const doCompile = useCompile(dispatch, state, compilerList);
   const navigate = useNavigate();
   const [, setError] = useError();
-  const { save } = usePersistence(dispatch, state, false);
-  const [editCompleted, setEditCompleted] = useState(false);
 
   const onRun = React.useCallback((): void => {
     dispatch(actions.setRunning(true));
@@ -48,7 +47,8 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
       return null;
     }
 
-    // ひたすら permlinkData の内容を各状態へ設定していく
+    // ひたすら permlinkData の内容を各状態へ設定して、
+    // その後それを localStorage に書き込む（ページ遷移で状態がリセットされてしまうため）。
     // コンパイラ情報は既に存在しない場合もあるので、その場合も考慮する
 
     const {
@@ -136,22 +136,21 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
       dispatch(actions.setResults(permlinkData.results));
     }
 
-    // すぐに save() すると値が反映されないので、
-    // editCompleted の値が変化するのを待ってから save() する
-    setEditCompleted(true);
+    dispatch(actions.pushQuickSave());
+
+    dispatch(actions.setNavigate("/"));
   }, []);
 
   useEffect(() => {
-    if (!editCompleted) {
+    if (state.navigate.length === 0) {
       return;
     }
 
-    // この後 navigate で遷移すると状態がリセットされてしまうため
-    // localStorage に保存しておいて遷移後に読み込ませる
-    save();
+    saveHistory(state.history, state.storageExists);
+    dispatch(actions.clearNavigate());
 
-    navigate("/");
-  }, [editCompleted]);
+    navigate(state.navigate);
+  }, [state.navigate]);
 
   // 共有中は編集ボタン
   if (permlinkData !== null) {

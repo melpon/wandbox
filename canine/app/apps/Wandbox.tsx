@@ -1,14 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import { formatDistanceToNow } from "date-fns";
 
 import { useCompilerList } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
 import { useGetPermlink, PermlinkData } from "~/hooks/permlink";
-import { usePersistence } from "~/hooks/persistence";
 import { Header } from "~/components/Header";
 import { Compiler } from "~/components/Compiler";
 import { Permlink } from "~/components/Permlink";
@@ -17,18 +12,19 @@ import { Command } from "~/components/Command";
 import { Result } from "~/components/Result";
 import { Run } from "~/components/Run";
 import { Title } from "~/components/Title";
-import { Button } from "react-bootstrap";
 import { useParams } from "remix";
 import { Author } from "~/components/Author";
 import Sidebar from "~/components/react-sidebar/Sidebar";
-import { Gear, LayoutSidebarReverse, X } from "react-bootstrap-icons";
-import { AppState, useAppDispatch, useAppStore } from "~/store";
+import { AppState, useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
-import { loadHistory, saveHistory } from "~/features/actions";
-
-interface WandboxRouterProps {
-  permlinkId?: string;
-}
+import {
+  applySettings,
+  loadHistory,
+  loadSettings,
+  saveHistory,
+  saveSettings,
+} from "~/features/actions";
+import { SidebarBase } from "~/components/SidebarBase";
 
 const Wandbox: React.FC = (): React.ReactElement | null => {
   const { permlinkId } = useParams();
@@ -63,142 +59,89 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setPermlinkData(permlinkResp);
   }, [permlinkResp]);
 
-  const clearPermlinkData = React.useCallback((): void => {
-    setPermlinkData(null);
-  }, [setPermlinkData]);
-
-  const state = useSelector(({ wandbox }: AppState) => wandbox);
-  const dispatch = useAppDispatch();
-  const actions = wandboxSlice.actions;
-  const { load, save } = usePersistence(
-    dispatch,
-    state,
-    permlinkId !== undefined
+  const {
+    currentCompilerName,
+    editorSettings,
+    sidebarState,
+    sidebarLocked,
+    history,
+    storageExists,
+  } = useSelector(
+    ({
+      wandbox: {
+        currentCompilerName,
+        editorSettings,
+        sidebarState,
+        sidebarLocked,
+        history,
+        storageExists,
+      },
+    }: AppState) => ({
+      currentCompilerName,
+      editorSettings,
+      sidebarState,
+      sidebarLocked,
+      history,
+      storageExists,
+    })
   );
+  const dispatch = useAppDispatch();
+
+  const actions = wandboxSlice.actions;
   // 設定データのロード（初回に一回だけ読み込む）
   useEffect((): void => {
-    load();
+    const settings = loadSettings();
+    applySettings(dispatch, settings);
   }, []);
 
-  // データに変化があった3秒後に設定を保存する
-  useEffect((): (() => void) => {
-    const timerID = setTimeout((): void => {
-      save();
-    }, 3000);
-
-    return (): void => {
-      clearTimeout(timerID);
-    };
-  }, [save]);
-  // それとは別に、設定周りの変更があったら即座に保存する
+  // 設定に変更があったら即座に保存する
   useEffect((): void => {
-    save();
-  }, [state.editorSettings]);
+    saveSettings({ editorSettings, sidebarState, sidebarLocked });
+  }, [editorSettings, sidebarState, sidebarLocked]);
 
   // 履歴情報のロード
   useEffect(() => {
     const [history, storageExists] = loadHistory();
     dispatch(actions.initHistory({ history, storageExists }));
+    // permlink 経由でない場合、クイックセーブした情報を読み込む
+    if (permlinkId === undefined) {
+      const qss = history.quickSaves;
+      if (qss.length !== 0) {
+        dispatch(actions.loadQuickSave(qss[qss.length - 1]));
+      }
+    }
   }, []);
 
   // 履歴の差分が出たら Local Storage に保存する
   useEffect(() => {
-    const storageExists = saveHistory(state.history, state.storageExists);
-    dispatch(actions.setStorageExists(storageExists));
-  }, [state.history]);
+    const newStorageExists = saveHistory(history, storageExists);
+    dispatch(actions.setStorageExists(newStorageExists));
+  }, [history]);
 
   if (compilerList === null) {
     return null;
   }
 
-  const sidebarContent = (
-    <div
-      style={{ width: 244, height: "100%", backgroundColor: "white" }}
-      className="d-flex flex-column"
-    >
-      <div
-        className="d-flex justify-content-between px-8px py-4px"
-        style={{ borderBottom: "#d0d7de solid 1px" }}
-      >
-        <div className="d-flex align-items-center">
-          <h5>History</h5>
-          <Button
-            variant="link"
-            active={state.historyLocked}
-            onClick={() => {
-              dispatch(actions.setHistoryLocked(!state.historyLocked));
-            }}
-          >
-            <LayoutSidebarReverse />
-          </Button>
-        </div>
-        <Button
-          variant="link"
-          onClick={() => {
-            dispatch(actions.setHistoryOpened(false));
-            dispatch(actions.setHistoryLocked(false));
-          }}
-        >
-          <X />
-        </Button>
-      </div>
-      <div className="flex-grow-1">
-        {state.history.histories.map((x) => {
-          if (x.type === "permlink") {
-            return (
-              <div
-                key={`wb-history-${x.id}`}
-                className="d-flex flex-column"
-                style={{ border: "#eeeeee solid 1px" }}
-              >
-                <p>
-                  {formatDistanceToNow(x.createdAt * 1000, { addSuffix: true })}
-                </p>
-                <p>{x.permlinkId}</p>
-                <p>{x.title}</p>
-                <p>{x.currentLanguage}</p>
-                <p>{x.currentCompilerName}</p>
-                <p>
-                  {formatDistanceToNow(x.permlinkCreatedAt * 1000, {
-                    addSuffix: true,
-                  })}
-                </p>
-                {x.githubUser && <p>{`@${x.githubUser.login}`}</p>}
-              </div>
-            );
-          } else if (x.type === "run") {
-            return (
-              <div
-                key={`wb-history-${x.id}`}
-                className="d-flex flex-column"
-                style={{ border: "#eeeeee solid 1px" }}
-              >
-                <p>
-                  {formatDistanceToNow(x.createdAt * 1000, { addSuffix: true })}
-                </p>
-                <p>{x.editor.title}</p>
-                <p>{x.compiler.currentLanguage}</p>
-                <p>{x.compiler.currentCompilerName}</p>
-              </div>
-            );
-          }
-        })}
-      </div>
-    </div>
-  );
+  const sidebarContent = <SidebarBase />;
 
   return (
     <div id="wb-main" className="d-flex flex-column">
       <Header />
       <Sidebar
-        open={state.historyOpened}
-        docked={state.historyLocked}
+        open={sidebarState !== "none"}
+        docked={sidebarLocked}
         sidebar={sidebarContent}
         onSetOpen={(open) => {
-          dispatch(actions.setHistoryOpened(open));
+          if (open) {
+            dispatch(actions.setSidebarState("history"));
+          } else {
+            dispatch(actions.setSidebarState("none"));
+            dispatch(actions.setSidebarLocked(false));
+          }
         }}
         pullRight={true}
-        rootClassName="wb-sidebar"
+        rootClassName="wb-sidebar-root"
+        sidebarClassName="wb-sidebar"
         contentClassName="py-24px px-32px d-flex gap-16px"
         styles={{
           sidebar: {
@@ -213,7 +156,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
             {permlinkData !== null && <Author permlinkData={permlinkData} />}
           </div>
           <Editor compilerList={compilerList} permlinkData={permlinkData} />
-          {(state.currentCompilerName !== "" || permlinkData !== null) && (
+          {(currentCompilerName !== "" || permlinkData !== null) && (
             <>
               <Command
                 compilerList={compilerList}

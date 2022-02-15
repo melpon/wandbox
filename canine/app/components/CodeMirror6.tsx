@@ -195,6 +195,10 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
   const [view, setView] = useState<EditorView | null>(null);
 
   useLayoutEffect(() => {
+    if (initialText === undefined) {
+      return;
+    }
+
     const startState = EditorState.create({
       doc: initialText,
       extensions: optionToExtension(option),
@@ -214,12 +218,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
 
     setView(view);
     onViewCreated(view);
-
-    return () => {
-      view.destroy();
-      setView(null);
-    };
-  }, [ref]);
+  }, [ref, initialText]);
 
   useEffect(() => {
     if (view === null) {

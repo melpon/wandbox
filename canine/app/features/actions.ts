@@ -1,10 +1,13 @@
 import { EditorView } from "@codemirror/view";
 import { AppDispatch } from "~/store";
 import {
+  EditorSettingsData,
   EditorSourceData,
   HistoryData,
   StorageExists,
+  wandboxInitialState,
   wandboxSlice,
+  WandboxState,
 } from "./slice";
 
 const actions = wandboxSlice.actions;
@@ -148,4 +151,53 @@ export function loadHistory(): [HistoryData, StorageExists] {
   }
 
   return [{ keyCounter, quickSaves, histories }, storageExists];
+}
+
+const WANDBOX_SETTINGS_KEY = "wandbox.settings";
+
+interface PersistentSettingsData {
+  editorSettings: EditorSettingsData;
+  sidebarState: WandboxState["sidebarState"];
+  sidebarLocked: boolean;
+}
+
+export function saveSettings({
+  editorSettings,
+  sidebarState,
+  sidebarLocked,
+}: PersistentSettingsData) {
+  const item = {
+    editorSettings,
+    sidebarState,
+    sidebarLocked,
+  };
+  localStorage.setItem(WANDBOX_SETTINGS_KEY, JSON.stringify(item));
+}
+
+export function loadSettings(): PersistentSettingsData {
+  const item = localStorage.getItem(WANDBOX_SETTINGS_KEY);
+  if (item === null) {
+    const { editorSettings, sidebarLocked, sidebarState } = wandboxInitialState;
+    return {
+      editorSettings,
+      sidebarLocked,
+      sidebarState,
+    };
+  }
+  return JSON.parse(item);
+}
+
+export function applySettings(
+  dispatch: AppDispatch,
+  settings: PersistentSettingsData
+) {
+  dispatch(actions.setEditorSettingsEditor(settings.editorSettings.editor));
+  dispatch(actions.setEditorSettingsOpened(settings.editorSettings.opened));
+  dispatch(
+    actions.setEditorSettingsSmartIndent(settings.editorSettings.smartIndent)
+  );
+  dispatch(actions.setEditorSettingsTabKey(settings.editorSettings.tabKey));
+  dispatch(actions.setEditorSettingsTabWidth(settings.editorSettings.tabWidth));
+  dispatch(actions.setSidebarLocked(settings.sidebarLocked));
+  dispatch(actions.setSidebarState(settings.sidebarState));
 }
