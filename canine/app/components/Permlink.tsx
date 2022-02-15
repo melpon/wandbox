@@ -23,14 +23,24 @@ interface TweetButtonProps {
 
 const TweetButton: React.FC<TweetButtonProps> = ({ permlinkId }) => {
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
-  useEffect((): void => {
+  useEffect(() => {
     if (ref === null) {
       return;
     }
     const url = `${document.location.origin}/permlink/${permlinkId}`;
+    let elem: HTMLElement | null = null;
     twttr.ready((twttr) => {
-      twttr.widgets.createShareButton(url, ref, {});
+      twttr.widgets.createShareButton(url, ref, {}).then((x) => {
+        elem = x;
+      });
     });
+
+    return () => {
+      if (elem === null) {
+        return;
+      }
+      elem.remove();
+    };
   }, [permlinkId, ref]);
 
   return (
