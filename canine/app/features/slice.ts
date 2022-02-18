@@ -156,6 +156,7 @@ const initialState = {
   } as EditorSettingsData,
   running: false,
   sharable: false,
+  editorChanged: false,
 
   results: [] as ResultData[],
 
@@ -335,6 +336,9 @@ export const wandboxSlice = createSlice({
     },
     setSharable: (state, action: PayloadAction<boolean>) => {
       state.sharable = action.payload;
+    },
+    setEditorChanged: (state, action: PayloadAction<boolean>) => {
+      state.editorChanged = action.payload;
     },
     pushQuickSave: (state) => {
       const historyData: HistoryDataQuick = {

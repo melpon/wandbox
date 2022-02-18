@@ -63,7 +63,16 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   }, [permlinkResp]);
 
   const {
+    currentLanguage,
     currentCompilerName,
+    currentSwitches,
+    compilerOptionRaw,
+    runtimeOptionRaw,
+    currentTab,
+    title,
+    description,
+    editorChanged,
+    results,
     editorSettings,
     sidebarState,
     sidebarLocked,
@@ -72,7 +81,16 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   } = useSelector(
     ({
       wandbox: {
+        currentLanguage,
         currentCompilerName,
+        currentSwitches,
+        compilerOptionRaw,
+        runtimeOptionRaw,
+        currentTab,
+        title,
+        description,
+        editorChanged,
+        results,
         editorSettings,
         sidebarState,
         sidebarLocked,
@@ -80,7 +98,16 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         storageExists,
       },
     }: AppState) => ({
+      currentLanguage,
       currentCompilerName,
+      currentSwitches,
+      compilerOptionRaw,
+      runtimeOptionRaw,
+      currentTab,
+      title,
+      description,
+      editorChanged,
+      results,
       editorSettings,
       sidebarState,
       sidebarLocked,
@@ -147,6 +174,38 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       removeEventListener("focus", listener);
     };
   }, [localStorageChanged]);
+
+  // 編集中のデータが変化したら保存する
+  useEffect(() => {
+    dispatch(actions.setEditorChanged(true));
+  }, [
+    currentLanguage,
+    currentCompilerName,
+    currentSwitches,
+    compilerOptionRaw,
+    runtimeOptionRaw,
+    currentTab,
+    title,
+    description,
+    results,
+  ]);
+  useEffect(() => {
+    // 共有画面では保存しない
+    if (permlinkId !== undefined) {
+      return;
+    }
+    if (!editorChanged) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      dispatch(actions.pushQuickSave());
+      dispatch(actions.setEditorChanged(false));
+    }, 10000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [editorChanged]);
 
   if (compilerList === null) {
     return null;

@@ -165,6 +165,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
       onViewDestroyed={() => {}}
       onChange={() => {
         dispatch(actions.setSharable(false));
+        dispatch(actions.setEditorChanged(true));
       }}
     />
   );

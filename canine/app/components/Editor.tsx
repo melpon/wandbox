@@ -97,6 +97,7 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
             onViewDestroyed={(view) => {}}
             onChange={() => {
               dispatch(actions.setSharable(false));
+              dispatch(actions.setEditorChanged(true));
             }}
           />
         </div>
