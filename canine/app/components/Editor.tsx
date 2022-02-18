@@ -23,7 +23,7 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
   const { compilerList, permlinkData } = props;
-  const { editorSettings: settings } = state;
+  const { editorSettings } = state;
   // パーマリンク時は permlinkData からソースデータを作る
   const sources =
     permlinkData === null
@@ -46,7 +46,11 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
   }, [state.stdinView, state.stdinOpened]);
 
   return (
-    <div className="d-flex justify-content-stretch gap-8px">
+    <div
+      className={`${
+        editorSettings.fixedHeight ? "wb-editor-fixedheight" : ""
+      } d-flex justify-content-stretch gap-8px`}
+    >
       <div className="d-flex flex-column flex-grow-1">
         <EditorTabs state={state} permlinkData={permlinkData} />
         {state.sources.map((source, tab) => {

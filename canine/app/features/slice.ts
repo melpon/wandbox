@@ -17,11 +17,10 @@ export type TabWidthType = "2" | "4" | "8";
 export type RunningState = "init" | "running" | "completed";
 
 export interface EditorSettingsData {
-  opened: boolean;
-  editor: EditorType;
   tabKey: TabKeyType;
   tabWidth: TabWidthType;
   smartIndent: boolean;
+  fixedHeight: boolean;
 }
 
 type ResultType =
@@ -148,11 +147,10 @@ const initialState = {
   stdinView: undefined as EditorView | undefined,
   stdinOpened: false,
   editorSettings: {
-    opened: false,
-    editor: "default",
     tabKey: "4",
     tabWidth: "4",
     smartIndent: false,
+    fixedHeight: false,
   } as EditorSettingsData,
   running: false,
   sharable: false,
@@ -214,12 +212,6 @@ export const wandboxSlice = createSlice({
     setResults: (state, action: PayloadAction<ResultData[]>) => {
       state.results = action.payload;
     },
-    setEditorSettingsOpened: (state, action: PayloadAction<boolean>) => {
-      state.editorSettings.opened = action.payload;
-    },
-    setEditorSettingsEditor: (state, action: PayloadAction<EditorType>) => {
-      state.editorSettings.editor = action.payload;
-    },
     setEditorSettingsTabKey: (state, action: PayloadAction<TabKeyType>) => {
       state.editorSettings.tabKey = action.payload;
     },
@@ -228,6 +220,9 @@ export const wandboxSlice = createSlice({
     },
     setEditorSettingsSmartIndent: (state, action: PayloadAction<boolean>) => {
       state.editorSettings.smartIndent = action.payload;
+    },
+    setEditorSettingsFixedHeight: (state, action: PayloadAction<boolean>) => {
+      state.editorSettings.fixedHeight = action.payload;
     },
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;

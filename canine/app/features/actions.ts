@@ -189,13 +189,14 @@ export function applySettings(
   dispatch: AppDispatch,
   settings: PersistentSettingsData
 ) {
-  dispatch(actions.setEditorSettingsEditor(settings.editorSettings.editor));
-  dispatch(actions.setEditorSettingsOpened(settings.editorSettings.opened));
   dispatch(
     actions.setEditorSettingsSmartIndent(settings.editorSettings.smartIndent)
   );
   dispatch(actions.setEditorSettingsTabKey(settings.editorSettings.tabKey));
   dispatch(actions.setEditorSettingsTabWidth(settings.editorSettings.tabWidth));
+  dispatch(
+    actions.setEditorSettingsFixedHeight(settings.editorSettings.fixedHeight)
+  );
   dispatch(actions.setSidebarLocked(settings.sidebarLocked));
   dispatch(actions.setSidebarState(settings.sidebarState));
 }

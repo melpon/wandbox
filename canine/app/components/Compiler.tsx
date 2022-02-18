@@ -174,7 +174,7 @@ const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
   const readOnly = permlinkData !== null;
 
   return (
-    <div className="d-flex flex-column gap-16px" style={{ width: 280 }}>
+    <div className="wb-compiler d-flex flex-column gap-16px">
       {/* choose language */}
       <ChooseLanguage
         language={language}

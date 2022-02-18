@@ -86,10 +86,22 @@ p, h1, h2, h3, h4, h5, h6 {
   }
 }
 
-.cm-editor {
-  min-height: 300px;
-  height: 100%;
+#wb-main {
+  .cm-editor {
+    min-height: 300px;
+    height: 100%;
+  }
+  .cm-scroller {
+    overflow: auto;
+  }
+
+  .wb-editor-fixedheight {
+    .cm-editor {
+      height: 300px;
+    }
+  }
 }
+
 #wb-main {
   .cm-focused {
     outline: none;
@@ -129,15 +141,49 @@ p, h1, h2, h3, h4, h5, h6 {
 .wb-stdin {
   border: $color-gray solid 1px;
   border-radius: 8px 0px 8px 8px;
-  min-width: 244px;
+  width: 244px;
 }
 
 .wb-editor {
   border: $color-gray solid 1px;
   border-radius: 0px 0px 8px 8px;
+  min-width: 244px;
+  width: calc(100vw
+    /* 画面左右のパディング */ - 64px
+    /* 言語選択の幅 */ - 244px
+    /* 言語選択とエディタのマージン */ - 16px
+    );
 }
 .wb-editor.wb-stdinactive {
   border-radius: 0px 8px 8px 8px;
+  width: calc(100vw
+    /* 画面左右のパディング */ - 64px
+    /* 言語選択の幅 */ - 244px
+    /* 言語選択とエディタのマージン */ - 16px
+    /* 標準入力エディタの幅 */ - 244px
+    /* 通常エディタと標準入力エディタのマージン */ - 8px
+    );
+
+}
+.wb-sidebar-locked {
+  .wb-editor {
+    width: calc(100vw
+      /* 画面左右のパディング */ - 64px
+      /* 言語選択の幅 */ - 244px
+      /* 言語選択とエディタのマージン */ - 16px
+      /* サイドバーの幅 */ - 320px
+      );
+  }
+  .wb-editor.wb-stdinactive {
+    width: calc(100vw
+      /* 画面左右のパディング */ - 64px
+      /* 言語選択の幅 */ - 244px
+      /* 言語選択とエディタのマージン */ - 16px
+      /* 標準入力エディタの幅 */ - 244px
+      /* 通常エディタと標準入力エディタのマージン */ - 8px
+      /* サイドバーの幅 */ - 320px
+      );
+  }
 }
 
 .wb-input .CodeMirror {
@@ -168,6 +214,10 @@ p, h1, h2, h3, h4, h5, h6 {
     text-overflow: ellipsis;
     overflow-x: hidden;
   }
+}
+
+.wb-compiler {
+  width: 244px;
 }
 
 .wb-compilerlist {
@@ -269,8 +319,8 @@ p, h1, h2, h3, h4, h5, h6 {
 
 .wb-sidebar {
   overflow-x: hidden;
+  width: 320px;
   > div {
-    width: 384px;
     min-height: 100%;
     background-color: $color-white;
 

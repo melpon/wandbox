@@ -231,7 +231,9 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         pullRight={true}
         rootClassName="wb-sidebar-root"
         sidebarClassName="wb-sidebar"
-        contentClassName="py-24px px-32px d-flex gap-16px"
+        contentClassName={`${
+          sidebarLocked ? "wb-sidebar-locked" : ""
+        } py-24px px-32px d-flex gap-16px`}
         styles={{
           sidebar: {
             boxShadow: "-3px 2px 4px rgba(36, 41, 47, 0.15)",

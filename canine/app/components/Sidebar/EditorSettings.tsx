@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useSelector } from "react-redux";
 import Form from "react-bootstrap/Form";
 import { EditorType, wandboxSlice } from "~/features/slice";
@@ -11,24 +11,31 @@ const EditorSettings: React.FC = () => {
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
 
-  const onChangeTabKey = React.useCallback(
+  const onChangeTabKey = useCallback(
     (e): void => {
       const tabKey = e.target.value;
       dispatch(actions.setEditorSettingsTabKey(tabKey));
     },
     [settings]
   );
-  const onChangeTabWidth = React.useCallback(
+  const onChangeTabWidth = useCallback(
     (e): void => {
       const tabWidth = e.target.value;
       dispatch(actions.setEditorSettingsTabWidth(tabWidth));
     },
     [settings]
   );
-  const onChangeSmartIndent = React.useCallback(
+  const onChangeSmartIndent = useCallback(
     (e): void => {
       const smartIndent = e.target.checked;
       dispatch(actions.setEditorSettingsSmartIndent(smartIndent));
+    },
+    [settings]
+  );
+  const onChangeFixedHeight = useCallback(
+    (e): void => {
+      const fixedHeight = e.target.checked;
+      dispatch(actions.setEditorSettingsFixedHeight(fixedHeight));
     },
     [settings]
   );
@@ -68,9 +75,17 @@ const EditorSettings: React.FC = () => {
       <Form.Group controlId="wb-smartindent">
         <Form.Check
           type="checkbox"
-          label="Smart Indent"
+          label="Smart indent"
           checked={settings.smartIndent}
           onChange={onChangeSmartIndent}
+        />
+      </Form.Group>
+      <Form.Group controlId="wb-fixedheight">
+        <Form.Check
+          type="checkbox"
+          label="Fix editor height"
+          checked={settings.fixedHeight}
+          onChange={onChangeFixedHeight}
         />
       </Form.Group>
     </div>
