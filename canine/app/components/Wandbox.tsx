@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { useCompilerList } from "~/hooks/compilerList";
@@ -34,13 +34,12 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setError
   );
 
-  const [permlinkData, setPermlinkData] = React.useState<PermlinkData | null>(
-    null
-  );
+  const [permlinkData, setPermlinkData] = useState<PermlinkData | null>(null);
   const [permlinkResp, , doGetPermlink] = useGetPermlink(
     permlinkId === undefined ? "" : permlinkId,
     setError
   );
+  const [localStorageChanged, setLocalStorageChanged] = useState(false);
 
   useEffect((): void => {
     if (permlinkId === undefined) {
@@ -121,6 +120,33 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     const newStorageExists = saveHistory(history, storageExists);
     dispatch(actions.setStorageExists(newStorageExists));
   }, [history]);
+
+  // 他のタブで localStorage が更新されたら、
+  // アクティブになった際に情報を読み込み直す
+  useEffect(() => {
+    const listener = () => {
+      setLocalStorageChanged(true);
+    };
+
+    addEventListener("storage", listener);
+    return () => {
+      removeEventListener("storage", listener);
+    };
+  }, []);
+  useEffect(() => {
+    const listener = () => {
+      if (localStorageChanged) {
+        const [history, storageExists] = loadHistory();
+        dispatch(actions.initHistory({ history, storageExists }));
+        setLocalStorageChanged(false);
+      }
+    };
+
+    addEventListener("focus", listener);
+    return () => {
+      removeEventListener("focus", listener);
+    };
+  }, [localStorageChanged]);
 
   if (compilerList === null) {
     return null;

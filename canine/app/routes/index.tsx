@@ -1,10 +1,11 @@
-import { AppContexts } from "~/apps/AppContexts";
-import { Wandbox } from "~/apps/Wandbox";
+import { Provider } from "react-redux";
+import { Wandbox } from "~/components/Wandbox";
+import store from "~/store";
 
 export default function Index() {
   return (
-    <AppContexts>
+    <Provider store={store}>
       <Wandbox />
-    </AppContexts>
+    </Provider>
   );
 }
