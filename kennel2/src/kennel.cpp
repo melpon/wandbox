@@ -717,13 +717,9 @@ class kennel : public cppcms::application {
         permlink pl(service());
 
         cppcms::json::value auth;
-        if (value["login"].boolean()) {
-            auth = authenticate(pl.get_github_access_token(session()["access_token"]));
-            if (auth.is_undefined()) {
-                // user is expecting to logged in but actually not.
-                response().status(400);
-                return;
-            }
+        if (!value["login"].is_undefined()) {
+          auth.object({});
+          auth["login"] = value["login"].str();
         }
 
         auto compiler_infos = get_compiler_infos_or_cache()["compilers"];

@@ -70,7 +70,7 @@ const Permlink: React.FC<PermlinkProps> = (
   const [sharing, setSharing] = React.useState<boolean>(false);
 
   const [permlinkResp, permlinkFetchId, doPermlink] = usePostPermlink(
-    `${WANDBOX_URL_PREFIX}/api/permlink`,
+    "/api/permlink",
     setError
   );
 
@@ -83,7 +83,6 @@ const Permlink: React.FC<PermlinkProps> = (
     const body = JSON.stringify({
       ...json,
       results: state.results,
-      login: false,
     });
 
     doPermlink(null, { body: body });

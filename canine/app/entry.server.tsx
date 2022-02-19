@@ -84,7 +84,30 @@ export default async function handleRequest(
     const session = await getSession(request.headers.get("Cookie"));
     session.unset("github_user");
     await commitSession(session);
-    return Response.redirect(url.origin + "/");
+    return Response.redirect(url.origin + "/", 301);
+  }
+  // permlink 送信リクエストにユーザー情報を設定する
+  if (
+    !hasError &&
+    request.method === "POST" &&
+    url.pathname === "/api/permlink"
+  ) {
+    const json = await request.json();
+    const session = await getSession(request.headers.get("Cookie"));
+    if (session.has("github_user")) {
+      const githubUser = JSON.parse(session.get("github_user"));
+      json["login"] = githubUser["login"];
+      json["github_id"] = githubUser["id"];
+    }
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/permlink`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(json),
+    });
   }
 
   let markup = renderToString(
