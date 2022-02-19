@@ -1,18 +1,13 @@
-name = "remix-cloudflare-workers"
+name = "wandbox-local"
 type = "javascript"
 
-zone_id = ""
-account_id = ""
+zone_id = "c3cbf0990f6c7eccfdcd4aede36ce2f9"
+account_id = "a88d1d39ba893e18fa44d5cf1ec1115e"
 route = ""
-workers_dev = true
 
 kv_namespaces = [ 
   { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" }
 ]
-
-[vars]
-WANDBOX_URL_PREFIX = "http://139.180.192.155"
-WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08"
 
 [site]
 bucket = "./public"
@@ -25,16 +20,24 @@ watch_dir = "build/index.js"
 [build.upload]
 format="service-worker"
 
-[env.wandbox]
-name = "wandbox"
+# [secrets]
+# WANDBOX_GITHUB_CLIENT_SECRET
+# WANDBOX_KV_COOKIE_SECRET
+
+##### develop 用 ######
+
+[env.develop]
+name = "wandbox-develop"
+route = "develop.wandbox.org/*"
+vars = { WANDBOX_URL_PREFIX = "http://api.develop.wandbox.org", WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08" }
 kv_namespaces = [ 
   { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" }
 ]
 
-[env.wandbox.vars]
-WANDBOX_URL_PREFIX = "https://develop.wandbox.org"
-WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08"
 
-# [secrets.wandbox]
-# WANDBOX_GITHUB_CLIENT_SECRET
-# WANDBOX_KV_COOKIE_SECRET
+##### master 用 ######
+
+[env.production]
+name = "wandbox"
+route = "wandbox.org/*"
+vars = { WANDBOX_URL_PREFIX = "http://139.180.192.155", WANDBOX_GITHUB_CLIENT_ID = "f9d429d939d997e6b08e" }

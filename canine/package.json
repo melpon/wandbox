@@ -10,9 +10,10 @@
     "postinstall": "remix setup cloudflare-workers",
     "build:worker": "esbuild --define:process.env.NODE_ENV='\"production\"' --minify --bundle --sourcemap --outdir=dist ./worker",
     "dev:worker": "esbuild --define:process.env.NODE_ENV='\"development\"' --bundle --sourcemap --outdir=dist ./worker",
-    "start": "miniflare --build-command \"npm run dev:worker\" --binding WANDBOX_URL_PREFIX=\"http://139.180.192.155\" --binding WANDBOX_GITHUB_CLIENT_ID=50835a4ce149db7aeedc --binding WANDBOX_GITHUB_CLIENT_SECRET=9d7a83fcb5f0ff7cd0c209206e1b9e1b4dcecd3e --binding WANDBOX_KV_COOKIE_SECRET=12345678  --watch",
-    "deploy": "npm run build && wrangler publish --env wandbox",
-    "deploy:tail": "npm run build && wrangler publish --env wandbox && wrangler tail --env wandbox --format pretty"
+    "start": "miniflare --build-command \"npm run dev:worker\" --binding WANDBOX_URL_PREFIX=\"http://api.develop.wandbox.org\" --binding WANDBOX_GITHUB_CLIENT_ID=50835a4ce149db7aeedc --binding WANDBOX_GITHUB_CLIENT_SECRET=9d7a83fcb5f0ff7cd0c209206e1b9e1b4dcecd3e --binding WANDBOX_KV_COOKIE_SECRET=12345678 --watch",
+    "deploy:master": "npm run build && wrangler publish --env master",
+    "deploy:develop": "npm run build && wrangler publish --env develop",
+    "deploy:develop:tail": "npm run build && wrangler publish --env develop && wrangler tail --env develop --format pretty"
   },
   "dependencies": {
     "@codemirror/basic-setup": "^0.19.1",

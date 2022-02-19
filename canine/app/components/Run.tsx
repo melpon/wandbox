@@ -138,7 +138,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
     dispatch(actions.pushQuickSave());
 
     dispatch(actions.setNavigate("/"));
-  }, []);
+  }, [compilerList, permlinkData]);
 
   useEffect(() => {
     if (state.navigate.length === 0) {

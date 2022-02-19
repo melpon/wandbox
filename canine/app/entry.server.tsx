@@ -76,7 +76,6 @@ export default async function handleRequest(
         await commitSession(session);
       }
     }
-    console.log(url);
     return Response.redirect(url.origin + "/", 301);
   }
   // ログアウト
