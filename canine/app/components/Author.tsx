@@ -53,13 +53,12 @@ const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
           permlinkCreatedAt: permlinkData.parameter.createdAt,
         })
       );
+      setUser(null);
       return;
     }
-    if (user !== null) {
-      return;
-    }
+    setUser(null);
     getGithubUser(username).then(setUser);
-  }, [user]);
+  }, [permlinkData.parameter.githubUser]);
 
   const distanceTime = formatDistanceToNow(
     new Date(permlinkData.parameter.createdAt * 1000),
@@ -83,6 +82,13 @@ const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
       })
     );
   }, [user]);
+
+  const loading =
+    permlinkData.parameter.githubUser.length !== 0 && user === null;
+
+  if (loading) {
+    return null;
+  }
 
   return (
     <div className="wb-author d-flex flex-column align-self-start">

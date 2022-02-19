@@ -108,6 +108,24 @@ export default async function handleRequest(
       headers: headers,
       body: JSON.stringify(json),
     });
+    return resp;
+  }
+  // それ以外の API リクエストは単に転送する
+  if (!hasError && url.pathname.startsWith("/api")) {
+    let json: any = null;
+    if (request.method === "POST") {
+      json = await request.json();
+    }
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    const resp = await fetch(`${WANDBOX_URL_PREFIX}${url.pathname}`, {
+      method: request.method,
+      headers: headers,
+      body: json === null ? undefined : JSON.stringify(json),
+    });
+    return resp;
   }
 
   let markup = renderToString(

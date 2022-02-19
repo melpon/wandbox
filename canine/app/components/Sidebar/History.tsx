@@ -53,7 +53,14 @@ const History: React.FC = () => {
                     })}
                   </p>
                   {x.githubUser && (
-                    <p className="wb-weak-text">{`@${x.githubUser.login}`}</p>
+                    <p className="wb-weak-text">
+                      Created by{" "}
+                      <a
+                        href={x.githubUser.html_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >{`@${x.githubUser.login}`}</a>
+                    </p>
                   )}
                   {!x.githubUser && (
                     <p className="wb-weak-text">Created by anonymous</p>

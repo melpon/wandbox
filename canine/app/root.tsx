@@ -51,7 +51,6 @@ export default function App() {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              window.WANDBOX_URL_PREFIX = ${JSON.stringify(WANDBOX_URL_PREFIX)};
               window.WANDBOX_GITHUB_CLIENT_ID = ${JSON.stringify(
                 WANDBOX_GITHUB_CLIENT_ID
               )};

@@ -29,10 +29,7 @@ import { SidebarBase } from "~/components/SidebarBase";
 const Wandbox: React.FC = (): React.ReactElement | null => {
   const { permlinkId } = useParams();
   const [, setError] = useError();
-  const compilerList = useCompilerList(
-    `${WANDBOX_URL_PREFIX}/api/list.json`,
-    setError
-  );
+  const compilerList = useCompilerList(`/api/list.json`, setError);
 
   const [permlinkData, setPermlinkData] = useState<PermlinkData | null>(null);
   const [permlinkResp, , doGetPermlink] = useGetPermlink(
@@ -47,7 +44,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       return;
     }
 
-    doGetPermlink(`${WANDBOX_URL_PREFIX}/api/permlink/${permlinkId}`, {});
+    doGetPermlink(`/api/permlink/${permlinkId}`, {});
   }, [permlinkId]);
 
   useEffect((): void => {

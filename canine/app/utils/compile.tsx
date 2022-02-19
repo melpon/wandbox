@@ -54,7 +54,7 @@ export function compile(
     return;
   }
 
-  fetch(`${WANDBOX_URL_PREFIX}/api/compile.ndjson`, {
+  fetch(`/api/compile.ndjson`, {
     method: "POST",
     body: JSON.stringify(body),
     mode: "cors",
