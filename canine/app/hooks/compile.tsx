@@ -1,14 +1,14 @@
 import React, { useCallback } from "react";
 import { ResultData, wandboxSlice, WandboxState } from "~/features/slice";
 import { AppDispatch } from "~/store";
-import { compile } from "~/utils/compile";
+import { compile, CompileState } from "~/utils/compile";
 import { CompilerList } from "./compilerList";
 import { useError } from "./error";
 import { AnyJson } from "./fetch";
 
 export function useCompile(
   dispatch: AppDispatch,
-  state: WandboxState,
+  state: CompileState,
   compilerList: CompilerList
 ): () => void {
   const actions = wandboxSlice.actions;

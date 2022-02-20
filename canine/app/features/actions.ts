@@ -1,4 +1,4 @@
-import { EditorView } from "@codemirror/view";
+import { EditorView, KeyBinding } from "@codemirror/view";
 import { AppDispatch } from "~/store";
 import {
   EditorSettingsData,

@@ -149,7 +149,7 @@ const codeMirrorDefaultExtensions: Extension[] = [
   highlightSelectionMatches(),
 ];
 
-const keymaps: Extension = keymap.of([
+const defaultKeyMaps: KeyBinding[] = [
   ...closeBracketsKeymap,
   ...defaultKeymap,
   ...searchKeymap,
@@ -158,17 +158,16 @@ const keymaps: Extension = keymap.of([
   ...commentKeymap,
   ...completionKeymap,
   ...lintKeymap,
-]);
+];
 
 export interface CodeMirror6Option {
-  keyMap?: string;
   lineNumbers?: boolean;
   theme?: string;
   mode?: string;
   indentUnit?: number;
   indentWithTab?: boolean;
   tabSize?: number;
-  //extraKeys?: { [key: string]: (view: EditorView) => void };
+  keymaps?: KeyBinding[];
   viewportMargin?: number;
   readOnly?: boolean;
   languageSupport?: Extension;
@@ -193,23 +192,29 @@ function optionToExtension(option: CodeMirror6Option): Extension[] {
     ext.push(EditorView.editable.of(false));
   } else {
     ext.push(
-      keymaps,
       highlightActiveLineGutter(),
       highlightActiveLine(),
       bracketMatching()
     );
+    const keymaps = [...defaultKeyMaps];
     if (option.indentWithTab) {
-      ext.push(keymap.of([indentWithTab]));
+      keymaps.push(indentWithTab);
       ext.push(indentUnit.of("\t"));
       if (option.tabSize !== undefined) {
         ext.push(EditorState.tabSize.of(option.tabSize));
       }
     } else {
-      ext.push(keymap.of([tabWithSpaceBinding]));
+      keymaps.push(tabWithSpaceBinding);
       if (option.indentUnit !== undefined) {
         ext.push(indentUnit.of(Array(option.indentUnit + 1).join(" ")));
       }
     }
+    if (option.keymaps) {
+      keymaps.unshift(...option.keymaps);
+      console.log(keymaps);
+    }
+
+    ext.push(keymap.of(keymaps));
   }
   if (option.languageSupport !== undefined) {
     ext.push(option.languageSupport);

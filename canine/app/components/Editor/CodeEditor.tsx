@@ -1,28 +1,58 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
+import { KeyBinding } from "@codemirror/view";
+
 import { resolveLanguage, importLanguage } from "~/utils/resolveLanguageMode";
 import { CompilerList } from "~/hooks/compilerList";
 import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useCompile } from "~/hooks/compile";
-import { CodeMirror6 } from "../CodeMirror6";
+import { CodeMirror6, CodeMirror6Option } from "../CodeMirror6";
 import { Extension } from "@codemirror/state";
 import { EditorSourceData, wandboxSlice, WandboxState } from "~/features/slice";
-import { useAppDispatch } from "~/store";
+import { AppState, useAppDispatch } from "~/store";
+import { useCompileStateSelector } from "~/utils/compile";
 
 interface CodeEditorProps {
-  sources: EditorSourceData[];
+  source: EditorSourceData;
   tab: number;
-  show: boolean;
-  state: WandboxState;
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
-  const { sources, tab, show, state, compilerList, permlinkData } = props;
+  const { source, tab, compilerList, permlinkData } = props;
+
+  const { currentLanguage, stdinOpened, currentTab, tabKey, tabWidth } =
+    useSelector(
+      ({
+        wandbox: {
+          currentLanguage,
+          stdinOpened,
+          currentTab,
+          editorSettings: { tabKey, tabWidth },
+        },
+      }: AppState) => ({
+        currentLanguage,
+        stdinOpened,
+        currentTab,
+        tabKey,
+        tabWidth,
+      })
+    );
+  const show = tab === currentTab;
 
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
+
+  const compileState = useCompileStateSelector();
+  const doCompile = useCompile(dispatch, compileState, compilerList);
+  const onRun = useCallback(() => {
+    dispatch(actions.setRunning(true));
+    dispatch(actions.setSharable(true));
+    dispatch(actions.prepareRun());
+    doCompile();
+  }, [doCompile]);
   //const { currentLanguage, currentCompilerName } = compiler;
 
   /*
@@ -122,41 +152,52 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
     />
   );
   */
-  const currentLanguage =
+  const language =
     permlinkData === null
-      ? state.currentLanguage
+      ? currentLanguage
       : permlinkData.parameter.compilerInfo.language;
-
-  const source = sources[tab];
 
   const [languageSupport, setLanguageSupport] =
     React.useState<Extension | null>(null);
-  const language = resolveLanguage(source.filename, currentLanguage);
+  const resolvedLanguage = resolveLanguage(source.filename, language);
   useEffect((): void => {
     // mode に応じて動的インポート
-    importLanguage(language).then((lang) => {
+    importLanguage(resolvedLanguage).then((lang) => {
       // 読み込みが完了したら CodeEditor をリフレッシュ
       setLanguageSupport(lang);
     });
-  }, [language]);
+  }, [resolvedLanguage]);
+
+  const ctrlEnter = useMemo((): KeyBinding => {
+    return {
+      key: "Ctrl-Enter",
+      preventDefault: true,
+      run: () => {
+        console.log("run");
+        onRun();
+        return true;
+      },
+    };
+  }, [onRun]);
+  const option = useMemo((): CodeMirror6Option => {
+    return {
+      lineNumbers: true,
+      tabSize: parseInt(tabWidth, 10),
+      indentUnit: tabKey !== "tab" ? parseInt(tabKey, 10) : undefined,
+      indentWithTab: tabKey === "tab",
+      languageSupport: languageSupport || undefined,
+      readOnly: permlinkData !== null,
+      keymaps: [ctrlEnter],
+    };
+  }, [tabWidth, tabKey, languageSupport, permlinkData, ctrlEnter]);
 
   return (
     <CodeMirror6
       className={`wb-editor flex-grow-1 ${
-        state.stdinOpened ? "wb-stdinactive" : ""
+        stdinOpened ? "wb-stdinactive" : ""
       } ${show ? "" : "d-none"}`}
       text={source.text}
-      option={{
-        lineNumbers: true,
-        tabSize: parseInt(state.editorSettings.tabWidth, 10),
-        indentUnit:
-          state.editorSettings.tabKey !== "tab"
-            ? parseInt(state.editorSettings.tabKey, 10)
-            : undefined,
-        indentWithTab: state.editorSettings.tabKey === "tab",
-        languageSupport: languageSupport || undefined,
-        readOnly: permlinkData !== null,
-      }}
+      option={option}
       onViewCreated={(view) => {
         if (permlinkData === null) {
           dispatch(actions.setView({ tab, view }));

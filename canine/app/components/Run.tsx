@@ -17,6 +17,7 @@ import { useError } from "~/hooks/error";
 import { AppState, useAppDispatch, useAppStore } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { saveHistory } from "~/features/actions";
+import { useCompileStateSelector } from "~/utils/compile";
 
 export interface RunProps {
   compilerList: CompilerList;
@@ -25,11 +26,19 @@ export interface RunProps {
 
 const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
-  const state = useSelector(({ wandbox }: AppState) => wandbox);
+  const { running, navigate, history, storageExists } = useSelector(
+    ({ wandbox: { running, navigate, history, storageExists } }: AppState) => ({
+      running,
+      navigate,
+      history,
+      storageExists,
+    })
+  );
+  const compileState = useCompileStateSelector();
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
-  const doCompile = useCompile(dispatch, state, compilerList);
-  const navigate = useNavigate();
+  const doCompile = useCompile(dispatch, compileState, compilerList);
+  const doNavigate = useNavigate();
   const [, setError] = useError();
 
   const onRun = React.useCallback((): void => {
@@ -37,7 +46,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
     dispatch(actions.setSharable(true));
     dispatch(actions.prepareRun());
     doCompile();
-  }, [state, doCompile]);
+  }, [doCompile]);
 
   //const disabled = permlinkData !== null || currentCompilerName === "";
 
@@ -141,15 +150,15 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   }, [compilerList, permlinkData]);
 
   useEffect(() => {
-    if (state.navigate.length === 0) {
+    if (navigate.length === 0) {
       return;
     }
 
-    saveHistory(state.history, state.storageExists);
+    saveHistory(history, storageExists);
     dispatch(actions.clearNavigate());
 
-    navigate(state.navigate);
-  }, [state.navigate]);
+    doNavigate(navigate);
+  }, [navigate, history, storageExists]);
 
   // 共有中は編集ボタン
   if (permlinkData !== null) {
@@ -165,7 +174,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
     <Button
       style={{
         minWidth: 144,
-        visibility: state.running ? "hidden" : "visible",
+        visibility: running ? "hidden" : "visible",
       }}
       onClick={onRun}
       variant="primary"

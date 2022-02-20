@@ -1,13 +1,56 @@
+import { EditorView } from "@codemirror/view";
 import ndjsonStream from "can-ndjson-stream";
+import { useSelector } from "react-redux";
 
 import { getSourceText } from "~/features/actions";
-import { getStdin, WandboxState } from "~/features/slice";
+import { EditorSourceData, getStdin, WandboxState } from "~/features/slice";
 import { CompilerList } from "~/hooks/compilerList";
 import { AnyJson, JsonMap } from "~/hooks/fetch";
+import { AppState } from "~/store";
 import { getCompileOptions } from "./getCompileOptions";
 
+export type CompileState = {
+  currentCompilerName: string;
+  currentSwitches: { [name: string]: string | boolean };
+  compilerOptionRaw: string;
+  runtimeOptionRaw: string;
+  title: string;
+  description: string;
+  sources: EditorSourceData[];
+  stdin: string;
+  stdinView?: EditorView;
+};
+
+export function useCompileStateSelector(): CompileState {
+  return useSelector(
+    ({
+      wandbox: {
+        currentCompilerName,
+        currentSwitches,
+        compilerOptionRaw,
+        runtimeOptionRaw,
+        title,
+        description,
+        sources,
+        stdin,
+        stdinView,
+      },
+    }: AppState) => ({
+      currentCompilerName,
+      currentSwitches,
+      compilerOptionRaw,
+      runtimeOptionRaw,
+      title,
+      description,
+      sources,
+      stdin,
+      stdinView,
+    })
+  );
+}
+
 export function createBody(
-  state: WandboxState,
+  state: CompileState,
   compilerList: CompilerList
 ): JsonMap | null {
   const defaultEditorTab = state.sources.findIndex(
@@ -42,8 +85,9 @@ export function createBody(
     "runtime-option-raw": state.runtimeOptionRaw,
   };
 }
+
 export function compile(
-  state: WandboxState,
+  state: CompileState,
   compilerList: CompilerList,
   onRead: (result: AnyJson) => void,
   onComplete: () => void,

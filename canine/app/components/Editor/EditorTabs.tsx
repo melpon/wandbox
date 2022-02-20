@@ -6,36 +6,29 @@ import { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { EditorTab, RenamingSource } from "./EditorTab";
 import { Button } from "react-bootstrap";
-import { wandboxSlice, WandboxState } from "~/features/slice";
+import { EditorSourceData, wandboxSlice, WandboxState } from "~/features/slice";
 import { useAppDispatch } from "~/store";
 import { addSource } from "~/features/actions";
 
 interface EditorTabsProps {
-  state: WandboxState;
+  currentTab: number;
+  stdinOpened: boolean;
+  sources: EditorSourceData[];
   permlinkData: PermlinkData | null;
 }
 
 const EditorTabs: React.FC<EditorTabsProps> = (
   props
 ): React.ReactElement | null => {
-  const { state, permlinkData } = props;
+  const { currentTab, stdinOpened, sources, permlinkData } = props;
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
   const [renamingSources, setRenamingSources] = React.useState<
     RenamingSource[]
   >([]);
 
-  // パーマリンク時は permlinkData からソースデータを作る
-  const sources =
-    permlinkData === null
-      ? state.sources
-      : createEditorSourceData(
-          permlinkData.parameter.code,
-          permlinkData.parameter.codes
-        );
-
   React.useEffect((): void => {
-    const rs = state.sources.map(
+    const rs = sources.map(
       (source): RenamingSource => ({
         renaming: false,
         // 0番目は source.filename == null になっていて、UI 上で編集不可なので、
@@ -45,11 +38,11 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       })
     );
     setRenamingSources(rs);
-  }, [state.sources]);
+  }, [sources]);
 
   const onAddTab = React.useCallback((): void => {
-    addSource(dispatch, state.sources, "noname");
-  }, [state]);
+    addSource(dispatch, sources, "noname");
+  }, [sources]);
 
   const onChangeTabs = React.useCallback(
     (index: number): void => {
@@ -67,7 +60,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
 
       setRenamingSources(rs);
     },
-    [state, renamingSources]
+    [renamingSources]
   );
   const onClickTabClose = React.useCallback((index: number): void => {
     dispatch(actions.removeSource(index));
@@ -85,7 +78,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       );
       setRenamingSources(rs);
     },
-    [state, renamingSources]
+    [renamingSources]
   );
   const onChangeRenamingFilename = React.useCallback(
     (index: number, filename: string): void => {
@@ -123,7 +116,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       };
       setRenamingSources(rs);
     },
-    [renamingSources, state]
+    [renamingSources]
   );
 
   return (
@@ -131,7 +124,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       <Nav
         className="wb-editortabs flex-grow-1"
         variant="tabs"
-        activeKey={`wb-editor-${state.currentTab}`}
+        activeKey={`wb-editor-${currentTab}`}
       >
         {sources.map((source, index): React.ReactElement => {
           return (
@@ -142,7 +135,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
                 source,
                 readonly: permlinkData !== null,
                 renamingSource: renamingSources[index] || null,
-                active: index === state.currentTab,
+                active: index === currentTab,
                 onChangeTabs,
                 onClickTabEdit,
                 onClickTabClose,
@@ -186,11 +179,11 @@ const EditorTabs: React.FC<EditorTabsProps> = (
         }
       )*/}
       </Nav>
-      {!state.stdinOpened && (
+      {!stdinOpened && (
         <Button
           variant="link"
           className="wb-stdinbutton d-none d-md-block align-self-end"
-          onClick={() => dispatch(actions.setStdinOpened(!state.stdinOpened))}
+          onClick={() => dispatch(actions.setStdinOpened(!stdinOpened))}
         >
           Stdin
         </Button>
