@@ -90,7 +90,6 @@ export const insertTabWithSpace: StateCommand = ({ state, dispatch }) => {
   const newCursor = Math.floor((cursor + indentUnit) / indentUnit) * indentUnit;
   const indentNum = newCursor - cursor;
   const spaces = Array(indentNum + 1).join(" ");
-  console.log(cursor, newCursor, indentUnit, spaces.length);
   dispatch(
     state.update(state.replaceSelection(spaces), {
       scrollIntoView: true,
@@ -100,9 +99,40 @@ export const insertTabWithSpace: StateCommand = ({ state, dispatch }) => {
   return true;
 };
 
+export const removeTabWithSpace: StateCommand = ({ state, dispatch }) => {
+  const cursor =
+    state.selection.main.head -
+    state.doc.lineAt(state.selection.main.head).from;
+  const indentUnit = getIndentUnit(state);
+  const newCursor = Math.floor((cursor - 1) / indentUnit) * indentUnit;
+  if (newCursor < 0) {
+    return true;
+  }
+  const removeNum = cursor - newCursor;
+  const newHead = state.selection.main.head - removeNum;
+  dispatch(
+    state.update(
+      {
+        changes: {
+          from: newHead,
+          to: state.selection.main.head,
+          insert: "",
+        },
+      },
+      { selection: { anchor: newHead } },
+      {
+        scrollIntoView: true,
+        annotations: Transaction.userEvent.of("delete"),
+      }
+    )
+  );
+  return true;
+};
+
 export const tabWithSpaceBinding: KeyBinding = {
   key: "Tab",
   run: insertTabWithSpace,
+  shift: removeTabWithSpace,
 };
 
 const codeMirrorDefaultExtensions: Extension[] = [
