@@ -104,9 +104,8 @@ const Title: React.FC<TitleProps> = (props) => {
       <div className="d-flex justify-content-between">
         <div className="d-flex align-items-center">
           <h4
-            className={`d-flex align-self-end flex-grow ${
-              permlinkData !== null ? "text-info" : ""
-            }`}
+            className={`${permlinkData !== null ? "text-info" : ""}`}
+            style={{ wordBreak: "break-word" }}
           >
             {permlinkData === null ? title : permlinkData.parameter.title}
           </h4>
@@ -123,7 +122,7 @@ const Title: React.FC<TitleProps> = (props) => {
         )}
       </div>
       <div style={{ borderBottom: "#d0d7de solid 1px" }}></div>
-      <p style={{ whiteSpace: "pre-wrap" }}>
+      <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
         {permlinkData === null
           ? description
           : permlinkData.parameter.description}
