@@ -93,7 +93,14 @@ const Compiler: React.FC<CompilerProps> = (props) => {
   const dispatch = useAppDispatch();
   const onSelectLanguage = useCallback((language): void => {
     dispatch(actions.setCurrentLanguage(language));
-    dispatch(actions.setCurrentCompilerName(""));
+    // 言語を選択するとコンパイラ名を自動で設定済みにする
+    // head 以外のコンパイラを設定する
+    for (const ci of compilerList.languages[language]) {
+      if (ci.name.indexOf("head") === -1) {
+        dispatch(actions.setCurrentCompilerName(ci.name));
+        break;
+      }
+    }
   }, []);
   const onDeselectLanguage = useCallback((): void => {
     dispatch(actions.setCurrentLanguage(""));
