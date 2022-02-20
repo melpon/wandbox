@@ -48,41 +48,41 @@ const EditorTab: React.FC<EditorTabProps> = (props) => {
         eventKey={`wb-editor-${index}`}
         onClick={() => onChangeTabs(index)}
         style={{ height: 40 }}
-        className="py-0 pe-4px"
+        className={`py-0 ${
+          source.filename !== null && active ? "pe-4px" : "pe-16px"
+        }`}
       >
         <div className="d-flex gap-4px h-100 align-items-center">
           {renamingSource === null || !renamingSource.renaming ? (
             <>
               <div className="d-flex gap-4px align-items-center">
                 <FileEarmarkText />
-                {source.filename || ""}
+                {source.filename}
               </div>
-              <div className="d-flex align-items-center">
-                {source.filename === null || readonly || !active ? null : (
-                  <>
-                    <Button
-                      className="px-4px"
-                      variant="link"
-                      onClick={(e: React.MouseEvent): void => {
-                        onClickTabEdit(index);
-                        e.stopPropagation();
-                      }}
-                    >
-                      <Pencil />
-                    </Button>
-                    <Button
-                      className="px-4px"
-                      variant="link"
-                      onClick={(e): void => {
-                        onClickTabClose(index);
-                        e.stopPropagation();
-                      }}
-                    >
-                      <X />
-                    </Button>
-                  </>
-                )}
-              </div>
+              {source.filename === null || readonly || !active ? null : (
+                <div className="d-flex align-items-center">
+                  <Button
+                    className="px-4px"
+                    variant="link"
+                    onClick={(e: React.MouseEvent): void => {
+                      onClickTabEdit(index);
+                      e.stopPropagation();
+                    }}
+                  >
+                    <Pencil />
+                  </Button>
+                  <Button
+                    className="px-4px"
+                    variant="link"
+                    onClick={(e): void => {
+                      onClickTabClose(index);
+                      e.stopPropagation();
+                    }}
+                  >
+                    <X />
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <>

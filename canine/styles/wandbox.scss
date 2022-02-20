@@ -273,6 +273,9 @@ p, h1, h2, h3, h4, h5, h6 {
     > pre {
       font-size: 14px;
       white-space: pre-wrap;
+      line-height: 1.2;
+      margin: 0;
+      padding: 0;
     }
     .wb-result-compilermessages {
       color: $color-white2;
