@@ -189,9 +189,6 @@ export function applySettings(
   dispatch: AppDispatch,
   settings: PersistentSettingsData
 ) {
-  dispatch(
-    actions.setEditorSettingsSmartIndent(settings.editorSettings.smartIndent)
-  );
   dispatch(actions.setEditorSettingsTabKey(settings.editorSettings.tabKey));
   dispatch(actions.setEditorSettingsTabWidth(settings.editorSettings.tabWidth));
   dispatch(

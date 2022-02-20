@@ -25,13 +25,6 @@ const EditorSettings: React.FC = () => {
     },
     [settings]
   );
-  const onChangeSmartIndent = useCallback(
-    (e): void => {
-      const smartIndent = e.target.checked;
-      dispatch(actions.setEditorSettingsSmartIndent(smartIndent));
-    },
-    [settings]
-  );
   const onChangeFixedHeight = useCallback(
     (e): void => {
       const fixedHeight = e.target.checked;
@@ -71,14 +64,6 @@ const EditorSettings: React.FC = () => {
             <option value="8">8</option>
           </Form.Control>
         </div>
-      </Form.Group>
-      <Form.Group controlId="wb-smartindent">
-        <Form.Check
-          type="checkbox"
-          label="Smart indent"
-          checked={settings.smartIndent}
-          onChange={onChangeSmartIndent}
-        />
       </Form.Group>
       <Form.Group controlId="wb-fixedheight">
         <Form.Check

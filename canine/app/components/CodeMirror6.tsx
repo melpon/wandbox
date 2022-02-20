@@ -168,7 +168,6 @@ export interface CodeMirror6Option {
   indentUnit?: number;
   indentWithTab?: boolean;
   tabSize?: number;
-  smartIndent?: boolean;
   //extraKeys?: { [key: string]: (view: EditorView) => void };
   viewportMargin?: number;
   readOnly?: boolean;

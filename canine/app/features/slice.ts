@@ -19,7 +19,6 @@ export type RunningState = "init" | "running" | "completed";
 export interface EditorSettingsData {
   tabKey: TabKeyType;
   tabWidth: TabWidthType;
-  smartIndent: boolean;
   fixedHeight: boolean;
 }
 
@@ -153,7 +152,6 @@ const initialState = {
   editorSettings: {
     tabKey: "4",
     tabWidth: "4",
-    smartIndent: false,
     fixedHeight: false,
   } as EditorSettingsData,
   running: false,
@@ -223,9 +221,6 @@ export const wandboxSlice = createSlice({
     },
     setEditorSettingsTabWidth: (state, action: PayloadAction<TabWidthType>) => {
       state.editorSettings.tabWidth = action.payload;
-    },
-    setEditorSettingsSmartIndent: (state, action: PayloadAction<boolean>) => {
-      state.editorSettings.smartIndent = action.payload;
     },
     setEditorSettingsFixedHeight: (state, action: PayloadAction<boolean>) => {
       state.editorSettings.fixedHeight = action.payload;
