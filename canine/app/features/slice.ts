@@ -3,6 +3,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { normalizePath } from "~/utils/normalizePath";
 import { castDraft, castImmutable } from "immer";
 import { startOfYesterday } from "date-fns";
+import { CompilerList } from "~/hooks/compilerList";
+import { PermlinkData } from "~/hooks/permlink";
 
 export interface EditorSourceData {
   id: string;
@@ -49,6 +51,8 @@ export interface HistoryDataQuick {
   currentSwitches: { [name: string]: string | boolean };
   compilerOptionRaw: string;
   runtimeOptionRaw: string;
+  displayName: string;
+  version: string;
   sources: HistoryEditorSourceData[];
   currentTab: number;
   stdin: string;
@@ -65,6 +69,8 @@ export interface HistoryDataRun {
   currentSwitches: { [name: string]: string | boolean };
   compilerOptionRaw: string;
   runtimeOptionRaw: string;
+  displayName: string;
+  version: string;
   sources: HistoryEditorSourceData[];
   currentTab: number;
   stdin: string;
@@ -81,7 +87,8 @@ export interface HistoryDataPermlink {
   // 細かいデータはロードした時に読み込むので、
   // リスト一覧の表示に必要な情報だけ保存しておく
   currentLanguage: string;
-  currentCompilerName: string;
+  displayName: string;
+  version: string;
   title: string;
   permlinkCreatedAt: number;
 }
@@ -126,6 +133,9 @@ const WANDBOX_MAX_QUICKSAVE_COUNT = 5;
 const WANDBOX_MAX_HISTORY_COUNT = 50;
 
 const initialState = {
+  compilerList: null as CompilerList | null,
+  permlinkData: null as PermlinkData | null,
+
   currentLanguage: "",
   currentCompilerName: "",
   currentSwitches: {} as { [name: string]: string | boolean },
@@ -182,6 +192,12 @@ export const wandboxSlice = createSlice({
   name: "wandbox",
   initialState: initialState,
   reducers: {
+    setCompilerList: (state, action: PayloadAction<CompilerList | null>) => {
+      state.compilerList = action.payload;
+    },
+    setPermlinkData: (state, action: PayloadAction<PermlinkData | null>) => {
+      state.permlinkData = action.payload;
+    },
     setCurrentLanguage: (state, action: PayloadAction<string>) => {
       state.currentLanguage = action.payload;
     },
@@ -343,6 +359,16 @@ export const wandboxSlice = createSlice({
       state.editorChanged = action.payload;
     },
     pushQuickSave: (state) => {
+      if (state.compilerList === null) {
+        return;
+      }
+      const ci = state.compilerList.compilers.find(
+        (x) => x.name === state.currentCompilerName
+      );
+      if (ci === undefined) {
+        return;
+      }
+
       const historyData: HistoryDataQuick = {
         type: "quick",
         id: state.history.keyCounter,
@@ -352,6 +378,8 @@ export const wandboxSlice = createSlice({
         currentSwitches: state.currentSwitches,
         compilerOptionRaw: state.compilerOptionRaw,
         runtimeOptionRaw: state.runtimeOptionRaw,
+        displayName: ci.displayName,
+        version: ci.version,
         sources: sourceToHistorySource(state.sources as any),
         currentTab: state.currentTab,
         stdin: getStdin(state.stdin, state.stdinView as any),
@@ -367,6 +395,16 @@ export const wandboxSlice = createSlice({
       h.keyCounter += 1;
     },
     prepareRun: (state) => {
+      if (state.compilerList === null) {
+        return;
+      }
+      const ci = state.compilerList.compilers.find(
+        (x) => x.name === state.currentCompilerName
+      );
+      if (ci === undefined) {
+        return;
+      }
+
       const historyData: HistoryDataRun = {
         type: "run",
         id: state.history.keyCounter,
@@ -376,6 +414,8 @@ export const wandboxSlice = createSlice({
         currentSwitches: state.currentSwitches,
         compilerOptionRaw: state.compilerOptionRaw,
         runtimeOptionRaw: state.runtimeOptionRaw,
+        displayName: ci.displayName,
+        version: ci.version,
         sources: sourceToHistorySource(state.sources as any),
         currentTab: state.currentTab,
         stdin: getStdin(state.stdin, state.stdinView as any),
@@ -409,7 +449,8 @@ export const wandboxSlice = createSlice({
         permlinkId: string;
         githubUser: GithubUser | null;
         currentLanguage: string;
-        currentCompilerName: string;
+        displayName: string;
+        version: string;
         title: string;
         permlinkCreatedAt: number;
       }>
@@ -418,7 +459,8 @@ export const wandboxSlice = createSlice({
         permlinkId,
         githubUser,
         currentLanguage,
-        currentCompilerName,
+        displayName,
+        version,
         title,
         permlinkCreatedAt,
       } = action.payload;
@@ -430,7 +472,8 @@ export const wandboxSlice = createSlice({
         permlinkId,
         githubUser,
         currentLanguage,
-        currentCompilerName,
+        displayName,
+        version,
         title,
         permlinkCreatedAt,
       };

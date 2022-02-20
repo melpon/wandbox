@@ -56,7 +56,8 @@ const AuthorData: React.FC<AuthorDataProps> = ({ permlinkData }) => {
           permlinkId: permlinkData.permlinkId,
           githubUser: null,
           currentLanguage: permlinkData.parameter.compilerInfo.language,
-          currentCompilerName: permlinkData.parameter.compilerInfo.displayName,
+          displayName: permlinkData.parameter.compilerInfo.displayName,
+          version: permlinkData.parameter.compilerInfo.version,
           title: permlinkData.parameter.title,
           permlinkCreatedAt: permlinkData.parameter.createdAt,
         })
@@ -86,7 +87,8 @@ const AuthorData: React.FC<AuthorDataProps> = ({ permlinkData }) => {
         permlinkId: permlinkData.permlinkId,
         githubUser: author,
         currentLanguage: permlinkData.parameter.compilerInfo.language,
-        currentCompilerName: permlinkData.parameter.compilerInfo.displayName,
+        displayName: permlinkData.parameter.compilerInfo.displayName,
+        version: permlinkData.parameter.compilerInfo.version,
         title: permlinkData.parameter.title,
         permlinkCreatedAt: permlinkData.parameter.createdAt,
       })

@@ -32,7 +32,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   const [, setError] = useError();
   const compilerList = useCompilerList(`/api/list.json`, setError);
 
-  const [permlinkData, setPermlinkData] = useState<PermlinkData | null>(null);
   const [permlinkResp, , doGetPermlink] = useGetPermlink(
     permlinkId === undefined ? "" : permlinkId,
     setError
@@ -41,7 +40,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
 
   useEffect((): void => {
     if (permlinkId === undefined) {
-      setPermlinkData(null);
+      dispatch(actions.setPermlinkData(null));
       return;
     }
 
@@ -53,7 +52,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       return;
     }
 
-    setPermlinkData(permlinkResp);
+    dispatch(actions.setPermlinkData(permlinkResp));
     // stdin がある場合は標準入力用のエディタを開く
     if (permlinkResp.parameter.stdin.length !== 0) {
       dispatch(actions.setStdinOpened(true));
@@ -61,6 +60,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   }, [permlinkResp]);
 
   const {
+    permlinkData,
     currentLanguage,
     currentCompilerName,
     currentSwitches,
@@ -80,6 +80,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   } = useSelector(
     ({
       wandbox: {
+        permlinkData,
         currentLanguage,
         currentCompilerName,
         currentSwitches,
@@ -98,6 +99,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         storageExists,
       },
     }: AppState) => ({
+      permlinkData,
       currentLanguage,
       currentCompilerName,
       currentSwitches,
@@ -116,9 +118,15 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       storageExists,
     })
   );
-  const dispatch = useAppDispatch();
 
+  const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
+
+  // compilerList と permlinkData は state に保存しておく
+  useEffect(() => {
+    dispatch(actions.setCompilerList(compilerList));
+  }, [compilerList]);
+
   // 設定データのロード（初回に一回だけ読み込む）
   useEffect((): void => {
     const settings = loadSettings();

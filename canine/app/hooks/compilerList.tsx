@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useFetchJSON, AnyJson, JsonMap } from "./fetch";
 
 export interface SingleSwitch {
@@ -97,7 +97,7 @@ export function useCompilerList(
     "Content-Type": "application/json",
   };
 
-  const resolver = React.useCallback((json): CompilerInfo[] => {
+  const resolver = useCallback((json): CompilerInfo[] => {
     return (json as AnyJson[]).map(resolveCompilerInfo);
   }, []);
 
@@ -108,25 +108,27 @@ export function useCompilerList(
     onError
   );
 
-  React.useEffect((): void => {
+  useEffect((): void => {
     doFetch(null, {});
   }, []);
 
-  if (compilerInfos === null) {
-    return null;
-  }
-
-  const languages: { [lang: string]: CompilerInfo[] } = {};
-  for (const info of compilerInfos) {
-    if (info.language in languages) {
-      languages[info.language].push(info);
-    } else {
-      languages[info.language] = [info];
+  return useMemo(() => {
+    if (compilerInfos === null) {
+      return null;
     }
-  }
 
-  return {
-    compilers: compilerInfos,
-    languages: languages,
-  };
+    const languages: { [lang: string]: CompilerInfo[] } = {};
+    for (const info of compilerInfos) {
+      if (info.language in languages) {
+        languages[info.language].push(info);
+      } else {
+        languages[info.language] = [info];
+      }
+    }
+
+    return {
+      compilers: compilerInfos,
+      languages: languages,
+    };
+  }, [compilerInfos]);
 }
