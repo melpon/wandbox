@@ -3,16 +3,16 @@ import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "~/store";
 import { LayoutSidebarReverse, X } from "react-bootstrap-icons";
-import { wandboxSlice, WandboxState } from "~/features/slice";
+import { Breakpoint, wandboxSlice, WandboxState } from "~/features/slice";
 import { History } from "./Sidebar/History";
 import { EditorSettings } from "./Sidebar/EditorSettings";
 
 const SidebarBase: React.FC = () => {
-  const { sidebarLocked, sidebarState } = useSelector(
-    ({ wandbox: { sidebarLocked, sidebarState, history } }: AppState) => ({
+  const { sidebarLocked, sidebarState, breakpoint } = useSelector(
+    ({ wandbox: { sidebarLocked, sidebarState, breakpoint } }: AppState) => ({
       sidebarLocked,
       sidebarState,
-      history,
+      breakpoint,
     })
   );
   const dispatch = useAppDispatch();
@@ -28,6 +28,26 @@ const SidebarBase: React.FC = () => {
     setState(sidebarState);
   }, [sidebarState]);
 
+  const [currentBreakpoint, setCurrentBreakpoint] =
+    useState<Breakpoint>(breakpoint);
+
+  useEffect(() => {
+    // md -> sm に変化した
+    if (
+      (currentBreakpoint === "xxl" ||
+        currentBreakpoint === "xl" ||
+        currentBreakpoint === "lg" ||
+        currentBreakpoint === "md") &&
+      (breakpoint === "sm" || breakpoint === "xs")
+    ) {
+      // sm 以下のサイズではサイドバーのロックが使えないので
+      // サイドバーを強制的に閉じてアンロックする
+      dispatch(actions.setSidebarState("none"));
+      dispatch(actions.setSidebarLocked(false));
+    }
+    setCurrentBreakpoint(breakpoint);
+  }, [breakpoint]);
+
   const title = state === "editorSettings" ? "Editor Settings" : "Log";
   const content = state === "editorSettings" ? <EditorSettings /> : <History />;
 
@@ -37,6 +57,7 @@ const SidebarBase: React.FC = () => {
         <div className="d-flex align-items-center gap-8px">
           <h5>{title}</h5>
           <Button
+            className="d-none d-md-block"
             variant={sidebarLocked ? "primary" : "link"}
             active={sidebarLocked}
             onClick={() => {

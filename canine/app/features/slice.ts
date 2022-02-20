@@ -95,6 +95,8 @@ export interface HistoryData {
   keyCounter: number;
 }
 
+export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+
 function sourceToHistorySource(
   sources: EditorSourceData[]
 ): HistoryEditorSourceData[] {
@@ -133,6 +135,8 @@ const initialState = {
 
   title: "",
   description: "",
+  author: null as GithubUser | null,
+  titleDialogOpened: false,
 
   currentTab: 0,
   tabCounter: 0,
@@ -170,6 +174,8 @@ const initialState = {
 
   // この値が空文字以外になったらページ遷移する
   navigate: "",
+
+  breakpoint: "md" as Breakpoint,
 };
 
 export type WandboxState = typeof initialState;
@@ -229,6 +235,12 @@ export const wandboxSlice = createSlice({
     },
     setDescription: (state, action: PayloadAction<string>) => {
       state.description = action.payload;
+    },
+    setAuthor: (state, action: PayloadAction<GithubUser | null>) => {
+      state.author = action.payload;
+    },
+    setTitleDialogOpened: (state, action: PayloadAction<boolean>) => {
+      state.titleDialogOpened = action.payload;
     },
     setCurrentTab: (state, action: PayloadAction<number>) => {
       state.currentTab = action.payload;
@@ -512,6 +524,10 @@ export const wandboxSlice = createSlice({
       if (x.type === "run") {
         state.sharable = true;
       }
+    },
+
+    setBreakpoint: (state, action: PayloadAction<Breakpoint>) => {
+      state.breakpoint = action.payload;
     },
   },
   extraReducers: (builder) => {},

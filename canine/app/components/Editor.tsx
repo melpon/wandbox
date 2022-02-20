@@ -49,7 +49,7 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
     <div
       className={`${
         editorSettings.fixedHeight ? "wb-editor-fixedheight" : ""
-      } d-flex justify-content-stretch gap-8px`}
+      } d-flex flex-column flex-md-row gap-8px`}
     >
       <div className="d-flex flex-column flex-grow-1">
         <EditorTabs state={state} permlinkData={permlinkData} />
@@ -69,11 +69,20 @@ const Editor: React.FC<EditorProps> = (props): React.ReactElement => {
           );
         })}
       </div>
+      {!state.stdinOpened && (
+        <Button
+          variant="link"
+          className="wb-stdinbutton d-block d-md-none align-self-start align-self-md-end"
+          onClick={() => dispatch(actions.setStdinOpened(!state.stdinOpened))}
+        >
+          Stdin
+        </Button>
+      )}
       {state.stdinOpened && (
         <div className="d-flex flex-column">
           <Button
             variant="link"
-            className="wb-stdinbutton wb-stdinactive align-self-end"
+            className="wb-stdinbutton wb-stdinactive align-self-start align-self-md-end"
             onClick={() => dispatch(actions.setStdinOpened(!state.stdinOpened))}
           >
             Stdin

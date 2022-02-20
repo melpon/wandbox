@@ -68,6 +68,16 @@ $spacers: (
 
 @import 'bootstrap/scss/bootstrap';
 
+// TypeScript 上で使いたい変数は CSS Variables に入れておく
+:root {
+  --wb-breakpoint-xs: #{map-get($grid-breakpoints, "xs")};
+  --wb-breakpoint-sm: #{map-get($grid-breakpoints, "sm")};
+  --wb-breakpoint-md: #{map-get($grid-breakpoints, "md")};
+  --wb-breakpoint-lg: #{map-get($grid-breakpoints, "lg")};
+  --wb-breakpoint-xl: #{map-get($grid-breakpoints, "xl")};
+  --wb-breakpoint-xxl: #{map-get($grid-breakpoints, "xxl")};
+}
+
 #wb-main {
   .btn-info {
     color: $color-white;
@@ -129,60 +139,77 @@ p, h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   background-color: $color-white2;
   border: $color-gray solid 1px;
-  border-bottom: $color-white2 solid 1px;
-  border-radius: 4px 4px 0px 0px;
+  border-radius: 4px 4px 4px 4px;
   margin-bottom: -1px;
   height: 40px;
 }
+@include media-breakpoint-up(md) {
+  .wb-stdinbutton {
+    border-bottom: $color-white2 solid 1px;
+    border-radius: 4px 4px 0px 0px;
+  }
+}
 .wb-stdinbutton.wb-stdinactive {
   isolation: isolate;
+  border-bottom: $color-white2 solid 1px;
+  border-radius: 4px 4px 0px 0px;
 }
 
 .wb-stdin {
   border: $color-gray solid 1px;
   border-radius: 8px 0px 8px 8px;
-  width: 244px;
+}
+@include media-breakpoint-up(md) {
+  .wb-stdin {
+    width: 244px;
+  }
 }
 
 .wb-editor {
   border: $color-gray solid 1px;
-  border-radius: 0px 0px 8px 8px;
-  min-width: 244px;
-  width: calc(100vw
-    /* 画面左右のパディング */ - 64px
-    /* 言語選択の幅 */ - 244px
-    /* 言語選択とエディタのマージン */ - 16px
-    );
-}
-.wb-editor.wb-stdinactive {
   border-radius: 0px 8px 8px 8px;
-  width: calc(100vw
-    /* 画面左右のパディング */ - 64px
-    /* 言語選択の幅 */ - 244px
-    /* 言語選択とエディタのマージン */ - 16px
-    /* 標準入力エディタの幅 */ - 244px
-    /* 通常エディタと標準入力エディタのマージン */ - 8px
-    );
-
 }
-.wb-sidebar-locked {
+
+@include media-breakpoint-up(md) {
   .wb-editor {
+    border-radius: 0px 0px 8px 8px;
+    min-width: 244px;
     width: calc(100vw
       /* 画面左右のパディング */ - 64px
       /* 言語選択の幅 */ - 244px
       /* 言語選択とエディタのマージン */ - 16px
-      /* サイドバーの幅 */ - 320px
       );
   }
   .wb-editor.wb-stdinactive {
+    border-radius: 0px 8px 8px 8px;
     width: calc(100vw
       /* 画面左右のパディング */ - 64px
       /* 言語選択の幅 */ - 244px
       /* 言語選択とエディタのマージン */ - 16px
       /* 標準入力エディタの幅 */ - 244px
       /* 通常エディタと標準入力エディタのマージン */ - 8px
-      /* サイドバーの幅 */ - 320px
       );
+  
+  }
+  .wb-sidebar-locked {
+    .wb-editor {
+      width: calc(100vw
+        /* 画面左右のパディング */ - 64px
+        /* 言語選択の幅 */ - 244px
+        /* 言語選択とエディタのマージン */ - 16px
+        /* サイドバーの幅 */ - 320px
+        );
+    }
+    .wb-editor.wb-stdinactive {
+      width: calc(100vw
+        /* 画面左右のパディング */ - 64px
+        /* 言語選択の幅 */ - 244px
+        /* 言語選択とエディタのマージン */ - 16px
+        /* 標準入力エディタの幅 */ - 244px
+        /* 通常エディタと標準入力エディタのマージン */ - 8px
+        /* サイドバーの幅 */ - 320px
+        );
+    }
   }
 }
 
@@ -204,8 +231,11 @@ p, h1, h2, h3, h4, h5, h6 {
   }
 }
 
-.wb-compiler {
-  width: 244px;
+@include media-breakpoint-up(md) {
+  .wb-compiler {
+    width: 244px;
+    min-width: 244px;
+  }
 }
 
 .wb-compilerlist {
@@ -308,6 +338,8 @@ p, h1, h2, h3, h4, h5, h6 {
 .wb-sidebar {
   overflow-x: hidden;
   width: 320px;
+  box-shadow: -3px 2px 4px rgba(36, 41, 47, 0.15);
+
   > div {
     min-height: 100%;
     background-color: $color-white;

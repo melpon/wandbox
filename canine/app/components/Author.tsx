@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { PermlinkData } from "~/hooks/permlink";
 import { formatDistanceToNow } from "date-fns";
-import { useAppDispatch } from "~/store";
+import { AppState, useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
+import { useSelector } from "react-redux";
 
+export interface AuthorDataProps {
+  permlinkData: PermlinkData;
+}
 export interface AuthorProps {
   permlinkData: PermlinkData;
+  author: GithubUser | null;
 }
 
 async function getGithubUser(username: string): Promise<GithubUser | null> {
@@ -34,10 +39,13 @@ async function getGithubUser(username: string): Promise<GithubUser | null> {
   };
 }
 
-const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
-  const [user, setUser] = useState<GithubUser | null>(null);
+// Author はスマホ用とPC用で別の場所に置くことになったので、
+// 副作用は AuthorData に閉じ込めて Author では表示だけを行う。
+const AuthorData: React.FC<AuthorDataProps> = ({ permlinkData }) => {
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
+  const author = useSelector(({ wandbox: { author } }: AppState) => author);
+
   useEffect(() => {
     const username = permlinkData.parameter.githubUser;
     if (username.length === 0) {
@@ -53,11 +61,13 @@ const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
           permlinkCreatedAt: permlinkData.parameter.createdAt,
         })
       );
-      setUser(null);
+      dispatch(actions.setAuthor(null));
       return;
     }
-    setUser(null);
-    getGithubUser(username).then(setUser);
+    dispatch(actions.setAuthor(null));
+    getGithubUser(username).then((author) =>
+      dispatch(actions.setAuthor(author))
+    );
   }, [permlinkData.parameter.githubUser]);
 
   const distanceTime = formatDistanceToNow(
@@ -67,24 +77,33 @@ const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
 
   useEffect(() => {
     const username = permlinkData.parameter.githubUser;
-    if (username.length === 0 || user === null) {
+    if (username.length === 0 || author === null) {
       return;
     }
     // Permlink の履歴を追加
     dispatch(
       actions.pushPermlink({
         permlinkId: permlinkData.permlinkId,
-        githubUser: user,
+        githubUser: author,
         currentLanguage: permlinkData.parameter.compilerInfo.language,
         currentCompilerName: permlinkData.parameter.compilerInfo.displayName,
         title: permlinkData.parameter.title,
         permlinkCreatedAt: permlinkData.parameter.createdAt,
       })
     );
-  }, [user]);
+  }, [author]);
+
+  return null;
+};
+
+const Author: React.FC<AuthorProps> = ({ permlinkData, author }) => {
+  const distanceTime = formatDistanceToNow(
+    new Date(permlinkData.parameter.createdAt * 1000),
+    { addSuffix: true }
+  );
 
   const loading =
-    permlinkData.parameter.githubUser.length !== 0 && user === null;
+    permlinkData.parameter.githubUser.length !== 0 && author === null;
 
   if (loading) {
     return null;
@@ -95,24 +114,24 @@ const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
       <p className="wb-label px-4px py-2px">Author</p>
       <div className="wb-card d-flex px-4px py-4px gap-4px">
         <div className="d-flex flex-column flex-grow-1">
-          {user === null ? (
+          {author === null ? (
             <p>anonymous</p>
           ) : (
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href={user.html_url}
-            >{`@${user.login}`}</a>
+              href={author.html_url}
+            >{`@${author.login}`}</a>
           )}
           <p className="wb-time">{distanceTime}</p>
         </div>
         <div style={{ width: 40, height: 40 }}>
-          {user !== null && (
-            <a target="_blank" rel="noopener noreferrer" href={user.html_url}>
+          {author !== null && (
+            <a target="_blank" rel="noopener noreferrer" href={author.html_url}>
               <img
                 className="w-100 h-100"
                 style={{ borderRadius: "50%" }}
-                src={user.avatar_url}
+                src={author.avatar_url}
               />
             </a>
           )}
@@ -122,4 +141,4 @@ const Author: React.FC<AuthorProps> = ({ permlinkData }) => {
   );
 };
 
-export { Author };
+export { AuthorData, Author };

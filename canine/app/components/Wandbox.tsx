@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { useCompilerList } from "~/hooks/compilerList";
@@ -11,12 +11,12 @@ import { Editor } from "~/components/Editor";
 import { Command } from "~/components/Command";
 import { Result } from "~/components/Result";
 import { Run } from "~/components/Run";
-import { Title } from "~/components/Title";
+import { Title, TitleDialog } from "~/components/Title";
 import { useParams } from "remix";
-import { Author } from "~/components/Author";
+import { Author, AuthorData } from "~/components/Author";
 import Sidebar from "~/components/react-sidebar/Sidebar";
 import { AppState, useAppDispatch } from "~/store";
-import { wandboxSlice } from "~/features/slice";
+import { Breakpoint, wandboxSlice } from "~/features/slice";
 import {
   applySettings,
   loadHistory,
@@ -25,6 +25,7 @@ import {
   saveSettings,
 } from "~/features/actions";
 import { SidebarBase } from "~/components/SidebarBase";
+import { StateEffect } from "@codemirror/state";
 
 const Wandbox: React.FC = (): React.ReactElement | null => {
   const { permlinkId } = useParams();
@@ -68,6 +69,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     currentTab,
     title,
     description,
+    author,
     editorChanged,
     results,
     editorSettings,
@@ -86,6 +88,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         currentTab,
         title,
         description,
+        author,
         editorChanged,
         results,
         editorSettings,
@@ -103,6 +106,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       currentTab,
       title,
       description,
+      author,
       editorChanged,
       results,
       editorSettings,
@@ -204,6 +208,39 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     };
   }, [editorChanged]);
 
+  // 現在の breakpoint を設定する
+  const updateBreakpoint = useCallback(() => {
+    const breakpoints = ["xxl", "xl", "lg", "md", "sm", "xs"].map(
+      (x) =>
+        [
+          x,
+          parseInt(
+            getComputedStyle(document.body).getPropertyValue(
+              `--wb-breakpoint-${x}`
+            ),
+            10
+          ),
+        ] as [Breakpoint, number]
+    );
+
+    const width = document.documentElement.clientWidth;
+    for (const [bp, value] of breakpoints) {
+      if (width >= value) {
+        dispatch(actions.setBreakpoint(bp));
+        break;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("resize", updateBreakpoint);
+    window.addEventListener("orientationchange", updateBreakpoint);
+    return () => {
+      window.removeEventListener("resize", updateBreakpoint);
+      window.removeEventListener("orientationchange", updateBreakpoint);
+    };
+  }, [updateBreakpoint]);
+
   if (compilerList === null) {
     return null;
   }
@@ -230,18 +267,27 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         sidebarClassName="wb-sidebar"
         contentClassName={`${
           sidebarLocked ? "wb-sidebar-locked" : ""
-        } py-24px px-32px d-flex gap-16px`}
-        styles={{
-          sidebar: {
-            boxShadow: "-3px 2px 4px rgba(36, 41, 47, 0.15)",
-          },
-        }}
+        } py-24px px-8px px-md-32px d-flex flex-column flex-md-row gap-16px`}
       >
+        <TitleDialog />
+        {permlinkData !== null && <AuthorData permlinkData={permlinkData} />}
+
+        <div className="d-flex d-md-none flex-column gap-16px">
+          <Title permlinkData={permlinkData} />
+          {permlinkData !== null && (
+            <div className="align-self-end">
+              <Author permlinkData={permlinkData} author={author} />
+            </div>
+          )}
+        </div>
+
         <Compiler compilerList={compilerList} permlinkData={permlinkData} />
         <div className="flex-grow-1 d-flex flex-column gap-8px">
-          <div className="d-flex gap-16px">
-            <Title className="flex-grow-1" permlinkData={permlinkData} />
-            {permlinkData !== null && <Author permlinkData={permlinkData} />}
+          <div className="d-none d-md-flex gap-16px">
+            <Title permlinkData={permlinkData} />
+            {permlinkData !== null && (
+              <Author permlinkData={permlinkData} author={author} />
+            )}
           </div>
           <Editor compilerList={compilerList} permlinkData={permlinkData} />
           {(currentCompilerName !== "" || permlinkData !== null) && (

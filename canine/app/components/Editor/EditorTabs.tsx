@@ -189,7 +189,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
       {!state.stdinOpened && (
         <Button
           variant="link"
-          className="wb-stdinbutton align-self-end"
+          className="wb-stdinbutton d-none d-md-block align-self-end"
           onClick={() => dispatch(actions.setStdinOpened(!state.stdinOpened))}
         >
           Stdin
