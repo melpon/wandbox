@@ -53,6 +53,8 @@ $input-focus-box-shadow: none;
 $btn-focus-box-shadow: none;
 $btn-active-box-shadow: none;
 $btn-focus-width: 0;
+$btn-close-focus-shadow: none;
+$form-check-input-focus-box-shadow: none;
 
 $font-size-base: 0.875rem;
 
@@ -122,6 +124,22 @@ p, h1, h2, h3, h4, h5, h6 {
 #wb-main {
   .cm-focused {
     outline: none;
+  }
+}
+
+#wb-main {
+  .wb-loadtemplate {
+    .dropdown-toggle {
+      padding: 0px 10px;
+      color: $color-gray2;
+
+      display: flex;
+      align-content: center;
+      justify-content: center;
+    }
+    .dropdown-toggle::after {
+      display: none;
+    }
   }
 }
 

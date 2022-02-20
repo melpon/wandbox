@@ -1,4 +1,6 @@
 import React from "react";
+import { Dropdown } from "react-bootstrap";
+import { ThreeDots } from "react-bootstrap-icons";
 import ListGroup from "react-bootstrap/ListGroup";
 
 import { CompilerInfo } from "~/hooks/compilerList";
@@ -7,8 +9,10 @@ interface ChooseCompilerProps {
   compilerInfo: CompilerInfo | null;
   compilerInfos: CompilerInfo[];
   readOnly: boolean;
+  templates: string[];
   onSelectCompiler: (compiler: CompilerInfo) => void;
   onDeselectCompiler: () => void;
+  onLoadTemplate: (template: string) => void;
 }
 
 const ChooseCompiler: React.FC<ChooseCompilerProps> = (
@@ -18,8 +22,10 @@ const ChooseCompiler: React.FC<ChooseCompilerProps> = (
     compilerInfo,
     compilerInfos,
     readOnly,
+    templates,
     onSelectCompiler,
     onDeselectCompiler,
+    onLoadTemplate,
   } = props;
 
   return compilerInfo === null ? (
@@ -40,7 +46,28 @@ const ChooseCompiler: React.FC<ChooseCompilerProps> = (
     </ListGroup>
   ) : (
     <div className="d-flex flex-column gap-8px wb-compilerlist-selected">
-      <h6>Compiler</h6>
+      <div className="d-flex justify-content-between">
+        <h6>Compiler</h6>
+        {!readOnly && (
+          <Dropdown className="wb-loadtemplate" align="end">
+            <Dropdown.Toggle variant="link">
+              <ThreeDots />
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {templates.map((template) => {
+                return (
+                  <Dropdown.Item
+                    key={template}
+                    onClick={() => onLoadTemplate(template)}
+                  >
+                    Load template
+                  </Dropdown.Item>
+                );
+              })}
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
+      </div>
       <div className="px-8px d-flex justify-content-between">
         <p>{`${compilerInfo.displayName} ${compilerInfo.version}`}</p>
         {readOnly ? null : (

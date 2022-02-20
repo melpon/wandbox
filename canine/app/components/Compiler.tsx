@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 
 import {
@@ -15,6 +15,9 @@ import { CompilerOption } from "./Compiler/CompilerOption";
 import { RawCompilerOption } from "./Compiler/RawCompilerOption";
 import { AppState, useAppDispatch, useAppStore } from "~/store";
 import { wandboxSlice } from "~/features/slice";
+import { useGetTemplate } from "~/hooks/template";
+import { useError } from "~/hooks/error";
+import { createEditorSourceData } from "~/utils/createEditorSourceData";
 
 interface CompilerProps {
   //editor: EditorState,
@@ -91,16 +94,29 @@ const Compiler: React.FC<CompilerProps> = (props) => {
 
   const actions = wandboxSlice.actions;
   const dispatch = useAppDispatch();
+
+  const [_, setError] = useError();
+  const [loadedTemplate, templateFetchId, doLoadTemplate] = useGetTemplate(
+    "",
+    setError
+  );
+
   const onSelectLanguage = useCallback((language): void => {
     dispatch(actions.setCurrentLanguage(language));
     // 言語を選択するとコンパイラ名を自動で設定済みにする
     // head 以外のコンパイラを設定する
+    let name: string | null = null;
     for (const ci of compilerList.languages[language]) {
       if (ci.name.indexOf("head") === -1) {
-        dispatch(actions.setCurrentCompilerName(ci.name));
+        name = ci.name;
         break;
       }
     }
+    // ただし全部 head だったら諦めて head を使う
+    if (name === null) {
+      name = compilerList.languages[language][0].name;
+    }
+    dispatch(actions.setCurrentCompilerName(name));
   }, []);
   const onDeselectLanguage = useCallback((): void => {
     dispatch(actions.setCurrentLanguage(""));
@@ -130,6 +146,21 @@ const Compiler: React.FC<CompilerProps> = (props) => {
   const onChangeRuntimeOptionRaw = useCallback((value: string): void => {
     dispatch(actions.setRuntimeOptionRaw(value));
   }, []);
+  const onLoadTemplate = useCallback((template: string): void => {
+    doLoadTemplate(`/api/template/${template}`, {});
+  }, []);
+
+  useEffect(() => {
+    if (loadedTemplate === null) {
+      return;
+    }
+
+    dispatch(
+      actions.initSources(
+        createEditorSourceData(loadedTemplate.code, loadedTemplate.codes)
+      )
+    );
+  }, [templateFetchId]);
 
   const language =
     permlinkData === null
@@ -186,8 +217,10 @@ const Compiler: React.FC<CompilerProps> = (props) => {
           compilerInfo={compilerInfo}
           compilerInfos={compilerInfos}
           readOnly={readOnly}
+          templates={compilerInfo === null ? [] : compilerInfo.templates}
           onSelectCompiler={onSelectCompiler}
           onDeselectCompiler={onDeselectCompiler}
+          onLoadTemplate={onLoadTemplate}
         />
       )}
 
