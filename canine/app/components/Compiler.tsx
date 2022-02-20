@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 
 import {
@@ -63,7 +63,7 @@ function optionsToSwitch(
   return switches;
 }
 
-const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
+const Compiler: React.FC<CompilerProps> = (props) => {
   const { compilerList, permlinkData } = props;
   const {
     currentLanguage,
@@ -88,52 +88,41 @@ const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
       runtimeOptionRaw,
     })
   );
-  const state = useSelector(({ wandbox }: AppState) => wandbox);
 
   const actions = wandboxSlice.actions;
   const dispatch = useAppDispatch();
-  const onSelectLanguage = React.useCallback((language): void => {
+  const onSelectLanguage = useCallback((language): void => {
     dispatch(actions.setCurrentLanguage(language));
     dispatch(actions.setCurrentCompilerName(""));
   }, []);
-  const onDeselectLanguage = React.useCallback((): void => {
+  const onDeselectLanguage = useCallback((): void => {
     dispatch(actions.setCurrentLanguage(""));
     dispatch(actions.setCurrentCompilerName(""));
   }, []);
-  const onSelectCompiler = React.useCallback((compiler: CompilerInfo): void => {
+  const onSelectCompiler = useCallback((compiler: CompilerInfo): void => {
     dispatch(actions.setCurrentCompilerName(compiler.name));
   }, []);
-  const onDeselectCompiler = React.useCallback((): void => {
+  const onDeselectCompiler = useCallback((): void => {
     dispatch(actions.setCurrentCompilerName(""));
   }, []);
-  const onChangeChecked = React.useCallback(
+  const onChangeChecked = useCallback(
     (switchName: string, checked: boolean): void => {
       dispatch(actions.setCurrentSwitch({ switchName, value: checked }));
     },
     []
   );
-  const onChangeSelected = React.useCallback(
+  const onChangeSelected = useCallback(
     (switchName: string, selected: string): void => {
       dispatch(actions.setCurrentSwitch({ switchName, value: selected }));
     },
     []
   );
-  const onChangeCompilerOptionRaw = React.useCallback(
-    (cm: unknown, data: unknown, value: string): void => {
-      dispatch(actions.setCompilerOptionRaw(value));
-    },
-    []
-  );
-  const onChangeRuntimeOptionRaw = React.useCallback(
-    (cm: unknown, data: unknown, value: string): void => {
-      dispatch(actions.setRuntimeOptionRaw(value));
-    },
-    []
-  );
-  const doCompile = useCompile(dispatch, state, compilerList);
-  const onCtrlEnter = React.useCallback((): void => {
-    doCompile();
-  }, [doCompile]);
+  const onChangeCompilerOptionRaw = useCallback((value: string): void => {
+    dispatch(actions.setCompilerOptionRaw(value));
+  }, []);
+  const onChangeRuntimeOptionRaw = useCallback((value: string): void => {
+    dispatch(actions.setRuntimeOptionRaw(value));
+  }, []);
 
   const language =
     permlinkData === null
@@ -143,7 +132,7 @@ const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
       : permlinkData.parameter.compilerInfo.language;
   const languages = Object.keys(compilerList.languages).sort();
 
-  const compilerInfo = React.useMemo((): CompilerInfo | null => {
+  const compilerInfo = useMemo((): CompilerInfo | null => {
     if (permlinkData !== null) {
       return permlinkData.parameter.compilerInfo;
     }
@@ -208,29 +197,29 @@ const Compiler: React.FC<CompilerProps> = (props): React.ReactElement => {
       {/* raw compiler options */}
       {compilerInfo === null ? null : (
         <RawCompilerOption
-          compilerOptionRaw={
+          enabledCompilerOptionRaw={
             permlinkData === null
               ? compilerInfo.compilerOptionRaw
-                ? compilerOptionRaw
-                : null
               : permlinkData.parameter.compilerInfo.compilerOptionRaw
-              ? permlinkData.parameter.compilerOptionRaw
-              : null
+          }
+          compilerOptionRaw={
+            permlinkData === null
+              ? compilerOptionRaw
+              : permlinkData.parameter.compilerOptionRaw
+          }
+          enabledRuntimeOptionRaw={
+            permlinkData === null
+              ? compilerInfo.runtimeOptionRaw
+              : permlinkData.parameter.compilerInfo.runtimeOptionRaw
           }
           runtimeOptionRaw={
             permlinkData === null
-              ? compilerInfo.runtimeOptionRaw || runtimeOptionRaw !== ""
-                ? runtimeOptionRaw
-                : null
-              : permlinkData.parameter.compilerInfo.runtimeOptionRaw ||
-                permlinkData.parameter.runtimeOptionRaw !== ""
-              ? permlinkData.parameter.runtimeOptionRaw
-              : null
+              ? runtimeOptionRaw
+              : permlinkData.parameter.runtimeOptionRaw
           }
           readOnly={readOnly}
           onChangeCompilerOptionRaw={onChangeCompilerOptionRaw}
           onChangeRuntimeOptionRaw={onChangeRuntimeOptionRaw}
-          onCtrlEnter={onCtrlEnter}
         />
       )}
     </div>

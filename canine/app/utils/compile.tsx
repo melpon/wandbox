@@ -1,4 +1,5 @@
 import { EditorView } from "@codemirror/view";
+import { createSelector } from "@reduxjs/toolkit";
 import ndjsonStream from "can-ndjson-stream";
 import { useSelector } from "react-redux";
 
@@ -21,32 +22,41 @@ export type CompileState = {
   stdinView?: EditorView;
 };
 
+const compileStateSelector = createSelector(
+  ({ wandbox: { currentCompilerName } }: AppState) => currentCompilerName,
+  ({ wandbox: { currentSwitches } }: AppState) => currentSwitches,
+  ({ wandbox: { compilerOptionRaw } }: AppState) => compilerOptionRaw,
+  ({ wandbox: { runtimeOptionRaw } }: AppState) => runtimeOptionRaw,
+  ({ wandbox: { title } }: AppState) => title,
+  ({ wandbox: { description } }: AppState) => description,
+  ({ wandbox: { sources } }: AppState) => sources,
+  ({ wandbox: { stdin } }: AppState) => stdin,
+  ({ wandbox: { stdinView } }: AppState) => stdinView,
+  (
+    currentCompilerName,
+    currentSwitches,
+    compilerOptionRaw,
+    runtimeOptionRaw,
+    title,
+    description,
+    sources,
+    stdin,
+    stdinView
+  ) => ({
+    currentCompilerName,
+    currentSwitches,
+    compilerOptionRaw,
+    runtimeOptionRaw,
+    title,
+    description,
+    sources,
+    stdin,
+    stdinView,
+  })
+);
+
 export function useCompileStateSelector(): CompileState {
-  return useSelector(
-    ({
-      wandbox: {
-        currentCompilerName,
-        currentSwitches,
-        compilerOptionRaw,
-        runtimeOptionRaw,
-        title,
-        description,
-        sources,
-        stdin,
-        stdinView,
-      },
-    }: AppState) => ({
-      currentCompilerName,
-      currentSwitches,
-      compilerOptionRaw,
-      runtimeOptionRaw,
-      title,
-      description,
-      sources,
-      stdin,
-      stdinView,
-    })
-  );
+  return useSelector(compileStateSelector);
 }
 
 export function createBody(

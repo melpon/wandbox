@@ -211,7 +211,6 @@ function optionToExtension(option: CodeMirror6Option): Extension[] {
     }
     if (option.keymaps) {
       keymaps.unshift(...option.keymaps);
-      console.log(keymaps);
     }
 
     ext.push(keymap.of(keymaps));

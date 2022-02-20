@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import Button from "react-bootstrap/Button";
 
-import { createBody } from "~/utils/compile";
+import { createBody, useCompileStateSelector } from "~/utils/compile";
 import {
   CompilerList,
   CompilerInfo,
@@ -63,7 +63,14 @@ const Permlink: React.FC<PermlinkProps> = (
 ): React.ReactElement | null => {
   const { compilerList, permlinkData, clearPermlinkData } = props;
   const navigate = useNavigate();
-  const state = useSelector(({ wandbox }: AppState) => wandbox);
+  const compileState = useCompileStateSelector();
+  const { results, running, sharable } = useSelector(
+    ({ wandbox: { results, running, sharable } }: AppState) => ({
+      results,
+      running,
+      sharable,
+    })
+  );
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
   const [, setError] = useError();
@@ -76,17 +83,17 @@ const Permlink: React.FC<PermlinkProps> = (
 
   const onShare = React.useCallback((): void => {
     setSharing(true);
-    const json = createBody(state, compilerList);
+    const json = createBody(compileState, compilerList);
     if (json === null) {
       return;
     }
     const body = JSON.stringify({
       ...json,
-      results: state.results,
+      results: results,
     });
 
     doPermlink(null, { body: body });
-  }, [compilerList, state]);
+  }, [compilerList, compileState, results]);
 
   useEffect((): void => {
     // 初回での更新は弾く
@@ -104,7 +111,7 @@ const Permlink: React.FC<PermlinkProps> = (
   // コンパイラやエディタの状態が書き換わったら共有不可にする
   useEffect(() => {
     dispatch(actions.setSharable(false));
-  }, [state.sources]);
+  }, [compileState]);
 
   //const onEdit = React.useCallback((): void => {
   //  if (permlinkData === null) {
@@ -208,7 +215,7 @@ const Permlink: React.FC<PermlinkProps> = (
 
   return (
     <div className="d-flex">
-      {!state.running && state.sharable && permlinkData === null && !sharing && (
+      {!running && sharable && permlinkData === null && !sharing && (
         <Button
           className="d-flex justify-content-center align-items-center"
           style={{ minWidth: 144, fontWeight: 700 }}
