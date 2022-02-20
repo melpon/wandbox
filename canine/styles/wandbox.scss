@@ -19,8 +19,6 @@ a {
 $color-white: #ffffff;
 // ヘッダーの背景色や黒字用のテキスト色
 $color-white2: #f6f8fa;
-// ヘッダーの背景色や黒字用のテキスト色
-$color-white3: #f6f8fa;
 // ボーダー色
 $color-gray: #d0d7de;
 // 弱いテキスト色
@@ -35,6 +33,10 @@ $color-blue2: #ddf4ff;
 $color-green: #2da44e;
 // 緑ボタンのボーダーとして使う色
 // $color-btn-primary-border: rgba(27, 31, 36, 0.15);
+// 白地用のエラー色
+$color-red: #cf222e;
+// 黒地用のエラー色
+$color-red2: #f85149;
 
 $primary: $color-primary;
 $secondary: $color-white2;
@@ -115,12 +117,6 @@ p, h1, h2, h3, h4, h5, h6 {
 #wb-main {
   .cm-focused {
     outline: none;
-  }
-}
-
-#wb-main {
-  .nav-link.active {
-    //background-color: #f6f8fa;
   }
 }
 
@@ -279,18 +275,16 @@ p, h1, h2, h3, h4, h5, h6 {
       white-space: pre-wrap;
     }
     .wb-result-compilermessages {
+      color: $color-white2;
     }
     .wb-result-compilermessagee {
+      color: $color-red2;
     }
     .wb-result-stdout {
+      color: $color-white2;
     }
     .wb-result-stderr {
-    }
-    .wb-result-control {
-    }
-    .wb-result-signal {
-    }
-    .wb-result-exitcode {
+      color: $color-red2;
     }
   }
 
@@ -317,8 +311,6 @@ p, h1, h2, h3, h4, h5, h6 {
   .wb-label {
     background-color: $color-primary;
     color: $color-white2;
-  }
-  .wb-card {
   }
   .wb-time {
     font-size: 12px;
