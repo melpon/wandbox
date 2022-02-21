@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Button, Form, Modal } from "react-bootstrap";
 import { Pencil } from "react-bootstrap-icons";
@@ -17,9 +17,8 @@ const TitleDialog: React.FC = () => {
   );
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
-  const [editingTitle, setEditingTitle] = React.useState<string>("");
-  const [editingDescription, setEditingDescription] =
-    React.useState<string>("");
+  const [editingTitle, setEditingTitle] = useState<string>("");
+  const [editingDescription, setEditingDescription] = useState<string>("");
 
   useEffect(() => {
     if (!titleDialogOpened) {
@@ -28,7 +27,14 @@ const TitleDialog: React.FC = () => {
 
     setEditingTitle(title);
     setEditingDescription(description);
-  }, [titleDialogOpened]);
+  }, [titleDialogOpened, title, description]);
+
+  useEffect(() => {
+    setInvalidTitle([...editingTitle].length > 100);
+    setInvalidDescription([...editingDescription].length > 1000);
+  }, [editingTitle, editingDescription]);
+  const [invalidTitle, setInvalidTitle] = useState(false);
+  const [invalidDescription, setInvalidDescription] = useState(false);
 
   return (
     <Modal
@@ -52,6 +58,9 @@ const TitleDialog: React.FC = () => {
               value={editingTitle}
               onChange={(e) => setEditingTitle(e.currentTarget.value)}
             />
+            {invalidTitle && (
+              <p className="wb-control-error">Enter within 100 characters.</p>
+            )}
           </div>
           <div className="d-flex flex-column gap-4px">
             <label>Description</label>
@@ -62,6 +71,9 @@ const TitleDialog: React.FC = () => {
               value={editingDescription}
               onChange={(e) => setEditingDescription(e.currentTarget.value)}
             />
+            {invalidDescription && (
+              <p className="wb-control-error">Enter within 1,000 characters.</p>
+            )}
           </div>
         </div>
       </Modal.Body>
@@ -74,7 +86,11 @@ const TitleDialog: React.FC = () => {
         </Button>
         <Button
           variant="primary"
+          form="titleEditDialog"
           onClick={() => {
+            if (invalidTitle || invalidDescription) {
+              return;
+            }
             dispatch(actions.setTitle(editingTitle));
             dispatch(actions.setDescription(editingDescription));
             dispatch(actions.setTitleDialogOpened(false));

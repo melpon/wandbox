@@ -734,6 +734,19 @@ class kennel : public cppcms::application {
             return;
         }
 
+        // 長さチェック
+        // ブラウザでの制限がコードポイント単位で 100 なので、
+        // UTF-8 換算で適当に 400 あたりにしておく。
+        if (value.get("title", "").str().size() > 400) {
+            response().status(403);
+            return;
+        }
+        // こっちはコードポイント単位で 1000
+        if (value.get("description", "").str().size() > 4000) {
+            response().status(403);
+            return;
+        }
+
         std::string permlink_name = make_random_name(16);
         pl.make_permlink(permlink_name, value, *it, auth);
 

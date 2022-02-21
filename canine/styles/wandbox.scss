@@ -341,6 +341,7 @@ p, h1, h2, h3, h4, h5, h6 {
   .wb-time {
     font-size: 12px;
     color: $color-gray2;
+    white-space: nowrap;
   }
 }
 
@@ -400,4 +401,9 @@ p, h1, h2, h3, h4, h5, h6 {
     }
   }
 
+}
+
+.wb-control-error {
+  font-size: 12px;
+  color: $color-red;
 }
