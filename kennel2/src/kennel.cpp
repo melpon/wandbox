@@ -737,12 +737,12 @@ class kennel : public cppcms::application {
         // 長さチェック
         // ブラウザでの制限がコードポイント単位で 100 なので、
         // UTF-8 換算で適当に 400 あたりにしておく。
-        if (value.get("title", "").str().size() > 400) {
+        if (value.get("title", "").size() > 400) {
             response().status(403);
             return;
         }
         // こっちはコードポイント単位で 1000
-        if (value.get("description", "").str().size() > 4000) {
+        if (value.get("description", "").size() > 4000) {
             response().status(403);
             return;
         }
