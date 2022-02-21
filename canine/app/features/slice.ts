@@ -1,10 +1,11 @@
-import { EditorView } from "@codemirror/view";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { EditorView } from "@codemirror/view";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import { castDraft } from "immer";
+
 import { normalizePath } from "~/utils/normalizePath";
-import { castDraft, castImmutable } from "immer";
-import { startOfYesterday } from "date-fns";
-import { CompilerList } from "~/hooks/compilerList";
-import { PermlinkData } from "~/hooks/permlink";
+import type { CompilerList } from "~/hooks/compilerList";
+import type { PermlinkData } from "~/hooks/permlink";
 
 export interface EditorSourceData {
   id: string;

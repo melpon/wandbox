@@ -1,6 +1,8 @@
-import { useFetchJSON, AnyJson, JsonMap } from "./fetch";
-import { CompilerInfo, resolveCompilerInfo } from "./compilerList";
-import { ResultData } from "~/features/slice";
+import type { AnyJson, JsonMap } from "./fetch";
+import { useFetchJSON } from "./fetch";
+import type { CompilerInfo } from "./compilerList";
+import { resolveCompilerInfo } from "./compilerList";
+import type { ResultData } from "~/features/slice";
 
 export interface PermlinkPostData {
   permlink: string;

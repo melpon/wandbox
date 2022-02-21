@@ -1,19 +1,13 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   EditorView,
   keymap,
-  highlightSpecialChars,
   drawSelection,
   highlightActiveLine,
   KeyBinding,
 } from "@codemirror/view";
-import {
-  Extension,
-  EditorState,
-  StateEffect,
-  Transaction,
-  StateCommand,
-} from "@codemirror/state";
+import type { Extension, StateCommand } from "@codemirror/state";
+import { EditorState, StateEffect, Transaction } from "@codemirror/state";
 import { history, historyKeymap } from "@codemirror/history";
 import { foldGutter, foldKeymap } from "@codemirror/fold";
 import { indentOnInput, getIndentUnit, indentUnit } from "@codemirror/language";
@@ -25,15 +19,8 @@ import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { commentKeymap } from "@codemirror/comment";
 import { rectangularSelection } from "@codemirror/rectangular-selection";
-import { defaultHighlightStyle } from "@codemirror/highlight";
 import { lintKeymap } from "@codemirror/lint";
-//import {
-//  oneDarkTheme,
-//  oneDarkHighlightStyle,
-//} from "@codemirror/theme-one-dark";
-//import { cpp } from "@codemirror/lang-cpp";
-import { useEffect } from "react";
-import { tags, HighlightStyle } from "@codemirror/highlight";
+import { HighlightStyle, tags } from "@codemirror/highlight";
 
 // --color-prettylights-syntax-comment: #6e7781;
 // --color-prettylights-syntax-constant: #0550ae;
@@ -73,13 +60,6 @@ const highlightStyle = HighlightStyle.define([
   { tag: tags.string, color: "#cf222e" },
   { tag: tags.variableName, color: "#953800" },
   { tag: tags.processingInstruction, color: "#0a3069" },
-  // --color-prettylights-syntax-constant: #0550ae;
-  // --color-prettylights-syntax-entity: #8250df;
-  // --color-prettylights-syntax-storage-modifier-import: #24292f;
-  // --color-prettylights-syntax-entity-tag: #116329;
-  // --color-prettylights-syntax-keyword: #cf222e;
-  // --color-prettylights-syntax-string: #0a3069;
-  // --color-prettylights-syntax-variable: #953800;
 ]);
 
 export const insertTabWithSpace: StateCommand = ({ state, dispatch }) => {
@@ -136,7 +116,6 @@ export const tabWithSpaceBinding: KeyBinding = {
 };
 
 const codeMirrorDefaultExtensions: Extension[] = [
-  //highlightSpecialChars({ replaceTabs: true }),
   history(),
   foldGutter(),
   drawSelection(),

@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useMemo } from "react";
-import { useFetchJSON, AnyJson, JsonMap } from "./fetch";
+import { useCallback, useEffect, useMemo } from "react";
+
+import type { AnyJson, JsonMap } from "./fetch";
+import { useFetchJSON } from "./fetch";
 
 export interface SingleSwitch {
   name: string;

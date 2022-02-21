@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Nav from "react-bootstrap/Nav";
-import { FileEarmarkPlus, Gear } from "react-bootstrap-icons";
-
-import { PermlinkData } from "~/hooks/permlink";
-import { createEditorSourceData } from "~/utils/createEditorSourceData";
-import { EditorTab, RenamingSource } from "./EditorTab";
+import { FileEarmarkPlus } from "react-bootstrap-icons";
 import { Button } from "react-bootstrap";
-import { EditorSourceData, wandboxSlice, WandboxState } from "~/features/slice";
+
+import type { PermlinkData } from "~/hooks/permlink";
+import type { RenamingSource } from "./EditorTab";
+import { EditorTab } from "./EditorTab";
+import type { EditorSourceData } from "~/features/slice";
+import { wandboxSlice } from "~/features/slice";
 import { useAppDispatch } from "~/store";
 import { addSource } from "~/features/actions";
 
@@ -23,11 +24,9 @@ const EditorTabs: React.FC<EditorTabsProps> = (
   const { currentTab, stdinOpened, sources, permlinkData } = props;
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
-  const [renamingSources, setRenamingSources] = React.useState<
-    RenamingSource[]
-  >([]);
+  const [renamingSources, setRenamingSources] = useState<RenamingSource[]>([]);
 
-  React.useEffect((): void => {
+  useEffect((): void => {
     const rs = sources.map(
       (source): RenamingSource => ({
         renaming: false,
@@ -40,11 +39,11 @@ const EditorTabs: React.FC<EditorTabsProps> = (
     setRenamingSources(rs);
   }, [sources]);
 
-  const onAddTab = React.useCallback((): void => {
+  const onAddTab = useCallback((): void => {
     addSource(dispatch, sources, "noname");
   }, [sources]);
 
-  const onChangeTabs = React.useCallback(
+  const onChangeTabs = useCallback(
     (index: number): void => {
       // 追加ボタン
       dispatch(actions.setCurrentTab(index));
@@ -62,11 +61,11 @@ const EditorTabs: React.FC<EditorTabsProps> = (
     },
     [renamingSources]
   );
-  const onClickTabClose = React.useCallback((index: number): void => {
+  const onClickTabClose = useCallback((index: number): void => {
     dispatch(actions.removeSource(index));
   }, []);
 
-  const onClickTabEdit = React.useCallback(
+  const onClickTabEdit = useCallback(
     (index: number): void => {
       dispatch(actions.setCurrentTab(index));
       const rs = renamingSources.map(
@@ -80,7 +79,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
     },
     [renamingSources]
   );
-  const onChangeRenamingFilename = React.useCallback(
+  const onChangeRenamingFilename = useCallback(
     (index: number, filename: string): void => {
       const rs = [...renamingSources];
       rs[index] = { ...rs[index], filename: filename };
@@ -88,7 +87,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
     },
     [renamingSources]
   );
-  const onCancelRenamingFilename = React.useCallback(
+  const onCancelRenamingFilename = useCallback(
     (index: number): void => {
       const rs = [...renamingSources];
       rs[index] = {
@@ -100,7 +99,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
     },
     [renamingSources]
   );
-  const onSubmitRenamingFilename = React.useCallback(
+  const onSubmitRenamingFilename = useCallback(
     (index: number): void => {
       dispatch(
         actions.setFilename({
@@ -155,30 +154,8 @@ const EditorTabs: React.FC<EditorTabsProps> = (
             </Nav.Link>
           </Nav.Item>
         ) : null}
-        {/*sources.map(
-        (source, index): React.ReactElement => {
-          return (
-            <Tab
-              key={index}
-              disableRipple
-              classes={{ root: classes.tabRoot }}
-              component={EditorTab}
-              {...{
-                index,
-                source,
-                readonly: permlinkData !== null,
-                renamingSource: renamingSources[index] || null,
-                onClickTabEdit,
-                onClickTabClose,
-                onChangeRenamingFilename,
-                onCancelRenamingFilename,
-                onSubmitRenamingFilename,
-              }}
-            />
-          );
-        }
-      )*/}
       </Nav>
+
       {!stdinOpened && (
         <Button
           variant="link"

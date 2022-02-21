@@ -2,10 +2,9 @@ import React from "react";
 import Nav from "react-bootstrap/Nav";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import { FileEarmarkText, Pencil, Check, X } from "react-bootstrap-icons";
-import { EditorSourceData } from "~/features/slice";
+
+import type { EditorSourceData } from "~/features/slice";
 
 export interface RenamingSource {
   renaming: boolean;
@@ -124,7 +123,5 @@ const EditorTab: React.FC<EditorTabProps> = (props) => {
     </Nav.Item>
   );
 };
-
-EditorTab.displayName = "EditorTab";
 
 export { EditorTab };

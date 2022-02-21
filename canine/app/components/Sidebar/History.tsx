@@ -1,10 +1,12 @@
 import React from "react";
-import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { AppState, useAppDispatch } from "~/store";
+import { Button } from "react-bootstrap";
 import { formatDistanceToNow } from "date-fns";
-import { wandboxSlice } from "~/features/slice";
 import { useNavigate, useParams } from "remix";
+
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
+import { wandboxSlice } from "~/features/slice";
 
 const History: React.FC = () => {
   const { permlinkId } = useParams();

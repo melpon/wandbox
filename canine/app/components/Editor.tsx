@@ -1,18 +1,20 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { KeyBinding } from "@codemirror/view";
-
-import { CompilerList } from "~/hooks/compilerList";
-import { PermlinkData } from "~/hooks/permlink";
-import { CodeEditor } from "./Editor/CodeEditor";
-import { EditorTabs } from "./Editor/EditorTabs";
-import { CodeMirror6, CodeMirror6Option } from "./CodeMirror6";
 import { Button } from "react-bootstrap";
+import type { KeyBinding } from "@codemirror/view";
+
+import type { CompilerList } from "~/hooks/compilerList";
+import type { PermlinkData } from "~/hooks/permlink";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
-import { AppState, useAppDispatch, useAppStore } from "~/store";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { useCompileStateSelector } from "~/utils/compile";
 import { useCompile } from "~/hooks/compile";
+import { CodeEditor } from "./Editor/CodeEditor";
+import { EditorTabs } from "./Editor/EditorTabs";
+import type { CodeMirror6Option } from "./CodeMirror6";
+import { CodeMirror6 } from "./CodeMirror6";
 
 export interface EditorProps {
   compilerList: CompilerList;
@@ -21,7 +23,6 @@ export interface EditorProps {
 
 const Editor: React.FC<EditorProps> = (props) => {
   const {
-    currentLanguage,
     sources,
     stdin,
     stdinOpened,
@@ -33,7 +34,6 @@ const Editor: React.FC<EditorProps> = (props) => {
   } = useSelector(
     ({
       wandbox: {
-        currentLanguage,
         sources,
         stdin,
         stdinOpened,
@@ -42,7 +42,6 @@ const Editor: React.FC<EditorProps> = (props) => {
         editorSettings: { tabKey, tabWidth, fixedHeight },
       },
     }: AppState) => ({
-      currentLanguage,
       sources,
       stdin,
       stdinOpened,

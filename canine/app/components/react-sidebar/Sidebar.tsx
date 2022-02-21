@@ -1,14 +1,8 @@
 // https://github.com/balloob/react-sidebar を Functional Component で書き直しつつ
 // Wandbox で不要なプロパティを削除したりしつつ移植したもの
-import React, {
-  HTMLAttributes,
-  Ref,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import React, { HTMLAttributes, useCallback, useEffect, useState } from "react";
 
-const CANCEL_DISTANCE_ON_SCROLL = 20;
+//const CANCEL_DISTANCE_ON_SCROLL = 20;
 
 const defaultStyles = {
   root: {

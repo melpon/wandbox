@@ -1,6 +1,7 @@
-import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
-import { wandboxReducer } from "~/features/slice";
+import { configureStore } from "@reduxjs/toolkit";
 import { useStore, useDispatch } from "react-redux";
+
+import { wandboxReducer } from "~/features/slice";
 
 const store = configureStore({
   reducer: {

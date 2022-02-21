@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 
 import { reduceCompileOptions } from "~/utils/reduceCompileOptions";
-import { CompilerList, CompilerInfo } from "~/hooks/compilerList";
-import { PermlinkData } from "~/hooks/permlink";
-import { AppState } from "~/store";
+import type { CompilerList, CompilerInfo } from "~/hooks/compilerList";
+import type { PermlinkData } from "~/hooks/permlink";
+import type { AppState } from "~/store";
 
 export interface CommandProps {
   compilerList: CompilerList;
@@ -38,7 +38,7 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
     })
   );
 
-  const command = React.useMemo((): string => {
+  const command = useMemo((): string => {
     let info: CompilerInfo;
     if (permlinkData === null) {
       const infoUndef = compilerList.compilers.find(

@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { PermlinkData } from "~/hooks/permlink";
+import React, { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { AppState, useAppDispatch } from "~/store";
+
+import type { PermlinkData } from "~/hooks/permlink";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { useSelector } from "react-redux";
 
@@ -70,11 +72,6 @@ const AuthorData: React.FC<AuthorDataProps> = ({ permlinkData }) => {
       dispatch(actions.setAuthor(author))
     );
   }, [permlinkData.parameter.githubUser]);
-
-  const distanceTime = formatDistanceToNow(
-    new Date(permlinkData.parameter.createdAt * 1000),
-    { addSuffix: true }
-  );
 
   useEffect(() => {
     const username = permlinkData.parameter.githubUser;

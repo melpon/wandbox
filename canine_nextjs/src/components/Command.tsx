@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { reduceCompileOptions } from "~/utils/reduceCompileOptions";
 import { CompilerList, CompilerInfo } from "~/hooks/compilerList";
@@ -21,7 +21,7 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
   const { compilerList, permlinkData } = props;
   const compiler = useCompilerContext();
 
-  const command = React.useMemo((): string => {
+  const command = useMemo((): string => {
     let info: CompilerInfo;
     if (permlinkData === null) {
       const infoUndef = compilerList.compilers.find(

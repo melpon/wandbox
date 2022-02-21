@@ -1,9 +1,11 @@
 import React from "react";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 
-import { CompilerInfo, SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
+import type {
+  CompilerInfo,
+  SingleSwitch,
+  SelectSwitch,
+} from "~/hooks/compilerList";
 
 interface CompilerOptionProps {
   switches: { [name: string]: string | boolean };

@@ -1,27 +1,25 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 
-import {
+import type {
   CompilerList,
   SelectSwitchOption,
   CompilerInfo,
 } from "~/hooks/compilerList";
-import { PermlinkData } from "~/hooks/permlink";
-import { useCompile } from "~/hooks/compile";
-import { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
-import { ChooseLanguage } from "./Compiler/ChooseLanguage";
-import { ChooseCompiler } from "./Compiler/ChooseCompiler";
-import { CompilerOption } from "./Compiler/CompilerOption";
-import { RawCompilerOption } from "./Compiler/RawCompilerOption";
-import { AppState, useAppDispatch, useAppStore } from "~/store";
+import type { PermlinkData } from "~/hooks/permlink";
+import type { SingleSwitch, SelectSwitch } from "~/hooks/compilerList";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { useGetTemplate } from "~/hooks/template";
 import { useError } from "~/hooks/error";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
+import { ChooseLanguage } from "./Compiler/ChooseLanguage";
+import { ChooseCompiler } from "./Compiler/ChooseCompiler";
+import { CompilerOption } from "./Compiler/CompilerOption";
+import { RawCompilerOption } from "./Compiler/RawCompilerOption";
 
 interface CompilerProps {
-  //editor: EditorState,
-  //compiler: CompilerState,
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
 }

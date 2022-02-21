@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { ResultData } from "~/features/slice";
 
-import { PermlinkData } from "~/hooks/permlink";
-import { AppState } from "~/store";
+import type { ResultData } from "~/features/slice";
+import type { PermlinkData } from "~/hooks/permlink";
+import type { AppState } from "~/store";
 
 interface ResultProps {
   permlinkData: PermlinkData | null;
@@ -33,7 +33,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
       preview = r;
     }
   }
-  const typeClassNames = React.useMemo(
+  const typeClassNames = useMemo(
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     () => ({
       CompilerMessageS: "wb-result-compilermessages",

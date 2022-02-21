@@ -1,4 +1,5 @@
-import { useFetchJSON, AnyJson, JsonMap } from "./fetch";
+import type { AnyJson, JsonMap } from "./fetch";
+import { useFetchJSON } from "./fetch";
 
 export interface TemplateCode {
   file: string;

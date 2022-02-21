@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type AnyJson = string | number | boolean | null | JsonMap | AnyJson[];
 export type JsonMap = { [property: string]: AnyJson };
@@ -67,15 +67,15 @@ export function useFetch<T>(
   resolver: Resolver<T>,
   onError: (error: string) => void
 ): [T | null, number, (url: string | null, opts: RequestInit) => void] {
-  const [response, setResponse] = React.useState<T | null>(null);
-  const [counter, setCounter] = React.useState<number>(0);
-  const [fetchCounter, setFetchCounter] = React.useState<number>(0);
-  const [url, setUrl] = React.useState<string | null>(null);
-  const [opts, setOpts] = React.useState<RequestInit>({});
+  const [response, setResponse] = useState<T | null>(null);
+  const [counter, setCounter] = useState<number>(0);
+  const [fetchCounter, setFetchCounter] = useState<number>(0);
+  const [url, setUrl] = useState<string | null>(null);
+  const [opts, setOpts] = useState<RequestInit>({});
 
-  const didMountRef = React.useRef(false);
+  const didMountRef = useRef(false);
 
-  React.useEffect((): (() => void) | undefined => {
+  useEffect((): (() => void) | undefined => {
     // 初回は実行しない
     if (!didMountRef.current) {
       didMountRef.current = true;
@@ -121,7 +121,7 @@ export function useFetch<T>(
     return cleanup;
   }, [counter]);
 
-  const doFetch = React.useCallback(
+  const doFetch = useCallback(
     (url, opts): void => {
       setUrl(url || defaultUrl);
       setOpts(Object.assign(defaultOpts, opts));

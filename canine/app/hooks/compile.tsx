@@ -1,10 +1,13 @@
-import React, { useCallback } from "react";
-import { ResultData, wandboxSlice, WandboxState } from "~/features/slice";
-import { AppDispatch } from "~/store";
-import { compile, CompileState } from "~/utils/compile";
-import { CompilerList } from "./compilerList";
+import { useCallback } from "react";
+
+import type { ResultData } from "~/features/slice";
+import { wandboxSlice } from "~/features/slice";
+import type { AppDispatch } from "~/store";
+import type { CompileState } from "~/utils/compile";
+import { compile } from "~/utils/compile";
+import type { CompilerList } from "./compilerList";
 import { useError } from "./error";
-import { AnyJson } from "./fetch";
+import type { AnyJson } from "./fetch";
 
 export function useCompile(
   dispatch: AppDispatch,

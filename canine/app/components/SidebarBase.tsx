@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { AppState, useAppDispatch } from "~/store";
 import { LayoutSidebarReverse, X } from "react-bootstrap-icons";
-import { Breakpoint, wandboxSlice, WandboxState } from "~/features/slice";
+
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
+import type { Breakpoint, WandboxState } from "~/features/slice";
+import { wandboxSlice } from "~/features/slice";
 import { History } from "./Sidebar/History";
 import { EditorSettings } from "./Sidebar/EditorSettings";
 

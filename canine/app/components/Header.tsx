@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import Navbar from "react-bootstrap/Navbar";
-import { Modal, Nav, NavDropdown } from "react-bootstrap";
-import { AppState, useAppDispatch } from "~/store";
+import { Nav, NavDropdown } from "react-bootstrap";
+
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = (): React.ReactElement => {
-  const { sidebarState, editorSettings } = useSelector(
-    ({ wandbox: { sidebarState, editorSettings } }: AppState) => ({
+  const { sidebarState } = useSelector(
+    ({ wandbox: { sidebarState } }: AppState) => ({
       sidebarState,
-      editorSettings,
     })
   );
   const { githubUser } = WANDBOX_LOADER_DATA;

@@ -1,16 +1,18 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { KeyBinding } from "@codemirror/view";
+import type { KeyBinding } from "@codemirror/view";
+import type { Extension } from "@codemirror/state";
 
 import { resolveLanguage, importLanguage } from "~/utils/resolveLanguageMode";
-import { CompilerList } from "~/hooks/compilerList";
-import { PermlinkData } from "~/hooks/permlink";
-import { createEditorSourceData } from "~/utils/createEditorSourceData";
+import type { CompilerList } from "~/hooks/compilerList";
+import type { PermlinkData } from "~/hooks/permlink";
 import { useCompile } from "~/hooks/compile";
-import { CodeMirror6, CodeMirror6Option } from "../CodeMirror6";
-import { Extension } from "@codemirror/state";
-import { EditorSourceData, wandboxSlice, WandboxState } from "~/features/slice";
-import { AppState, useAppDispatch } from "~/store";
+import { CodeMirror6 } from "../CodeMirror6";
+import type { CodeMirror6Option } from "../CodeMirror6";
+import type { EditorSourceData } from "~/features/slice";
+import { wandboxSlice } from "~/features/slice";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 import { useCompileStateSelector } from "~/utils/compile";
 
 interface CodeEditorProps {
@@ -53,112 +55,15 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
     dispatch(actions.prepareRun());
     doCompile();
   }, [doCompile]);
-  //const { currentLanguage, currentCompilerName } = compiler;
 
-  /*
-  const insertTabSpace = React.useCallback((cm: CodeMirrorType): void => {
-    const cursor = cm.getCursor()["ch"];
-    const indentUnit = cm.getOption("indentUnit");
-    const newCursor =
-      Math.floor((cursor + indentUnit) / indentUnit) * indentUnit;
-    const indentNum = newCursor - cursor;
-    const spaces = Array(indentNum + 1).join(" ");
-    cm.replaceSelection(spaces, "end", "+input");
-  }, []);
-
-  const doCompile = useCompile(editor, compiler, compilerList, result);
-
-  const onCtrlEnter = React.useCallback((): void => {
-    if (permlinkData !== null) {
-      return;
-    }
-
-    doCompile();
-  }, [currentLanguage, currentCompilerName, doCompile]);
-
-  const settings = editor.settings;
-  const options = React.useMemo((): CodeMirrorOptions => {
-    const options = {
-      keyMap: settings.editor,
-      smartIndent: settings.smartIndent,
-      tabSize: parseInt(settings.tabWidth, 10),
-      extraKeys: {
-        "Ctrl-Enter": onCtrlEnter,
-      },
-    };
-
-    if (settings.tabKey === "tab") {
-      return {
-        ...options,
-        indentWithTabs: true,
-      };
-    } else {
-      return {
-        ...options,
-        extraKeys: {
-          ...options.extraKeys,
-          Tab: insertTabSpace,
-        },
-        indentUnit: parseInt(settings.tabKey, 10),
-        indentWithTabs: true,
-      };
-    }
-  }, [settings, insertTabSpace, onCtrlEnter]);
-
-  // パーマリンク時は permlinkData からソースデータを作る
-  const sources =
-    permlinkData === null
-      ? editor.sources
-      : createEditorSourceData(
-          permlinkData.parameter.code,
-          permlinkData.parameter.codes
-        );
-
-  const source = sources[editor.currentTab];
-
-  const [mode, setMode] = React.useState<string>("text/x-text");
-  const tmpMode = resolveLanguageMode(
-    source.filename,
-    compiler.currentLanguage,
-    "text/x-text"
-  );
-  useEffect((): void => {
-    // mode に応じて動的インポート
-    importLanguageMode(tmpMode).then((): void => {
-      // 読み込みが完了したら CodeEditor をリフレッシュ
-      setMode(tmpMode);
-    });
-  }, [tmpMode]);
-
-  const onBeforeChange = React.useCallback(
-    (_editor, _data, value): void => {
-      editor.setText(editor.currentTab, value);
-    },
-    [editor.currentTab]
-  );
-
-  return (
-    <CodeMirror
-      className="wb-editor"
-      value={source.text}
-      options={{
-        readOnly: permlinkData !== null,
-        lineNumbers: true,
-        theme: "material",
-        mode: mode,
-        ...options,
-      }}
-      onBeforeChange={onBeforeChange}
-    />
-  );
-  */
   const language =
     permlinkData === null
       ? currentLanguage
       : permlinkData.parameter.compilerInfo.language;
 
-  const [languageSupport, setLanguageSupport] =
-    React.useState<Extension | null>(null);
+  const [languageSupport, setLanguageSupport] = useState<Extension | null>(
+    null
+  );
   const resolvedLanguage = resolveLanguage(source.filename, language);
   useEffect((): void => {
     // mode に応じて動的インポート

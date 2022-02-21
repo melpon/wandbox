@@ -1,10 +1,13 @@
-import { EditorView, KeyBinding } from "@codemirror/view";
-import { AppDispatch } from "~/store";
-import {
+import type { EditorView } from "@codemirror/view";
+
+import type { AppDispatch } from "~/store";
+import type {
   EditorSettingsData,
   EditorSourceData,
   HistoryData,
   StorageExists,
+} from "./slice";
+import {
   wandboxInitialState,
   wandboxSlice,
   WandboxState,

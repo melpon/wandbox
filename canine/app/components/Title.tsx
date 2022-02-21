@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Button, Form, Modal } from "react-bootstrap";
 import { Pencil } from "react-bootstrap-icons";
-import { useParams } from "remix";
+
 import { wandboxSlice } from "~/features/slice";
-import { PermlinkData } from "~/hooks/permlink";
-import { AppState, useAppDispatch } from "~/store";
+import type { PermlinkData } from "~/hooks/permlink";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 
 const TitleDialog: React.FC = () => {
   const { title, description, titleDialogOpened } = useSelector(

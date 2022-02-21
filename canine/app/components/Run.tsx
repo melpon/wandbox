@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Button from "react-bootstrap/Button";
+import { useNavigate } from "remix";
 
-import {
+import type {
   CompilerInfo,
   CompilerList,
   SelectSwitch,
   SingleSwitch,
 } from "~/hooks/compilerList";
-import { PermlinkData } from "~/hooks/permlink";
+import type { PermlinkData } from "~/hooks/permlink";
 import { useCompile } from "~/hooks/compile";
-import { BoxArrowUp } from "react-bootstrap-icons";
-import { useNavigate } from "remix";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
 import { useError } from "~/hooks/error";
-import { AppState, useAppDispatch, useAppStore } from "~/store";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { saveHistory } from "~/features/actions";
 import { useCompileStateSelector } from "~/utils/compile";
@@ -41,16 +41,14 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const doNavigate = useNavigate();
   const [, setError] = useError();
 
-  const onRun = React.useCallback((): void => {
+  const onRun = useCallback((): void => {
     dispatch(actions.setRunning(true));
     dispatch(actions.setSharable(true));
     dispatch(actions.prepareRun());
     doCompile();
   }, [doCompile]);
 
-  //const disabled = permlinkData !== null || currentCompilerName === "";
-
-  const onEdit = React.useCallback(() => {
+  const onEdit = useCallback(() => {
     if (permlinkData === null) {
       return null;
     }

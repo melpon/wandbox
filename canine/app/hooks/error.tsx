@@ -22,7 +22,7 @@
  * const MyErrorComponent = () => {
  *   [error, setError] = useError();
  *   const onClose = useCallback(() => setError(null));
- *   // エラーが起きていたらポップアップを表示して、ポップアップがクリックされたらエラーを閉じるようにする
+ *   // エラーが起きていたらポップアップを表示して、ポップアップがクリックされたらエラーを閉じるようにする
  *   return (
  *     <MyPopupComponent
  *       open={error != null}
@@ -53,7 +53,7 @@
  * }
  * ```
  */
-import React from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
 
 interface ErrorState {
   valid: boolean;
@@ -65,7 +65,7 @@ interface ErrorContextType {
   setState: React.Dispatch<React.SetStateAction<ErrorState>>;
 }
 
-const ErrorContext = React.createContext<ErrorContextType>({
+const ErrorContext = createContext<ErrorContextType>({
   state: {
     valid: false,
     value: "",
@@ -76,7 +76,7 @@ const ErrorContext = React.createContext<ErrorContextType>({
 });
 
 const Error: React.FC = (props): React.ReactElement => {
-  const [state, setState] = React.useState<ErrorState>({
+  const [state, setState] = useState<ErrorState>({
     valid: false,
     value: "",
   });
@@ -94,9 +94,9 @@ const Error: React.FC = (props): React.ReactElement => {
 export { Error };
 
 export function useError(): [string | null, (error: string | null) => void] {
-  const context = React.useContext<ErrorContextType>(ErrorContext);
+  const context = useContext<ErrorContextType>(ErrorContext);
   const error = context.state.valid ? context.state.value : null;
-  const setError = React.useCallback(
+  const setError = useCallback(
     (error: string | null): void => {
       context.setState({
         valid: error !== null,

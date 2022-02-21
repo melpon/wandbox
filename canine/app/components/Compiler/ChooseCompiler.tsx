@@ -81,43 +81,6 @@ const ChooseCompiler: React.FC<ChooseCompilerProps> = (
       </div>
     </div>
   );
-  /*
-  return (
-    <ListGroup className="wb-compilerlist">
-      <ListGroup.Item>Compiler</ListGroup.Item>
-      {compilerInfo === null ? (
-        compilerInfos.map(
-          (info): React.ReactElement => {
-            return (
-              <ListGroup.Item
-                className="wb-item"
-                key={info.name}
-                action
-                onClick={(): void => onSelectCompiler(info)}
-              >
-                <p>{`${info.displayName} ${info.version}`}</p>
-              </ListGroup.Item>
-            );
-          }
-        )
-      ) : (
-        <ListGroup.Item className="wb-item">
-          <p>{`${compilerInfo.displayName} ${compilerInfo.version}`}</p>
-          {readOnly ? null : (
-            <button
-              type="button"
-              className="close"
-              aria-label="Close"
-              onClick={onDeselectCompiler}
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          )}
-        </ListGroup.Item>
-      )}
-    </ListGroup>
-  );
-  */
 };
 
 export { ChooseCompiler };

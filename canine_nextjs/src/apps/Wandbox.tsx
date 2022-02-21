@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -36,9 +36,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setError
   );
 
-  const [permlinkData, setPermlinkData] = React.useState<PermlinkData | null>(
-    null
-  );
+  const [permlinkData, setPermlinkData] = useState<PermlinkData | null>(null);
   const [permlinkResp, , doGetPermlink] = useGetPermlink(
     permlinkId === null ? "" : permlinkId,
     setError
@@ -64,7 +62,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setPermlinkData(permlinkResp);
   }, [permlinkResp]);
 
-  const clearPermlinkData = React.useCallback((): void => {
+  const clearPermlinkData = useCallback((): void => {
     setPermlinkData(null);
   }, [setPermlinkData]);
 
@@ -78,12 +76,12 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     permlinkId !== null
   );
   // 設定データのロード（初回に一回だけ読み込む）
-  React.useEffect((): void => {
+  useEffect((): void => {
     load();
   }, []);
 
   // データに変化があった3秒後に設定を保存する
-  React.useEffect((): (() => void) => {
+  useEffect((): (() => void) => {
     const timerID = setTimeout((): void => {
       save();
     }, 3000);
@@ -93,7 +91,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     };
   }, [save]);
   // それとは別に、設定周りの変更があったら即座に保存する
-  React.useEffect((): void => {
+  useEffect((): void => {
     save();
   }, [compiler, editor.settings]);
 

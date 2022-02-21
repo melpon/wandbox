@@ -1,6 +1,4 @@
 import React from "react";
-import { Dropdown } from "react-bootstrap";
-import { ThreeDots } from "react-bootstrap-icons";
 import ListGroup from "react-bootstrap/ListGroup";
 
 interface ChooseLanguageProps {

@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "remix";
 
 import { useCompilerList } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
-import { useGetPermlink, PermlinkData } from "~/hooks/permlink";
+import { useGetPermlink } from "~/hooks/permlink";
 import { Header } from "~/components/Header";
 import { Compiler } from "~/components/Compiler";
 import { Permlink } from "~/components/Permlink";
@@ -12,11 +13,12 @@ import { Command } from "~/components/Command";
 import { Result } from "~/components/Result";
 import { Run } from "~/components/Run";
 import { Title, TitleDialog } from "~/components/Title";
-import { useParams } from "remix";
 import { Author, AuthorData } from "~/components/Author";
 import Sidebar from "~/components/react-sidebar/Sidebar";
-import { AppState, useAppDispatch } from "~/store";
-import { Breakpoint, wandboxSlice } from "~/features/slice";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
+import type { Breakpoint } from "~/features/slice";
+import { wandboxSlice } from "~/features/slice";
 import {
   applySettings,
   loadHistory,
@@ -25,7 +27,6 @@ import {
   saveSettings,
 } from "~/features/actions";
 import { SidebarBase } from "~/components/SidebarBase";
-import { StateEffect } from "@codemirror/state";
 
 const Wandbox: React.FC = (): React.ReactElement | null => {
   const { permlinkId } = useParams();

@@ -1,8 +1,10 @@
 import React, { useCallback } from "react";
 import { useSelector } from "react-redux";
 import Form from "react-bootstrap/Form";
-import { EditorType, wandboxSlice } from "~/features/slice";
-import { AppState, useAppDispatch } from "~/store";
+
+import { wandboxSlice } from "~/features/slice";
+import type { AppState } from "~/store";
+import { useAppDispatch } from "~/store";
 
 const EditorSettings: React.FC = () => {
   const settings = useSelector(
