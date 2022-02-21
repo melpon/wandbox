@@ -250,6 +250,26 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     };
   }, [updateBreakpoint]);
 
+  // 適切にタイトルを書き換える
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    let language: string;
+    let docTitle: string;
+    if (permlinkResp === null) {
+      language = currentLanguage;
+      docTitle = title;
+    } else {
+      language = permlinkResp.parameter.compilerInfo.language;
+      docTitle = permlinkResp.parameter.title;
+    }
+    document.title =
+      (language.length === 0 ? "" : `[${language}] `) +
+      (docTitle.length === 0 ? "" : `${docTitle} - `) +
+      "Wandbox";
+  }, [permlinkResp, currentLanguage, title]);
+
   if (compilerList === null) {
     return null;
   }

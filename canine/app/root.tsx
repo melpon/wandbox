@@ -8,27 +8,47 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useParams,
 } from "remix";
 import type { MetaFunction, LinksFunction } from "remix";
 
 import wandboxStyles from "./styles/wandbox.css";
 import { getSession, commitSession } from "./sessions.server";
+import { fetchPermlinkData } from "./entry.server";
+import type { PermlinkData } from "./hooks/permlink";
+import { resolvePermlinkData } from "./hooks/permlink";
 
-export const meta: MetaFunction = () => {
-  return { title: "New Remix App" };
+export const meta: MetaFunction = ({ params, data }) => {
+  let title: string;
+  const permlinkData: PermlinkData | null = data.permlinkData;
+
+  if (permlinkData === null) {
+    title = "Wandbox";
+  } else {
+    title = `[${permlinkData.parameter.compilerInfo.language}] ${permlinkData.parameter.title} - Wandbox`;
+  }
+  return { title };
 };
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: wandboxStyles }];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   const session = await getSession(request.headers.get("Cookie"));
 
   const githubUser = session.has("github_user")
     ? JSON.parse(session.get("github_user"))
     : null;
-  const data: WandboxLoaderData = { githubUser };
+
+  const { permlinkId } = params;
+  const permlinkData =
+    permlinkId === undefined
+      ? null
+      : resolvePermlinkData(permlinkId, await fetchPermlinkData(permlinkId));
+
+  const data: WandboxLoaderData = { githubUser, permlinkData };
+
   return json(data, {
     headers: {
       "Set-Cookie": await commitSession(session),
@@ -37,7 +57,12 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function App() {
-  const data: WandboxLoaderData = useLoaderData() || { githubUser: null };
+  const data: WandboxLoaderData = useLoaderData();
+  // permlinkData はタイトルの設定のために用意しているだけなので HTML 生成時には除ける
+  const data2: WandboxLoaderData = {
+    githubUser: data.githubUser,
+    permlinkData: null,
+  };
   return (
     <html>
       <head>

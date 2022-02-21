@@ -3,6 +3,7 @@ import { RemixServer } from "remix";
 import type { EntryContext } from "remix";
 
 import { commitSession, getSession } from "./sessions.server";
+import { AnyJson } from "./hooks/fetch";
 
 async function getGithubAccessToken(url: URL): Promise<string | null> {
   const client_id = WANDBOX_GITHUB_CLIENT_ID;
@@ -51,6 +52,32 @@ async function getGithubUser(accessToken: string): Promise<GithubUser | null> {
     return null;
   }
   return json as GithubUser;
+}
+
+export async function fetchPermlinkData(permlinkId: string): Promise<AnyJson> {
+  const permlinkKey = `permlink-${permlinkId}`;
+  const cache = await KV_SESSION.get(permlinkKey, "json");
+  if (cache !== null) {
+    return cache as AnyJson;
+  }
+
+  const headers = {
+    "content-type": "application/json",
+  };
+  const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/permlink/${permlinkId}`, {
+    headers: headers,
+  });
+  if (resp.status !== 200) {
+    throw `Error fetch permlink ${permlinkId}`;
+  }
+  const body = await resp.json();
+
+  // 30日間キャッシュする
+  await KV_SESSION.put(permlinkKey, JSON.stringify(body), {
+    expirationTtl: 30 * 24 * 60 * 60,
+  });
+
+  return body;
 }
 
 export default async function handleRequest(
@@ -108,6 +135,19 @@ export default async function handleRequest(
       body: JSON.stringify(json),
     });
     return resp;
+  }
+  // permlink の取得はキャッシュする
+  if (
+    !hasError &&
+    request.method === "GET" &&
+    url.pathname.startsWith("/api/permlink")
+  ) {
+    const permlinkId = url.pathname
+      .replace("/api/permlink/", "")
+      .replace("/", "");
+    const json = await fetchPermlinkData(permlinkId);
+    responseHeaders.set("Content-Type", "application/json");
+    return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
   // それ以外の API リクエストは単に転送する
   if (!hasError && url.pathname.startsWith("/api")) {

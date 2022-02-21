@@ -11,6 +11,7 @@ declare type GithubUser = {
 
 declare interface WandboxLoaderData {
   githubUser: GithubUser | null;
+  permlinkData: any;
 }
 
 declare var WANDBOX_URL_PREFIX: string;

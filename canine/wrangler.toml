@@ -6,7 +6,8 @@ account_id = "a88d1d39ba893e18fa44d5cf1ec1115e"
 route = ""
 
 kv_namespaces = [ 
-  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" }
+  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" },
+  { binding = "KV_CACHE", id = "346f95298b6e443d886793fdea9ef733" }
 ]
 
 [site]
@@ -31,7 +32,8 @@ name = "wandbox-develop"
 route = "develop.wandbox.org/*"
 vars = { WANDBOX_URL_PREFIX = "http://api.develop.wandbox.org", WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08" }
 kv_namespaces = [ 
-  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" }
+  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" },
+  { binding = "KV_CACHE", id = "346f95298b6e443d886793fdea9ef733" }
 ]
 
 

@@ -58,7 +58,10 @@ export interface PermlinkData {
   results: ResultData[];
 }
 
-function resolvePermlinkData(permlinkId: string, json: AnyJson): PermlinkData {
+export function resolvePermlinkData(
+  permlinkId: string,
+  json: AnyJson
+): PermlinkData {
   const map = json as JsonMap;
   const param = map.parameter as JsonMap;
   return {
