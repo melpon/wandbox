@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Nav from "react-bootstrap/Nav";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -40,6 +40,15 @@ const EditorTab: React.FC<EditorTabProps> = (props) => {
     onCancelRenamingFilename,
     onSubmitRenamingFilename,
   } = props;
+
+  // ファイル名の編集ボタンを押して input コントロールが出たらフォーカスする
+  const [ref, setRef] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (ref === null) {
+      return;
+    }
+    ref.focus();
+  }, [ref]);
 
   return (
     <Nav.Item key={index}>
@@ -95,10 +104,12 @@ const EditorTab: React.FC<EditorTabProps> = (props) => {
                   } else if (e.key === "Escape") {
                     onCancelRenamingFilename(index);
                   }
+                  e.stopPropagation();
                 }}
                 onChange={(e): void =>
                   onChangeRenamingFilename(index, e.target.value)
                 }
+                ref={setRef}
               />
               <div className="d-flex align-items-center">
                 <Button

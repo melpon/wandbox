@@ -323,12 +323,16 @@ export const wandboxSlice = createSlice({
         return;
       }
       // ファイル名の ../ とか ./ みたいなのを normalize する
-      const newFilename = normalizePath(filename);
+      const newFilename = normalizePath(filename).trim();
       // 既存のファイルが既にあったら変更させない
       if (
         state.sources.findIndex((source) => source.filename === newFilename) !==
         -1
       ) {
+        return;
+      }
+      // 空文字
+      if (newFilename.length === 0) {
         return;
       }
 
