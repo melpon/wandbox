@@ -93,6 +93,7 @@ class kennel : public cppcms::application {
     dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this,
                         1);
     mapper().assign("api-template", "/api/template/");
+    dispatcher().assign("/api/sponsors.json", &kennel::api_sponsors, this);
 
     dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this,
                         1);
@@ -1145,6 +1146,85 @@ class kennel : public cppcms::application {
 
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
+        result.save(response().out(), cppcms::json::readable);
+    }
+
+    struct sponsor {
+      std::string name;
+      std::string url;
+      std::time_t due_date;
+    };
+    std::time_t from_iso8601(std::string str) {
+      std::tm tm;
+      std::memset(&tm, 0, sizeof(tm));
+      strptime(str.c_str(), "%FT%T%z", &tm);
+      return std::mktime(&tm);
+    }
+    sponsor make_sponsor(cppcms::json::value& json) {
+      sponsor sp;
+      sp.name = json["name"].str();
+      sp.url = json["url"].str();
+      sp.due_date = from_iso8601(json["due_date"].str());
+      return sp;
+    }
+
+    void api_sponsors() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
+
+        cppcms::json::array corporate;
+        cppcms::json::array personal;
+        cppcms::json::value error = cppcms::json::object();
+        error["corporate"] = corporate;
+        error["personal"] = personal;
+
+        auto file = service().settings()["application"]["sponsors"].str();
+        if (file.empty()) {
+          error.save(response().out(), cppcms::json::readable);
+          return;
+        }
+
+        std::ifstream ifs(file.c_str());
+        if (!ifs) {
+          error.save(response().out(), cppcms::json::readable);
+          return;
+        }
+
+        cppcms::json::value js;
+        if (!js.load(ifs, true, nullptr)) {
+          error.save(response().out(), cppcms::json::readable);
+          return;
+        }
+
+        auto now = std::time(nullptr);
+        for (auto&& v: js["corporate"].array()) {
+          auto sp = make_sponsor(v);
+          if (now <= sp.due_date) {
+            cppcms::json::value j = cppcms::json::object();
+            j["name"].str(sp.name);
+            j["url"].str(sp.url);
+            j["due_date"].number(sp.due_date);
+            corporate.push_back(std::move(j));
+          }
+        }
+        for (auto&& v: js["personal"].array()) {
+          auto sp = make_sponsor(v);
+          if (now <= sp.due_date) {
+            cppcms::json::value j = cppcms::json::object();
+            j["name"].str(sp.name);
+            j["url"].str(sp.url);
+            j["due_date"].number(sp.due_date);
+            personal.push_back(std::move(j));
+          }
+        }
+
+        cppcms::json::value result = cppcms::json::object();
+        result["corporate"] = corporate;
+        result["personal"] = personal;
         result.save(response().out(), cppcms::json::readable);
     }
 
