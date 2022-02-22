@@ -301,46 +301,53 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         sidebarClassName="wb-sidebar"
         contentClassName={`${
           sidebarLocked ? "wb-sidebar-locked" : ""
-        } py-24px px-8px px-md-32px d-flex flex-column flex-md-row gap-16px`}
+        } py-24px px-8px px-md-32px d-flex flex-column`}
       >
-        <TitleDialog />
-        {permlinkData !== null && <AuthorData permlinkData={permlinkData} />}
+        <div className="d-flex flex-column flex-md-row gap-16px">
+          <TitleDialog />
+          {permlinkData !== null && <AuthorData permlinkData={permlinkData} />}
 
-        <div className="d-flex d-md-none flex-column gap-16px">
-          <Title permlinkData={permlinkData} />
-          {permlinkData !== null && (
-            <div className="align-self-end">
-              <Author permlinkData={permlinkData} author={author} />
-            </div>
-          )}
-        </div>
-
-        <Compiler compilerList={compilerList} permlinkData={permlinkData} />
-        <div className="flex-grow-1 d-flex flex-column gap-8px">
-          <div className="d-none d-md-flex gap-16px">
+          <div className="d-flex d-md-none flex-column gap-16px">
             <Title permlinkData={permlinkData} />
             {permlinkData !== null && (
-              <Author permlinkData={permlinkData} author={author} />
+              <div className="align-self-end">
+                <Author permlinkData={permlinkData} author={author} />
+              </div>
             )}
           </div>
-          <Editor compilerList={compilerList} permlinkData={permlinkData} />
-          {(currentCompilerName !== "" || permlinkData !== null) && (
-            <>
-              <Command
-                compilerList={compilerList}
-                permlinkData={permlinkData}
-              />
-              <div className="d-flex gap-8px">
-                <Run compilerList={compilerList} permlinkData={permlinkData} />
-                <Permlink
+
+          <Compiler compilerList={compilerList} permlinkData={permlinkData} />
+          <div className="flex-grow-1 d-flex flex-column gap-8px">
+            <div className="d-none d-md-flex gap-16px">
+              <Title permlinkData={permlinkData} />
+              {permlinkData !== null && (
+                <Author permlinkData={permlinkData} author={author} />
+              )}
+            </div>
+            <Editor compilerList={compilerList} permlinkData={permlinkData} />
+            {(currentCompilerName !== "" || permlinkData !== null) && (
+              <>
+                <Command
                   compilerList={compilerList}
                   permlinkData={permlinkData}
                 />
-              </div>
-            </>
-          )}
-          <Result permlinkData={permlinkData} />
+                <div className="d-flex gap-8px">
+                  <Run
+                    compilerList={compilerList}
+                    permlinkData={permlinkData}
+                  />
+                  <Permlink
+                    compilerList={compilerList}
+                    permlinkData={permlinkData}
+                  />
+                </div>
+              </>
+            )}
+            <Result permlinkData={permlinkData} />
+          </div>
         </div>
+        {/* この div を入れておくことで padding-bottom が効くようになる */}
+        <div></div>
       </Sidebar>
     </div>
   );

@@ -360,6 +360,8 @@ p, h1, h2, h3, h4, h5, h6 {
 
 .wb-sidebar-root {
   margin-top: 48px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .wb-sidebar {
