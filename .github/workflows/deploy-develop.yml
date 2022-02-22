@@ -72,3 +72,4 @@ jobs:
           npm run build:css
           npm run build
         workingDirectory: canine
+        environment: develop
