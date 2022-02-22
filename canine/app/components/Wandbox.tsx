@@ -28,6 +28,8 @@ import {
 } from "~/features/actions";
 import { SidebarBase } from "~/components/SidebarBase";
 import i18n from "~/i18n";
+import { useGetSponsors } from "~/hooks/sponsors";
+import { Sponsors } from "./Sponsors";
 
 const Wandbox: React.FC = (): React.ReactElement | null => {
   // 参照しておかないとグローバルな初期化コード自体が消えてしまうので、
@@ -43,6 +45,11 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setError
   );
   const [localStorageChanged, setLocalStorageChanged] = useState(false);
+
+  const [sponsors, , doGetSponsors] = useGetSponsors(
+    "/api/sponsors.json",
+    setError
+  );
 
   useEffect((): void => {
     if (permlinkId === undefined) {
@@ -64,6 +71,10 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       dispatch(actions.setStdinOpened(true));
     }
   }, [permlinkResp]);
+
+  useEffect((): void => {
+    doGetSponsors(null, {});
+  }, []);
 
   const {
     permlinkData,
@@ -316,7 +327,19 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
             )}
           </div>
 
-          <Compiler compilerList={compilerList} permlinkData={permlinkData} />
+          <div className="d-flex flex-column">
+            <Compiler compilerList={compilerList} permlinkData={permlinkData} />
+            {sponsors !== null &&
+              (sponsors.corporate.length !== 0 ||
+                sponsors.personal.length !== 0) && (
+                <>
+                  <div className="wb-line-horizontal my-16px d-none d-md-block" />
+                  <div className="d-none d-md-block">
+                    <Sponsors sponsors={sponsors} />
+                  </div>
+                </>
+              )}
+          </div>
           <div className="flex-grow-1 d-flex flex-column gap-8px">
             <div className="d-none d-md-flex gap-16px">
               <Title permlinkData={permlinkData} />
@@ -346,6 +369,16 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
             <Result permlinkData={permlinkData} />
           </div>
         </div>
+        {sponsors !== null &&
+          (sponsors.corporate.length !== 0 ||
+            sponsors.personal.length !== 0) && (
+            <>
+              <div className="wb-line-horizontal my-16px d-block d-md-none" />
+              <div className="d-block d-md-none">
+                <Sponsors sponsors={sponsors} />
+              </div>
+            </>
+          )}
         {/* この div を入れておくことで padding-bottom が効くようになる */}
         <div></div>
       </Sidebar>

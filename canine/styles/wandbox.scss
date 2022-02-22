@@ -105,6 +105,10 @@ p, h1, h2, h3, h4, h5, h6 {
   }
 }
 
+.wb-line-horizontal {
+  border-bottom: $color-gray solid 1px;
+}
+
 #wb-main {
   .cm-editor {
     min-height: 300px;
@@ -419,4 +423,30 @@ p, h1, h2, h3, h4, h5, h6 {
 .wb-control-error {
   font-size: 12px;
   color: $color-red;
+}
+
+.wb-sponsors {
+  > div {
+    background-color: $color-white2;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    padding: 8px;
+
+    > label {
+      font-weight: bold;
+    }
+
+    > div {
+      padding: 8px 8px 0px 8px;
+      display: flex;
+      flex-flow: wrap;
+      justify-content: space-around;
+      > p,a {
+        white-space: nowrap;
+        text-decoration: none;
+      }
+    }
+  }
 }

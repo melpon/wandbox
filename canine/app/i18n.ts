@@ -68,6 +68,10 @@ const resources = {
       permlink: {
         share: "Share",
       },
+      sponsors: {
+        corporate: "🐕 Corporate Sponsors",
+        personal: "🐶 Personal Sponsors",
+      },
     },
   },
   ja: {
@@ -135,6 +139,10 @@ const resources = {
       permlink: {
         share: "共有",
       },
+      sponsors: {
+        corporate: "🐕 企業スポンサー",
+        personal: "🐶 個人スポンサー",
+      },
     },
   },
 };
@@ -146,7 +154,7 @@ i18n
     resources: resources,
 
     fallbackLng: "en",
-    debug: true,
+    debug: false,
 
     interpolation: {
       escapeValue: false,
