@@ -70,7 +70,7 @@ jobs:
         preCommands: |
           npm install
           npm run build:css
-          npm run build:worker
           npm run build
+          npm run build:worker
         workingDirectory: canine
         environment: develop
