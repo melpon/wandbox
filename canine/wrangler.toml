@@ -4,6 +4,7 @@ type = "javascript"
 zone_id = "c3cbf0990f6c7eccfdcd4aede36ce2f9"
 account_id = "a88d1d39ba893e18fa44d5cf1ec1115e"
 route = ""
+compatibility_date = "2022-02-22"
 
 kv_namespaces = [ 
   { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" },
