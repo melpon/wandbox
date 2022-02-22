@@ -140,7 +140,9 @@ const Title: React.FC<TitleProps> = (props) => {
           </Button>
         )}
       </div>
-      <div style={{ borderBottom: "#d0d7de solid 1px" }}></div>
+      {(permlinkData === null || permlinkData.parameter.title.length !== 0) && (
+        <div style={{ borderBottom: "#d0d7de solid 1px" }}></div>
+      )}
       <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
         {permlinkData === null
           ? description

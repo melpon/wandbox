@@ -339,6 +339,7 @@ p, h1, h2, h3, h4, h5, h6 {
 }
 
 .wb-author {
+  min-width: 144px;
   border: $color-primary solid 1px;
   border-radius: 4px;
   .wb-label {
