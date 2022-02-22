@@ -69,5 +69,6 @@ jobs:
         apiToken: ${{ secrets.CF_API_TOKEN }}
         preCommands: |
           npm install
+          npm run build:css
           npm run build
         workingDirectory: canine

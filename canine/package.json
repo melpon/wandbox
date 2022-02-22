@@ -5,6 +5,7 @@
   "license": "",
   "scripts": {
     "build": "remix build",
+    "build:css": "sass --load-path=node_modules styles/:app/styles/",
     "dev": "remix watch",
     "dev:css": "sass --load-path=node_modules styles/:app/styles/ --watch ",
     "postinstall": "remix setup cloudflare-workers",
