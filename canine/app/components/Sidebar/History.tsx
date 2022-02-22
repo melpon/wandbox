@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Button } from "react-bootstrap";
-import { formatDistanceToNow } from "date-fns";
+import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { formatDistanceToNow, formatRFC3339 } from "date-fns";
 import { useNavigate, useParams } from "remix";
 
 import type { AppState } from "~/store";
@@ -31,12 +31,28 @@ const History: React.FC = () => {
             className="wb-history-data d-flex flex-column px-8px py-8px"
           >
             <div className="d-flex justify-content-between">
-              <p className="wb-weak-text">
-                {formatDistanceToNow(x.createdAt * 1000, {
-                  addSuffix: true,
-                  locale: locale,
-                })}
-              </p>
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip id={`wb-tooltip-history-${x.id}`}>
+                    {formatRFC3339(x.createdAt * 1000)}
+                  </Tooltip>
+                }
+              >
+                <p className="wb-weak-text">
+                  {t(
+                    x.type === "permlink"
+                      ? "history.viewedAt"
+                      : "history.ranAt",
+                    {
+                      time: formatDistanceToNow(x.createdAt * 1000, {
+                        addSuffix: true,
+                        locale: locale,
+                      }),
+                    }
+                  )}
+                </p>
+              </OverlayTrigger>
               {x.type === "permlink" && (
                 <p className="wb-weak-text">{`${x.permlinkId}`}</p>
               )}
@@ -55,14 +71,26 @@ const History: React.FC = () => {
                 </p>
                 {x.type === "permlink" && (
                   <>
-                    <p className="wb-weak-text">
-                      {t("history.createdAt", {
-                        time: formatDistanceToNow(x.permlinkCreatedAt * 1000, {
-                          addSuffix: true,
-                          locale: locale,
-                        }),
-                      })}
-                    </p>
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`wb-tooltip-history-permlink-${x.id}`}>
+                          {formatRFC3339(x.permlinkCreatedAt * 1000)}
+                        </Tooltip>
+                      }
+                    >
+                      <p className="wb-weak-text">
+                        {t("history.createdAt", {
+                          time: formatDistanceToNow(
+                            x.permlinkCreatedAt * 1000,
+                            {
+                              addSuffix: true,
+                              locale: locale,
+                            }
+                          ),
+                        })}
+                      </p>
+                    </OverlayTrigger>
                     {x.githubUser && (
                       <p className="wb-weak-text">
                         <Trans

@@ -19,6 +19,7 @@ import { wandboxSlice } from "~/features/slice";
 import { saveHistory } from "~/features/actions";
 import { useCompileStateSelector } from "~/utils/compile";
 import { useTranslation } from "react-i18next";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export interface RunProps {
   compilerList: CompilerList;
@@ -171,16 +172,21 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
 
   // 実行中は表示しない
   return (
-    <Button
-      style={{
-        minWidth: 144,
-        visibility: running ? "hidden" : "visible",
-      }}
-      onClick={onRun}
-      variant="primary"
+    <OverlayTrigger
+      placement="bottom"
+      overlay={<Tooltip id="wb-tooltip-run">{t("run.ctrlEnter")}</Tooltip>}
     >
-      {t("run.run")}
-    </Button>
+      <Button
+        style={{
+          minWidth: 144,
+          visibility: running ? "hidden" : "visible",
+        }}
+        onClick={onRun}
+        variant="primary"
+      >
+        {t("run.run")}
+      </Button>
+    </OverlayTrigger>
   );
 };
 

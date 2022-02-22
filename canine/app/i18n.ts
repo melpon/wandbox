@@ -48,6 +48,8 @@ const resources = {
       },
       history: {
         title: "Ran/Viewed Log",
+        ranAt: "Ran {{time}}",
+        viewedAt: "Viewed {{time}}",
         createdAt: "Created at {{time}}",
         createdByUser: "Created by <a>@{{user}}</a>",
         createdByAnonymous: "Created by anonymous",
@@ -57,6 +59,7 @@ const resources = {
       run: {
         edit: "Clone & Edit",
         run: "Run",
+        ctrlEnter: "or Ctrl+Enter",
       },
       result: {
         exitcode: "<d1>Exit Code: </d1><d2>{{exitCode}}</d2>",
@@ -112,6 +115,8 @@ const resources = {
       },
       history: {
         title: "実行/表示履歴",
+        ranAt: "{{time}} に実行",
+        viewedAt: "{{time}} に表示",
         createdAt: "{{time}} に作成",
         createdByUser: "<a>@{{user}}</a> が作成",
         createdByAnonymous: "匿名ユーザが作成",
@@ -121,6 +126,7 @@ const resources = {
       run: {
         edit: "コピーして編集",
         run: "実行",
+        ctrlEnter: "または Ctrl+Enter",
       },
       result: {
         exitcode: "<d1>終了コード: </d1><d2>{{exitCode}}</d2>",
