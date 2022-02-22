@@ -7,8 +7,12 @@ import { useNavigate, useParams } from "remix";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
+import { Trans, useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "~/utils/getDateFnsLocale";
+import { t } from "i18next";
 
 const History: React.FC = () => {
+  const { i18n } = useTranslation();
   const { permlinkId } = useParams();
   const { history } = useSelector(({ wandbox: { history } }: AppState) => ({
     history,
@@ -16,6 +20,7 @@ const History: React.FC = () => {
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
   const navigate = useNavigate();
+  const locale = getDateFnsLocale(i18n.language);
 
   return (
     <div className="wb-history flex-grow-1 d-flex flex-column px-16px py-8px gap-8px">
@@ -29,6 +34,7 @@ const History: React.FC = () => {
               <p className="wb-weak-text">
                 {formatDistanceToNow(x.createdAt * 1000, {
                   addSuffix: true,
+                  locale: locale,
                 })}
               </p>
               {x.type === "permlink" && (
@@ -50,23 +56,34 @@ const History: React.FC = () => {
                 {x.type === "permlink" && (
                   <>
                     <p className="wb-weak-text">
-                      Created at{" "}
-                      {formatDistanceToNow(x.permlinkCreatedAt * 1000, {
-                        addSuffix: true,
+                      {t("history.createdAt", {
+                        time: formatDistanceToNow(x.permlinkCreatedAt * 1000, {
+                          addSuffix: true,
+                          locale: locale,
+                        }),
                       })}
                     </p>
                     {x.githubUser && (
                       <p className="wb-weak-text">
-                        Created by{" "}
-                        <a
-                          href={x.githubUser.html_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >{`@${x.githubUser.login}`}</a>
+                        <Trans
+                          i18nKey="history.createdByUser"
+                          values={{ user: x.githubUser.login }}
+                          components={{
+                            a: (
+                              <a
+                                href={x.githubUser.html_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              />
+                            ),
+                          }}
+                        ></Trans>
                       </p>
                     )}
                     {!x.githubUser && (
-                      <p className="wb-weak-text">Created by anonymous</p>
+                      <p className="wb-weak-text">
+                        {t("history.createdByAnonymous")}
+                      </p>
                     )}
                   </>
                 )}
@@ -82,7 +99,7 @@ const History: React.FC = () => {
                       navigate(`/permlink/${x.permlinkId}`);
                     }}
                   >
-                    View
+                    {t("history.view")}
                   </Button>
                 ) : (
                   <Button
@@ -97,7 +114,7 @@ const History: React.FC = () => {
                       dispatch(actions.loadQuickSave(x));
                     }}
                   >
-                    Load
+                    {t("history.load")}
                   </Button>
                 )}
               </div>

@@ -6,6 +6,8 @@ import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { useSelector } from "react-redux";
+import { getDateFnsLocale } from "~/utils/getDateFnsLocale";
+import { useTranslation } from "react-i18next";
 
 export interface AuthorDataProps {
   permlinkData: PermlinkData;
@@ -96,9 +98,10 @@ const AuthorData: React.FC<AuthorDataProps> = ({ permlinkData }) => {
 };
 
 const Author: React.FC<AuthorProps> = ({ permlinkData, author }) => {
+  const { i18n } = useTranslation();
   const distanceTime = formatDistanceToNow(
     new Date(permlinkData.parameter.createdAt * 1000),
-    { addSuffix: true }
+    { addSuffix: true, locale: getDateFnsLocale(i18n.language) }
   );
 
   const loading =

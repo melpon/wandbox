@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { LayoutSidebarReverse, X } from "react-bootstrap-icons";
+import { useTranslation } from "react-i18next";
 
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
@@ -11,6 +12,7 @@ import { History } from "./Sidebar/History";
 import { EditorSettings } from "./Sidebar/EditorSettings";
 
 const SidebarBase: React.FC = () => {
+  const { t } = useTranslation();
   const { sidebarLocked, sidebarState, breakpoint } = useSelector(
     ({ wandbox: { sidebarLocked, sidebarState, breakpoint } }: AppState) => ({
       sidebarLocked,
@@ -51,7 +53,8 @@ const SidebarBase: React.FC = () => {
     setCurrentBreakpoint(breakpoint);
   }, [breakpoint]);
 
-  const title = state === "editorSettings" ? "Editor Settings" : "Log";
+  const title =
+    state === "editorSettings" ? t("settings.title") : t("history.title");
   const content = state === "editorSettings" ? <EditorSettings /> : <History />;
 
   return (

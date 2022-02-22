@@ -11,6 +11,7 @@ import { usePostPermlink, PermlinkData } from "~/hooks/permlink";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
+import { useTranslation } from "react-i18next";
 
 interface TweetButtonProps {
   permlinkId: string;
@@ -50,13 +51,13 @@ const TweetButton: React.FC<TweetButtonProps> = ({ permlinkId }) => {
 export interface PermlinkProps {
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
-  clearPermlinkData: () => void;
 }
 
 const Permlink: React.FC<PermlinkProps> = (
   props
 ): React.ReactElement | null => {
-  const { compilerList, permlinkData, clearPermlinkData } = props;
+  const { compilerList, permlinkData } = props;
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const compileState = useCompileStateSelector();
   const { results, running, sharable } = useSelector(
@@ -118,7 +119,7 @@ const Permlink: React.FC<PermlinkProps> = (
           variant="outline-primary"
         >
           <BoxArrowUp />
-          <span>Share</span>
+          <span>{t("permlink.share")}</span>
         </Button>
       )}
       {permlinkData !== null && (

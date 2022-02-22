@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Nav from "react-bootstrap/Nav";
 import { FileEarmarkPlus } from "react-bootstrap-icons";
 import { Button } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 import type { PermlinkData } from "~/hooks/permlink";
 import type { RenamingSource } from "./EditorTab";
@@ -22,6 +23,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
   props
 ): React.ReactElement | null => {
   const { currentTab, stdinOpened, sources, permlinkData } = props;
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
   const [renamingSources, setRenamingSources] = useState<RenamingSource[]>([]);
@@ -162,7 +164,7 @@ const EditorTabs: React.FC<EditorTabsProps> = (
           className="wb-stdinbutton d-none d-md-block align-self-end"
           onClick={() => dispatch(actions.setStdinOpened(!stdinOpened))}
         >
-          Stdin
+          {t("editor.stdinTab")}
         </Button>
       )}
     </div>

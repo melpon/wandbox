@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "i18next": "^21.6.11",
+    "react-i18next": "^11.15.4",
+    "remix-i18next": "^2.2.0"
+  }
+}

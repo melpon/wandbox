@@ -1,5 +1,6 @@
 import React from "react";
 import { Form } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 interface RawCompilerOptionProps {
   enabledCompilerOptionRaw: boolean;
@@ -24,11 +25,13 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
     onChangeCompilerOptionRaw,
     onChangeRuntimeOptionRaw,
   } = props;
+  const { t } = useTranslation();
+
   return (
     <div className="d-flex flex-column gap-16px">
       {enabledCompilerOptionRaw && (
         <div className="d-flex flex-column gap-8px">
-          <h6>Raw compiler options</h6>
+          <h6>{t("compiler.rawCompilerOptions")}</h6>
           <div className="px-8px d-flex flex-column gap-4px">
             {readOnly ? (
               <div style={{ whiteSpace: "pre-wrap" }}>{compilerOptionRaw}</div>
@@ -44,7 +47,7 @@ const RawCompilerOption: React.FC<RawCompilerOptionProps> = (
       )}
       {enabledRuntimeOptionRaw && (
         <div className="d-flex flex-column gap-8px">
-          <h6>Raw runtime options</h6>
+          <h6>{t("compiler.rawRuntimeOptions")}</h6>
           <div className="px-8px d-flex flex-column gap-4px">
             {readOnly ? (
               <div style={{ whiteSpace: "pre-wrap" }}>{runtimeOptionRaw}</div>

@@ -1,12 +1,14 @@
 import React, { useCallback } from "react";
 import { useSelector } from "react-redux";
 import Form from "react-bootstrap/Form";
+import { useTranslation } from "react-i18next";
 
 import { wandboxSlice } from "~/features/slice";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
 
 const EditorSettings: React.FC = () => {
+  const { t } = useTranslation();
   const settings = useSelector(
     ({ wandbox: { editorSettings } }: AppState) => editorSettings
   );
@@ -38,22 +40,22 @@ const EditorSettings: React.FC = () => {
   return (
     <div className="d-flex flex-column align-items-stretch gap-8px">
       <Form.Group controlId="wb-tabkey">
-        <Form.Label>TAB Key Inserted</Form.Label>
+        <Form.Label>{t("settings.tabKeyInserted")}</Form.Label>
         <div className="px-8px">
           <Form.Control
             as="select"
             value={settings.tabKey}
             onChange={onChangeTabKey}
           >
-            <option value="2">2 Spaces</option>
-            <option value="4">4 Spaces</option>
-            <option value="8">8 Spaces</option>
-            <option value="tab">TAB</option>
+            <option value="2">{t("settings.tabKeyInserted2Spaces")}</option>
+            <option value="4">{t("settings.tabKeyInserted4Spaces")}</option>
+            <option value="8">{t("settings.tabKeyInserted8Spaces")}</option>
+            <option value="tab">{t("settings.tabKeyInsertedTab")}</option>
           </Form.Control>
         </div>
       </Form.Group>
       <Form.Group controlId="wb-tabwidth">
-        <Form.Label>TAB Width</Form.Label>
+        <Form.Label>{t("settings.tabWidth")}</Form.Label>
         <div className="px-8px">
           <Form.Control
             as="select"
@@ -70,7 +72,7 @@ const EditorSettings: React.FC = () => {
       <Form.Group controlId="wb-fixedheight">
         <Form.Check
           type="checkbox"
-          label="Fix editor height"
+          label={t("settings.fixEditorHeight")}
           checked={settings.fixedHeight}
           onChange={onChangeFixedHeight}
         />

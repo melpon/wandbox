@@ -27,8 +27,13 @@ import {
   saveSettings,
 } from "~/features/actions";
 import { SidebarBase } from "~/components/SidebarBase";
+import i18n from "~/i18n";
 
 const Wandbox: React.FC = (): React.ReactElement | null => {
+  // 参照しておかないとグローバルな初期化コード自体が消えてしまうので、
+  // 適当にアクセスするコードを書いておく
+  i18n;
+
   const { permlinkId } = useParams();
   const [, setError] = useError();
   const compilerList = useCompilerList(`/api/list.json`, setError);
@@ -330,7 +335,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
                 <Permlink
                   compilerList={compilerList}
                   permlinkData={permlinkData}
-                  clearPermlinkData={() => {}}
                 />
               </div>
             </>

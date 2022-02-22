@@ -8,7 +8,6 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
-  useParams,
 } from "remix";
 import type { MetaFunction, LinksFunction } from "remix";
 

@@ -1,5 +1,6 @@
 import React from "react";
 import ListGroup from "react-bootstrap/ListGroup";
+import { useTranslation } from "react-i18next";
 
 interface ChooseLanguageProps {
   language: string | null;
@@ -19,10 +20,11 @@ const ChooseLanguage: React.FC<ChooseLanguageProps> = (
     onSelectLanguage,
     onDeselectLanguage,
   } = props;
+  const { t } = useTranslation();
 
   return language === null ? (
     <ListGroup className="wb-languagelist">
-      <ListGroup.Item>Language</ListGroup.Item>
+      <ListGroup.Item>{t("compiler.language")}</ListGroup.Item>
       {languages.map((lang): React.ReactElement => {
         return (
           <ListGroup.Item
@@ -37,7 +39,7 @@ const ChooseLanguage: React.FC<ChooseLanguageProps> = (
     </ListGroup>
   ) : (
     <div className="d-flex flex-column gap-8px wb-languagelist-selected">
-      <h6>Language</h6>
+      <h6>{t("compiler.language")}</h6>
       <div className="px-8px d-flex justify-content-between">
         <p>{language}</p>
         {readOnly ? null : (

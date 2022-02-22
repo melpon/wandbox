@@ -2,6 +2,7 @@ import React from "react";
 import { Dropdown } from "react-bootstrap";
 import { ThreeDots } from "react-bootstrap-icons";
 import ListGroup from "react-bootstrap/ListGroup";
+import { useTranslation } from "react-i18next";
 
 import { CompilerInfo } from "~/hooks/compilerList";
 
@@ -27,10 +28,11 @@ const ChooseCompiler: React.FC<ChooseCompilerProps> = (
     onDeselectCompiler,
     onLoadTemplate,
   } = props;
+  const { t } = useTranslation();
 
   return compilerInfo === null ? (
     <ListGroup className="wb-compilerlist">
-      <ListGroup.Item>Compiler</ListGroup.Item>
+      <ListGroup.Item>{t("compiler.compiler")}</ListGroup.Item>
       {compilerInfos.map((info): React.ReactElement => {
         return (
           <ListGroup.Item
@@ -47,7 +49,7 @@ const ChooseCompiler: React.FC<ChooseCompilerProps> = (
   ) : (
     <div className="d-flex flex-column gap-8px wb-compilerlist-selected">
       <div className="d-flex justify-content-between">
-        <h6>Compiler</h6>
+        <h6>{t("compiler.compiler")}</h6>
         {!readOnly && (
           <Dropdown className="wb-loadtemplate" align="end">
             <Dropdown.Toggle variant="link">
@@ -60,7 +62,7 @@ const ChooseCompiler: React.FC<ChooseCompilerProps> = (
                     key={template}
                     onClick={() => onLoadTemplate(template)}
                   >
-                    Load template
+                    {t("compiler.loadTemplate")}
                   </Dropdown.Item>
                 );
               })}

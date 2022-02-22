@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
 import type { ResultData } from "~/features/slice";
@@ -10,6 +11,7 @@ interface ResultProps {
 }
 
 const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
+  const { t } = useTranslation();
   const { permlinkData } = props;
   const rs = useSelector(({ wandbox: { results } }: AppState) => results);
   const results = permlinkData === null ? rs : permlinkData.results;
@@ -83,10 +85,25 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
 
           return (
             <div key={index} className="d-flex align-items-center gap-8px">
-              <div className="wb-name">
-                {r.type === "Signal" ? "Signal: " : "Exit Code: "}
-              </div>
-              <div className="wb-value">{r.data}</div>
+              {r.type === "Signal" ? (
+                <Trans
+                  i18nKey="result.signal"
+                  values={{ signal: r.data }}
+                  components={{
+                    d1: <div className="wb-name" />,
+                    d2: <div className="wb-value" />,
+                  }}
+                />
+              ) : (
+                <Trans
+                  i18nKey="result.exitcode"
+                  values={{ exitCode: r.data }}
+                  components={{
+                    d1: <div className="wb-name" />,
+                    d2: <div className="wb-value" />,
+                  }}
+                />
+              )}
             </div>
           );
         })}

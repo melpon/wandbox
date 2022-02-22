@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Button, Form, Modal } from "react-bootstrap";
 import { Pencil } from "react-bootstrap-icons";
+import { useTranslation } from "react-i18next";
 
 import { wandboxSlice } from "~/features/slice";
 import type { PermlinkData } from "~/hooks/permlink";
@@ -9,6 +10,7 @@ import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
 
 const TitleDialog: React.FC = () => {
+  const { t } = useTranslation();
   const { title, description, titleDialogOpened } = useSelector(
     ({ wandbox: { title, description, titleDialogOpened } }: AppState) => ({
       title,
@@ -52,7 +54,7 @@ const TitleDialog: React.FC = () => {
         />
         <div className="d-flex flex-column gap-16px">
           <div className="d-flex flex-column gap-4px">
-            <label>Title</label>
+            <label>{t("title.title")}</label>
             <Form.Control
               type="input"
               placeholder="Title"
@@ -64,7 +66,7 @@ const TitleDialog: React.FC = () => {
             )}
           </div>
           <div className="d-flex flex-column gap-4px">
-            <label>Description</label>
+            <label>{t("title.description")}</label>
             <Form.Control
               as="textarea"
               rows={5}
@@ -83,7 +85,7 @@ const TitleDialog: React.FC = () => {
           variant="outline-primary"
           onClick={() => dispatch(actions.setTitleDialogOpened(false))}
         >
-          Cancel
+          {t("cancel")}
         </Button>
         <Button
           variant="primary"
@@ -97,7 +99,7 @@ const TitleDialog: React.FC = () => {
             dispatch(actions.setTitleDialogOpened(false));
           }}
         >
-          OK
+          {t("ok")}
         </Button>
       </Modal.Footer>
     </Modal>

@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import Navbar from "react-bootstrap/Navbar";
 import { Nav, NavDropdown } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
@@ -11,6 +12,7 @@ import { wandboxSlice } from "~/features/slice";
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = (): React.ReactElement => {
+  const { t, i18n } = useTranslation();
   const { sidebarState } = useSelector(
     ({ wandbox: { sidebarState } }: AppState) => ({
       sidebarState,
@@ -22,15 +24,46 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
 
   return (
     <Navbar
-      className="px-16px"
-      bg="primary"
+      className="px-16px justify-content-between"
+      bg="dark"
       variant="dark"
-      style={{ height: 48 }}
+      style={{ padding: "5px 16px", zIndex: 10 }}
+      expand="md"
     >
       <Navbar.Brand href="/">Wandbox</Navbar.Brand>
-      <Navbar.Toggle />
-      <Navbar.Collapse className="justify-content-end">
-        <Nav>
+      {/* スマホ表示用 */}
+      <Nav className="d-flex d-md-none flex-row gap-8px gap-md-0px">
+        <Nav.Link
+          active={sidebarState === "editorSettings"}
+          onClick={() => {
+            if (sidebarState === "editorSettings") {
+              dispatch(actions.setSidebarState("none"));
+              dispatch(actions.setSidebarLocked(false));
+            } else {
+              dispatch(actions.setSidebarState("editorSettings"));
+            }
+          }}
+        >
+          {t("header.settings")}
+        </Nav.Link>
+        <Nav.Link
+          active={sidebarState === "history"}
+          onClick={() => {
+            if (sidebarState === "history") {
+              dispatch(actions.setSidebarState("none"));
+              dispatch(actions.setSidebarLocked(false));
+            } else {
+              dispatch(actions.setSidebarState("history"));
+            }
+          }}
+        >
+          {t("header.history")}
+        </Nav.Link>
+        <Navbar.Toggle aria-controls="wb-navbar" />
+      </Nav>
+
+      <Navbar.Collapse id="wb-navbar" className="justify-content-end">
+        <Nav className="d-none d-md-flex">
           <Nav.Link
             active={sidebarState === "editorSettings"}
             onClick={() => {
@@ -42,7 +75,7 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
               }
             }}
           >
-            Settings
+            {t("header.settings")}
           </Nav.Link>
           <Nav.Link
             active={sidebarState === "history"}
@@ -55,23 +88,42 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
               }
             }}
           >
-            Log
+            {t("header.history")}
           </Nav.Link>
+        </Nav>
+        <Nav className="align-items-md-center">
+          <NavDropdown title={t("header.language")} align="end">
+            <NavDropdown.Item
+              onClick={() => {
+                i18n.changeLanguage("en-US");
+              }}
+            >
+              {t("header.languageEn")}
+            </NavDropdown.Item>
+            <NavDropdown.Item
+              onClick={() => {
+                i18n.changeLanguage("ja-jp");
+              }}
+            >
+              {t("header.languageJa")}
+            </NavDropdown.Item>
+          </NavDropdown>
           <Nav.Link
             target="_blank"
             rel="noopener noreferrer"
             href="https://github.com/melpon/wandbox"
           >
-            GitHub
+            {t("header.github")}
           </Nav.Link>
           {githubUser === null ? (
             <Nav.Link
               href={`https://github.com/login/oauth/authorize?client_id=${WANDBOX_GITHUB_CLIENT_ID}`}
             >
-              Login
+              {t("header.login")}
             </Nav.Link>
           ) : (
             <NavDropdown
+              className="wb-nav-icondropdown"
               title={
                 <img
                   src={githubUser.avatar_url}
@@ -80,7 +132,9 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
               }
               align="end"
             >
-              <NavDropdown.Item href="/logout">Logout</NavDropdown.Item>
+              <NavDropdown.Item href="/logout">
+                {t("header.logout")}
+              </NavDropdown.Item>
             </NavDropdown>
           )}
         </Nav>

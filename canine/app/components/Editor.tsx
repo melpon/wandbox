@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Button } from "react-bootstrap";
 import type { KeyBinding } from "@codemirror/view";
+import { useTranslation } from "react-i18next";
 
 import type { CompilerList } from "~/hooks/compilerList";
 import type { PermlinkData } from "~/hooks/permlink";
@@ -22,6 +23,7 @@ export interface EditorProps {
 }
 
 const Editor: React.FC<EditorProps> = (props) => {
+  const { t } = useTranslation();
   const {
     sources,
     stdin,
@@ -132,7 +134,7 @@ const Editor: React.FC<EditorProps> = (props) => {
           className="wb-stdinbutton d-block d-md-none align-self-start align-self-md-end"
           onClick={() => dispatch(actions.setStdinOpened(!stdinOpened))}
         >
-          Stdin
+          {t("editor.stdinTab")}
         </Button>
       )}
       {stdinOpened && (
@@ -142,7 +144,7 @@ const Editor: React.FC<EditorProps> = (props) => {
             className="wb-stdinbutton wb-stdinactive align-self-start align-self-md-end"
             onClick={() => dispatch(actions.setStdinOpened(!stdinOpened))}
           >
-            Stdin
+            {t("editor.stdinTab")}
           </Button>
           <CodeMirror6
             className="wb-stdin flex-grow-1"

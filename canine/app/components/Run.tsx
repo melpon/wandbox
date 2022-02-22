@@ -18,6 +18,7 @@ import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { saveHistory } from "~/features/actions";
 import { useCompileStateSelector } from "~/utils/compile";
+import { useTranslation } from "react-i18next";
 
 export interface RunProps {
   compilerList: CompilerList;
@@ -25,6 +26,7 @@ export interface RunProps {
 }
 
 const Run: React.FC<RunProps> = (props): React.ReactElement => {
+  const { t } = useTranslation();
   const { compilerList, permlinkData } = props;
   const { running, navigate, history, storageExists } = useSelector(
     ({ wandbox: { running, navigate, history, storageExists } }: AppState) => ({
@@ -162,7 +164,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   if (permlinkData !== null) {
     return (
       <Button style={{ minWidth: 144 }} variant="info" onClick={onEdit}>
-        Edit
+        {t("run.edit")}
       </Button>
     );
   }
@@ -177,7 +179,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
       onClick={onRun}
       variant="primary"
     >
-      Run
+      {t("run.run")}
     </Button>
   );
 };

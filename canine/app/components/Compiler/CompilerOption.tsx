@@ -1,5 +1,6 @@
 import React from "react";
 import Form from "react-bootstrap/Form";
+import { useTranslation } from "react-i18next";
 
 import type {
   CompilerInfo,
@@ -25,10 +26,11 @@ const CompilerOption: React.FC<CompilerOptionProps> = (
     onChangeChecked,
     onChangeSelected,
   } = props;
+  const { t } = useTranslation();
 
   return (
     <div className="d-flex flex-column gap-8px">
-      <h6>Options</h6>
+      <h6>{t("compiler.options")}</h6>
       <div className="px-8px d-flex flex-column gap-4px">
         {compilerInfo.switches.map((sw): React.ReactElement | null => {
           if (sw.type === "single") {
