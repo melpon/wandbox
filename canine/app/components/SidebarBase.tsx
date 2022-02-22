@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { LayoutSidebarReverse, X } from "react-bootstrap-icons";
+import {
+  LayoutSidebarReverse,
+  PinAngle,
+  PinAngleFill,
+  X,
+} from "react-bootstrap-icons";
 import { useTranslation } from "react-i18next";
 
 import type { AppState } from "~/store";
@@ -59,19 +64,19 @@ const SidebarBase: React.FC = () => {
 
   return (
     <div className="d-flex flex-column">
-      <div className="wb-nav d-flex justify-content-between px-8px py-4px">
-        <div className="d-flex align-items-center gap-8px">
-          <h5>{title}</h5>
+      <div className="wb-nav d-flex justify-content-between px-8px py-4px ps-0px">
+        <div className="d-flex align-items-center">
           <Button
             className="d-none d-md-block"
-            variant={sidebarLocked ? "primary" : "link"}
+            variant={"link"}
             active={sidebarLocked}
             onClick={() => {
               dispatch(actions.setSidebarLocked(!sidebarLocked));
             }}
           >
-            <LayoutSidebarReverse />
+            {sidebarLocked ? <PinAngleFill /> : <PinAngle />}
           </Button>
+          <h5>{title}</h5>
         </div>
         <Button
           variant="link"

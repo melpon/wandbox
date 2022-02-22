@@ -38,10 +38,12 @@ const EditorSettings: React.FC = () => {
   );
 
   return (
-    <div className="d-flex flex-column align-items-stretch gap-8px">
+    <div className="d-flex flex-column align-items-stretch px-16px py-16px gap-16px">
       <Form.Group controlId="wb-tabkey">
-        <Form.Label>{t("settings.tabKeyInserted")}</Form.Label>
-        <div className="px-8px">
+        <Form.Label className="mb-8px">
+          {t("settings.tabKeyInserted")}
+        </Form.Label>
+        <div className="px-16px">
           <Form.Control
             as="select"
             value={settings.tabKey}
@@ -54,21 +56,23 @@ const EditorSettings: React.FC = () => {
           </Form.Control>
         </div>
       </Form.Group>
-      <Form.Group controlId="wb-tabwidth">
-        <Form.Label>{t("settings.tabWidth")}</Form.Label>
-        <div className="px-8px">
-          <Form.Control
-            as="select"
-            value={settings.tabWidth}
-            onChange={onChangeTabWidth}
-            disabled={settings.tabKey !== "tab"}
-          >
-            <option value="2">2</option>
-            <option value="4">4</option>
-            <option value="8">8</option>
-          </Form.Control>
-        </div>
-      </Form.Group>
+      {settings.tabKey === "tab" && (
+        <Form.Group controlId="wb-tabwidth">
+          <Form.Label className="mb-8px">{t("settings.tabWidth")}</Form.Label>
+          <div className="px-16px">
+            <Form.Control
+              as="select"
+              value={settings.tabWidth}
+              onChange={onChangeTabWidth}
+              disabled={settings.tabKey !== "tab"}
+            >
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+            </Form.Control>
+          </div>
+        </Form.Group>
+      )}
       <Form.Group controlId="wb-fixedheight">
         <Form.Check
           type="checkbox"

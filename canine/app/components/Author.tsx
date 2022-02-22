@@ -98,7 +98,7 @@ const AuthorData: React.FC<AuthorDataProps> = ({ permlinkData }) => {
 };
 
 const Author: React.FC<AuthorProps> = ({ permlinkData, author }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const distanceTime = formatDistanceToNow(
     new Date(permlinkData.parameter.createdAt * 1000),
     { addSuffix: true, locale: getDateFnsLocale(i18n.language) }
@@ -113,11 +113,11 @@ const Author: React.FC<AuthorProps> = ({ permlinkData, author }) => {
 
   return (
     <div className="wb-author d-flex flex-column align-self-start">
-      <p className="wb-label px-4px py-2px">Author</p>
+      <p className="wb-label px-4px py-2px">{t("author.author")}</p>
       <div className="wb-card d-flex px-4px py-4px gap-4px">
         <div className="d-flex flex-column flex-grow-1">
           {author === null ? (
-            <p>anonymous</p>
+            <p>{t("author.anonymous")}</p>
           ) : (
             <a
               target="_blank"

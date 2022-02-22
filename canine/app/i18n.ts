@@ -29,6 +29,10 @@ const resources = {
         title: "Title",
         description: "Description",
       },
+      author: {
+        author: "Author",
+        anonymous: "anonymous",
+      },
       editor: {
         stdinTab: "Stdin",
       },
@@ -88,6 +92,10 @@ const resources = {
       title: {
         title: "タイトル",
         description: "詳細説明",
+      },
+      author: {
+        author: "作成者",
+        anonymous: "匿名ユーザ",
       },
       editor: {
         stdinTab: "標準入力",
