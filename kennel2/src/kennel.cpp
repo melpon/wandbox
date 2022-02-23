@@ -93,6 +93,7 @@ class kennel : public cppcms::application {
     dispatcher().assign("/api/template/(.+?)/?", &kennel::api_template, this,
                         1);
     mapper().assign("api-template", "/api/template/");
+    dispatcher().assign("/api/sponsors.json", &kennel::api_sponsors, this);
 
     dispatcher().assign("/nojs/(.+?)/compile/?", &kennel::nojs_compile, this,
                         1);
@@ -398,52 +399,53 @@ class kennel : public cppcms::application {
     }
 
     bool check_ip() {
-      auto content_size = request().raw_post_data().second;
-      if (content_size == 0) {
-        SPDLOG_WARN("empty content");
-        response().status(400);
-        return false;
-      }
-      auto ip = request().getenv("HTTP_X_REAL_IP");
-      if (ip.empty()) {
-        SPDLOG_WARN("X-Real-IP is empty");
-        response().status(400);
-        return false;
-      }
+      // 多分今はちゃんと動かないのでとりあえず外す
+      //auto content_size = request().raw_post_data().second;
+      //if (content_size == 0) {
+      //  SPDLOG_WARN("empty content");
+      //  response().status(400);
+      //  return false;
+      //}
+      //auto ip = request().getenv("HTTP_X_REAL_IP");
+      ////if (ip.empty()) {
+      ////  SPDLOG_WARN("X-Real-IP is empty");
+      ////  response().status(400);
+      ////  return false;
+      ////}
 
-      // limit_duration 秒以内に合計で limit_size バイト以上のデータが送信されてきた場合、
-      // その IP のユーザを最初のアクセス時間から limit_duration 秒経過した時点までブロックする。
-      auto settings = service().settings()["application"];
-      int limit_duration = (int)settings["iplimit"]["duration"].number();
-      int limit_size = (int)settings["iplimit"]["size"].number();
+      //// limit_duration 秒以内に合計で limit_size バイト以上のデータが送信されてきた場合、
+      //// その IP のユーザを最初のアクセス時間から limit_duration 秒経過した時点までブロックする。
+      //auto settings = service().settings()["application"];
+      //int limit_duration = (int)settings["iplimit"]["duration"].number();
+      //int limit_size = (int)settings["iplimit"]["size"].number();
 
-      std::time_t now_time = std::time(nullptr);
+      //std::time_t now_time = std::time(nullptr);
 
-      auto key = "ip-" + ip + "-totalsize";
-      cppcms::json::value info;
-      if (!cache().fetch_data(key, info)) {
-        info["total_size"] = 0;
-        info["expired_at"] = now_time + limit_duration;
-      }
+      //auto key = "ip-" + ip + "-totalsize";
+      //cppcms::json::value info;
+      //if (!cache().fetch_data(key, info)) {
+      //  info["total_size"] = 0;
+      //  info["expired_at"] = now_time + limit_duration;
+      //}
 
-      if (now_time >= (time_t)info["expired_at"].number()) {
-        // 期限が切れてたらリセット
-        info["total_size"] = 0;
-        info["expired_at"] = now_time + limit_duration;
-      }
+      //if (now_time >= (time_t)info["expired_at"].number()) {
+      //  // 期限が切れてたらリセット
+      //  info["total_size"] = 0;
+      //  info["expired_at"] = now_time + limit_duration;
+      //}
 
-      auto new_total_size = (size_t)info["total_size"].number() + content_size;
-      info["total_size"] = new_total_size;
-      cache().store_data(key, info, limit_duration);
+      //auto new_total_size = (size_t)info["total_size"].number() + content_size;
+      //info["total_size"] = new_total_size;
+      //cache().store_data(key, info, limit_duration);
 
-      // 期限内にサイズを超えてたらブロック
-      if (now_time < (time_t)info["expired_at"].number() &&
-          new_total_size > limit_size) {
-        SPDLOG_INFO("!!! Blocked. IP={}, size={}, total={} bytes", ip,
-                    content_size, new_total_size);
-        response().status(400);
-        return false;
-      }
+      //// 期限内にサイズを超えてたらブロック
+      //if (now_time < (time_t)info["expired_at"].number() &&
+      //    new_total_size > limit_size) {
+      //  SPDLOG_INFO("!!! Blocked. IP={}, size={}, total={} bytes", ip,
+      //              content_size, new_total_size);
+      //  response().status(400);
+      //  return false;
+      //}
       return true;
     }
 
@@ -717,13 +719,9 @@ class kennel : public cppcms::application {
         permlink pl(service());
 
         cppcms::json::value auth;
-        if (value["login"].boolean()) {
-            auth = authenticate(pl.get_github_access_token(session()["access_token"]));
-            if (auth.is_undefined()) {
-                // user is expecting to logged in but actually not.
-                response().status(400);
-                return;
-            }
+        if (!value["login"].is_undefined()) {
+          auth.object({});
+          auth["login"] = value["login"].str();
         }
 
         auto compiler_infos = get_compiler_infos_or_cache()["compilers"];
@@ -735,6 +733,19 @@ class kennel : public cppcms::application {
         // error if the compiler is not found
         if (it == compiler_infos.array().end()) {
             response().status(400);
+            return;
+        }
+
+        // 長さチェック
+        // ブラウザでの制限がコードポイント単位で 100 なので、
+        // UTF-8 換算で適当に 400 あたりにしておく。
+        if (value.get("title", "").size() > 400) {
+            response().status(403);
+            return;
+        }
+        // こっちはコードポイント単位で 1000
+        if (value.get("description", "").size() > 4000) {
+            response().status(403);
             return;
         }
 
@@ -1136,6 +1147,85 @@ class kennel : public cppcms::application {
 
         response().content_type("application/json");
         response().set_header("Access-Control-Allow-Origin", "*");
+        result.save(response().out(), cppcms::json::readable);
+    }
+
+    struct sponsor {
+      std::string name;
+      std::string url;
+      std::time_t due_date;
+    };
+    std::time_t from_iso8601(std::string str) {
+      std::tm tm;
+      std::memset(&tm, 0, sizeof(tm));
+      strptime(str.c_str(), "%FT%T%z", &tm);
+      return std::mktime(&tm);
+    }
+    sponsor make_sponsor(cppcms::json::value& json) {
+      sponsor sp;
+      sp.name = json["name"].str();
+      sp.url = json["url"].str();
+      sp.due_date = from_iso8601(json["due_date"].str());
+      return sp;
+    }
+
+    void api_sponsors() {
+        if (!ensure_method_get()) {
+            return;
+        }
+
+        response().content_type("application/json");
+        response().set_header("Access-Control-Allow-Origin", "*");
+
+        cppcms::json::array corporate;
+        cppcms::json::array personal;
+        cppcms::json::value error = cppcms::json::object();
+        error["corporate"] = corporate;
+        error["personal"] = personal;
+
+        auto file = service().settings()["application"]["sponsors"].str();
+        if (file.empty()) {
+          error.save(response().out(), cppcms::json::readable);
+          return;
+        }
+
+        std::ifstream ifs(file.c_str());
+        if (!ifs) {
+          error.save(response().out(), cppcms::json::readable);
+          return;
+        }
+
+        cppcms::json::value js;
+        if (!js.load(ifs, true, nullptr)) {
+          error.save(response().out(), cppcms::json::readable);
+          return;
+        }
+
+        auto now = std::time(nullptr);
+        for (auto&& v: js["corporate"].array()) {
+          auto sp = make_sponsor(v);
+          if (now <= sp.due_date) {
+            cppcms::json::value j = cppcms::json::object();
+            j["name"].str(sp.name);
+            j["url"].str(sp.url);
+            j["due_date"].number(sp.due_date);
+            corporate.push_back(std::move(j));
+          }
+        }
+        for (auto&& v: js["personal"].array()) {
+          auto sp = make_sponsor(v);
+          if (now <= sp.due_date) {
+            cppcms::json::value j = cppcms::json::object();
+            j["name"].str(sp.name);
+            j["url"].str(sp.url);
+            j["due_date"].number(sp.due_date);
+            personal.push_back(std::move(j));
+          }
+        }
+
+        cppcms::json::value result = cppcms::json::object();
+        result["corporate"] = corporate;
+        result["personal"] = personal;
         result.save(response().out(), cppcms::json::readable);
     }
 

@@ -18,13 +18,23 @@ CMAKE_OPTS=""
 while [ $# -ne 0 ]; do
   case "$1" in
     "--help" )
-      echo "$0 [--tsan] [--asan] [--develop] [--master] [--prefix <dir>] [--help]"
+      echo "$0 [--tsan] [--asan] [--local] [--develop] [--master] [--prefix <dir>] [--help]"
       exit 0
       ;;
 
     "--prefix" )
       CMAKE_INSTALL_PREFIX="$2"
       shift 1
+      ;;
+
+    "--local" )
+      CMAKE_OPTS=" \
+        -DKENNEL_DOMAIN=http \
+        -DKENNEL_DOMAIN=localhost \
+        -DKENNEL_SERVICE_API=http \
+      "
+      CMAKE_BUILD_TYPE=Debug
+      BUILD_DIR="_build/debug"
       ;;
 
     "--develop" )

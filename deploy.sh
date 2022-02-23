@@ -20,7 +20,7 @@ PACKAGE_DIR="`pwd`/_package"
 
 set -ex
 
-if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
+if [ "$APP" != "kennel" -a "$APP" != "cattleshed" -a "$APP" != "canine" ]; then
   show_help
   exit 1
 fi

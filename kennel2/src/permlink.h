@@ -142,8 +142,10 @@ public:
         cppdb::statement stat;
 
         stat = sql <<
-            "INSERT INTO code (compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at, updated_at, github_user) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO code (title, description, compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at, updated_at, github_user) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            << code.get("title", "")
+            << code.get("description", "")
             << code["compiler"].str()
             << code["code"].str()
             << false

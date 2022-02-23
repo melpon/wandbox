@@ -1,0 +1,50 @@
+name = "wandbox-local"
+type = "javascript"
+
+zone_id = "c3cbf0990f6c7eccfdcd4aede36ce2f9"
+account_id = "a88d1d39ba893e18fa44d5cf1ec1115e"
+route = ""
+compatibility_date = "2022-02-22"
+
+kv_namespaces = [ 
+  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" },
+  { binding = "KV_CACHE", id = "346f95298b6e443d886793fdea9ef733" }
+]
+
+[site]
+bucket = "./public"
+entry-point = "."
+
+[build]
+command = "npm run build:worker"
+watch_dir = "build/index.js"
+
+[build.upload]
+format="service-worker"
+
+# [secrets]
+# WANDBOX_GITHUB_CLIENT_SECRET
+# WANDBOX_KV_COOKIE_SECRET
+
+##### develop 用 ######
+
+[env.develop]
+name = "wandbox-develop"
+route = "develop.wandbox.org/*"
+vars = { WANDBOX_URL_PREFIX = "https://api-develop.wandbox.org", WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08" }
+kv_namespaces = [ 
+  { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" },
+  { binding = "KV_CACHE", id = "346f95298b6e443d886793fdea9ef733" }
+]
+
+
+##### master 用 ######
+
+[env.production]
+name = "wandbox"
+route = "wandbox.org/*"
+vars = { WANDBOX_URL_PREFIX = "https://api.wandbox.org", WANDBOX_GITHUB_CLIENT_ID = "f9d429d939d997e6b08e" }
+kv_namespaces = [
+  { binding = "KV_SESSION", id = "5c938730ff3d489fb02730317a5c17d3" },
+  { binding = "KV_CACHE", id = "5edf9e985c504b6b8099c405585145ad" }
+]

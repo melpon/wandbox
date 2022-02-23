@@ -52,3 +52,31 @@ jobs:
     - name: Deploy kennel to wandbox.org
       run: |
         ./deploy.sh wandbox kennel master
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Cache node modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules-v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('canine/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: Build Workers
+      working-directory: canine
+      run: |
+          set -ex
+          npm install
+          npm run build:css
+          npm run build
+          npm run build:worker
+    - name: Publish canine
+      uses: cloudflare/wrangler-action@1.3.0
+      with:
+        apiToken: ${{ secrets.CF_API_TOKEN }}
+        workingDirectory: canine
+        environment: production

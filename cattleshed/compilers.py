@@ -36,7 +36,7 @@ class Compilers(object):
         if isinstance(formats, list):
             return [typedo(value) for value in formats]
         else:
-            return {key:typedo(value) for key,value in formats.iteritems()}
+            return {key:typedo(value) for key,value in formats.items()}
 
     def make_common(self, names, formats):
         params = {
@@ -98,4 +98,4 @@ def make_config():
     }
 
 if __name__ == '__main__':
-    print json.dumps(make_config(), indent=4)
+    print(json.dumps(make_config(), indent=4))

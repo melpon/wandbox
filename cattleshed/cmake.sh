@@ -7,7 +7,7 @@ INSTALL_DIR="`pwd`/../_install"
 MODULE_PATH="`pwd`/../cmake"
 PROJECT_DIR="`pwd`"
 
-BUILD_DIR="_build/release"
+BUILD_DIR="`pwd`/_build/release"
 GRPC_DIR="$INSTALL_DIR/grpc"
 CMAKE_BUILD_TYPE=Release
 ENABLE_TSAN=OFF
@@ -18,7 +18,7 @@ CMAKE_OPTS=""
 while [ $# -ne 0 ]; do
   case "$1" in
     "--help" )
-      echo "$0 [--tsan] [--asan] [--staging] [--master] [--prefix <dir>] [--help]"
+      echo "$0 [--tsan] [--asan] [--local] [--develop] [--master] [--prefix <dir>] [--help]"
       exit 0
       ;;
 
@@ -27,6 +27,12 @@ while [ $# -ne 0 ]; do
       shift 1
       ;;
 
+    "--local" )
+      CMAKE_OPTS=" \
+        -DCATTLESHED_STOREDIR=$BUILD_DIR/cattleshed-develop-log
+        -DCATTLESHED_BASEDIR=$BUILD_DIR/cattleshed-develop
+      "
+      ;;
     "--develop" )
       CMAKE_OPTS=" \
         -DCATTLESHED_STOREDIR=/tmp/cattleshed-develop-log
@@ -41,13 +47,13 @@ while [ $# -ne 0 ]; do
 
     "--tsan" )
       ENABLE_TSAN=ON
-      BUILD_DIR="_build/tsan"
+      BUILD_DIR="`pwd`/_build/tsan"
       GRPC_DIR="$INSTALL_DIR/grpc-tsan"
       CMAKE_BUILD_TYPE=Debug
       ;;
     "--asan" )
       ENABLE_ASAN=ON
-      BUILD_DIR="_build/asan"
+      BUILD_DIR="`pwd`/_build/asan"
       GRPC_DIR="$INSTALL_DIR/grpc-asan"
       CMAKE_BUILD_TYPE=Debug
       ;;
