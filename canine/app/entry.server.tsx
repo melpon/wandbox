@@ -80,6 +80,32 @@ export async function fetchPermlinkData(permlinkId: string): Promise<AnyJson> {
   return body;
 }
 
+export async function fetchListData(): Promise<AnyJson> {
+  const listKey = "list";
+  const cache = await KV_CACHE.get(listKey, "json");
+  if (cache !== null) {
+    return cache as AnyJson;
+  }
+
+  const headers = {
+    "content-type": "application/json",
+  };
+  const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/list.json`, {
+    headers: headers,
+  });
+  if (resp.status !== 200) {
+    throw `Error fetch list.json`;
+  }
+  const body = await resp.json();
+
+  // 10分間キャッシュする
+  await KV_CACHE.put(listKey, JSON.stringify(body), {
+    expirationTtl: 10 * 60,
+  });
+
+  return body;
+}
+
 export async function fetchSponsorsData(): Promise<AnyJson> {
   const sponsorsKey = "sponsors";
   const cache = await KV_CACHE.get(sponsorsKey, "json");
@@ -204,6 +230,16 @@ export default async function handleRequest(
     url.pathname.startsWith("/api/sponsors.json")
   ) {
     const json = await fetchSponsorsData();
+    responseHeaders.set("Content-Type", "application/json");
+    return new Response(JSON.stringify(json), { headers: responseHeaders });
+  }
+  // list の取得もキャッシュする
+  if (
+    !hasError &&
+    request.method === "GET" &&
+    url.pathname.startsWith("/api/list.json")
+  ) {
+    const json = await fetchListData();
     responseHeaders.set("Content-Type", "application/json");
     return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
