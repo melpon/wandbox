@@ -399,52 +399,53 @@ class kennel : public cppcms::application {
     }
 
     bool check_ip() {
-      auto content_size = request().raw_post_data().second;
-      if (content_size == 0) {
-        SPDLOG_WARN("empty content");
-        response().status(400);
-        return false;
-      }
-      auto ip = request().getenv("HTTP_X_REAL_IP");
-      //if (ip.empty()) {
-      //  SPDLOG_WARN("X-Real-IP is empty");
+      // 多分今はちゃんと動かないのでとりあえず外す
+      //auto content_size = request().raw_post_data().second;
+      //if (content_size == 0) {
+      //  SPDLOG_WARN("empty content");
       //  response().status(400);
       //  return false;
       //}
+      //auto ip = request().getenv("HTTP_X_REAL_IP");
+      ////if (ip.empty()) {
+      ////  SPDLOG_WARN("X-Real-IP is empty");
+      ////  response().status(400);
+      ////  return false;
+      ////}
 
-      // limit_duration 秒以内に合計で limit_size バイト以上のデータが送信されてきた場合、
-      // その IP のユーザを最初のアクセス時間から limit_duration 秒経過した時点までブロックする。
-      auto settings = service().settings()["application"];
-      int limit_duration = (int)settings["iplimit"]["duration"].number();
-      int limit_size = (int)settings["iplimit"]["size"].number();
+      //// limit_duration 秒以内に合計で limit_size バイト以上のデータが送信されてきた場合、
+      //// その IP のユーザを最初のアクセス時間から limit_duration 秒経過した時点までブロックする。
+      //auto settings = service().settings()["application"];
+      //int limit_duration = (int)settings["iplimit"]["duration"].number();
+      //int limit_size = (int)settings["iplimit"]["size"].number();
 
-      std::time_t now_time = std::time(nullptr);
+      //std::time_t now_time = std::time(nullptr);
 
-      auto key = "ip-" + ip + "-totalsize";
-      cppcms::json::value info;
-      if (!cache().fetch_data(key, info)) {
-        info["total_size"] = 0;
-        info["expired_at"] = now_time + limit_duration;
-      }
+      //auto key = "ip-" + ip + "-totalsize";
+      //cppcms::json::value info;
+      //if (!cache().fetch_data(key, info)) {
+      //  info["total_size"] = 0;
+      //  info["expired_at"] = now_time + limit_duration;
+      //}
 
-      if (now_time >= (time_t)info["expired_at"].number()) {
-        // 期限が切れてたらリセット
-        info["total_size"] = 0;
-        info["expired_at"] = now_time + limit_duration;
-      }
+      //if (now_time >= (time_t)info["expired_at"].number()) {
+      //  // 期限が切れてたらリセット
+      //  info["total_size"] = 0;
+      //  info["expired_at"] = now_time + limit_duration;
+      //}
 
-      auto new_total_size = (size_t)info["total_size"].number() + content_size;
-      info["total_size"] = new_total_size;
-      cache().store_data(key, info, limit_duration);
+      //auto new_total_size = (size_t)info["total_size"].number() + content_size;
+      //info["total_size"] = new_total_size;
+      //cache().store_data(key, info, limit_duration);
 
-      // 期限内にサイズを超えてたらブロック
-      if (now_time < (time_t)info["expired_at"].number() &&
-          new_total_size > limit_size) {
-        SPDLOG_INFO("!!! Blocked. IP={}, size={}, total={} bytes", ip,
-                    content_size, new_total_size);
-        response().status(400);
-        return false;
-      }
+      //// 期限内にサイズを超えてたらブロック
+      //if (now_time < (time_t)info["expired_at"].number() &&
+      //    new_total_size > limit_size) {
+      //  SPDLOG_INFO("!!! Blocked. IP={}, size={}, total={} bytes", ip,
+      //              content_size, new_total_size);
+      //  response().status(400);
+      //  return false;
+      //}
       return true;
     }
 
