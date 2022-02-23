@@ -1,4 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "remix";
 
@@ -255,6 +260,10 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         break;
       }
     }
+  }, []);
+
+  useLayoutEffect(() => {
+    updateBreakpoint();
   }, []);
 
   useEffect(() => {

@@ -11,8 +11,8 @@ export interface EditorSourceData {
   id: string;
   filename: string | null;
   text: string;
-  view?: EditorView;
 }
+export type EditorViewMap = { [id: string]: EditorView | undefined };
 
 export type EditorType = "default" | "vim" | "emacs";
 export type TabKeyType = "2" | "4" | "8" | "tab";
@@ -105,25 +105,28 @@ export interface HistoryData {
 export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
 function sourceToHistorySource(
-  sources: EditorSourceData[]
+  sources: EditorSourceData[],
+  views: EditorViewMap
 ): HistoryEditorSourceData[] {
   return sources
     .map((s) => {
-      if (s.view === undefined && s.text === undefined) {
+      const view = views[s.id];
+      if (view === undefined && s.text === undefined) {
         return null;
       }
       return {
         filename: s.filename,
-        text: s.view !== undefined ? s.view.state.doc.toString() : s.text,
+        text: view !== undefined ? view.state.doc.toString() : s.text,
       };
     })
     .filter((s) => s !== null) as HistoryEditorSourceData[];
 }
 
-export function getSourceText(source: EditorSourceData): string {
-  return source.view !== undefined
-    ? source.view.state.doc.toString()
-    : source.text;
+export function getSourceText(
+  source: EditorSourceData,
+  view: EditorView | undefined
+): string {
+  return view !== undefined ? view.state.doc.toString() : source.text;
 }
 
 export function getStdin(stdin: string, stdinView?: EditorView): string {
@@ -157,6 +160,7 @@ const initialState = {
       text: "",
     },
   ] as EditorSourceData[],
+  views: {} as { [id: string]: EditorView | undefined },
   stdin: "" as string,
   stdinView: undefined as EditorView | undefined,
   stdinOpened: false,
@@ -310,6 +314,7 @@ export const wandboxSlice = createSlice({
         counter += 1;
       }
       state.sources = newSources;
+      state.views = {};
       state.tabCounter = counter;
     },
     setFilename: (
@@ -340,15 +345,15 @@ export const wandboxSlice = createSlice({
     },
     setView: (
       state,
-      action: PayloadAction<{ tab: number; view: EditorView }>
+      action: PayloadAction<{ id: string; view: EditorView | undefined }>
     ) => {
-      const { tab, view } = action.payload;
-      state.sources[tab].view = castDraft(view);
+      const { id, view } = action.payload;
+      state.views[id] = castDraft(view);
     },
     setStdin: (state, action: PayloadAction<string>) => {
       state.stdin = action.payload;
     },
-    setStdinView: (state, action: PayloadAction<EditorView>) => {
+    setStdinView: (state, action: PayloadAction<EditorView | undefined>) => {
       state.stdinView = castDraft(action.payload);
     },
     setStdinOpened: (state, action: PayloadAction<boolean>) => {
@@ -385,7 +390,7 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         displayName: ci.displayName,
         version: ci.version,
-        sources: sourceToHistorySource(state.sources as any),
+        sources: sourceToHistorySource(state.sources, state.views as any),
         currentTab: state.currentTab,
         stdin: getStdin(state.stdin, state.stdinView as any),
         title: state.title,
@@ -421,7 +426,7 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         displayName: ci.displayName,
         version: ci.version,
-        sources: sourceToHistorySource(state.sources as any),
+        sources: sourceToHistorySource(state.sources, state.views as any),
         currentTab: state.currentTab,
         stdin: getStdin(state.stdin, state.stdinView as any),
         title: state.title,

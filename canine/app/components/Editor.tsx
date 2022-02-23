@@ -26,6 +26,7 @@ const Editor: React.FC<EditorProps> = (props) => {
   const { t } = useTranslation();
   const {
     sources,
+    views,
     stdin,
     stdinOpened,
     stdinView,
@@ -37,6 +38,7 @@ const Editor: React.FC<EditorProps> = (props) => {
     ({
       wandbox: {
         sources,
+        views,
         stdin,
         stdinOpened,
         stdinView,
@@ -45,6 +47,7 @@ const Editor: React.FC<EditorProps> = (props) => {
       },
     }: AppState) => ({
       sources,
+      views,
       stdin,
       stdinOpened,
       stdinView,
@@ -121,6 +124,7 @@ const Editor: React.FC<EditorProps> = (props) => {
             <CodeEditor
               key={source.id}
               source={source}
+              view={views[source.id]}
               tab={tab}
               compilerList={compilerList}
               permlinkData={permlinkData}
@@ -149,13 +153,14 @@ const Editor: React.FC<EditorProps> = (props) => {
           <CodeMirror6
             className="wb-stdin flex-grow-1"
             text={permlinkData === null ? stdin : permlinkData.parameter.stdin}
+            view={stdinView}
             option={option}
             onViewCreated={(view) => {
-              if (permlinkData === null) {
-                dispatch(actions.setStdinView(view));
-              }
+              dispatch(actions.setStdinView(view));
             }}
-            onViewDestroyed={(view) => {}}
+            onViewDestroyed={(view) => {
+              dispatch(actions.setStdinView(undefined));
+            }}
             onChange={() => {
               dispatch(actions.setSharable(false));
               dispatch(actions.setEditorChanged(true));

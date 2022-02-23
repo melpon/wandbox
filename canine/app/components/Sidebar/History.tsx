@@ -135,6 +135,7 @@ const History: React.FC = () => {
                         breakpoint === "md"
                       ) {
                         dispatch(actions.setSidebarState("none"));
+                        dispatch(actions.setSidebarLocked(false));
                       }
                     }}
                   >
@@ -158,6 +159,7 @@ const History: React.FC = () => {
                         breakpoint === "md"
                       ) {
                         dispatch(actions.setSidebarState("none"));
+                        dispatch(actions.setSidebarLocked(false));
                       }
                     }}
                   >

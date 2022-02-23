@@ -4,10 +4,11 @@ import ndjsonStream from "can-ndjson-stream";
 import { useSelector } from "react-redux";
 
 import { getSourceText } from "~/features/actions";
-import { EditorSourceData, getStdin, WandboxState } from "~/features/slice";
-import { CompilerList } from "~/hooks/compilerList";
-import { AnyJson, JsonMap } from "~/hooks/fetch";
-import { AppState } from "~/store";
+import type { EditorSourceData, EditorViewMap } from "~/features/slice";
+import { getStdin } from "~/features/slice";
+import type { CompilerList } from "~/hooks/compilerList";
+import type { AnyJson, JsonMap } from "~/hooks/fetch";
+import type { AppState } from "~/store";
 import { getCompileOptions } from "./getCompileOptions";
 
 export type CompileState = {
@@ -18,6 +19,7 @@ export type CompileState = {
   title: string;
   description: string;
   sources: EditorSourceData[];
+  views: EditorViewMap;
   stdin: string;
   stdinView?: EditorView;
 };
@@ -30,6 +32,7 @@ const compileStateSelector = createSelector(
   ({ wandbox: { title } }: AppState) => title,
   ({ wandbox: { description } }: AppState) => description,
   ({ wandbox: { sources } }: AppState) => sources,
+  ({ wandbox: { views } }: AppState) => views,
   ({ wandbox: { stdin } }: AppState) => stdin,
   ({ wandbox: { stdinView } }: AppState) => stdinView,
   (
@@ -40,6 +43,7 @@ const compileStateSelector = createSelector(
     title,
     description,
     sources,
+    views,
     stdin,
     stdinView
   ) => ({
@@ -50,6 +54,7 @@ const compileStateSelector = createSelector(
     title,
     description,
     sources,
+    views,
     stdin,
     stdinView,
   })
@@ -85,9 +90,15 @@ export function createBody(
     compiler: state.currentCompilerName,
     title: state.title,
     description: state.description,
-    code: getSourceText(state.sources[defaultEditorTab]),
+    code: getSourceText(
+      state.sources[defaultEditorTab],
+      state.views[state.sources[defaultEditorTab].id]
+    ),
     codes: state.sources
-      .map((s, tab) => ({ file: s.filename, code: getSourceText(s) }))
+      .map((s, tab) => ({
+        file: s.filename,
+        code: getSourceText(s, state.views[s.id]),
+      }))
       .filter((x) => x.file !== null),
     options: options.join(","),
     stdin: getStdin(state.stdin, state.stdinView),
