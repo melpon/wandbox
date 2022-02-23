@@ -14,9 +14,12 @@ import { t } from "i18next";
 const History: React.FC = () => {
   const { i18n } = useTranslation();
   const { permlinkId } = useParams();
-  const { history } = useSelector(({ wandbox: { history } }: AppState) => ({
-    history,
-  }));
+  const { history, breakpoint } = useSelector(
+    ({ wandbox: { history, breakpoint } }: AppState) => ({
+      history,
+      breakpoint,
+    })
+  );
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
   const navigate = useNavigate();
@@ -125,6 +128,14 @@ const History: React.FC = () => {
                         dispatch(actions.pushQuickSave());
                       }
                       navigate(`/permlink/${x.permlinkId}`);
+                      // スマホではロードしたら画面を閉じる
+                      if (
+                        breakpoint === "xs" ||
+                        breakpoint === "sm" ||
+                        breakpoint === "md"
+                      ) {
+                        dispatch(actions.setSidebarState("none"));
+                      }
                     }}
                   >
                     {t("history.view")}
@@ -140,6 +151,14 @@ const History: React.FC = () => {
                         dispatch(actions.pushQuickSave());
                       }
                       dispatch(actions.loadQuickSave(x));
+                      // スマホではロードしたら画面を閉じる
+                      if (
+                        breakpoint === "xs" ||
+                        breakpoint === "sm" ||
+                        breakpoint === "md"
+                      ) {
+                        dispatch(actions.setSidebarState("none"));
+                      }
                     }}
                   >
                     {t("history.load")}

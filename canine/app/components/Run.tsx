@@ -170,11 +170,14 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
     );
   }
 
-  // 実行中は表示しない
   return (
     <OverlayTrigger
       placement="bottom"
-      overlay={<Tooltip id="wb-tooltip-run">{t("run.ctrlEnter")}</Tooltip>}
+      overlay={
+        <Tooltip className="d-none d-md-block" id="wb-tooltip-run">
+          {t("run.ctrlEnter")}
+        </Tooltip>
+      }
     >
       <Button
         style={{
