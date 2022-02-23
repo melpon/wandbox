@@ -9,7 +9,7 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "remix";
-import type { MetaFunction, LinksFunction } from "remix";
+import type { MetaFunction, HtmlMetaDescriptor, LinksFunction } from "remix";
 
 import wandboxStyles from "./styles/wandbox.css";
 import { getSession, commitSession } from "./sessions.server";
@@ -24,9 +24,23 @@ export const meta: MetaFunction = ({ params, data }) => {
   if (permlinkData === null) {
     title = "Wandbox";
   } else {
-    title = `[${permlinkData.parameter.compilerInfo.language}] ${permlinkData.parameter.title} - Wandbox`;
+    if (permlinkData.parameter.title.length !== 0) {
+      title = `[${permlinkData.parameter.compilerInfo.language}] ${permlinkData.parameter.title} - Wandbox`;
+    } else {
+      title = `[${permlinkData.parameter.compilerInfo.language}] ${permlinkData.parameter.compilerInfo.displayName} ${permlinkData.parameter.compilerInfo.version} - Wandbox`;
+    }
   }
-  return { title };
+
+  const result: HtmlMetaDescriptor = {};
+  result.title = title;
+
+  // Twitter カードの設定
+  if (permlinkData !== null) {
+    result["twitter:card"] = "summary";
+    result["twitter:title"] = title;
+    result["twitter:description"] = permlinkData.parameter.code.slice(0, 100);
+  }
+  return result;
 };
 
 export const links: LinksFunction = () => {
