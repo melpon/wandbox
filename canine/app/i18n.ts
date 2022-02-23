@@ -24,6 +24,7 @@ const resources = {
         options: "Options",
         rawCompilerOptions: "Raw compiler options",
         rawRuntimeOptions: "Raw runtime options",
+        showRawRuntimeOptions: "Show raw runtime options",
       },
       title: {
         title: "Title",
@@ -95,6 +96,7 @@ const resources = {
         options: "オプション",
         rawCompilerOptions: "コンパイル時オプション",
         rawRuntimeOptions: "実行時オプション",
+        showRawRuntimeOptions: "実行時オプションを表示する",
       },
       title: {
         title: "タイトル",
