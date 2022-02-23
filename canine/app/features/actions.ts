@@ -45,7 +45,7 @@ export function setView(
     });
   }
 
-  dispatch(actions.setView({ tab, view }));
+  dispatch(actions.setView({ id: sources[tab].id, view }));
 }
 
 const WANDBOX_QUICKSAVES_KEY = "wandbox.quicksaves";

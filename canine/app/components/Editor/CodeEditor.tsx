@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import type { KeyBinding } from "@codemirror/view";
+import type { EditorView, KeyBinding } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 
 import { resolveLanguage, importLanguage } from "~/utils/resolveLanguageMode";
@@ -17,13 +17,14 @@ import { useCompileStateSelector } from "~/utils/compile";
 
 interface CodeEditorProps {
   source: EditorSourceData;
+  view: EditorView | undefined;
   tab: number;
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
-  const { source, tab, compilerList, permlinkData } = props;
+  const { source, view, tab, compilerList, permlinkData } = props;
 
   const { currentLanguage, stdinOpened, currentTab, tabKey, tabWidth } =
     useSelector(
@@ -78,7 +79,6 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
       key: "Ctrl-Enter",
       preventDefault: true,
       run: () => {
-        console.log("run");
         onRun();
         return true;
       },
@@ -102,13 +102,14 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
         stdinOpened ? "wb-stdinactive" : ""
       } ${show ? "" : "d-none"}`}
       text={source.text}
+      view={view}
       option={option}
       onViewCreated={(view) => {
-        if (permlinkData === null) {
-          dispatch(actions.setView({ tab, view }));
-        }
+        dispatch(actions.setView({ id: source.id, view }));
       }}
-      onViewDestroyed={() => {}}
+      onViewDestroyed={() => {
+        dispatch(actions.setView({ id: source.id, view: undefined }));
+      }}
       onChange={() => {
         dispatch(actions.setSharable(false));
         dispatch(actions.setEditorChanged(true));

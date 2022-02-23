@@ -156,6 +156,7 @@ export interface CodeMirror6Props {
   className?: string;
   style?: React.CSSProperties;
   text: string;
+  view: EditorView | undefined;
   option: CodeMirror6Option;
   onViewCreated: (view: EditorView) => void;
   onViewDestroyed: (view: EditorView) => void;
@@ -205,6 +206,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
     className,
     style,
     text,
+    view,
     option,
     onViewCreated,
     onViewDestroyed,
@@ -212,37 +214,49 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
   } = props;
 
   const ref = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<EditorView | null>(null);
+  const localView = useRef<EditorView>();
 
   useLayoutEffect(() => {
+    if (view !== undefined) {
+      return;
+    }
+
+    if (localView.current !== undefined) {
+      onViewDestroyed(localView.current);
+      localView.current.destroy();
+    }
+
     const startState = EditorState.create({
       doc: text,
       extensions: optionToExtension(option),
     });
 
     const dispatch = (tr: Transaction) => {
-      view.update([tr]);
+      newView.update([tr]);
       if (!tr.changes.empty && onChange !== undefined) {
-        onChange(view);
+        onChange(newView);
       }
     };
-    const view = new EditorView({
+    const newView = new EditorView({
       state: startState,
       parent: ref.current || undefined,
       dispatch: dispatch,
     });
 
-    setView(view);
-    onViewCreated(view);
-
-    return () => {
-      onViewDestroyed(view);
-      view.destroy();
-    };
-  }, [ref]);
+    localView.current = newView;
+    onViewCreated(newView);
+  }, [view, localView]);
 
   useEffect(() => {
-    if (view === null) {
+    return () => {
+      if (localView.current !== undefined) {
+        onViewDestroyed(localView.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (view === undefined) {
       return;
     }
 
@@ -257,7 +271,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
   }, [text]);
 
   useEffect(() => {
-    if (view === null) {
+    if (view === undefined) {
       return;
     }
     view.dispatch({
