@@ -54,16 +54,36 @@ async function getGithubUser(accessToken: string): Promise<GithubUser | null> {
   return json as GithubUser;
 }
 
-export async function fetchPermlinkData(permlinkId: string): Promise<AnyJson> {
+// Cloudflare Workers からサブリクエストを投げる場合、
+// CF-Connecting-IP が Cloudflare Workers の IP になってしまうことがある。
+// なのでこの値を X-Real-IP に設定して、サブリクエスト側ではそれを利用してもらう
+function withClientIP(headers: HeadersInit, request: Request): HeadersInit {
+  const ip = request.headers.get("cf-connecting-ip");
+  if (ip === null) {
+    return headers;
+  }
+  return {
+    ...headers,
+    "X-Forwarded-For": ip,
+  };
+}
+
+export async function fetchPermlinkData(
+  permlinkId: string,
+  request: Request
+): Promise<AnyJson> {
   const permlinkKey = `permlink-${permlinkId}`;
   const cache = await KV_CACHE.get(permlinkKey, "json");
   if (cache !== null) {
     return cache as AnyJson;
   }
 
-  const headers = {
-    "content-type": "application/json",
-  };
+  const headers = withClientIP(
+    {
+      "content-type": "application/json",
+    },
+    request
+  );
   const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/permlink/${permlinkId}`, {
     headers: headers,
   });
@@ -80,16 +100,19 @@ export async function fetchPermlinkData(permlinkId: string): Promise<AnyJson> {
   return body;
 }
 
-export async function fetchListData(): Promise<AnyJson> {
+export async function fetchListData(request: Request): Promise<AnyJson> {
   const listKey = "list";
   const cache = await KV_CACHE.get(listKey, "json");
   if (cache !== null) {
     return cache as AnyJson;
   }
 
-  const headers = {
-    "content-type": "application/json",
-  };
+  const headers = withClientIP(
+    {
+      "content-type": "application/json",
+    },
+    request
+  );
   const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/list.json`, {
     headers: headers,
   });
@@ -106,16 +129,19 @@ export async function fetchListData(): Promise<AnyJson> {
   return body;
 }
 
-export async function fetchSponsorsData(): Promise<AnyJson> {
+export async function fetchSponsorsData(request: Request): Promise<AnyJson> {
   const sponsorsKey = "sponsors";
   const cache = await KV_CACHE.get(sponsorsKey, "json");
   if (cache !== null) {
     return cache as AnyJson;
   }
 
-  const headers = {
-    "content-type": "application/json",
-  };
+  const headers = withClientIP(
+    {
+      "content-type": "application/json",
+    },
+    request
+  );
   const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/sponsors.json`, {
     headers: headers,
   });
@@ -199,10 +225,13 @@ export default async function handleRequest(
       json["login"] = githubUser["login"];
       json["github_id"] = githubUser["id"];
     }
-    const headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
+    const headers = withClientIP(
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      request
+    );
     const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/permlink`, {
       method: "POST",
       headers: headers,
@@ -219,7 +248,7 @@ export default async function handleRequest(
     const permlinkId = url.pathname
       .replace("/api/permlink/", "")
       .replace("/", "");
-    const json = await fetchPermlinkData(permlinkId);
+    const json = await fetchPermlinkData(permlinkId, request);
     responseHeaders.set("Content-Type", "application/json");
     return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
@@ -229,7 +258,7 @@ export default async function handleRequest(
     request.method === "GET" &&
     url.pathname.startsWith("/api/sponsors.json")
   ) {
-    const json = await fetchSponsorsData();
+    const json = await fetchSponsorsData(request);
     responseHeaders.set("Content-Type", "application/json");
     return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
@@ -239,7 +268,7 @@ export default async function handleRequest(
     request.method === "GET" &&
     url.pathname.startsWith("/api/list.json")
   ) {
-    const json = await fetchListData();
+    const json = await fetchListData(request);
     responseHeaders.set("Content-Type", "application/json");
     return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
@@ -249,10 +278,13 @@ export default async function handleRequest(
     if (request.method === "POST") {
       json = await request.json();
     }
-    const headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
+    const headers = withClientIP(
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      request
+    );
     const resp = await fetch(`${WANDBOX_URL_PREFIX}${url.pathname}`, {
       method: request.method,
       headers: headers,
