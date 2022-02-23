@@ -64,7 +64,7 @@ const SidebarBase: React.FC = () => {
 
   return (
     <div className="d-flex flex-column">
-      <div className="wb-nav d-flex justify-content-between px-8px py-4px ps-0px">
+      <div className="wb-nav d-flex justify-content-between px-8px py-4px ps-md-0px">
         <div className="d-flex align-items-center">
           <Button
             className="d-none d-md-block"
