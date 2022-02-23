@@ -284,16 +284,33 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     let docTitle: string;
     if (permlinkResp === null) {
       language = currentLanguage;
-      docTitle = title;
+      if (title.length !== 0) {
+        docTitle = title;
+      } else if (compilerList !== null && currentCompilerName.length !== 0) {
+        const ci = compilerList.compilers.find(
+          (x) => x.name === currentCompilerName
+        );
+        if (ci === undefined) {
+          docTitle = "";
+        } else {
+          docTitle = `${ci.displayName} ${ci.version}`;
+        }
+      } else {
+        docTitle = "";
+      }
     } else {
       language = permlinkResp.parameter.compilerInfo.language;
-      docTitle = permlinkResp.parameter.title;
+      if (permlinkResp.parameter.title.length !== 0) {
+        docTitle = permlinkResp.parameter.title;
+      } else {
+        docTitle = `${permlinkResp.parameter.compilerInfo.displayName} ${permlinkResp.parameter.compilerInfo.version}`;
+      }
     }
     document.title =
       (language.length === 0 ? "" : `[${language}] `) +
       (docTitle.length === 0 ? "" : `${docTitle} - `) +
       "Wandbox";
-  }, [permlinkResp, currentLanguage, title]);
+  }, [permlinkResp, currentLanguage, title, currentCompilerName, compilerList]);
 
   if (compilerList === null) {
     return null;
