@@ -106,6 +106,16 @@ export async function fetchSponsorsData(): Promise<AnyJson> {
   return body;
 }
 
+function redirectWithCookie(url: string, cookie: string): Response {
+  return new Response(null, {
+    status: 301,
+    headers: {
+      Location: url,
+      "Set-Cookie": cookie,
+    },
+  });
+}
+
 export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
@@ -126,7 +136,13 @@ export default async function handleRequest(
       if (user !== null) {
         const session = await getSession(request.headers.get("Cookie"));
         session.set("github_user", JSON.stringify(user));
-        await commitSession(session);
+        return redirectWithCookie(
+          url.origin + "/",
+          await commitSession(session, {
+            maxAge: 30 * 24 * 60 * 60,
+            sameSite: "lax",
+          })
+        );
       }
     }
     return Response.redirect(url.origin + "/", 301);
@@ -135,8 +151,13 @@ export default async function handleRequest(
   if (!hasError && request.method === "GET" && url.pathname === "/logout") {
     const session = await getSession(request.headers.get("Cookie"));
     session.unset("github_user");
-    await commitSession(session);
-    return Response.redirect(url.origin + "/", 301);
+    return redirectWithCookie(
+      url.origin + "/",
+      await commitSession(session, {
+        maxAge: 30 * 24 * 60 * 60,
+        sameSite: "lax",
+      })
+    );
   }
   // permlink 送信リクエストにユーザー情報を設定する
   if (

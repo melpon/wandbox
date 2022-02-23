@@ -48,9 +48,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const data: WandboxLoaderData = { githubUser, permlinkData };
 
+  const cookie = await commitSession(session, {
+    maxAge: 30 * 24 * 60 * 60,
+    sameSite: "lax",
+  });
   return json(data, {
     headers: {
-      "Set-Cookie": await commitSession(session),
+      "Set-Cookie": cookie,
     },
   });
 };
