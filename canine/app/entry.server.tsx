@@ -56,7 +56,7 @@ async function getGithubUser(accessToken: string): Promise<GithubUser | null> {
 
 export async function fetchPermlinkData(permlinkId: string): Promise<AnyJson> {
   const permlinkKey = `permlink-${permlinkId}`;
-  const cache = await KV_SESSION.get(permlinkKey, "json");
+  const cache = await KV_CACHE.get(permlinkKey, "json");
   if (cache !== null) {
     return cache as AnyJson;
   }
@@ -73,7 +73,7 @@ export async function fetchPermlinkData(permlinkId: string): Promise<AnyJson> {
   const body = await resp.json();
 
   // 30日間キャッシュする
-  await KV_SESSION.put(permlinkKey, JSON.stringify(body), {
+  await KV_CACHE.put(permlinkKey, JSON.stringify(body), {
     expirationTtl: 30 * 24 * 60 * 60,
   });
 
@@ -82,7 +82,7 @@ export async function fetchPermlinkData(permlinkId: string): Promise<AnyJson> {
 
 export async function fetchSponsorsData(): Promise<AnyJson> {
   const sponsorsKey = "sponsors";
-  const cache = await KV_SESSION.get(sponsorsKey, "json");
+  const cache = await KV_CACHE.get(sponsorsKey, "json");
   if (cache !== null) {
     return cache as AnyJson;
   }
@@ -99,7 +99,7 @@ export async function fetchSponsorsData(): Promise<AnyJson> {
   const body = await resp.json();
 
   // 10分間キャッシュする
-  await KV_SESSION.put(sponsorsKey, JSON.stringify(body), {
+  await KV_CACHE.put(sponsorsKey, JSON.stringify(body), {
     expirationTtl: 10 * 60,
   });
 
@@ -108,7 +108,7 @@ export async function fetchSponsorsData(): Promise<AnyJson> {
 
 function redirectWithCookie(url: string, cookie: string): Response {
   return new Response(null, {
-    status: 301,
+    status: 302,
     headers: {
       Location: url,
       "Set-Cookie": cookie,
@@ -145,12 +145,13 @@ export default async function handleRequest(
         );
       }
     }
-    return Response.redirect(url.origin + "/", 301);
+    return Response.redirect(url.origin + "/", 302);
   }
   // ログアウト
   if (!hasError && request.method === "GET" && url.pathname === "/logout") {
     const session = await getSession(request.headers.get("Cookie"));
     session.unset("github_user");
+
     return redirectWithCookie(
       url.origin + "/",
       await commitSession(session, {

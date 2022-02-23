@@ -20,3 +20,4 @@ declare var WANDBOX_GITHUB_CLIENT_SECRET: string;
 declare var WANDBOX_KV_COOKIE_SECRET: string;
 declare var WANDBOX_LOADER_DATA: WandboxLoaderData;
 declare var KV_SESSION: KVNamespace;
+declare var KV_CACHE: KVNamespace;
