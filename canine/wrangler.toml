@@ -31,7 +31,7 @@ format="service-worker"
 [env.develop]
 name = "wandbox-develop"
 route = "develop.wandbox.org/*"
-vars = { WANDBOX_URL_PREFIX = "http://api.develop.wandbox.org", WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08" }
+vars = { WANDBOX_URL_PREFIX = "https://api-develop.wandbox.org", WANDBOX_GITHUB_CLIENT_ID = "d097a8f338db3c15fe08" }
 kv_namespaces = [ 
   { binding = "KV_SESSION", id = "639a875898404175a8121a01647dfbea" },
   { binding = "KV_CACHE", id = "346f95298b6e443d886793fdea9ef733" }
@@ -43,4 +43,8 @@ kv_namespaces = [
 [env.production]
 name = "wandbox"
 route = "wandbox.org/*"
-vars = { WANDBOX_URL_PREFIX = "http://139.180.192.155", WANDBOX_GITHUB_CLIENT_ID = "f9d429d939d997e6b08e" }
+vars = { WANDBOX_URL_PREFIX = "https://api.wandbox.org", WANDBOX_GITHUB_CLIENT_ID = "f9d429d939d997e6b08e" }
+kv_namespaces = [
+  { binding = "KV_SESSION", id = "5c938730ff3d489fb02730317a5c17d3" },
+  { binding = "KV_CACHE", id = "5edf9e985c504b6b8099c405585145ad" }
+]
