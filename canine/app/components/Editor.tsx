@@ -16,6 +16,7 @@ import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorTabs } from "./Editor/EditorTabs";
 import type { CodeMirror6Option } from "./CodeMirror6";
 import { CodeMirror6 } from "./CodeMirror6";
+import { ModemFill } from "react-bootstrap-icons";
 
 export interface EditorProps {
   compilerList: CompilerList;
@@ -31,6 +32,7 @@ const Editor: React.FC<EditorProps> = (props) => {
     stdinOpened,
     stdinView,
     currentTab,
+    mode,
     tabKey,
     tabWidth,
     fixedHeight,
@@ -43,7 +45,7 @@ const Editor: React.FC<EditorProps> = (props) => {
         stdinOpened,
         stdinView,
         currentTab,
-        editorSettings: { tabKey, tabWidth, fixedHeight },
+        editorSettings: { mode, tabKey, tabWidth, fixedHeight },
       },
     }: AppState) => ({
       sources,
@@ -52,6 +54,7 @@ const Editor: React.FC<EditorProps> = (props) => {
       stdinOpened,
       stdinView,
       currentTab,
+      mode,
       tabKey,
       tabWidth,
       fixedHeight,
@@ -98,13 +101,14 @@ const Editor: React.FC<EditorProps> = (props) => {
   const option = useMemo((): CodeMirror6Option => {
     return {
       lineNumbers: true,
+      mode: mode,
       tabSize: parseInt(tabWidth, 10),
       indentUnit: tabKey !== "tab" ? parseInt(tabKey, 10) : undefined,
       indentWithTab: tabKey === "tab",
       readOnly: permlinkData !== null,
       keymaps: [ctrlEnter],
     };
-  }, [tabWidth, tabKey, permlinkData, ctrlEnter]);
+  }, [mode, tabWidth, tabKey, permlinkData, ctrlEnter]);
 
   return (
     <div

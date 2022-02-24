@@ -14,12 +14,13 @@ export interface EditorSourceData {
 }
 export type EditorViewMap = { [id: string]: EditorView | undefined };
 
-export type EditorType = "default" | "vim" | "emacs";
+export type EditorType = "default" | "vim";
 export type TabKeyType = "2" | "4" | "8" | "tab";
 export type TabWidthType = "2" | "4" | "8";
 export type RunningState = "init" | "running" | "completed";
 
 export interface EditorSettingsData {
+  mode?: EditorType;
   tabKey: TabKeyType;
   tabWidth: TabWidthType;
   fixedHeight: boolean;
@@ -166,6 +167,7 @@ const initialState = {
   stdinView: undefined as EditorView | undefined,
   stdinOpened: false,
   editorSettings: {
+    mode: undefined,
     tabKey: "4",
     tabWidth: "4",
     fixedHeight: false,
@@ -238,6 +240,9 @@ export const wandboxSlice = createSlice({
     },
     setResults: (state, action: PayloadAction<ResultData[]>) => {
       state.results = action.payload;
+    },
+    setEditorSettingsMode: (state, action: PayloadAction<EditorType>) => {
+      state.editorSettings.mode = action.payload;
     },
     setEditorSettingsTabKey: (state, action: PayloadAction<TabKeyType>) => {
       state.editorSettings.tabKey = action.payload;

@@ -21,6 +21,7 @@ import { commentKeymap } from "@codemirror/comment";
 import { rectangularSelection } from "@codemirror/rectangular-selection";
 import { lintKeymap } from "@codemirror/lint";
 import { HighlightStyle, tags } from "@codemirror/highlight";
+import { vim } from "@replit/codemirror-vim";
 
 // --color-prettylights-syntax-comment: #6e7781;
 // --color-prettylights-syntax-constant: #0550ae;
@@ -176,6 +177,9 @@ function optionToExtension(option: CodeMirror6Option): Extension[] {
       highlightActiveLine(),
       bracketMatching()
     );
+    if (option.mode === "vim") {
+      ext.push(vim());
+    }
     const keymaps = [...defaultKeyMaps];
     if (option.indentWithTab) {
       keymaps.push(indentWithTab);
