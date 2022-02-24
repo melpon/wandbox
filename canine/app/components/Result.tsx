@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
@@ -12,10 +12,21 @@ interface ResultProps {
 
 const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
   const { permlinkData } = props;
-  const { running, results: rs } = useSelector(
-    ({ wandbox: { running, results } }: AppState) => ({
+  const {
+    running,
+    results: rs,
+    fixedResultHeight,
+  } = useSelector(
+    ({
+      wandbox: {
+        running,
+        results,
+        editorSettings: { fixedResultHeight },
+      },
+    }: AppState) => ({
       running,
       results,
+      fixedResultHeight,
     })
   );
   const results = permlinkData === null ? rs : permlinkData.results;
@@ -57,11 +68,13 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
   );
 
   // スクロールを一番下に持ってくる
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (ref.current === null || !running) {
       return;
     }
-    const elem = document.querySelector("#wb-main-content");
+    const elem = fixedResultHeight
+      ? document.querySelector("#wb-result-console")
+      : document.querySelector("#wb-main-content");
     if (elem === null) {
       return;
     }
@@ -73,8 +86,14 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
   }
 
   return (
-    <div ref={ref} className="wb-result d-flex flex-column">
-      <code className="wb-console p-16px">
+    <div className="wb-result d-flex flex-column">
+      <code
+        ref={ref}
+        id="wb-result-console"
+        className={`wb-console ${
+          fixedResultHeight ? "wb-result-fixedheight" : ""
+        } p-16px`}
+      >
         {mergedResults.map((r, index): React.ReactElement | null => {
           if (
             r.type === "Control" ||

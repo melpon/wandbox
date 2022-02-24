@@ -325,6 +325,12 @@ p, h1, h2, h3, h4, h5, h6 {
     }
   }
 
+  .wb-console.wb-result-fixedheight {
+    height: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
   .wb-info {
     padding: 4px 16px;
     border: $color-primary solid 1px;

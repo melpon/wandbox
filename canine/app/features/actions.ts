@@ -197,6 +197,11 @@ export function applySettings(
   dispatch(
     actions.setEditorSettingsFixedHeight(settings.editorSettings.fixedHeight)
   );
+  dispatch(
+    actions.setEditorSettingsFixedResultHeight(
+      settings.editorSettings.fixedResultHeight || false
+    )
+  );
   dispatch(actions.setSidebarLocked(settings.sidebarLocked));
   dispatch(actions.setSidebarState(settings.sidebarState));
 }

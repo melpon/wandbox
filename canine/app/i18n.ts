@@ -46,6 +46,7 @@ const resources = {
         tabKeyInsertedTab: "TAB",
         tabWidth: "TAB width",
         fixEditorHeight: "Fix editor height",
+        fixResultHeight: "Fix output window height",
       },
       history: {
         title: "Ran/Viewed Log",
@@ -118,6 +119,7 @@ const resources = {
         tabKeyInsertedTab: "タブ",
         tabWidth: "タブ幅",
         fixEditorHeight: "エディタの高さを固定する",
+        fixResultHeight: "出力ウィンドウの高さを固定する",
       },
       history: {
         title: "実行/表示履歴",
