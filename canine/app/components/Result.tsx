@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
@@ -11,10 +11,15 @@ interface ResultProps {
 }
 
 const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
-  const { t } = useTranslation();
   const { permlinkData } = props;
-  const rs = useSelector(({ wandbox: { results } }: AppState) => results);
+  const { running, results: rs } = useSelector(
+    ({ wandbox: { running, results } }: AppState) => ({
+      running,
+      results,
+    })
+  );
   const results = permlinkData === null ? rs : permlinkData.results;
+  const ref = useRef<HTMLDivElement>(null);
   const mergedResults: ResultData[] = [];
   let preview: ResultData | null = null;
   for (const r of results) {
@@ -51,12 +56,24 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
     []
   );
 
+  // スクロールを一番下に持ってくる
+  useEffect(() => {
+    if (ref.current === null || !running) {
+      return;
+    }
+    const elem = document.querySelector("#wb-main-content");
+    if (elem === null) {
+      return;
+    }
+    elem.scrollTop = ref.current.scrollHeight;
+  }, [results]);
+
   if (results.length === 0) {
     return null;
   }
 
   return (
-    <div className="wb-result d-flex flex-column">
+    <div ref={ref} className="wb-result d-flex flex-column">
       <code className="wb-console p-16px">
         {mergedResults.map((r, index): React.ReactElement | null => {
           if (
