@@ -39,6 +39,9 @@ const resources = {
       },
       settings: {
         title: "Editor Settings",
+        mode: "Key binding",
+        modeDefault: "Default",
+        modeVim: "Vim",
         tabKeyInserted: "TAB key inserted",
         tabKeyInserted2Spaces: "2 Spaces",
         tabKeyInserted4Spaces: "4 Spaces",
@@ -112,6 +115,9 @@ const resources = {
       },
       settings: {
         title: "エディタ設定",
+        mode: "キーバインディング",
+        modeDefault: "デフォルト",
+        modeVim: "Vim",
         tabKeyInserted: "タブキーで挿入されるテキスト",
         tabKeyInserted2Spaces: "2 スペース",
         tabKeyInserted4Spaces: "4 スペース",

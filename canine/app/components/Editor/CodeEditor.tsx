@@ -26,19 +26,20 @@ interface CodeEditorProps {
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   const { source, view, tab, compilerList, permlinkData } = props;
 
-  const { currentLanguage, stdinOpened, currentTab, tabKey, tabWidth } =
+  const { currentLanguage, stdinOpened, currentTab, mode, tabKey, tabWidth } =
     useSelector(
       ({
         wandbox: {
           currentLanguage,
           stdinOpened,
           currentTab,
-          editorSettings: { tabKey, tabWidth },
+          editorSettings: { mode, tabKey, tabWidth },
         },
       }: AppState) => ({
         currentLanguage,
         stdinOpened,
         currentTab,
+        mode,
         tabKey,
         tabWidth,
       })
@@ -87,6 +88,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   const option = useMemo((): CodeMirror6Option => {
     return {
       lineNumbers: true,
+      mode: mode,
       tabSize: parseInt(tabWidth, 10),
       indentUnit: tabKey !== "tab" ? parseInt(tabKey, 10) : undefined,
       indentWithTab: tabKey === "tab",
@@ -94,7 +96,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
       readOnly: permlinkData !== null,
       keymaps: [ctrlEnter],
     };
-  }, [tabWidth, tabKey, languageSupport, permlinkData, ctrlEnter]);
+  }, [mode, tabWidth, tabKey, languageSupport, permlinkData, ctrlEnter]);
 
   return (
     <CodeMirror6

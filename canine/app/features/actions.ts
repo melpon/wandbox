@@ -192,6 +192,9 @@ export function applySettings(
   dispatch: AppDispatch,
   settings: PersistentSettingsData
 ) {
+  dispatch(
+    actions.setEditorSettingsMode(settings.editorSettings.mode || "default")
+  );
   dispatch(actions.setEditorSettingsTabKey(settings.editorSettings.tabKey));
   dispatch(actions.setEditorSettingsTabWidth(settings.editorSettings.tabWidth));
   dispatch(

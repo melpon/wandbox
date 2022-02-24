@@ -15,6 +15,13 @@ const EditorSettings: React.FC = () => {
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
 
+  const onChangeMode = useCallback(
+    (e): void => {
+      const mode = e.target.value;
+      dispatch(actions.setEditorSettingsMode(mode));
+    },
+    [settings]
+  );
   const onChangeTabKey = useCallback(
     (e): void => {
       const tabKey = e.target.value;
@@ -46,6 +53,19 @@ const EditorSettings: React.FC = () => {
 
   return (
     <div className="d-flex flex-column align-items-stretch px-16px py-16px gap-16px">
+      <Form.Group controlId="wb-mode">
+        <Form.Label className="mb-8px">{t("settings.mode")}</Form.Label>
+        <div className="px-16px">
+          <Form.Control
+            as="select"
+            value={settings.mode}
+            onChange={onChangeMode}
+          >
+            <option value="default">{t("settings.modeDefault")}</option>
+            <option value="vim">{t("settings.modeVim")}</option>
+          </Form.Control>
+        </div>
+      </Form.Group>
       <Form.Group controlId="wb-tabkey">
         <Form.Label className="mb-8px">
           {t("settings.tabKeyInserted")}
