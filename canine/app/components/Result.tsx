@@ -26,10 +26,12 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
 
     // 直前と同じメッセージタイプなら結合する
     if (isMessage && preview !== null && preview.type === r.type) {
-      mergedResults[mergedResults.length - 1] = {
+      const v = {
         type: r.type,
         data: preview.data + r.data,
       };
+      mergedResults[mergedResults.length - 1] = v;
+      preview = v;
     } else {
       mergedResults.push(r);
       preview = r;
