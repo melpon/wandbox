@@ -26,7 +26,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
 
     // 直前と同じメッセージタイプなら結合する
     if (isMessage && preview !== null && preview.type === r.type) {
-      const v = {
+      const v: ResultData = {
         type: r.type,
         data: preview.data + r.data,
       };
