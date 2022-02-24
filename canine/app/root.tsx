@@ -58,7 +58,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const permlinkData =
     permlinkId === undefined
       ? null
-      : resolvePermlinkData(permlinkId, await fetchPermlinkData(permlinkId));
+      : resolvePermlinkData(
+          permlinkId,
+          await fetchPermlinkData(permlinkId, request)
+        );
 
   const data: WandboxLoaderData = { githubUser, permlinkData };
 
