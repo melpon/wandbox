@@ -23,6 +23,7 @@ export interface EditorSettingsData {
   tabKey: TabKeyType;
   tabWidth: TabWidthType;
   fixedHeight: boolean;
+  fixedResultHeight?: boolean;
 }
 
 type ResultType =
@@ -168,6 +169,7 @@ const initialState = {
     tabKey: "4",
     tabWidth: "4",
     fixedHeight: false,
+    fixedResultHeight: undefined,
   } as EditorSettingsData,
   running: false,
   sharable: false,
@@ -245,6 +247,12 @@ export const wandboxSlice = createSlice({
     },
     setEditorSettingsFixedHeight: (state, action: PayloadAction<boolean>) => {
       state.editorSettings.fixedHeight = action.payload;
+    },
+    setEditorSettingsFixedResultHeight: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.editorSettings.fixedResultHeight = action.payload;
     },
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;

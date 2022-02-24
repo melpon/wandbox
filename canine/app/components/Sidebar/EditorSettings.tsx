@@ -36,6 +36,13 @@ const EditorSettings: React.FC = () => {
     },
     [settings]
   );
+  const onChangeFixedResultHeight = useCallback(
+    (e): void => {
+      const fixedResultHeight = e.target.checked;
+      dispatch(actions.setEditorSettingsFixedResultHeight(fixedResultHeight));
+    },
+    [settings]
+  );
 
   return (
     <div className="d-flex flex-column align-items-stretch px-16px py-16px gap-16px">
@@ -79,6 +86,14 @@ const EditorSettings: React.FC = () => {
           label={t("settings.fixEditorHeight")}
           checked={settings.fixedHeight}
           onChange={onChangeFixedHeight}
+        />
+      </Form.Group>
+      <Form.Group controlId="wb-fixedresultheight">
+        <Form.Check
+          type="checkbox"
+          label={t("settings.fixResultHeight")}
+          checked={settings.fixedResultHeight}
+          onChange={onChangeFixedResultHeight}
         />
       </Form.Group>
     </div>

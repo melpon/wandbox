@@ -339,6 +339,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         contentClassName={`${
           sidebarLocked ? "wb-sidebar-locked" : ""
         } py-24px px-8px px-md-32px d-flex flex-column`}
+        contentId="wb-main-content"
       >
         <div className="d-flex flex-column flex-md-row gap-16px">
           <TitleDialog />

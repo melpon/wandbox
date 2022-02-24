@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
@@ -11,10 +11,26 @@ interface ResultProps {
 }
 
 const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
-  const { t } = useTranslation();
   const { permlinkData } = props;
-  const rs = useSelector(({ wandbox: { results } }: AppState) => results);
+  const {
+    running,
+    results: rs,
+    fixedResultHeight,
+  } = useSelector(
+    ({
+      wandbox: {
+        running,
+        results,
+        editorSettings: { fixedResultHeight },
+      },
+    }: AppState) => ({
+      running,
+      results,
+      fixedResultHeight,
+    })
+  );
   const results = permlinkData === null ? rs : permlinkData.results;
+  const ref = useRef<HTMLDivElement>(null);
   const mergedResults: ResultData[] = [];
   let preview: ResultData | null = null;
   for (const r of results) {
@@ -26,7 +42,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
 
     // 直前と同じメッセージタイプなら結合する
     if (isMessage && preview !== null && preview.type === r.type) {
-      const v = {
+      const v: ResultData = {
         type: r.type,
         data: preview.data + r.data,
       };
@@ -51,13 +67,33 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
     []
   );
 
+  // スクロールを一番下に持ってくる
+  useLayoutEffect(() => {
+    if (ref.current === null || !running) {
+      return;
+    }
+    const elem = fixedResultHeight
+      ? document.querySelector("#wb-result-console")
+      : document.querySelector("#wb-main-content");
+    if (elem === null) {
+      return;
+    }
+    elem.scrollTop = ref.current.scrollHeight;
+  }, [results]);
+
   if (results.length === 0) {
     return null;
   }
 
   return (
     <div className="wb-result d-flex flex-column">
-      <code className="wb-console p-16px">
+      <code
+        ref={ref}
+        id="wb-result-console"
+        className={`wb-console ${
+          fixedResultHeight ? "wb-result-fixedheight" : ""
+        } p-16px`}
+      >
         {mergedResults.map((r, index): React.ReactElement | null => {
           if (
             r.type === "Control" ||
