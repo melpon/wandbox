@@ -1,6 +1,7 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import React, { useLayoutEffect, useMemo, useRef } from "react";
+import { Trans } from "react-i18next";
 import { useSelector } from "react-redux";
+import { default as AnsiUp } from "ansi_up";
 
 import type { ResultData } from "~/features/slice";
 import type { PermlinkData } from "~/hooks/permlink";
@@ -81,6 +82,8 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
     elem.scrollTop = ref.current.scrollHeight;
   }, [results]);
 
+  const ansiUp = new AnsiUp();
+
   if (results.length === 0) {
     return null;
   }
@@ -105,9 +108,11 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
           const className = typeClassNames[r.type];
 
           return (
-            <pre key={index} className={className}>
-              {r.data}
-            </pre>
+            <pre
+              key={index}
+              className={className}
+              dangerouslySetInnerHTML={{ __html: ansiUp.ansi_to_html(r.data) }}
+            ></pre>
           );
         })}
       </code>
