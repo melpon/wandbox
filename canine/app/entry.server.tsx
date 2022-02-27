@@ -68,6 +68,15 @@ function withClientIP(headers: HeadersInit, request: Request): HeadersInit {
   };
 }
 
+// CORS ヘッダーの設定
+function setCors(headers: Headers, request: Request): void {
+  const allowHeaders = request.headers.get("Access-Control-Request-Headers");
+  if (allowHeaders !== null) {
+    headers.set("Access-Control-Allow-Headers", allowHeaders);
+  }
+  headers.set("Access-Control-Allow-Origin", "*");
+}
+
 export async function fetchPermlinkData(
   permlinkId: string,
   request: Request
@@ -250,6 +259,7 @@ export default async function handleRequest(
       .replace("/", "");
     const json = await fetchPermlinkData(permlinkId, request);
     responseHeaders.set("Content-Type", "application/json");
+    setCors(responseHeaders, request);
     return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
   // sponsors の取得もキャッシュする
@@ -260,6 +270,7 @@ export default async function handleRequest(
   ) {
     const json = await fetchSponsorsData(request);
     responseHeaders.set("Content-Type", "application/json");
+    setCors(responseHeaders, request);
     return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
   // list の取得もキャッシュする
@@ -270,6 +281,7 @@ export default async function handleRequest(
   ) {
     const json = await fetchListData(request);
     responseHeaders.set("Content-Type", "application/json");
+    setCors(responseHeaders, request);
     return new Response(JSON.stringify(json), { headers: responseHeaders });
   }
   // それ以外の API リクエストは単に転送する
@@ -290,7 +302,16 @@ export default async function handleRequest(
       headers: headers,
       body: json === null ? undefined : JSON.stringify(json),
     });
-    return resp;
+    responseHeaders.set(
+      "Content-Type",
+      resp.headers.get("content-type") ?? "application/json"
+    );
+    setCors(responseHeaders, request);
+    return new Response(await resp.text(), {
+      headers: responseHeaders,
+      status: resp.status,
+      statusText: resp.statusText,
+    });
   }
 
   let markup = renderToString(
