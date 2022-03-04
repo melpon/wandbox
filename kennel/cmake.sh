@@ -7,19 +7,17 @@ INSTALL_DIR="`pwd`/../_install"
 MODULE_PATH="`pwd`/../cmake"
 PROJECT_DIR="`pwd`"
 
-BUILD_DIR="`pwd`/_build/local"
+BUILD_DIR="_build/local"
 GRPC_DIR="$INSTALL_DIR/grpc"
-CMAKE_BUILD_TYPE=Release
+CMAKE_BUILD_TYPE=Debug
 ENABLE_TSAN=OFF
 ENABLE_ASAN=OFF
-CMAKE_INSTALL_PREFIX="$PROJECT_DIR/_install"
+CMAKE_INSTALL_PREFIX=$PROJECT_DIR/_install
 CMAKE_OPTS=" \
-  -DCATTLESHED_STOREDIR=$BUILD_DIR/cattleshed-develop-log
-  -DCATTLESHED_BASEDIR=$BUILD_DIR/cattleshed-develop
-  -DCATTLESHED_BINDIR=$BUILD_DIR
+  -DKENNEL_SCHEME=http \
+  -DKENNEL_DOMAIN=localhost \
 "
 LOCAL=1
-RUN_AFTER_BUILD=0
 
 while [ $# -ne 0 ]; do
   case "$1" in
@@ -35,46 +33,48 @@ while [ $# -ne 0 ]; do
 
     "--local" )
       LOCAL=1
-      BUILD_DIR="`pwd`/_build/local"
+      BUILD_DIR="_build/local"
+      CMAKE_BUILD_TYPE=Debug
       CMAKE_OPTS=" \
-        -DCATTLESHED_STOREDIR=$BUILD_DIR/cattleshed-develop-log
-        -DCATTLESHED_BASEDIR=$BUILD_DIR/cattleshed-develop
-        -DCATTLESHED_BINDIR=$BUILD_DIR
+        -DKENNEL_SCHEME=http \
+        -DKENNEL_DOMAIN=localhost \
       "
       ;;
+
     "--develop" )
       LOCAL=0
-      BUILD_DIR="`pwd`/_build/develop"
+      BUILD_DIR="_build/develop"
+      CMAKE_BUILD_TYPE=Debug
       CMAKE_OPTS=" \
-        -DCATTLESHED_STOREDIR=/tmp/cattleshed-develop-log
-        -DCATTLESHED_BASEDIR=/tmp/cattleshed-develop
-        -DCATTLESHED_LISTEN_PORT=50052
+        -DKENNEL_DOMAIN=develop.wandbox.org \
+        -DKENNEL_CATTLESHED_PORT=50052 \
+        -DKENNEL_SERVICE_PORT=3501 \
       "
-      CATTLESHED_BINDIR="$CMAKE_INSTALL_PREFIX/bin"
       ;;
     "--master" )
       LOCAL=0
-      BUILD_DIR="`pwd`/_build/master"
+      BUILD_DIR="_build/master"
+      CMAKE_BUILD_TYPE=Release
       CMAKE_OPTS=" \
       "
-      CATTLESHED_BINDIR="$CMAKE_INSTALL_PREFIX/bin"
       ;;
 
     "--tsan" )
       ENABLE_TSAN=ON
-      BUILD_DIR="`pwd`/_build/tsan"
+      BUILD_DIR="_build/tsan"
       GRPC_DIR="$INSTALL_DIR/grpc-tsan"
       CMAKE_BUILD_TYPE=Debug
       ;;
     "--asan" )
       ENABLE_ASAN=ON
-      BUILD_DIR="`pwd`/_build/asan"
+      BUILD_DIR="_build/asan"
       GRPC_DIR="$INSTALL_DIR/grpc-asan"
       CMAKE_BUILD_TYPE=Debug
       ;;
 
     "--run" )
       RUN_AFTER_BUILD=1
+      ;;
 
   esac
   shift 1
@@ -85,21 +85,22 @@ export PATH=$INSTALL_DIR/cmake/bin:$PATH
 mkdir -p $BUILD_DIR
 pushd $BUILD_DIR
   cmake $PROJECT_DIR \
-    -DCLI11_ROOT_DIR="$INSTALL_DIR/CLI11" \
+    -DPROTOC_GEN_JSONIF_CPP="$INSTALL_DIR/protoc-gen-jsonif/linux/amd64/protoc-gen-jsonif-cpp" \
+    -DCppDB_ROOT_DIR="$INSTALL_DIR/cppdb" \
+    -DSQLite3_INCLUDE_DIR="$INSTALL_DIR/sqlite3/include" \
     -DSPDLOG_ROOT_DIR="$INSTALL_DIR/spdlog" \
+    -DCLI11_ROOT_DIR="$INSTALL_DIR/CLI11" \
     -DGGRPC_ROOT_DIR="$INSTALL_DIR/ggrpc" \
-    -DCMAKE_PREFIX_PATH="$INSTALL_DIR/boost;$GRPC_DIR" \
-    -DCMAKE_MODULE_PATH=$MODULE_PATH \
+    -DCMAKE_PREFIX_PATH="$INSTALL_DIR/boost;$INSTALL_DIR/cppdb;$INSTALL_DIR/sqlite3;$GRPC_DIR" \
     -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX \
+    -DCMAKE_MODULE_PATH=$MODULE_PATH \
     -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE \
     -DENABLE_TSAN=$ENABLE_TSAN \
     -DENABLE_ASAN=$ENABLE_ASAN \
-    -DCATTLESHED_BINDIR=$CATTLESHED_BINDIR \
     $CMAKE_OPTS
   cmake --build . -j`nproc`
 popd
 
 if [ $LOCAL -eq 1 -a $RUN_AFTER_BUILD -eq 1 ]; then
-  sudo setcap cap_sys_admin,cap_chown,cap_setuid,cap_setgid,cap_sys_chroot,cap_mknod,cap_net_admin=p $BUILD_DIR/cattlegrid
-  exec $BUILD_DIR/cattleshed -c $BUILD_DIR/cattleshed.conf -c $PROJECT_DIR/compiler.default
+  exec $BUILD_DIR/kennel
 fi

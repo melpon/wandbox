@@ -6,7 +6,7 @@ syntax = "proto3";
 // option objc_class_prefix = "HLW";
 option cc_enable_arenas = true;
 
-package cattleshed;
+package wandbox.cattleshed;
 
 service Cattleshed {
   rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}

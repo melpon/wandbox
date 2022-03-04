@@ -14,5 +14,24 @@
   "[typescriptreact]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.associations": {
+    "*.cs": "csharp",
+    "*.txt": "plaintext",
+    "*.ipp": "cpp",
+    "array": "cpp",
+    "*.tcc": "cpp",
+    "memory": "cpp",
+    "future": "cpp",
+    "istream": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "utility": "cpp",
+    "hash_map": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "string_view": "cpp",
+    "rope": "cpp"
   }
 }

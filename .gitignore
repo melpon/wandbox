@@ -2,6 +2,7 @@
 /_build/
 /_install/
 /_package/
+/kennel/_build/
 /kennel2/_build/
 /kennel2/_install/
 /cattleshed/_build/
@@ -10,3 +11,4 @@
 /test/_build/
 /test/_crash/
 *.swp
+*.sqlite

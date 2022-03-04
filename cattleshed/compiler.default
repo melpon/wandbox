@@ -24,11 +24,15 @@
                 "prog.sh"
             ],
             "runtime-option-raw": true,
-            "jail-name": "melpon2-default",
+            "jail-name": "test",
             "templates": [
                 "bash"
             ]
         }
     ],
-    "templates": {}
+    "templates": {
+        "bash": {
+            "code": "echo \"Hello Wandbox\"\n"
+        }
+    }
 }
