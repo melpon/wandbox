@@ -20,7 +20,7 @@ PACKAGE_DIR="`pwd`/_package"
 
 set -ex
 
-if [ "$APP" != "kennel" -a "$APP" != "cattleshed" -a "$APP" != "canine" ]; then
+if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
   show_help
   exit 1
 fi
@@ -45,10 +45,6 @@ ssh $REMOTE /bin/bash -c "
       if [ "$APP" = "kennel" ]; then
         # データ置き場を作る
         mkdir -p var/lib/kennel
-        # セッションキー
-        if [ "$ENV" = "develop" ]; then
-          echo "0123456789abcdef0123456789abcdef" > var/lib/kennel/.session.key
-        fi
         chown -R ubuntu:ubuntu var/
       fi
     popd

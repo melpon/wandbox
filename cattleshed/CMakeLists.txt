@@ -4,9 +4,7 @@ project(kennel C CXX)
 
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost REQUIRED
-  COMPONENTS
-    program_options)
+find_package(Boost REQUIRED)
 find_package(RT REQUIRED)
 find_package(CAP REQUIRED)
 find_package(Threads REQUIRED)
@@ -94,7 +92,6 @@ target_compile_definitions(cattleshed
     SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 target_link_libraries(cattleshed
   Boost::boost
-  Boost::program_options
   RT::RT
   Threads::Threads
   gRPC::grpc++
@@ -111,7 +108,6 @@ add_executable(cattlegrid
 set_target_properties(cattlegrid PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
 target_link_libraries(cattlegrid
   Boost::boost
-  Boost::program_options
   CAP::CAP
   Threads::Threads)
 

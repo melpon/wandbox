@@ -231,7 +231,7 @@ export default async function handleRequest(
     const session = await getSession(request.headers.get("Cookie"));
     if (session.has("github_user")) {
       const githubUser = JSON.parse(session.get("github_user"));
-      json["login"] = githubUser["login"];
+      json["github_user"] = githubUser["login"];
       json["github_id"] = githubUser["id"];
     }
     const headers = withClientIP(

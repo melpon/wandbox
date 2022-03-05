@@ -3,9 +3,10 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/cattleshed/_build/tsan/proto",
+                "${workspaceFolder}/kennel/_build/local/proto",
                 "${workspaceFolder}/_install/boost/include",
                 "${workspaceFolder}/_install/ggrpc/include",
+                "${workspaceFolder}/_install/grpc/include",
                 "${workspaceFolder}/_install/spdlog/include",
                 "${workspaceFolder}/_install/CLI11/include",
                 "${workspaceFolder}/_install/cppcms/include",

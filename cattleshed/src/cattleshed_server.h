@@ -32,10 +32,10 @@
 #include "posixapi.hpp"
 
 class GetVersionHandler
-    : public ggrpc::ServerResponseWriterHandler<cattleshed::GetVersionResponse,
-                                                cattleshed::GetVersionRequest> {
+    : public ggrpc::ServerResponseWriterHandler<wandbox::cattleshed::GetVersionResponse,
+                                                wandbox::cattleshed::GetVersionRequest> {
  public:
-  GetVersionHandler(cattleshed::Cattleshed::AsyncService* service,
+  GetVersionHandler(wandbox::cattleshed::Cattleshed::AsyncService* service,
                     std::shared_ptr<boost::asio::io_context> ioc,
                     std::shared_ptr<boost::asio::signal_set> sigs,
                     const wandbox::server_config* config)
@@ -166,13 +166,13 @@ class GetVersionHandler
   };
 
   void Request(grpc::ServerContext* context,
-               cattleshed::GetVersionRequest* request,
-               grpc::ServerAsyncResponseWriter<cattleshed::GetVersionResponse>*
+               wandbox::cattleshed::GetVersionRequest* request,
+               grpc::ServerAsyncResponseWriter<wandbox::cattleshed::GetVersionResponse>*
                    response_writer,
                grpc::ServerCompletionQueue* cq, void* tag) override {
     service_->RequestGetVersion(context, request, response_writer, cq, cq, tag);
   }
-  void OnAccept(cattleshed::GetVersionRequest request) override {
+  void OnAccept(wandbox::cattleshed::GetVersionRequest request) override {
     version_runner_.reset(new VersionRunner(ioc_, sigs_, *config_));
     version_runner_->AsyncRun(
         [this, context = Context()](
@@ -185,10 +185,10 @@ class GetVersionHandler
         });
   }
 
-  static cattleshed::GetVersionResponse GenResponse(
+  static wandbox::cattleshed::GetVersionResponse GenResponse(
       const wandbox::server_config& config,
       const std::vector<std::pair<std::string, std::string>>& versions) {
-    cattleshed::GetVersionResponse resp;
+    wandbox::cattleshed::GetVersionResponse resp;
 
     for (const auto& pair : versions) {
       const auto it = config.compilers.get<1>().find(pair.first);
@@ -198,7 +198,7 @@ class GetVersionHandler
       }
       const wandbox::compiler_trait& compiler = *it;
 
-      cattleshed::CompilerInfo* info = resp.add_compiler_info();
+      wandbox::cattleshed::CompilerInfo* info = resp.add_compiler_info();
 
       for (const auto& sw : compiler.local_switches.get<1>()) {
         auto rng = compiler.local_switches.get<2>().equal_range(sw.group_name);
@@ -207,11 +207,11 @@ class GetVersionHandler
         }
 
         if (std::next(rng.first) != rng.second) {
-          cattleshed::SelectSwitch* sel =
+          wandbox::cattleshed::SelectSwitch* sel =
               info->add_switches()->mutable_select();
           std::string def;
           for (; rng.first != rng.second; ++rng.first) {
-            cattleshed::SelectSwitchOption* opt = sel->add_options();
+            wandbox::cattleshed::SelectSwitchOption* opt = sel->add_options();
             auto&& sw = *rng.first;
             opt->set_name(sw.name);
             opt->set_display_name(sw.display_name);
@@ -226,7 +226,7 @@ class GetVersionHandler
           sel->set_name(sw.group_name);
           sel->set_default_value(def);
         } else {
-          cattleshed::SingleSwitch* single =
+          wandbox::cattleshed::SingleSwitch* single =
               info->add_switches()->mutable_single();
           auto&& sw = *rng.first;
           single->set_name(sw.name);
@@ -254,7 +254,7 @@ class GetVersionHandler
         if (!group) {
           used.insert(swname);
 
-          cattleshed::SingleSwitch* single =
+          wandbox::cattleshed::SingleSwitch* single =
               info->add_switches()->mutable_single();
           single->set_name(sw.name);
           single->set_display_name(sw.display_name);
@@ -272,7 +272,7 @@ class GetVersionHandler
             }
           }
 
-          cattleshed::SelectSwitch* sel =
+          wandbox::cattleshed::SelectSwitch* sel =
               info->add_switches()->mutable_select();
           std::string def = swname;
           for (const auto& swname : compiler.switches) {
@@ -281,7 +281,7 @@ class GetVersionHandler
               continue;
             }
 
-            cattleshed::SelectSwitchOption* opt = sel->add_options();
+            wandbox::cattleshed::SelectSwitchOption* opt = sel->add_options();
             opt->set_name(sw.name);
             opt->set_display_name(sw.display_name);
             opt->set_display_flags(sw.display_flags
@@ -312,7 +312,7 @@ class GetVersionHandler
     }
     for (const auto& pair : config.templates) {
       const wandbox::template_trait& t = pair.second;
-      cattleshed::Template* tmpl = resp.add_templates();
+      wandbox::cattleshed::Template* tmpl = resp.add_templates();
       tmpl->set_name(t.name);
       tmpl->set_default_source(t.code);
       // TODO(melpon): sources を設定する（template_traits 側を直さないといけない）
@@ -337,15 +337,15 @@ class GetVersionHandler
   std::shared_ptr<boost::asio::io_context> ioc_;
   std::shared_ptr<boost::asio::signal_set> sigs_;
   const wandbox::server_config* config_;
-  cattleshed::Cattleshed::AsyncService* service_;
+  wandbox::cattleshed::Cattleshed::AsyncService* service_;
   std::shared_ptr<VersionRunner> version_runner_;
 };
 
 class RunJobHandler
-    : public ggrpc::ServerReaderWriterHandler<cattleshed::RunJobResponse,
-                                              cattleshed::RunJobRequest> {
+    : public ggrpc::ServerReaderWriterHandler<wandbox::cattleshed::RunJobResponse,
+                                              wandbox::cattleshed::RunJobRequest> {
  public:
-  RunJobHandler(cattleshed::Cattleshed::AsyncService* service,
+  RunJobHandler(wandbox::cattleshed::Cattleshed::AsyncService* service,
                 std::shared_ptr<boost::asio::io_context> ioc,
                 std::shared_ptr<boost::asio::signal_set> sigs,
                 const wandbox::server_config* config)
@@ -367,20 +367,20 @@ class RunJobHandler
 
   void Request(
       grpc::ServerContext* context,
-      grpc::ServerAsyncReaderWriter<cattleshed::RunJobResponse,
-                                    cattleshed::RunJobRequest>* streamer,
+      grpc::ServerAsyncReaderWriter<wandbox::cattleshed::RunJobResponse,
+                                    wandbox::cattleshed::RunJobRequest>* streamer,
       grpc::ServerCompletionQueue* cq, void* tag) override {
     service_->RequestRunJob(context, streamer, cq, cq, tag);
   }
   void OnAccept() override { SPDLOG_INFO("RunJobRequest::OnAccept"); }
-  void OnRead(cattleshed::RunJobRequest req) override {
+  void OnRead(wandbox::cattleshed::RunJobRequest req) override {
     SPDLOG_INFO("[0x{}] received RunJobRequest {}", (void*)this,
                 req.DebugString());
 
     FinishGuard guard(this);
 
     // リクエストの種類が kStart じゃない
-    if (req.data_case() != cattleshed::RunJobRequest::kStart) {
+    if (req.data_case() != wandbox::cattleshed::RunJobRequest::kStart) {
       SPDLOG_WARN("[0x{}] unknown enum value {}", (void*)this,
                   (int)req.data_case());
       return;
@@ -429,7 +429,7 @@ class RunJobHandler
 
     const wandbox::compiler_trait& target_compiler =
         *config_->compilers.get<1>().find(req_start_.compiler());
-    auto send = [context = Context()](const cattleshed::RunJobResponse& resp) {
+    auto send = [context = Context()](const wandbox::cattleshed::RunJobResponse& resp) {
       context->Write(resp);
     };
     program_runner_.reset(new ProgramRunner(ioc_, *config_, req_start_, sigs_,
@@ -523,7 +523,7 @@ class RunJobHandler
         sources_.emplace_back(filebase, logdir);
       }
       for (int i = 0; i < req_->sources_size(); i++) {
-        const cattleshed::Source& x = req_->sources(i);
+        const wandbox::cattleshed::Source& x = req_->sources(i);
         SPDLOG_INFO("[0x{}] registering file '{}'", (void*)this, x.file_name());
         if (x.file_name().empty()) {
           continue;
@@ -725,7 +725,7 @@ class RunJobHandler
     ProgramWriter(std::shared_ptr<boost::asio::io_context> ioc,
                   const wandbox::server_config& config,
                   const wandbox::compiler_trait& target_compiler,
-                  const cattleshed::RunJobRequest::Start& req,
+                  const wandbox::cattleshed::RunJobRequest::Start& req,
                   std::shared_ptr<boost::asio::signal_set> sigs)
         : ioc_(ioc),
           config_(&config),
@@ -757,7 +757,7 @@ class RunJobHandler
     std::shared_ptr<boost::asio::signal_set> sigs_;
     struct aiocb aiocb_;
     wandbox::compiler_trait target_compiler_;
-    const cattleshed::RunJobRequest::Start* req_;
+    const wandbox::cattleshed::RunJobRequest::Start* req_;
     std::function<void(const boost::system::error_code& error,
                        std::shared_ptr<DIR>, std::string)>
         cb_;
@@ -797,8 +797,8 @@ class RunJobHandler
     struct CommandType {
       std::vector<std::string> arguments;
       std::string stdin;
-      cattleshed::RunJobResponse::Type stdout_type;
-      cattleshed::RunJobResponse::Type stderr_type;
+      wandbox::cattleshed::RunJobResponse::Type stdout_type;
+      wandbox::cattleshed::RunJobResponse::Type stderr_type;
       int soft_kill_wait;
     };
 
@@ -906,9 +906,9 @@ class RunJobHandler
     struct OutputForwarder : PipeForwarderBase {
       OutputForwarder(
           std::shared_ptr<boost::asio::io_context> ioc, wandbox::unique_fd fd,
-          cattleshed::RunJobResponse::Type command_type,
+          wandbox::cattleshed::RunJobResponse::Type command_type,
           std::shared_ptr<WriteLimitCounter> limit,
-          std::function<void(const cattleshed::RunJobResponse&)> send)
+          std::function<void(const wandbox::cattleshed::RunJobResponse&)> send)
           : ioc_(ioc),
             pipe_(*ioc),
             command_type_(command_type),
@@ -937,7 +937,7 @@ class RunJobHandler
           }
           return;
         }
-        cattleshed::RunJobResponse resp;
+        wandbox::cattleshed::RunJobResponse resp;
         resp.set_type(command_type_);
         resp.set_data(std::string(buf_.begin(), buf_.begin() + len));
         send_(resp);
@@ -955,20 +955,20 @@ class RunJobHandler
      private:
       std::shared_ptr<boost::asio::io_context> ioc_;
       boost::asio::posix::stream_descriptor pipe_;
-      cattleshed::RunJobResponse::Type command_type_;
+      wandbox::cattleshed::RunJobResponse::Type command_type_;
       std::vector<char> buf_;
       std::function<void()> handler_;
       std::weak_ptr<WriteLimitCounter> limit_;
-      std::function<void(const cattleshed::RunJobResponse&)> send_;
+      std::function<void(const wandbox::cattleshed::RunJobResponse&)> send_;
     };
 
     ProgramRunner(std::shared_ptr<boost::asio::io_context> ioc,
                   const wandbox::server_config& config,
-                  const cattleshed::RunJobRequest::Start& req,
+                  const wandbox::cattleshed::RunJobRequest::Start& req,
                   std::shared_ptr<boost::asio::signal_set> sigs,
                   std::shared_ptr<DIR> workdir, std::string workdirpath,
                   const wandbox::compiler_trait& target_compiler,
-                  std::function<void(const cattleshed::RunJobResponse&)> send)
+                  std::function<void(const wandbox::cattleshed::RunJobResponse&)> send)
         : ioc_(ioc),
           config_(&config),
           req_(&req),
@@ -1053,17 +1053,17 @@ class RunJobHandler
         progargs.insert(progargs.begin(), jail().jail_command.begin(),
                         jail().jail_command.end());
         commands_ = {
-            {std::move(ccargs), "", cattleshed::RunJobResponse::COMPILER_STDOUT,
-             cattleshed::RunJobResponse::COMPILER_STDERR,
+            {std::move(ccargs), "", wandbox::cattleshed::RunJobResponse::COMPILER_STDOUT,
+             wandbox::cattleshed::RunJobResponse::COMPILER_STDERR,
              jail().compile_time_limit},
             {std::move(progargs), req_->stdin(),
-             cattleshed::RunJobResponse::STDOUT,
-             cattleshed::RunJobResponse::STDERR, jail().program_duration}};
+             wandbox::cattleshed::RunJobResponse::STDOUT,
+             wandbox::cattleshed::RunJobResponse::STDERR, jail().program_duration}};
       }
 
       auto handle_error = [&]() {
-        cattleshed::RunJobResponse resp;
-        resp.set_type(cattleshed::RunJobResponse::CONTROL);
+        wandbox::cattleshed::RunJobResponse resp;
+        resp.set_type(wandbox::cattleshed::RunJobResponse::CONTROL);
         resp.set_data("Start");
         send_(resp);
         resp.set_data("Finish");
@@ -1099,8 +1099,8 @@ class RunJobHandler
                     std::placeholders::_2));
 
       // 開始
-      cattleshed::RunJobResponse resp;
-      resp.set_type(cattleshed::RunJobResponse::CONTROL);
+      wandbox::cattleshed::RunJobResponse resp;
+      resp.set_type(wandbox::cattleshed::RunJobResponse::CONTROL);
       resp.set_data("Start");
       send_(resp);
 
@@ -1271,20 +1271,20 @@ class RunJobHandler
 
     void Completed() {
       if (WIFEXITED(laststatus_)) {
-        cattleshed::RunJobResponse resp;
-        resp.set_type(cattleshed::RunJobResponse::EXIT_CODE);
+        wandbox::cattleshed::RunJobResponse resp;
+        resp.set_type(wandbox::cattleshed::RunJobResponse::EXIT_CODE);
         resp.set_data(std::to_string(WEXITSTATUS(laststatus_)));
         send_(resp);
       }
       if (WIFSIGNALED(laststatus_)) {
-        cattleshed::RunJobResponse resp;
-        resp.set_type(cattleshed::RunJobResponse::SIGNAL);
+        wandbox::cattleshed::RunJobResponse resp;
+        resp.set_type(wandbox::cattleshed::RunJobResponse::SIGNAL);
         resp.set_data(::strsignal(WTERMSIG(laststatus_)));
         send_(resp);
       }
 
-      cattleshed::RunJobResponse resp;
-      resp.set_type(cattleshed::RunJobResponse::CONTROL);
+      wandbox::cattleshed::RunJobResponse resp;
+      resp.set_type(wandbox::cattleshed::RunJobResponse::CONTROL);
       resp.set_data("Finish");
       send_(resp);
 
@@ -1299,12 +1299,12 @@ class RunJobHandler
 
     std::shared_ptr<boost::asio::io_context> ioc_;
     const wandbox::server_config* config_;
-    const cattleshed::RunJobRequest::Start* req_;
+    const wandbox::cattleshed::RunJobRequest::Start* req_;
     std::shared_ptr<DIR> workdir_;
     std::string workdirpath_;
     std::shared_ptr<boost::asio::signal_set> sigs_;
     wandbox::compiler_trait target_compiler_;
-    std::function<void(const cattleshed::RunJobResponse&)> send_;
+    std::function<void(const wandbox::cattleshed::RunJobResponse&)> send_;
 
     std::function<void()> cb_;
 
@@ -1324,14 +1324,14 @@ class RunJobHandler
   };
 
  private:
-  cattleshed::Cattleshed::AsyncService* service_;
+  wandbox::cattleshed::Cattleshed::AsyncService* service_;
   std::shared_ptr<boost::asio::io_context> ioc_;
   std::shared_ptr<boost::asio::signal_set> sigs_;
   const wandbox::server_config* config_;
   bool started_ = false;
   std::shared_ptr<ProgramWriter> program_writer_;
   std::shared_ptr<ProgramRunner> program_runner_;
-  cattleshed::RunJobRequest::Start req_start_;
+  wandbox::cattleshed::RunJobRequest::Start req_start_;
 };
 
 class CattleshedServer {
@@ -1374,7 +1374,7 @@ class CattleshedServer {
 
  private:
   ggrpc::Server server_;
-  cattleshed::Cattleshed::AsyncService service_;
+  wandbox::cattleshed::Cattleshed::AsyncService service_;
   std::shared_ptr<boost::asio::io_context> ioc_;
   std::shared_ptr<boost::asio::signal_set> sigs_;
   wandbox::server_config config_;

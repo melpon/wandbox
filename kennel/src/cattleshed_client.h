@@ -1,5 +1,5 @@
-#ifndef CATTLESHED_CLIENT_H_INCLUDED
-#define CATTLESHED_CLIENT_H_INCLUDED
+#ifndef CATTLESHED_CLIENT_H_
+#define CATTLESHED_CLIENT_H_
 
 #include <atomic>
 #include <deque>
@@ -18,30 +18,32 @@
 #include "cattleshed.pb.h"
 
 using GetVersionClient =
-    ggrpc::ClientResponseReader<cattleshed::GetVersionRequest,
-                                cattleshed::GetVersionResponse>;
-using RunJobClient = ggrpc::ClientReaderWriter<cattleshed::RunJobRequest,
-                                               cattleshed::RunJobResponse>;
+    ggrpc::ClientResponseReader<wandbox::cattleshed::GetVersionRequest,
+                                wandbox::cattleshed::GetVersionResponse>;
+using RunJobClient =
+    ggrpc::ClientReaderWriter<wandbox::cattleshed::RunJobRequest,
+                              wandbox::cattleshed::RunJobResponse>;
 
 class CattleshedClientManager {
   ggrpc::ClientManager cm_;
-  std::unique_ptr<cattleshed::Cattleshed::Stub> stub_;
+  std::unique_ptr<wandbox::cattleshed::Cattleshed::Stub> stub_;
 
  public:
   CattleshedClientManager(std::shared_ptr<grpc::Channel> channel, int threads)
-      : cm_(threads), stub_(cattleshed::Cattleshed::NewStub(channel)) {
+      : cm_(threads), stub_(wandbox::cattleshed::Cattleshed::NewStub(channel)) {
     cm_.Start();
   }
 
   std::shared_ptr<GetVersionClient> CreateGetVersionClient() {
     auto request = [stub = stub_.get()](
                        grpc::ClientContext* context,
-                       const cattleshed::GetVersionRequest& req,
+                       const wandbox::cattleshed::GetVersionRequest& req,
                        grpc::CompletionQueue* cq) {
       return stub->AsyncGetVersion(context, req, cq);
     };
-    return cm_.CreateResponseReader<cattleshed::GetVersionRequest,
-                                    cattleshed::GetVersionResponse>(request);
+    return cm_.CreateResponseReader<wandbox::cattleshed::GetVersionRequest,
+                                    wandbox::cattleshed::GetVersionResponse>(
+        request);
   }
 
   std::shared_ptr<RunJobClient> CreateRunJobClient() {
@@ -49,9 +51,9 @@ class CattleshedClientManager {
                                         grpc::CompletionQueue* cq, void* tag) {
       return stub->AsyncRunJob(context, cq, tag);
     };
-    return cm_.CreateReaderWriter<cattleshed::RunJobRequest,
-                                  cattleshed::RunJobResponse>(connect);
+    return cm_.CreateReaderWriter<wandbox::cattleshed::RunJobRequest,
+                                  wandbox::cattleshed::RunJobResponse>(connect);
   }
 };
 
-#endif // CATTLESHED_CLIENT_H_INCLUDED
+#endif  // CATTLESHED_CLIENT_H_

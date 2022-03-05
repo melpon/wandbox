@@ -1,5 +1,133 @@
 {
-    "switches": {},
+    "switches": {
+        "warning": {
+            "flags": [
+                "-Wall",
+                "-Wextra"
+            ],
+            "display-name": "Warnings"
+        },
+        "optimize": {
+            "flags": [
+                "-O2",
+                "-march=native"
+            ],
+            "display-name": "Optimization"
+        },
+        "std-c++-default": {
+            "flags": [],
+            "display-name": "Compiler Default",
+            "group": "std-cxx"
+        },
+        "c++98": {
+            "flags": [
+                "-std=c++98"
+            ],
+            "display-name": "C++03",
+            "group": "std-cxx"
+        },
+        "gnu++98": {
+            "flags": "-std=gnu++98",
+            "display-name": "C++03(GNU)",
+            "group": "std-cxx"
+        },
+        "c++0x": {
+            "flags": [
+                "-std=c++0x"
+            ],
+            "display-name": "C++0x",
+            "group": "std-cxx"
+        },
+        "gnu++0x": {
+            "flags": "-std=gnu++0x",
+            "display-name": "C++0x(GNU)",
+            "group": "std-cxx"
+        },
+        "c++11": {
+            "flags": [
+                "-std=c++11"
+            ],
+            "display-name": "C++11",
+            "group": "std-cxx"
+        },
+        "gnu++11": {
+            "flags": "-std=gnu++11",
+            "display-name": "C++11(GNU)",
+            "group": "std-cxx"
+        },
+        "c++1y": {
+            "flags": [
+                "-std=c++1y"
+            ],
+            "display-name": "C++1y",
+            "group": "std-cxx"
+        },
+        "gnu++1y": {
+            "flags": "-std=gnu++1y",
+            "display-name": "C++1y(GNU)",
+            "group": "std-cxx"
+        },
+        "c++14": {
+            "flags": [
+                "-std=c++14"
+            ],
+            "display-name": "C++14",
+            "group": "std-cxx"
+        },
+        "gnu++14": {
+            "flags": "-std=gnu++14",
+            "display-name": "C++14(GNU)",
+            "group": "std-cxx"
+        },
+        "c++1z": {
+            "flags": [
+                "-std=c++1z"
+            ],
+            "display-name": "C++1z",
+            "group": "std-cxx"
+        },
+        "gnu++1z": {
+            "flags": "-std=gnu++1z",
+            "display-name": "C++1z(GNU)",
+            "group": "std-cxx"
+        },
+        "c++17": {
+            "flags": [
+                "-std=c++17"
+            ],
+            "display-name": "C++17",
+            "group": "std-cxx"
+        },
+        "gnu++17": {
+            "flags": "-std=gnu++17",
+            "display-name": "C++17(GNU)",
+            "group": "std-cxx"
+        },
+        "c++2a": {
+            "flags": [
+                "-std=c++2a"
+            ],
+            "display-name": "C++2a",
+            "group": "std-cxx"
+        },
+        "gnu++2a": {
+            "flags": "-std=gnu++2a",
+            "display-name": "C++2a(GNU)",
+            "group": "std-cxx"
+        },
+        "c++2b": {
+            "flags": [
+                "-std=c++2b"
+            ],
+            "display-name": "C++2b",
+            "group": "std-cxx"
+        },
+        "gnu++2b": {
+            "flags": "-std=gnu++2b",
+            "display-name": "C++2b(GNU)",
+            "group": "std-cxx"
+        }
+    },
     "compilers": [
         {
             "name": "bash",
@@ -24,11 +152,88 @@
                 "prog.sh"
             ],
             "runtime-option-raw": true,
-            "jail-name": "melpon2-default",
+            "jail-name": "test",
             "templates": [
                 "bash"
             ]
+        },
+        {
+            "name": "gcc",
+            "compile-command": [
+                "/usr/bin/g++",
+                "-oprog.exe",
+                "-lpthread",
+                "prog.cc"
+            ],
+            "version-command": [
+                "/bin/sh",
+                "-c",
+                "/usr/bin/g++ --version | head -1 | cut -d' ' -f3-"
+            ],
+            "display-name": "gcc",
+            "display-compile-command": "g++ prog.cc",
+            "language": "C++",
+            "output-file": "prog.cc",
+            "run-command": "./prog.exe",
+            "displayable": true,
+            "compiler-option-raw": true,
+            "switches": [
+                "warning",
+                "optimize",
+                "std-c++-default",
+                "c++98",
+                "gnu++98",
+                "c++11",
+                "gnu++11",
+                "c++14",
+                "gnu++14",
+                "c++17",
+                "gnu++17",
+                "c++2a",
+                "gnu++2a",
+            ],
+            "initial-checked": [
+                "warning",
+                "gnu++2b"
+            ],
+            "jail-name": "test",
+            "templates": [
+                "gcc"
+            ]
+        },
+        {
+            "templates": [], 
+            "compiler-option-raw": false, 
+            "version-command": [
+                "/usr/bin/python3", 
+                "-c", 
+                "import sys; print(sys.version.split()[0])"
+            ], 
+            "switches": [], 
+            "display-compile-command": "python3 prog.py", 
+            "initial-checked": [], 
+            "jail-name": "test", 
+            "display-name": "CPython HEAD", 
+            "runtime-option-raw": true, 
+            "compile-command": [
+                "/bin/true"
+            ], 
+            "name": "cpython", 
+            "language": "Python3", 
+            "output-file": "prog.py", 
+            "displayable": true, 
+            "run-command": [
+                "/usr/bin/python3", 
+                "prog.py"
+            ]
         }
     ],
-    "templates": {}
+    "templates": {
+        "bash": {
+            "code": "echo \"Hello Wandbox\"\n"
+        },
+        "gcc": {
+            "code": "// This file is a \"Hello, world!\" in C++ language by GCC for wandbox.\n#include <iostream>\n#include <cstdlib>\n\nint main()\n{\n    std::cout << \"Hello, Wandbox!\" << std::endl;\n}\n\n// GCC reference:\n//   https://gcc.gnu.org/\n\n// C++ language references:\n//   https://cppreference.com/\n//   https://isocpp.org/\n//   http://www.open-std.org/jtc1/sc22/wg21/\n\n// Boost libraries references:\n//   https://www.boost.org/doc/\n"
+        }
+    }
 }

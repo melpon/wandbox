@@ -1,4 +1,4 @@
-{"data":"Start","type":"Control"}
-{"data":"foo\n","type":"StdOut"}
-{"data":"0","type":"ExitCode"}
-{"data":"Finish","type":"Control"}
+{"type":"Control","data":"Start"}
+{"type":"StdOut","data":"foo\n"}
+{"type":"ExitCode","data":"0"}
+{"type":"Control","data":"Finish"}

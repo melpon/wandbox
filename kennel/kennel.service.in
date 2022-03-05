@@ -1,0 +1,19 @@
+[Unit]
+Description=Wandbox API Server
+
+[Service]
+
+ExecStart=@CMAKE_INSTALL_PREFIX@/bin/kennel \
+    --host @KENNEL_HOST@ \
+    --port @KENNEL_PORT@ \
+    --cattleshed-host @KENNEL_CATTLESHED_HOST@ \
+    --cattleshed-port @KENNEL_CATTLESHED_PORT@ \
+    --sponsorsfile @KENNEL_SPONSORSFILE@ \
+    --database @KENNEL_DATABASE@ \
+    --url @KENNEL_URL@
+Restart=on-failure
+User=ubuntu
+Group=ubuntu
+
+[Install]
+WantedBy=multi-user.target

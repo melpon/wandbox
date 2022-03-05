@@ -15,32 +15,18 @@ if [ "$1" = "--release" ]; then
   RELEASE_MODE=1
 fi
 
-CMAKE_VERSION="3.17.0"
+CMAKE_VERSION="3.22.2"
 CMAKE_VERSION_FILE="$INSTALL_DIR/cmake.version"
 CMAKE_CHANGED=0
 if [ ! -e $CMAKE_VERSION_FILE -o "$CMAKE_VERSION" != "`cat $CMAKE_VERSION_FILE`" ]; then
   CMAKE_CHANGED=1
 fi
 
-BOOST_VERSION="1.72.0"
+BOOST_VERSION="1.78.0"
 BOOST_VERSION_FILE="$INSTALL_DIR/boost.version"
 BOOST_CHANGED=0
 if [ ! -e $BOOST_VERSION_FILE -o "$BOOST_VERSION" != "`cat $BOOST_VERSION_FILE`" ]; then
   BOOST_CHANGED=1
-fi
-
-ICU_VERSION="64.2"
-ICU_VERSION_FILE="$INSTALL_DIR/icu.version"
-ICU_CHANGED=0
-if [ ! -e $ICU_VERSION_FILE -o "$ICU_VERSION" != "`cat $ICU_VERSION_FILE`" ]; then
-  ICU_CHANGED=1
-fi
-
-CPPCMS_VERSION="1.2.1"
-CPPCMS_VERSION_FILE="$INSTALL_DIR/cppcms.version"
-CPPCMS_CHANGED=0
-if [ ! -e $CPPCMS_VERSION_FILE -o "$CPPCMS_VERSION" != "`cat $CPPCMS_VERSION_FILE`" ]; then
-  CPPCMS_CHANGED=1
 fi
 
 CPPDB_VERSION="0.3.1"
@@ -50,54 +36,48 @@ if [ ! -e $CPPDB_VERSION_FILE -o "$CPPDB_VERSION" != "`cat $CPPDB_VERSION_FILE`"
   CPPDB_CHANGED=1
 fi
 
-GRPC_VERSION="1.28.0"
+GRPC_VERSION="1.44.0"
 GRPC_VERSION_FILE="$INSTALL_DIR/grpc.version"
 GRPC_CHANGED=0
 if [ ! -e $GRPC_VERSION_FILE -o "$GRPC_VERSION" != "`cat $GRPC_VERSION_FILE`" ]; then
   GRPC_CHANGED=1
 fi
 
-PCRE_VERSION="8.43"
-PCRE_VERSION_FILE="$INSTALL_DIR/pcre.version"
-PCRE_CHANGED=0
-if [ ! -e $PCRE_VERSION_FILE -o "$PCRE_VERSION" != "`cat $PCRE_VERSION_FILE`" ]; then
-  PCRE_CHANGED=1
-fi
-
-CURL_VERSION="7.66.0"
-CURL_VERSION_FILE="$INSTALL_DIR/curl.version"
-CURL_CHANGED=0
-if [ ! -e $CURL_VERSION_FILE -o "$CURL_VERSION" != "`cat $CURL_VERSION_FILE`" ]; then
-  CURL_CHANGED=1
-fi
-
-SQLITE3_VERSION="3.29.0"
-SQLITE3_VERSION_NUMBER="3290000"
+SQLITE3_VERSION="3.38.0"
+SQLITE3_VERSION_NUMBER="3380000"
+SQLITE3_YEAR="2022"
 SQLITE3_VERSION_FILE="$INSTALL_DIR/sqlite3.version"
 SQLITE3_CHANGED=0
 if [ ! -e $SQLITE3_VERSION_FILE -o "$SQLITE3_VERSION" != "`cat $SQLITE3_VERSION_FILE`" ]; then
   SQLITE3_CHANGED=1
 fi
 
-CLI11_VERSION="1.8.0"
+CLI11_VERSION="2.1.2"
 CLI11_VERSION_FILE="$INSTALL_DIR/cli11.version"
 CLI11_CHANGED=0
 if [ ! -e $CLI11_VERSION_FILE -o "$CLI11_VERSION" != "`cat $CLI11_VERSION_FILE`" ]; then
   CLI11_CHANGED=1
 fi
 
-SPDLOG_VERSION="1.4.2"
+SPDLOG_VERSION="1.9.2"
 SPDLOG_VERSION_FILE="$INSTALL_DIR/spdlog.version"
 SPDLOG_CHANGED=0
 if [ ! -e $SPDLOG_VERSION_FILE -o "$SPDLOG_VERSION" != "`cat $SPDLOG_VERSION_FILE`" ]; then
   SPDLOG_CHANGED=1
 fi
 
-GGRPC_VERSION="0.4.0"
+GGRPC_VERSION="0.5.7"
 GGRPC_VERSION_FILE="$INSTALL_DIR/ggrpc.version"
 GGRPC_CHANGED=0
 if [ ! -e $GGRPC_VERSION_FILE -o "$GGRPC_VERSION" != "`cat $GGRPC_VERSION_FILE`" ]; then
   GGRPC_CHANGED=1
+fi
+
+PROTOC_GEN_JSONIF_VERSION="0.5.0"
+PROTOC_GEN_JSONIF_VERSION_FILE="$INSTALL_DIR/protoc-gen-jsonif.version"
+PROTOC_GEN_JSONIF_CHANGED=0
+if [ ! -e $PROTOC_GEN_JSONIF_VERSION_FILE -o "$PROTOC_GEN_JSONIF_VERSION" != "`cat $PROTOC_GEN_JSONIF_VERSION_FILE`" ]; then
+  PROTOC_GEN_JSONIF_CHANGED=1
 fi
 
 if [ -z "$JOBS" ]; then
@@ -114,8 +94,8 @@ fi
 
 # CMake が古いとビルド出来ないので、インストール済み CMake から新しい CMake をインストールする
 if [ $CMAKE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cmake/bin/cmake ]; then
-  _URL=https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz
-  _FILE=$SOURCE_DIR/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz
+  _URL=https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz
+  _FILE=$SOURCE_DIR/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz
   if [ ! -e $_FILE ]; then
     echo "file(DOWNLOAD $_URL $_FILE)" > $SOURCE_DIR/tmp.cmake
     cmake -P $SOURCE_DIR/tmp.cmake
@@ -123,19 +103,19 @@ if [ $CMAKE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cmake/bin/cmake ]; then
   fi
 
   pushd $SOURCE_DIR
-    rm -rf cmake-${CMAKE_VERSION}-Linux-x86_64
+    rm -rf cmake-${CMAKE_VERSION}-linux-x86_64
     cmake -E tar xf $_FILE
   popd
 
   rm -rf $INSTALL_DIR/cmake
-  mv $SOURCE_DIR/cmake-${CMAKE_VERSION}-Linux-x86_64 $INSTALL_DIR/cmake
+  mv $SOURCE_DIR/cmake-${CMAKE_VERSION}-linux-x86_64 $INSTALL_DIR/cmake
 fi
 echo $CMAKE_VERSION > $CMAKE_VERSION_FILE
 
 export PATH=$INSTALL_DIR/cmake/bin:$PATH
 
 # grpc (cmake)
-if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; then
+if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc.a ]; then
   # gRPC のソース取得
   if [ ! -e $SOURCE_DIR/grpc/.git ]; then
     git clone https://github.com/grpc/grpc.git $SOURCE_DIR/grpc
@@ -196,6 +176,9 @@ echo $GRPC_VERSION > $GRPC_VERSION_FILE
 
 # boost
 if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_filesystem.a ]; then
+  rm -rf $SOURCE_DIR/boost_${_VERSION_UNDERSCORE}
+  rm -rf $INSTALL_DIR/boost
+
   _VERSION_UNDERSCORE=${BOOST_VERSION//./_}
   _URL=https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source/boost_${_VERSION_UNDERSCORE}.tar.gz
   _FILE=$SOURCE_DIR/boost_${_VERSION_UNDERSCORE}.tar.gz
@@ -216,108 +199,18 @@ if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_filesystem.a ]
       --build-dir=$BUILD_DIR/boost-build \
       --with-filesystem \
       --with-program_options \
+      --with-json \
+      target-os=linux \
+      address-model=64 \
+      variant=release \
       link=static
   popd
 fi
 echo $BOOST_VERSION > $BOOST_VERSION_FILE
 
-# icu
-if [ $ICU_CHANGED -eq 1 -o ! -e $INSTALL_DIR/icu/lib/libicudata.a ]; then
-  _VERSION_UNDERSCORE=${ICU_VERSION//./_}
-  _VERSION_MINUS=${ICU_VERSION//./-}
-  _URL=https://github.com/unicode-org/icu/releases/download/release-$_VERSION_MINUS/icu4c-${_VERSION_UNDERSCORE}-src.tgz
-  _FILE=$SOURCE_DIR/icu4c-${_VERSION_UNDERSCORE}-src.tgz
-  if [ ! -e $_FILE ]; then
-    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
-    cmake -P $BUILD_DIR/tmp.cmake
-    rm $BUILD_DIR/tmp.cmake
-  fi
-
-  pushd $SOURCE_DIR
-    rm -rf icu
-    cmake -E tar xf $_FILE
-  popd
-
-  rm -rf $BUILD_DIR/icu-build
-  mkdir $BUILD_DIR/icu-build
-  pushd $BUILD_DIR/icu-build
-    CC=gcc CXX=g++ $SOURCE_DIR/icu/source/configure \
-      --prefix=$INSTALL_DIR/icu \
-      --disable-tests \
-      --disable-samples \
-      --disable-shared \
-      --enable-static
-    make -j$JOBS
-    make install
-  popd
-fi
-echo $ICU_VERSION > $ICU_VERSION_FILE
-
-# pcre
-if [ $PCRE_CHANGED -eq 1 -o ! -e $INSTALL_DIR/pcre/lib/libpcre.a ]; then
-  _URL=https://jaist.dl.sourceforge.net/project/pcre/pcre/$PCRE_VERSION/pcre-$PCRE_VERSION.tar.gz
-  _FILE=$SOURCE_DIR/pcre-$PCRE_VERSION.zip
-  if [ ! -e $_FILE ]; then
-    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
-    cmake -P $BUILD_DIR/tmp.cmake
-    rm $BUILD_DIR/tmp.cmake
-  fi
-
-  pushd $SOURCE_DIR
-    rm -rf pcre-$PCRE_VERSION
-    cmake -E tar xf $_FILE
-  popd
-
-  rm -rf $BUILD_DIR/pcre-build
-  mkdir -p $BUILD_DIR/pcre-build
-  pushd $BUILD_DIR/pcre-build
-    cmake $SOURCE_DIR/pcre-$PCRE_VERSION \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/pcre \
-      -DPCRE_SUPPORT_UTF=ON \
-      -DPCRE_BUILD_PCREGREP=OFF \
-      -DPCRE_BUILD_TESTS=OFF
-    make -j$JOBS
-    make install
-  popd
-fi
-echo $PCRE_VERSION > $PCRE_VERSION_FILE
-
-# curl
-if [ $CURL_CHANGED -eq 1 -o ! -e $INSTALL_DIR/curl/lib/libcurl.a ]; then
-  _VERSION_UNDERSCORE=${CURL_VERSION//./_}
-  _URL=https://github.com/curl/curl/releases/download/curl-${_VERSION_UNDERSCORE}/curl-$CURL_VERSION.tar.gz
-  _FILE=$SOURCE_DIR/curl-$CURL_VERSION.tar.gz
-  if [ ! -e $_FILE ]; then
-    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
-    cmake -P $BUILD_DIR/tmp.cmake
-    rm $BUILD_DIR/tmp.cmake
-  fi
-
-  pushd $SOURCE_DIR
-    rm -rf curl-$CURL_VERSION
-    cmake -E tar xf $_FILE
-  popd
-
-  rm -rf $BUILD_DIR/curl-build
-  mkdir -p $BUILD_DIR/curl-build
-  pushd $BUILD_DIR/curl-build
-    $SOURCE_DIR/curl-$CURL_VERSION/configure \
-      --prefix=$INSTALL_DIR/curl \
-      --disable-shared \
-      --disable-ldap \
-      --with-ssl=$INSTALL_DIR/grpc \
-      --with-zlib=$INSTALL_DIR/grpc \
-      --without-librtmp
-    make -j$JOBS
-    make install
-  popd
-fi
-echo $CURL_VERSION > $CURL_VERSION_FILE
-
 # sqlite3
 if [ $SQLITE3_CHANGED -eq 1 -o ! -e $INSTALL_DIR/sqlite3/lib/libsqlite3.a ]; then
-  _URL=https://www.sqlite.org/2019/sqlite-autoconf-$SQLITE3_VERSION_NUMBER.tar.gz
+  _URL=https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION_NUMBER.tar.gz
   _FILE=$SOURCE_DIR/sqlite-autoconf-$SQLITE3_VERSION_NUMBER.tar.gz
   if [ ! -e $_FILE ]; then
     echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
@@ -342,37 +235,6 @@ if [ $SQLITE3_CHANGED -eq 1 -o ! -e $INSTALL_DIR/sqlite3/lib/libsqlite3.a ]; the
   popd
 fi
 echo $SQLITE3_VERSION > $SQLITE3_VERSION_FILE
-
-# cppcms
-if [ $CPPCMS_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppcms/lib/libcppcms.a ]; then
-  rm -rf $SOURCE_DIR/cppcms
-  git clone --branch v$CPPCMS_VERSION --depth 1 https://github.com/artyom-beilis/cppcms.git $SOURCE_DIR/cppcms
-
-  PATCH_DIR=`pwd`/patch
-  # パッチの適用
-  pushd $SOURCE_DIR/cppcms
-    patch -p1 < $PATCH_DIR/001_http_protocol.patch
-    patch -p1 < $PATCH_DIR/002_ignore_http_header_comments.patch
-    patch -p1 < $PATCH_DIR/003_cxx11_notest.patch
-  popd
-
-  # ビルドとインストール
-  mkdir -p $BUILD_DIR/cppcms-build
-  pushd $BUILD_DIR/cppcms-build
-    cmake $SOURCE_DIR/cppcms \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR/cppcms \
-      -DCMAKE_PREFIX_PATH="$INSTALL_DIR/pcre;$INSTALL_DIR/icu;$INSTALL_DIR/grpc" \
-      -DDISABLE_SHARED=ON \
-      -DDISABLE_SCGI=ON \
-      -DDISABLE_TCPCACHE=ON \
-      -DDISABLE_GCRYPT=ON \
-      -DDISABLE_ICONV=ON
-    make
-    make install
-  popd
-fi
-echo $CPPCMS_VERSION > $CPPCMS_VERSION_FILE
 
 # cppdb
 if [ $CPPDB_CHANGED -eq 1 -o ! -e $INSTALL_DIR/cppdb/lib/libcppdb.a ]; then
@@ -423,3 +285,24 @@ if [ $GGRPC_CHANGED -eq 1 -o  ! -e $INSTALL_DIR/ggrpc/include/server.h ]; then
   git clone --branch $GGRPC_VERSION --depth 1 https://github.com/melpon/ggrpc.git $INSTALL_DIR/ggrpc
 fi
 echo $GGRPC_VERSION > $GGRPC_VERSION_FILE
+
+# protoc-gen-jsonif
+if [ $PROTOC_GEN_JSONIF_CHANGED -eq 1 -o ! -e $INSTALL_DIR/protoc-gen-jsonif/linux/amd64/protoc-gen-jsonif-cpp ]; then
+  _URL=https://github.com/melpon/protoc-gen-jsonif/releases/download/$PROTOC_GEN_JSONIF_VERSION/protoc-gen-jsonif.tar.gz
+  _FILE=$BUILD_DIR/protoc-gen-jsonif.tar.gz
+  mkdir -p $BUILD_DIR
+  rm -f $_FILE
+  if [ ! -e $_FILE ]; then
+    echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
+    cmake -P $BUILD_DIR/tmp.cmake
+    rm $BUILD_DIR/tmp.cmake
+  fi
+  rm -rf $BUILD_DIR/protoc-gen-jsonif
+  rm -rf $INSTALL_DIR/protoc-gen-jsonif
+  pushd $BUILD_DIR
+    tar -xf $_FILE
+    mv protoc-gen-jsonif $INSTALL_DIR/protoc-gen-jsonif
+    chmod +x $INSTALL_DIR/protoc-gen-jsonif/linux/amd64/protoc-gen-jsonif-cpp
+  popd
+fi
+echo $PROTOC_GEN_JSONIF_VERSION > $PROTOC_GEN_JSONIF_VERSION_FILE
