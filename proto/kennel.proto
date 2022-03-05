@@ -17,16 +17,22 @@ message SelectSwitchOption {
 
 message Switch {
   option (jsonif_message_optimistic) = true;
+  // single か select かで出力する内容を出し分けたいが、
+  // optimistic や discard_if_default では default の型を切り替えるのができないので、
+  // シリアライザを自前で書くことにする。
+  option (jsonif_no_serializer) = true;
+  option (jsonif_no_deserializer) = true;
 
   // single | select
   string type = 1;
   string name = 2;
-  string default_value = 3 [(jsonif_name) = "default"];
   // type == single の場合のみ
   string display_name = 10 [(jsonif_name) = "display-name", (jsonif_discard_if_default) = true];
   string display_flags = 11 [(jsonif_name) = "display-flags", (jsonif_discard_if_default) = true];
+  bool single_default = 12 [(jsonif_name) = "default"];
   // type == select の場合のみ
   repeated SelectSwitchOption options = 20 [(jsonif_discard_if_default) = true];
+  string select_default = 21 [(jsonif_name) = "default"];
 }
 
 message CompilerInfo {
