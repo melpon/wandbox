@@ -4,9 +4,7 @@ project(kennel C CXX)
 
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost REQUIRED
-  COMPONENTS
-    program_options)
+find_package(Boost REQUIRED)
 find_package(RT REQUIRED)
 find_package(CAP REQUIRED)
 find_package(Threads REQUIRED)

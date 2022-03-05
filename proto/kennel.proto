@@ -123,6 +123,22 @@ message SponsorResponse {
 }
 
 message CompileNdjsonResult {
+  // type: Control, data: Start
+  //   - 開始
+  // type: Control, data: Finish
+  //   - 終了
+  // type: CompilerMessageS
+  //   - コンパイル時の標準出力
+  // type: CompilerMessageE
+  //   - コンパイル時の標準エラー
+  // type: StdOut
+  //   - 実行時の標準出力
+  // type: StdErr
+  //   - 実行時の標準エラー
+  // type: ExitCode
+  //   - プログラムの終了コード
+  // type: Signal
+  //   - プログラムのシグナルコード
   string type = 1;
   string data = 2;
 }

@@ -1,1 +1,0 @@
-../../../submodules/jquery-cookie/src/jquery.cookie.js
