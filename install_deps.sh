@@ -285,7 +285,7 @@ if [ $PROTOC_GEN_JSONIF_CHANGED -eq 1 -o ! -e $INSTALL_DIR/protoc-gen-jsonif/lin
   _URL=https://github.com/melpon/protoc-gen-jsonif/releases/download/$PROTOC_GEN_JSONIF_VERSION/protoc-gen-jsonif.tar.gz
   _FILE=$BUILD_DIR/protoc-gen-jsonif.tar.gz
   mkdir -p $BUILD_DIR
-  rm $_FILE
+  rm -f $_FILE
   if [ ! -e $_FILE ]; then
     echo "file(DOWNLOAD $_URL $_FILE)" > $BUILD_DIR/tmp.cmake
     cmake -P $BUILD_DIR/tmp.cmake
