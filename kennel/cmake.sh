@@ -16,12 +16,13 @@ CMAKE_INSTALL_PREFIX=$PROJECT_DIR/_install
 CMAKE_OPTS=" \
 "
 LOCAL=1
+GDB=0
 RUN_AFTER_BUILD=0
 
 while [ $# -ne 0 ]; do
   case "$1" in
     "--help" )
-      echo "$0 [--tsan] [--asan] [--local] [--develop] [--master] [--prefix <dir>] [--run] [--help]"
+      echo "$0 [--tsan] [--asan] [--local] [--develop] [--master] [--prefix <dir>] [--run] [--gdb] [--help]"
       exit 0
       ;;
 
@@ -72,7 +73,10 @@ while [ $# -ne 0 ]; do
     "--run" )
       RUN_AFTER_BUILD=1
       ;;
-    
+    "--gdb" )
+      GDB=1
+      ;;
+
     * )
       echo "Unknown option $1" 1>&2
       exit 1
@@ -104,5 +108,9 @@ pushd $BUILD_DIR
 popd
 
 if [ $LOCAL -eq 1 -a $RUN_AFTER_BUILD -eq 1 ]; then
-  exec $BUILD_DIR/kennel
+  if [ $GDB -eq 1 ]; then
+    exec gdb -ex r --args $BUILD_DIR/kennel --log-level debug
+  else
+    exec $BUILD_DIR/kennel --log-level debug
+  fi
 fi

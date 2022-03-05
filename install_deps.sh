@@ -176,6 +176,9 @@ echo $GRPC_VERSION > $GRPC_VERSION_FILE
 
 # boost
 if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_filesystem.a ]; then
+  rm -rf $SOURCE_DIR/boost_${_VERSION_UNDERSCORE}
+  rm -rf $INSTALL_DIR/boost
+
   _VERSION_UNDERSCORE=${BOOST_VERSION//./_}
   _URL=https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source/boost_${_VERSION_UNDERSCORE}.tar.gz
   _FILE=$SOURCE_DIR/boost_${_VERSION_UNDERSCORE}.tar.gz
@@ -197,6 +200,9 @@ if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_filesystem.a ]
       --with-filesystem \
       --with-program_options \
       --with-json \
+      target-os=linux \
+      address-model=64 \
+      variant=release \
       link=static
   popd
 fi

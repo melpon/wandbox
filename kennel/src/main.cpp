@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <boost/asio.hpp>
+#include <boost/json.hpp>
 #include <cstdlib>
 #include <fstream>
 #include <functional>
@@ -25,7 +27,9 @@ namespace wandbox {
 namespace kennel {
 
 // ::wandbox::kennel::Switch
-static void tag_invoke(const boost::json::value_from_tag&, boost::json::value& jv, const ::wandbox::kennel::Switch& v) {
+static void tag_invoke(const boost::json::value_from_tag&,
+                       boost::json::value& jv,
+                       const ::wandbox::kennel::Switch& v) {
   boost::json::object obj;
   obj["type"] = boost::json::value_from(v.type);
   obj["name"] = boost::json::value_from(v.name);
@@ -48,7 +52,9 @@ static void tag_invoke(const boost::json::value_from_tag&, boost::json::value& j
   jv = std::move(obj);
 }
 
-static ::wandbox::kennel::Switch tag_invoke(const boost::json::value_to_tag<::wandbox::kennel::Switch>&, const boost::json::value& jv) {
+static ::wandbox::kennel::Switch tag_invoke(
+    const boost::json::value_to_tag<::wandbox::kennel::Switch>&,
+    const boost::json::value& jv) {
   ::wandbox::kennel::Switch v;
   if (jv.as_object().find("type") != jv.as_object().end()) {
     v.type = boost::json::value_to<std::string>(jv.at("type"));
@@ -60,10 +66,12 @@ static ::wandbox::kennel::Switch tag_invoke(const boost::json::value_to_tag<::wa
     v.display_name = boost::json::value_to<std::string>(jv.at("display-name"));
   }
   if (jv.as_object().find("display-flags") != jv.as_object().end()) {
-    v.display_flags = boost::json::value_to<std::string>(jv.at("display-flags"));
+    v.display_flags =
+        boost::json::value_to<std::string>(jv.at("display-flags"));
   }
   if (jv.as_object().find("options") != jv.as_object().end()) {
-    v.options = boost::json::value_to<std::vector<::wandbox::kennel::SelectSwitchOption>>(jv.at("options"));
+    v.options = boost::json::value_to<
+        std::vector<::wandbox::kennel::SelectSwitchOption>>(jv.at("options"));
   }
   if (jv.as_object().find("default") != jv.as_object().end()) {
     if (v.type == "single") {
@@ -75,8 +83,34 @@ static ::wandbox::kennel::Switch tag_invoke(const boost::json::value_to_tag<::wa
   return v;
 }
 
+}  // namespace kennel
+}  // namespace wandbox
+
+namespace jsonif {
+
+template <class T>
+inline T from_json(const std::string& s, std::exception_ptr& e) {
+  e = std::exception_ptr();
+  try {
+    return boost::json::value_to<T>(boost::json::parse(s));
+  } catch (...) {
+    e = std::current_exception();
+    return T();
+  }
 }
+
+template <class T>
+inline std::string to_json(const T& v, std::exception_ptr& e) {
+  e = std::exception_ptr();
+  try {
+    return boost::json::serialize(boost::json::value_from(v));
+  } catch (...) {
+    e = std::current_exception();
+    return "";
+  }
 }
+
+}  // namespace jsonif
 
 // wandbox::cattleshed::GetVersionResponse を頑張って wandbox::kennel::CattleshedInfo に変換する
 static wandbox::kennel::CattleshedInfo version_response_to_kennel(
@@ -221,6 +255,19 @@ boost::beast::http::response<boost::beast::http::string_body> NotFound(
   res.set(boost::beast::http::field::content_type, "text/html");
   res.keep_alive(req.keep_alive());
   res.body() = "The resource '" + target.to_string() + "' was not found.";
+  res.prepare_payload();
+  return res;
+}
+
+boost::beast::http::response<boost::beast::http::string_body> ServerError(
+    const boost::beast::http::request<boost::beast::http::string_body>& req,
+    boost::beast::string_view what) {
+  boost::beast::http::response<boost::beast::http::string_body> res{
+      boost::beast::http::status::internal_server_error, req.version()};
+  res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+  res.set(boost::beast::http::field::content_type, "text/html");
+  res.keep_alive(req.keep_alive());
+  res.body() = "An error occurred: '" + what.to_string() + "'";
   res.prepare_payload();
   return res;
 }
@@ -451,30 +498,44 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
 
     SPDLOG_DEBUG("[{}] requested", req_.target().to_string());
 
-    if (req_.method() == boost::beast::http::verb::get) {
-      if (req_.target() == "/api/sponsors.json") {
-        HandleGetSponsors();
-      } else if (req_.target() == "/api/list.json") {
-        HandleGetList();
-      } else if (req_.target().starts_with("/api/permlink/")) {
-        HandleGetPermlink(req_.target().substr(sizeof("/api/permlink/") - 1));
-      } else if (req_.target().starts_with("/api/template/")) {
-        HandleGetTemplate(req_.target().substr(sizeof("/api/template/") - 1));
+    // 念のため catch しておく（投げっぱなしだとプロセスごと落ちてしまうので）
+    try {
+      if (req_.method() == boost::beast::http::verb::get) {
+        if (req_.target() == "/api/sponsors.json") {
+          HandleGetSponsors();
+        } else if (req_.target() == "/api/list.json") {
+          HandleGetList();
+        } else if (req_.target().starts_with("/api/permlink/")) {
+          HandleGetPermlink(req_.target().substr(sizeof("/api/permlink/") - 1));
+        } else if (req_.target().starts_with("/api/template/")) {
+          HandleGetTemplate(req_.target().substr(sizeof("/api/template/") - 1));
+        } else {
+          SendResponse(NotFound(req_, req_.target()));
+        }
+      } else if (req_.method() == boost::beast::http::verb::post) {
+        if (req_.target() == "/api/compile.json") {
+          HandlePostCompileJson();
+        } else if (req_.target() == "/api/compile.ndjson") {
+          HandlePostCompileNdjson();
+        } else if (req_.target() == "/api/permlink") {
+          HandlePostPermlink();
+        } else {
+          SendResponse(NotFound(req_, req_.target()));
+        }
       } else {
         SendResponse(NotFound(req_, req_.target()));
       }
-    } else if (req_.method() == boost::beast::http::verb::post) {
-      if (req_.target() == "/api/compile.json") {
-        HandlePostCompileJson();
-      } else if (req_.target() == "/api/compile.ndjson") {
-        HandlePostCompileNdjson();
-      } else if (req_.target() == "/api/permlink") {
-        HandlePostPermlink();
-      } else {
-        SendResponse(NotFound(req_, req_.target()));
-      }
-    } else {
-      SendResponse(NotFound(req_, req_.target()));
+    } catch (const char* e) {
+      SPDLOG_ERROR("[{}] Unexpected exception: {}", req_.target().to_string(),
+                   e);
+      SendResponse(ServerError(req_, e));
+    } catch (std::exception& e) {
+      SPDLOG_ERROR("[{}] Unexpected exception: {}", req_.target().to_string(),
+                   e.what());
+      SendResponse(ServerError(req_, e.what()));
+    } catch (...) {
+      SPDLOG_ERROR("[{}] Unexpected exception", req_.target().to_string());
+      SendResponse(ServerError(req_, "unexpected"));
     }
   }
 
@@ -515,7 +576,14 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
 
   void HandleGetPermlink(boost::beast::string_view permlink_id) {
     permlink pl(config_.database);
-    auto presp = pl.get_permlink(permlink_id.to_string());
+    wandbox::kennel::GetPermlinkResponse presp;
+    try {
+      presp = pl.get_permlink(permlink_id.to_string());
+    } catch (cppdb::null_value_fetch) {
+      SendResponse(NotFound(req_, req_.target()));
+      return;
+    }
+
     for (const auto& r : presp.results) {
       wandbox::cattleshed::RunJobResponse cr;
       cr.set_type(string_to_response_type(r.type));
@@ -543,8 +611,13 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
   }
 
   void HandlePostCompileJson() {
+    std::exception_ptr ep;
     auto kreq =
-        jsonif::from_json<wandbox::kennel::CompileParameter>(req_.body());
+        jsonif::from_json<wandbox::kennel::CompileParameter>(req_.body(), ep);
+    if (ep) {
+      SendResponse(BadRequest(req_, "Invalid JSON"));
+      return;
+    }
     if (!check_title(kreq)) {
       SendResponse(BadRequest(req_, "Too long title or description"));
       return;
@@ -605,8 +678,13 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
   }
 
   void HandlePostCompileNdjson() {
+    std::exception_ptr ep;
     auto kreq =
-        jsonif::from_json<wandbox::kennel::CompileParameter>(req_.body());
+        jsonif::from_json<wandbox::kennel::CompileParameter>(req_.body(), ep);
+    if (ep) {
+      SendResponse(BadRequest(req_, "Invalid JSON"));
+      return;
+    }
     if (!check_title(kreq)) {
       SendResponse(BadRequest(req_, "Too long title or description"));
       return;
@@ -650,8 +728,13 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
   }
 
   void HandlePostPermlink() {
-    auto preq =
-        jsonif::from_json<wandbox::kennel::PostPermlinkRequest>(req_.body());
+    std::exception_ptr ep;
+    auto preq = jsonif::from_json<wandbox::kennel::PostPermlinkRequest>(
+        req_.body(), ep);
+    if (ep) {
+      SendResponse(BadRequest(req_, "Invalid JSON"));
+      return;
+    }
     if (!check_title(preq)) {
       SendResponse(BadRequest(req_, "Too long title or description"));
       return;
@@ -779,7 +862,8 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
                   std::placeholders::_1, std::placeholders::_2,
                   sp->need_eof()));
 
-    SPDLOG_DEBUG("[{}] responsed {}", req_.target().to_string(), (int)sp->result());
+    SPDLOG_INFO("[{}] responsed {}", req_.target().to_string(),
+                (int)sp->result());
   }
 
   enum class ChunkState {
@@ -1087,6 +1171,7 @@ int main(int argc, char* argv[]) {
       std::make_shared<wandbox::kennel::SponsorFile>(std::move(sponsor_file));
   config.database = std::move(database);
   config.url = std::move(url);
+  SPDLOG_INFO("Start to listen {}:{}", host, port);
   KennelServer::Create(ioc, std::move(config))->Run();
   ioc.run();
 }
