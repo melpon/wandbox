@@ -5,6 +5,13 @@ import type { EntryContext } from "remix";
 import { commitSession, getSession } from "./sessions.server";
 import { AnyJson } from "./hooks/fetch";
 
+class WandboxError extends Error {
+  constructor(public statusCode: number, public errorMessage: string) {
+    super(`${statusCode} ${errorMessage}`);
+    this.name = new.target.name;
+  }
+}
+
 async function getGithubAccessToken(url: URL): Promise<string | null> {
   const client_id = WANDBOX_GITHUB_CLIENT_ID;
   const client_secret = WANDBOX_GITHUB_CLIENT_SECRET;
@@ -97,7 +104,7 @@ export async function fetchPermlinkData(
     headers: headers,
   });
   if (resp.status !== 200) {
-    throw `Error fetch permlink ${permlinkId}`;
+    throw new WandboxError(resp.status, await resp.text());
   }
   const body = await resp.json();
 
@@ -126,7 +133,7 @@ export async function fetchListData(request: Request): Promise<AnyJson> {
     headers: headers,
   });
   if (resp.status !== 200) {
-    throw `Error fetch list.json`;
+    throw new WandboxError(resp.status, await resp.text());
   }
   const body = await resp.json();
 
@@ -155,7 +162,7 @@ export async function fetchSponsorsData(request: Request): Promise<AnyJson> {
     headers: headers,
   });
   if (resp.status !== 200) {
-    throw `Error fetch sponsors.json`;
+    throw new WandboxError(resp.status, await resp.text());
   }
   const body = await resp.json();
 
@@ -221,97 +228,105 @@ export default async function handleRequest(
       })
     );
   }
-  // permlink 送信リクエストにユーザー情報を設定する
-  if (
-    !hasError &&
-    request.method === "POST" &&
-    url.pathname === "/api/permlink"
-  ) {
-    const json = await request.json();
-    const session = await getSession(request.headers.get("Cookie"));
-    if (session.has("github_user")) {
-      const githubUser = JSON.parse(session.get("github_user"));
-      json["github_user"] = githubUser["login"];
-      json["github_id"] = githubUser["id"];
+  try {
+    // permlink 送信リクエストにユーザー情報を設定する
+    if (
+      !hasError &&
+      request.method === "POST" &&
+      url.pathname === "/api/permlink"
+    ) {
+      const json = await request.json();
+      const session = await getSession(request.headers.get("Cookie"));
+      if (session.has("github_user")) {
+        const githubUser = JSON.parse(session.get("github_user"));
+        json["github_user"] = githubUser["login"];
+        json["github_id"] = githubUser["id"];
+      }
+      const headers = withClientIP(
+        {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        request
+      );
+      const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/permlink`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(json),
+      });
+      return resp;
     }
-    const headers = withClientIP(
-      {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      request
-    );
-    const resp = await fetch(`${WANDBOX_URL_PREFIX}/api/permlink`, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(json),
-    });
-    return resp;
-  }
-  // permlink の取得はキャッシュする
-  if (
-    !hasError &&
-    request.method === "GET" &&
-    url.pathname.startsWith("/api/permlink")
-  ) {
-    const permlinkId = url.pathname
-      .replace("/api/permlink/", "")
-      .replace("/", "");
-    const json = await fetchPermlinkData(permlinkId, request);
-    responseHeaders.set("Content-Type", "application/json");
-    setCors(responseHeaders, request);
-    return new Response(JSON.stringify(json), { headers: responseHeaders });
-  }
-  // sponsors の取得もキャッシュする
-  if (
-    !hasError &&
-    request.method === "GET" &&
-    url.pathname.startsWith("/api/sponsors.json")
-  ) {
-    const json = await fetchSponsorsData(request);
-    responseHeaders.set("Content-Type", "application/json");
-    setCors(responseHeaders, request);
-    return new Response(JSON.stringify(json), { headers: responseHeaders });
-  }
-  // list の取得もキャッシュする
-  if (
-    !hasError &&
-    request.method === "GET" &&
-    url.pathname.startsWith("/api/list.json")
-  ) {
-    const json = await fetchListData(request);
-    responseHeaders.set("Content-Type", "application/json");
-    setCors(responseHeaders, request);
-    return new Response(JSON.stringify(json), { headers: responseHeaders });
-  }
-  // それ以外の API リクエストは単に転送する
-  if (!hasError && url.pathname.startsWith("/api")) {
-    let json: any = null;
-    if (request.method === "POST") {
-      json = await request.json();
+    // permlink の取得はキャッシュする
+    if (
+      !hasError &&
+      request.method === "GET" &&
+      url.pathname.startsWith("/api/permlink")
+    ) {
+      const permlinkId = url.pathname
+        .replace("/api/permlink/", "")
+        .replace("/", "");
+      const json = await fetchPermlinkData(permlinkId, request);
+      responseHeaders.set("Content-Type", "application/json");
+      setCors(responseHeaders, request);
+      return new Response(JSON.stringify(json), { headers: responseHeaders });
     }
-    const headers = withClientIP(
-      {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      request
-    );
-    const resp = await fetch(`${WANDBOX_URL_PREFIX}${url.pathname}`, {
-      method: request.method,
-      headers: headers,
-      body: json === null ? undefined : JSON.stringify(json),
-    });
-    responseHeaders.set(
-      "Content-Type",
-      resp.headers.get("content-type") ?? "application/json"
-    );
-    setCors(responseHeaders, request);
-    return new Response(await resp.text(), {
-      headers: responseHeaders,
-      status: resp.status,
-      statusText: resp.statusText,
-    });
+    // sponsors の取得もキャッシュする
+    if (
+      !hasError &&
+      request.method === "GET" &&
+      url.pathname.startsWith("/api/sponsors.json")
+    ) {
+      const json = await fetchSponsorsData(request);
+      responseHeaders.set("Content-Type", "application/json");
+      setCors(responseHeaders, request);
+      return new Response(JSON.stringify(json), { headers: responseHeaders });
+    }
+    // list の取得もキャッシュする
+    if (
+      !hasError &&
+      request.method === "GET" &&
+      url.pathname.startsWith("/api/list.json")
+    ) {
+      const json = await fetchListData(request);
+      responseHeaders.set("Content-Type", "application/json");
+      setCors(responseHeaders, request);
+      return new Response(JSON.stringify(json), { headers: responseHeaders });
+    }
+    // それ以外の API リクエストは単に転送する
+    if (!hasError && url.pathname.startsWith("/api")) {
+      let json: any = null;
+      if (request.method === "POST") {
+        json = await request.json();
+      }
+      const headers = withClientIP(
+        {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        request
+      );
+      const resp = await fetch(`${WANDBOX_URL_PREFIX}${url.pathname}`, {
+        method: request.method,
+        headers: headers,
+        body: json === null ? undefined : JSON.stringify(json),
+      });
+      responseHeaders.set(
+        "Content-Type",
+        resp.headers.get("content-type") ?? "application/json"
+      );
+      setCors(responseHeaders, request);
+      return new Response(await resp.text(), {
+        headers: responseHeaders,
+        status: resp.status,
+        statusText: resp.statusText,
+      });
+    }
+  } catch (e) {
+    if (e instanceof WandboxError) {
+      return new Response(e.errorMessage, { status: e.statusCode });
+    } else {
+      throw e;
+    }
   }
 
   let markup = renderToString(
