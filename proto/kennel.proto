@@ -36,6 +36,8 @@ message Switch {
 }
 
 message CompilerInfo {
+  option (jsonif_message_optimistic) = true;
+
   string name = 1;
   string version = 2;
   string language = 3;

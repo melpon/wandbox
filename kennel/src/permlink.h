@@ -1,13 +1,17 @@
 #ifndef PERMLINK_H_
 #define PERMLINK_H_
 
-#include <cppdb/frontend.h>
-
 #include <algorithm>
 #include <ctime>
 #include <iostream>
 #include <string>
 #include <vector>
+
+// cppdb
+#include <cppdb/frontend.h>
+
+// spdlog
+#include <spdlog/spdlog.h>
 
 #include "kennel.json.h"
 
