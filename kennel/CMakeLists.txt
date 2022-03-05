@@ -17,24 +17,33 @@ find_package(Ggrpc REQUIRED)
 
 # ---- 初期値
 
-if(NOT KENNEL_DATABASEDIR)
-  set(KENNEL_DATABASEDIR ${CMAKE_INSTALL_PREFIX}/var/lib/kennel)
+if (NOT KENNEL_HOST)
+  # nginx 経由なのでリリース時でも 127.0.0.1
+  set(KENNEL_PORT "127.0.0.1")
 endif()
 
-if(NOT KENNEL_SPONSORSFILE)
-  set(KENNEL_SPONSORSFILE ${CMAKE_INSTALL_PREFIX}/etc/sponsors.json)
+if (NOT KENNEL_PORT)
+  set(KENNEL_PORT 3500)
 endif()
 
-if(NOT KENNEL_CATTLESHED_HOST)
+if (NOT KENNEL_CATTLESHED_HOST)
   set(KENNEL_CATTLESHED_HOST "127.0.0.1")
 endif()
 
-if(NOT KENNEL_CATTLESHED_PORT)
+if (NOT KENNEL_CATTLESHED_PORT)
   set(KENNEL_CATTLESHED_PORT 50051)
 endif()
 
-if(NOT KENNEL_SERVICE_PORT)
-  set(KENNEL_SERVICE_PORT 3500)
+if (NOT KENNEL_SPONSORSFILE)
+  set(KENNEL_SPONSORSFILE ${CMAKE_INSTALL_PREFIX}/etc/sponsors.json)
+endif()
+
+if (NOT KENNEL_DATABASE)
+  set(KENNEL_DATABASE "sqlite3:db=${CMAKE_INSTALL_PREFIX}/var/lib/kennel/kennel_production.sqlite;@pool_size=10")
+endif()
+
+if (NOT KENNEL_URL)
+  set(KENNEL_URL "https://wandbox.org")
 endif()
 
 if(NOT KENNEL_IPLIMIT_DURATION)
@@ -138,4 +147,4 @@ set_sanitizer(kennel)
 set(SPONSORS_JSON ${PROJECT_SOURCE_DIR}/sponsors.json)
 
 install(TARGETS kennel)
-install(FILES ${SPONSORS_JSON} ${KENNEL_JSON} ${KENNEL_SERVICE} DESTINATION etc)
+install(FILES ${SPONSORS_JSON} ${KENNEL_SERVICE} DESTINATION etc)

@@ -14,10 +14,9 @@ ENABLE_TSAN=OFF
 ENABLE_ASAN=OFF
 CMAKE_INSTALL_PREFIX=$PROJECT_DIR/_install
 CMAKE_OPTS=" \
-  -DKENNEL_SCHEME=http \
-  -DKENNEL_DOMAIN=localhost \
 "
 LOCAL=1
+RUN_AFTER_BUILD=0
 
 while [ $# -ne 0 ]; do
   case "$1" in
@@ -36,19 +35,17 @@ while [ $# -ne 0 ]; do
       BUILD_DIR="_build/local"
       CMAKE_BUILD_TYPE=Debug
       CMAKE_OPTS=" \
-        -DKENNEL_SCHEME=http \
-        -DKENNEL_DOMAIN=localhost \
       "
       ;;
 
     "--develop" )
       LOCAL=0
       BUILD_DIR="_build/develop"
-      CMAKE_BUILD_TYPE=Debug
+      CMAKE_BUILD_TYPE=Release
       CMAKE_OPTS=" \
-        -DKENNEL_DOMAIN=develop.wandbox.org \
+        -DKENNEL_PORT=3501 \
         -DKENNEL_CATTLESHED_PORT=50052 \
-        -DKENNEL_SERVICE_PORT=3501 \
+        -DKENNEL_URL=https://develop.wandbox.org \
       "
       ;;
     "--master" )
@@ -74,6 +71,11 @@ while [ $# -ne 0 ]; do
 
     "--run" )
       RUN_AFTER_BUILD=1
+      ;;
+    
+    * )
+      echo "Unknown option $1" 1>&2
+      exit 1
       ;;
 
   esac

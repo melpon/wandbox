@@ -19,7 +19,7 @@ INSTALL_DIR="`pwd`/_install"
 
 set -ex
 
-if [ "$APP" != "kennel" -a "$APP" != "cattleshed" -a "$APP" != "canine" ]; then
+if [ "$APP" != "kennel" -a "$APP" != "cattleshed" ]; then
   show_help
   exit 1
 fi
@@ -34,23 +34,16 @@ PREFIX="/opt/wandbox-data/release/$APP-$ENV"
 ./install_deps.sh
 
 if [ "$APP" = "kennel" ]; then
-  pushd kennel2
-    rm -rf _build/release
+  pushd kennel
+    rm -rf _build/$ENV
     ./cmake.sh --prefix $PREFIX --$ENV
-    sudo $INSTALL_DIR/cmake/bin/cmake --install _build/release
+    sudo $INSTALL_DIR/cmake/bin/cmake --install _build/$ENV
   popd
 elif [ "$APP" = "cattleshed" ]; then
   pushd cattleshed
-    rm -rf _build/release
+    rm -rf _build/$ENV
     ./cmake.sh --prefix $PREFIX --$ENV
-    sudo $INSTALL_DIR/cmake/bin/cmake --install _build/release
-  popd
-elif [ "$APP" = "canine" ]; then
-  pushd canine
-    npm ci
-    npm run dist
-    mkdir -p $PREFIX
-    cp -r dist/* $PREFIX/
+    sudo $INSTALL_DIR/cmake/bin/cmake --install _build/$ENV
   popd
 fi
 

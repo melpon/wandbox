@@ -14,6 +14,9 @@
 #include <boost/beast.hpp>
 #include <boost/json.hpp>
 
+// CLI11
+#include <CLI/CLI.hpp>
+
 #include "cattleshed_client.h"
 #include "kennel.json.h"
 #include "permlink.h"
@@ -912,15 +915,42 @@ class KennelServer : public std::enable_shared_from_this<KennelServer> {
 };
 
 int main(int argc, char* argv[]) {
-  spdlog::set_level(spdlog::level::debug);
+  CLI::App app("Kennel - Wandbox API Server");
 
+  std::string host = "127.0.0.1";
   int port = 3500;
   std::string cattleshed_host = "127.0.0.1";
   int cattleshed_port = 50051;
   std::string sponsor_json = "./sponsors.json";
   std::string database = "sqlite3:db=kennel.sqlite;@pool_size=10";
-  //std::string database = "sqlite3:db=:memory:";
   std::string url = "http://localhost:8787";
+  int log_level = spdlog::level::info;
+
+  auto log_level_map = std::vector<std::pair<std::string, int>>(
+      {{"trace", spdlog::level::trace},
+       {"debug", spdlog::level::debug},
+       {"warning", spdlog::level::warn},
+       {"error", spdlog::level::err},
+       {"critical", spdlog::level::critical},
+       {"off", spdlog::level::off}});
+
+  app.add_option("--host", host, "Listen host");
+  app.add_option("--port", port, "Listen port");
+  app.add_option("--cattleshed-host", cattleshed_host, "Cattleshed host");
+  app.add_option("--cattleshed-port", cattleshed_port, "Cattleshed port");
+  app.add_option("--sponsorsfile", sponsor_json, "Sponsors file");
+  app.add_option("--database", database, "Database URI");
+  app.add_option("--url", url, "Public URL for Wandbox");
+  app.add_option("--log-level", log_level, "Log severity level threshold")
+      ->transform(CLI::CheckedTransformer(log_level_map, CLI::ignore_case));
+
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::ParseError& e) {
+    exit(app.exit(e));
+  }
+
+  spdlog::set_level((spdlog::level::level_enum)log_level);
 
   wandbox::kennel::SponsorFile sponsor_file;
   if (sponsor_json.empty()) {
@@ -992,9 +1022,8 @@ int main(int argc, char* argv[]) {
 
   boost::asio::io_context ioc{1};
   KennelServerConfig config;
-  config.endpoint =
-      boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address("127.0.0.1"),
-                                     static_cast<unsigned short>(port));
+  config.endpoint = boost::asio::ip::tcp::endpoint(
+      boost::asio::ip::make_address(host), static_cast<unsigned short>(port));
   config.cm = cm;
   config.initial_cattleshed_info = info;
   config.sponsor_file =
