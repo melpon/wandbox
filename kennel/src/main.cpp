@@ -722,7 +722,7 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
                   std::placeholders::_1, std::placeholders::_2,
                   sp->need_eof()));
 
-    SPDLOG_DEBUG("[{}] responsed", req_.target().to_string());
+    SPDLOG_DEBUG("[{}] responsed {}", req_.target().to_string(), (int)sp->result());
   }
 
   enum class ChunkState {
