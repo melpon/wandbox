@@ -1,5 +1,1 @@
-{
-	"program_message" :	"foo\n",
-	"program_output" :	"foo\n",
-	"status" :	"0"
-}
+{"status":"0","compiler_output":"","compiler_error":"","compiler_message":"","program_output":"foo\n","program_error":"","program_message":"foo\n"}
