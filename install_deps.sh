@@ -115,7 +115,7 @@ echo $CMAKE_VERSION > $CMAKE_VERSION_FILE
 export PATH=$INSTALL_DIR/cmake/bin:$PATH
 
 # grpc (cmake)
-if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc++_unsecure.a ]; then
+if [ $GRPC_CHANGED -eq 1 -o ! -e $INSTALL_DIR/grpc/lib/libgrpc.a ]; then
   # gRPC のソース取得
   if [ ! -e $SOURCE_DIR/grpc/.git ]; then
     git clone https://github.com/grpc/grpc.git $SOURCE_DIR/grpc
