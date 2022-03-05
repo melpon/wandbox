@@ -1,5 +1,5 @@
-#ifndef PERMLINK_H_INCLUDED
-#define PERMLINK_H_INCLUDED
+#ifndef PERMLINK_H_
+#define PERMLINK_H_
 
 #include <cppdb/frontend.h>
 
@@ -329,4 +329,4 @@ class permlink {
   }
 };
 
-#endif  // PERMLINK_H_INCLUDED
+#endif  // PERMLINK_H_

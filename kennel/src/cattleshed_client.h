@@ -1,5 +1,5 @@
-#ifndef CATTLESHED_CLIENT_H_INCLUDED
-#define CATTLESHED_CLIENT_H_INCLUDED
+#ifndef CATTLESHED_CLIENT_H_
+#define CATTLESHED_CLIENT_H_
 
 #include <atomic>
 #include <deque>
@@ -56,4 +56,4 @@ class CattleshedClientManager {
   }
 };
 
-#endif  // CATTLESHED_CLIENT_H_INCLUDED
+#endif  // CATTLESHED_CLIENT_H_
