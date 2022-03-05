@@ -19,7 +19,7 @@ find_package(Ggrpc REQUIRED)
 
 if (NOT KENNEL_HOST)
   # nginx 経由なのでリリース時でも 127.0.0.1
-  set(KENNEL_PORT "127.0.0.1")
+  set(KENNEL_HOST "127.0.0.1")
 endif()
 
 if (NOT KENNEL_PORT)
