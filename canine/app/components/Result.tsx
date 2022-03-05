@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useMemo, useRef } from "react";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { default as AnsiUp } from "ansi_up";
 
@@ -12,6 +12,8 @@ interface ResultProps {
 }
 
 const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
+  useTranslation();
+
   const { permlinkData } = props;
   const {
     running,
