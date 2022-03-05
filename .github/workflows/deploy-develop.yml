@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - feature/new-kennel
 
 jobs:
   deploy:
