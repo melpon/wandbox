@@ -22,6 +22,7 @@ jobs:
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_USER: ${{ secrets.SSH_USER }}
       run: |
+        set -ex
         echo "Host wandbox" >> $HOME/.ssh/config
         echo "    HostName $SSH_HOST" >> $HOME/.ssh/config
         echo "    User $SSH_USER" >> $HOME/.ssh/config
@@ -67,9 +68,9 @@ jobs:
     - name: Build Workers
       working-directory: canine
       run: |
-          set -ex
-          npm install
-          npm run build
+        set -ex
+        npm install
+        npm run build
     - name: Publish canine
       working-directory: canine
       env:
