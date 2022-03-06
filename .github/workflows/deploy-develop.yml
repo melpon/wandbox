@@ -72,9 +72,9 @@ jobs:
         npm run build
     - name: Publish canine
       working-directory: canine
+      env:
+        CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       run: |
         set -ex
         npm install -g @cloudflare/wrangler
         npm run deploy:dev
-      with:
-        CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
