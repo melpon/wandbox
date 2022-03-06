@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "remix";
 
@@ -22,7 +17,6 @@ import { Author, AuthorData } from "~/components/Author";
 import Sidebar from "~/components/react-sidebar/Sidebar";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
-import type { Breakpoint } from "~/features/slice";
 import { wandboxSlice } from "~/features/slice";
 import {
   applySettings,
@@ -35,6 +29,7 @@ import { SidebarBase } from "~/components/SidebarBase";
 import i18n from "~/i18n";
 import { useGetSponsors } from "~/hooks/sponsors";
 import { Sponsors } from "./Sponsors";
+import { UpdateBreakpoint } from "./UpdateBreakpoint";
 
 const Wandbox: React.FC = (): React.ReactElement | null => {
   // 参照しておかないとグローバルな初期化コード自体が消えてしまうので、
@@ -238,43 +233,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     };
   }, [editorChanged]);
 
-  // 現在の breakpoint を設定する
-  const updateBreakpoint = useCallback(() => {
-    const breakpoints = ["xxl", "xl", "lg", "md", "sm", "xs"].map(
-      (x) =>
-        [
-          x,
-          parseInt(
-            getComputedStyle(document.body).getPropertyValue(
-              `--wb-breakpoint-${x}`
-            ),
-            10
-          ),
-        ] as [Breakpoint, number]
-    );
-
-    const width = document.documentElement.clientWidth;
-    for (const [bp, value] of breakpoints) {
-      if (width >= value) {
-        dispatch(actions.setBreakpoint(bp));
-        break;
-      }
-    }
-  }, []);
-
-  useLayoutEffect(() => {
-    updateBreakpoint();
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("resize", updateBreakpoint);
-    window.addEventListener("orientationchange", updateBreakpoint);
-    return () => {
-      window.removeEventListener("resize", updateBreakpoint);
-      window.removeEventListener("orientationchange", updateBreakpoint);
-    };
-  }, [updateBreakpoint]);
-
   // 適切にタイトルを書き換える
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -320,6 +278,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
 
   return (
     <div id="wb-main" className="d-flex flex-column">
+      <UpdateBreakpoint />
       <Header />
       <Sidebar
         open={sidebarState !== "none"}
