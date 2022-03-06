@@ -229,6 +229,16 @@ export default async function handleRequest(
     );
   }
   try {
+    // OPTIONS リクエストは通す
+    if (
+      !hasError &&
+      request.method === "OPTIONS" &&
+      url.pathname.startsWith("/api")
+    ) {
+      setCors(responseHeaders, request);
+      return new Response("", { headers: responseHeaders });
+    }
+
     // permlink 送信リクエストにユーザー情報を設定する
     if (
       !hasError &&
