@@ -69,9 +69,7 @@ jobs:
       run: |
           set -ex
           npm install
-          npm run build:css
           npm run build
-          npm run build:worker
     - name: Publish canine
       uses: cloudflare/wrangler-action@1.3.0
       with:
