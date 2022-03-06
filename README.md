@@ -2,7 +2,7 @@
 
 [Wandbox](https://wandbox.org/) はオンラインコンパイラサービスです。 
 
-API からもアクセスできます。 https://github.com/melpon/wandbox/blob/master/kennel/API.rst
+API からもアクセスできます。 [API.md](/kennel/API.md)
 
 ## 好きなエディタから Wandbox を実行する
 
