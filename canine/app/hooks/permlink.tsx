@@ -62,7 +62,6 @@ export function resolvePermlinkData(
   permlinkId: string,
   json: AnyJson
 ): PermlinkData {
-  console.log(json);
   const map = json as JsonMap;
   const param = map.parameter as JsonMap;
   return {
