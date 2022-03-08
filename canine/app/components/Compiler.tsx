@@ -41,7 +41,7 @@ function optionsToSwitch(
     } else if (sw.type === "select") {
       const ssw = sw.switch as SelectSwitch;
       // select
-      const value = ((): SelectSwitchOption => {
+      const value = ((): SelectSwitchOption | null => {
         // ssw.options の中から options に含まれるオプションを探す。
         // 多分複数一致することは無いはずだし、複数あってもどうしようも無いので
         // 最初に一致したものを返す。
@@ -53,10 +53,11 @@ function optionsToSwitch(
           }
         }
 
-        // ここに来ることは無いはず
-        throw "おかしい";
+        return null;
       })();
-      switches[ssw.name] = value.name;
+      if (value !== null) {
+        switches[ssw.name] = value.name;
+      }
     } else {
       throw "error";
     }
