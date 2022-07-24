@@ -25,11 +25,13 @@ const TweetButton: React.FC<TweetButtonProps> = ({ permlinkId }) => {
     }
     const url = `${document.location.origin}/permlink/${permlinkId}`;
     let elem: HTMLElement | null = null;
-    twttr.ready((twttr) => {
-      twttr.widgets.createShareButton(url, ref, {}).then((x) => {
-        elem = x;
+    if (typeof twttr !== "undefined") {
+      twttr.ready((twttr) => {
+        twttr.widgets.createShareButton(url, ref, {}).then((x) => {
+          elem = x;
+        });
       });
-    });
+    }
 
     return () => {
       if (elem === null) {
