@@ -139,6 +139,10 @@ const LANGUAGE_MODE = [
     extensions: ["vim"],
   },
   {
+    language: "Zig",
+    extensions: ["zig"],
+  },
+  {
     language: "Plain text",
     extensions: ["txt"],
   },
@@ -288,6 +292,8 @@ export function importLanguage(language: Language): Promise<Extension | null> {
       );
     case "Vim script":
       break;
+    case "Zig":
+      return import("./mode-zig").then((x) => StreamLanguage.define(x.zig));
     case "Plain text":
       break;
   }
