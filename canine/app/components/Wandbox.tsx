@@ -270,7 +270,25 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       "Wandbox";
   }, [permlinkResp, currentLanguage, title, currentCompilerName, compilerList]);
 
-  if (compilerList === null) {
+  // ローカルストレージからロードしたデータに存在しないデータがある場合、うまいこと調整する
+  useEffect(() => {
+    if (compilerList === null) {
+      return;
+    }
+    if (currentLanguage === "") {
+      return;
+    }
+
+    if (!(currentLanguage in compilerList.languages)) {
+      dispatch(actions.setCurrentLanguage(""));
+      return;
+    }
+  }, [currentLanguage, compilerList]);
+
+  if (
+    compilerList === null ||
+    (currentLanguage !== "" && !(currentLanguage in compilerList.languages))
+  ) {
     return null;
   }
 

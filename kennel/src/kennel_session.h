@@ -13,6 +13,8 @@
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <boost/json.hpp>
+#include <boost/algorithm/string/iter_find.hpp>
+#include <boost/algorithm/string/finder.hpp>
 
 #include "cattleshed_client.h"
 #include "kennel.json.h"
@@ -298,6 +300,42 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
           HandleGetPermlink(req_.target().substr(sizeof("/api/permlink/") - 1));
         } else if (req_.target().starts_with("/api/template/")) {
           HandleGetTemplate(req_.target().substr(sizeof("/api/template/") - 1));
+        } else if (req_.target().starts_with("/api/user/")) {
+          // /api/user/<username>/permlink?page=10&hoge=fuga → [/api/user/<username>/permlink, page=10&hoge=fuga]
+          std::vector<std::string> xs;
+          boost::algorithm::iter_split(xs, req_.target(), boost::first_finder("?"));
+          // /api/user/<username>/permlink → [, api, user, <username>, permlink]
+          std::vector<std::string> ys;
+          boost::algorithm::iter_split(ys, xs[0], boost::first_finder("/"));
+          if (ys.size() != 5) {
+            SendResponse(NotFound(req_, req_.target()));
+          } else {
+            const auto& user_target = ys[4];
+            if (user_target == "permlink") {
+              std::string username = std::move(ys[3]);
+              int page = 0;
+              if (xs.size() >= 2) {
+                // page=10&hoge=fuga → [page=10, hoge=fuga]
+                std::vector<std::string> zs;
+                boost::algorithm::iter_split(zs, xs[1], boost::first_finder("&"));
+                for (const auto& z : zs) {
+                  // page=10 → [page, 10]
+                  std::vector<std::string> as;
+                  boost::algorithm::iter_split(as, z, boost::first_finder("="));
+                  if (as.size() == 2 && as[0] == "page") {
+                    try {
+                      page = std::stoi(as[1]);
+                    } catch (std::exception& e) {
+                      // stoi は std::invalid_argument, std::out_of_range がやってくる可能性がある
+                    }
+                  }
+                }
+              }
+              HandleGetUserPermlink(username, page);
+            } else {
+              SendResponse(NotFound(req_, req_.target()));
+            }
+          }
         } else {
           SendResponse(NotFound(req_, req_.target()));
         }
@@ -396,6 +434,14 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
     }
 
     auto resp = CreateOKWithJSON(req_, boost::json::value_from(*it));
+    SendResponse(resp);
+  }
+
+  void HandleGetUserPermlink(std::string username, int page) {
+    permlink pl(config_.database);
+    auto usercode = pl.get_github_usercode(username, true, page, 30);
+    auto resp =
+        CreateOKWithJSON(req_, boost::json::value_from(usercode));
     SendResponse(resp);
   }
 

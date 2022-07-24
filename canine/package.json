@@ -7,7 +7,7 @@
     "postinstall": "remix setup cloudflare-workers",
     "build": "sass --load-path=node_modules styles/:app/styles/ && cross-env NODE_ENV=production remix build",
     "dev:remix": "cross-env NODE_ENV=development remix watch",
-    "dev:miniflare": "cross-env NODE_ENV=development miniflare ./build/index.js --watch --binding WANDBOX_URL_PREFIX=\"http://localhost:3500\" --binding WANDBOX_GITHUB_CLIENT_ID=50835a4ce149db7aeedc --binding WANDBOX_GITHUB_CLIENT_SECRET=9d7a83fcb5f0ff7cd0c209206e1b9e1b4dcecd3e --binding WANDBOX_KV_COOKIE_SECRET=12345678",
+    "dev:miniflare": "cross-env NODE_ENV=development miniflare ./build/index.js --watch --binding WANDBOX_URL_PREFIX=\"https://wandbox.org\" --binding WANDBOX_GITHUB_CLIENT_ID=50835a4ce149db7aeedc --binding WANDBOX_GITHUB_CLIENT_SECRET=9d7a83fcb5f0ff7cd0c209206e1b9e1b4dcecd3e --binding WANDBOX_KV_COOKIE_SECRET=12345678",
     "dev:css": "sass --load-path=node_modules styles/:app/styles/ --watch ",
     "dev": "cross-env NODE_ENV=development remix build && run-p dev:*",
     "start": "cross-env NODE_ENV=production miniflare ./build/index.js --binding WANDBOX_URL_PREFIX=\"http://localhost:3500\" --binding WANDBOX_GITHUB_CLIENT_ID=50835a4ce149db7aeedc --binding WANDBOX_GITHUB_CLIENT_SECRET=9d7a83fcb5f0ff7cd0c209206e1b9e1b4dcecd3e --binding WANDBOX_KV_COOKIE_SECRET=12345678",

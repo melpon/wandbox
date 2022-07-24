@@ -266,6 +266,54 @@ export default async function handleRequest(
       });
       return resp;
     }
+    // ユーザー用リクエストはユーザー情報を設定しつつ転送する
+    if (!hasError && url.pathname.startsWith("/api/user/")) {
+      const session = await getSession(request.headers.get("Cookie"));
+
+      const githubUser = session.has("github_user")
+        ? JSON.parse(session.get("github_user"))
+        : null;
+
+      // ユーザー情報が存在しないので認証エラー
+      if (githubUser === null) {
+        return new Response("", { status: 401 });
+      }
+
+      const path = url.pathname.substring("/api/user/".length);
+
+      let json: any = null;
+      if (request.method === "POST") {
+        json = await request.json();
+      }
+
+      const headers = withClientIP(
+        {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        request
+      );
+
+      const resp = await fetch(
+        `${WANDBOX_URL_PREFIX}/api/user/${githubUser.login}/${path}${url.search}`,
+        {
+          method: request.method,
+          headers: headers,
+          body: json === null ? undefined : JSON.stringify(json),
+        }
+      );
+      responseHeaders.set(
+        "Content-Type",
+        resp.headers.get("content-type") ?? "application/json"
+      );
+      setCors(responseHeaders, request);
+      return new Response(await resp.text(), {
+        headers: responseHeaders,
+        status: resp.status,
+        statusText: resp.statusText,
+      });
+    }
+
     // permlink の取得はキャッシュする
     if (
       !hasError &&

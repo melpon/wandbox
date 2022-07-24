@@ -68,7 +68,7 @@ message CompileParameter {
   string description = 11;
   // /api/compile.json 用
   bool save = 20 [(jsonif_discard_if_default) = true];
-  // /api/permlink/<permlink-id> 用
+  // /api/permlink/<permlink-id> と /api/user/permlink 用
   int64 created_at = 30;
   bool is_private = 31;
   CompilerInfo compiler_info = 32 [(jsonif_name) = "compiler-info", (jsonif_discard_if_default) = true];
@@ -170,4 +170,15 @@ message GetPermlinkResponse {
   CompileParameter parameter = 1;
   repeated CompileNdjsonResult results = 2;
   CompileResult result = 3;
+}
+
+message UserPermlink {
+  CompileParameter parameter = 1;
+  string permlink = 2;
+}
+message GetUserPermlinkListResponse {
+  repeated UserPermlink rows = 1;
+  int32 current_page = 2;
+  int32 page_max = 3;
+  int32 rows_per_page = 4;
 }

@@ -146,18 +146,17 @@ class permlink {
 
     cppdb::statement stat;
 
-    stat =
-        sql << "INSERT INTO code ( "
-               "  title, description, compiler, code, optimize, "
-               "  warning, options, compiler_option_raw, "
-               "  runtime_option_raw, stdin, created_at, updated_at, "
-               "  github_user "
-               ") "
-               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            << req.title << req.description << req.compiler << req.code << false
-            << false << req.options << req.compiler_option_raw
-            << req.runtime_option_raw << req.stdin << now << now
-            << req.github_user << cppdb::exec;
+    stat = sql << "INSERT INTO code ( "
+                  "  title, description, compiler, code, optimize, "
+                  "  warning, options, compiler_option_raw, "
+                  "  runtime_option_raw, stdin, created_at, updated_at, "
+                  "  github_user "
+                  ") "
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+               << req.title << req.description << req.compiler << req.code
+               << false << false << req.options << req.compiler_option_raw
+               << req.runtime_option_raw << req.stdin << now << now
+               << req.github_user << cppdb::exec;
 
     auto code_id = stat.last_insert_id();
     //std::clog << code_id << std::endl;
@@ -266,8 +265,9 @@ class permlink {
                "WHERE code_id=?"
             << code_id << cppdb::row;
     if (!r.empty()) {
-      p.parameter.compiler_info = jsonif::from_json<wandbox::kennel::CompilerInfo>(
-          r.get<std::string>("json"));
+      p.parameter.compiler_info =
+          jsonif::from_json<wandbox::kennel::CompilerInfo>(
+              r.get<std::string>("json"));
     }
     return p;
   }
@@ -289,8 +289,9 @@ class permlink {
     };
     std::vector<code_t> codes;
   };
-  usercode_info get_github_usercode(std::string username, bool include_private,
-                                    int current_page, int rows_per_page) {
+  wandbox::kennel::GetUserPermlinkListResponse get_github_usercode(
+      std::string username, bool include_private, int current_page,
+      int rows_per_page) {
     cppdb::result r;
     r = sql << "SELECT COUNT(*) as count "
                "FROM code "
@@ -302,34 +303,39 @@ class permlink {
     r = sql << "SELECT "
                "  compiler, code, options, created_at, title, "
                "  description, github_user, private, "
-               "  link.permlink as permlink "
-               "FROM code, link "
-               "WHERE github_user=? AND private<=? AND code.id=link.code_id "
+               "  link.permlink as permlink, json "
+               "FROM code, link, compiler_info "
+               "WHERE github_user=? AND private<=? "
+               "      AND code.id=link.code_id "
+               "      AND code.id=compiler_info.code_id "
                "ORDER BY created_at DESC "
                "LIMIT ? OFFSET ?"
             << username << (include_private ? 1 : 0) << rows_per_page
             << (current_page * rows_per_page);
 
-    usercode_info info;
-    info.current_page = current_page;
-    info.page_max = page_max;
-    info.rows_per_page = rows_per_page;
+    wandbox::kennel::GetUserPermlinkListResponse resp;
+    resp.current_page = current_page;
+    resp.page_max = page_max;
+    resp.rows_per_page = rows_per_page;
     while (r.next()) {
-      usercode_info::code_t code;
-      code.compiler = r.get<std::string>("compiler");
-      code.code = r.get<std::string>("code");
-      code.options = r.get<std::string>("options");
+      wandbox::kennel::UserPermlink p;
+      p.parameter.compiler = r.get<std::string>("compiler");
+      p.parameter.code = r.get<std::string>("code");
+      p.parameter.options = r.get<std::string>("options");
       std::tm tm = r.get<std::tm>("created_at");
-      code.created_at = std::mktime(&tm);
-      code.title = r.get<std::string>("title");
-      code.description = r.get<std::string>("description");
-      code.github_user = r.get<std::string>("github_user");
-      code.is_private = r.get<int>("private") != 0;
-      code.permlink = r.get<std::string>("permlink");
-      info.codes.push_back(std::move(code));
+      p.parameter.created_at = std::mktime(&tm);
+      p.parameter.title = r.get<std::string>("title");
+      p.parameter.description = r.get<std::string>("description");
+      p.parameter.github_user = r.get<std::string>("github_user");
+      p.parameter.is_private = r.get<int>("private") != 0;
+      p.parameter.compiler_info =
+          jsonif::from_json<wandbox::kennel::CompilerInfo>(
+              r.get<std::string>("json"));
+      p.permlink = r.get<std::string>("permlink");
+      resp.rows.push_back(std::move(p));
     }
 
-    return info;
+    return resp;
   }
 };
 
