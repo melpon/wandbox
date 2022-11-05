@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 
 import { reduceCompileOptions } from "~/utils/reduceCompileOptions";
+import { optionsToSwitch } from "~/utils/optionsToSwitch";
 import type { CompilerList, CompilerInfo } from "~/hooks/compilerList";
 import type { PermlinkData } from "~/hooks/permlink";
 import type { AppState } from "~/store";
@@ -54,7 +55,9 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
 
     const command = info.displayCompileCommand;
     const options = reduceCompileOptions<string[]>(
-      currentSwitches,
+      permlinkData === null
+        ? currentSwitches
+        : optionsToSwitch(permlinkData.parameter.options, info),
       info,
       [],
       (sw, state): string[] => [...state, sw.displayFlags],
@@ -67,7 +70,13 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
       }
     );
     const rawOptions = rawToOptions(
-      info.compilerOptionRaw ? compilerOptionRaw : runtimeOptionRaw
+      permlinkData === null
+        ? info.compilerOptionRaw
+          ? compilerOptionRaw
+          : runtimeOptionRaw
+        : info.compilerOptionRaw
+        ? permlinkData.parameter.compilerOptionRaw
+        : permlinkData.parameter.runtimeOptionRaw
     );
     return `$ ${command} ${options.join(" ")} ${rawOptions}`;
   }, [
