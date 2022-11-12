@@ -11,7 +11,7 @@ set -e
 
 # runnable a command
 is-same-output /bin/echo hoge
-# blockable accessing to disallowed pathes
+# blockable accessing to disallowed paths
 is-same-output /usr/bin/size /lib/libc.so.6
 is-same-output /usr/bin/size /proc/self/exe
 ! ptracer /bin/ls / 2> /dev/null

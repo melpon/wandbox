@@ -6,7 +6,7 @@
 import { simpleMode } from "@codemirror/legacy-modes/mode/simple-mode";
 
 export const zig = simpleMode({
-  // The start state contains the rules that are intially used
+  // The start state contains the rules that are initially used
   start: [
     // comments
     { regex: /\/\/.*/, token: "comment" },
