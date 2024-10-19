@@ -10,6 +10,7 @@ find_package(CAP REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
+find_package(utf8_range REQUIRED)
 find_package(Spdlog REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(Ggrpc REQUIRED)
@@ -25,7 +26,7 @@ if(NOT CATTLESHED_SYSCONFDIR)
 endif()
 
 if(NOT CATTLESHED_STOREDIR)
-  set(CATTLESHED_STOREDIR "/var/log/wandbox/ran")
+  set(CATTLESHED_STOREDIR "/opt/wandbox/_log/ran")
 endif()
 
 if(NOT CATTLESHED_BASEDIR)
@@ -84,7 +85,7 @@ add_executable(cattleshed
   src/server.cc
   src/load_config.cc
   ${CATTLESHED_PROTO})
-set_target_properties(cattleshed PROPERTIES CXX_STANDARD 14 C_STANDARD 99)
+set_target_properties(cattleshed PROPERTIES CXX_STANDARD 17 C_STANDARD 99)
 target_include_directories(cattleshed PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
 target_compile_definitions(cattleshed
   PRIVATE
@@ -94,10 +95,9 @@ target_link_libraries(cattleshed
   Boost::boost
   RT::RT
   Threads::Threads
-  gRPC::grpc++
+  Ggrpc::ggrpc
   Spdlog::Spdlog
-  CLI11::CLI11
-  Ggrpc::Ggrpc)
+  CLI11::CLI11)
 
 set_sanitizer(cattleshed)
 

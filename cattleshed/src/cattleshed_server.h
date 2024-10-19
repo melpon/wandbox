@@ -24,7 +24,7 @@
 #include <spdlog/spdlog.h>
 
 // protobuf
-#include <google/protobuf/util/json_util.h>
+#include <google/protobuf/json/json.h>
 
 #include "cattleshed.grpc.pb.h"
 #include "cattleshed.pb.h"
@@ -567,14 +567,14 @@ class RunJobHandler
       logdir_ = logdirbase;
       loginfoname_ = unique_name + ".json";
       {
-        google::protobuf::util::JsonPrintOptions opt;
+        google::protobuf::json::PrintOptions opt;
         opt.add_whitespace = true;
-        opt.always_print_primitive_fields = true;
+        opt.always_print_fields_with_no_presence = true;
         // ソースの情報を以外を JSON 化する
         auto req = *req_;
         req.clear_default_source();
         req.clear_sources();
-        google::protobuf::util::MessageToJsonString(req, &loginfocontent_, opt);
+        google::protobuf::json::MessageToJsonString(req, &loginfocontent_, opt);
       }
 
       // まずソース以外の情報を書き込む

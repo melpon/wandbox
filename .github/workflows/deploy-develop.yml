@@ -7,9 +7,9 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Register SSH key
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -19,11 +19,11 @@ jobs:
         chmod 600 $HOME/.ssh/id_ed25519
     - name: Add SSH config
       env:
-        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_HOST: ${{ secrets.SSH_HOST_UBUNTU_24_04 }}
         SSH_USER: ${{ secrets.SSH_USER }}
       run: |
         set -ex
-        echo "Host wandbox" >> $HOME/.ssh/config
+        echo "Host wandbox-ubuntu-24.04" >> $HOME/.ssh/config
         echo "    HostName $SSH_HOST" >> $HOME/.ssh/config
         echo "    User $SSH_USER" >> $HOME/.ssh/config
         echo "    ServerAliveInterval 60" >> $HOME/.ssh/config
@@ -33,31 +33,27 @@ jobs:
       run: sudo apt-get install -y libcap-dev
     - name: Get cached tools
       id: cache-tools
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: _install
-        key: install-deps-v2
-    - name: Install deps
-      run: ./install_deps.sh --release
+        key: install-deps-v3
     - name: Package cattleshed
-      run: |
-        ./package.sh cattleshed develop
+      run: python3 run.py package --env develop cattleshed
     - name: Package kennel
-      run: |
-        ./package.sh kennel develop
-    - name: Deploy cattleshed to develop.wandbox.org
-      run: |
-        ./deploy.sh wandbox cattleshed develop
-    - name: Deploy kennel to develop.wandbox.org
-      run: |
-        ./deploy.sh wandbox kennel develop
+      run: python3 run.py package --env develop kennel
+    # - name: Deploy cattleshed to develop.wandbox.org
+    #   run: |
+    #     ./deploy.sh wandbox-ubuntu-24.04 cattleshed master
+    # - name: Deploy kennel to develop.wandbox.org
+    #   run: |
+    #     ./deploy.sh wandbox-ubuntu-24.04 kennel master
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
     - name: Cache node modules
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       env:
-        cache-name: cache-node-modules-v1
+        cache-name: cache-node-modules-v2
       with:
         path: ~/.npm
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('canine/package-lock.json') }}
@@ -71,11 +67,11 @@ jobs:
         set -ex
         npm install
         npm run build
-    - name: Publish canine
-      working-directory: canine
-      env:
-        CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-      run: |
-        set -ex
-        npm install -g @cloudflare/wrangler
-        npm run deploy:dev
+    # - name: Publish canine
+    #   working-directory: canine
+    #   env:
+    #     CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+    #   run: |
+    #     set -ex
+    #     npm install -g @cloudflare/wrangler
+    #     npm run deploy:dev
