@@ -232,6 +232,7 @@ def do_package(debug: bool, target: str, env: str, prefix: str):
     cmake_configuration = "Debug" if debug else "Release"
     build_dir = os.path.join(BASE_DIR, "_build", configuration)
     package_dir = os.path.join(BASE_DIR, "_package")
+    mkdir_p(package_dir)
     do_build(debug, target, f"{prefix}/cattleshed-{env}", f"{prefix}/kennel-{env}")
     cmd(["cmake", "--install", os.path.join(build_dir, target), "--config", cmake_configuration])
     with cd(prefix):
