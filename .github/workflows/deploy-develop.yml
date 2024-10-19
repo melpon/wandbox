@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - feature/update-ubuntu-24.04
 
 jobs:
   deploy:
