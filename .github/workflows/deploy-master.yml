@@ -41,12 +41,12 @@ jobs:
       run: python3 run.py package --env master cattleshed
     - name: Package kennel
       run: python3 run.py package --env master kennel
-    # - name: Deploy cattleshed to wandbox.org
-    #   run: |
-    #     ./deploy.sh wandbox-ubuntu-24.04 cattleshed master
-    # - name: Deploy kennel to wandbox.org
-    #   run: |
-    #     ./deploy.sh wandbox-ubuntu-24.04 kennel master
+    - name: Deploy cattleshed to wandbox.org
+      run: |
+        python3 run.py deploy wandbox-ubuntu-24.04 cattleshed --env master
+    - name: Deploy kennel to wandbox.org
+      run: |
+        python3 run.py deploy wandbox-ubuntu-24.04 kennel --env master
     - uses: actions/setup-node@v2
       with:
         node-version: '16'

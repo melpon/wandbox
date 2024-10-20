@@ -240,6 +240,41 @@ def do_package(debug: bool, target: str, env: str, prefix: str):
     rm_rf(os.path.join(prefix, f"{target}-{env}"))
 
 
+def do_deploy(remote: str, target: str, env: str):
+    package_dir = os.path.join(BASE_DIR, "_package")
+
+    cmd(
+        [
+            "scp",
+            os.path.join(package_dir, f"{target}-{env}.tar.gz"),
+            f"{remote}:/tmp/{target}-{env}.tar.gz",
+        ]
+    )
+    remote_command = f"""
+set -ex
+mkdir -p /opt/wandbox-data/release
+pushd /opt/wandbox-data/release
+  tar xf /tmp/{target}-{env}.tar.gz
+  rm /tmp/{target}-{env}.tar.gz
+
+  pushd {target}-{env}
+    if [ "{target}" = "cattleshed" ]; then
+      setcap cap_sys_admin,cap_chown,cap_setuid,cap_setgid,cap_sys_chroot,cap_mknod,cap_net_admin=p bin/cattlegrid
+    fi
+    if [ "{target}" = "kennel" ]; then
+      # データ置き場を作る
+      mkdir -p var/lib/kennel
+      chown -R ubuntu:ubuntu var/
+    fi
+  popd
+popd
+cp /opt/wandbox-data/release/{target}-{env}/etc/{target}.service /etc/systemd/system/{target}-{env}.service
+systemctl enable {target}-{env}
+systemctl restart {target}-{env}
+"""
+    cmd(["ssh", remote, "/bin/bash", "-c", remote_command])
+
+
 PACKAGE_PREFIX = "/opt/wandbox-data/release"
 
 
@@ -256,6 +291,10 @@ def main():
     pp.add_argument("--env", choices=["master", "develop"], required=True)
     pp.add_argument("--debug", action="store_true")
     pp.add_argument("--prefix", default=PACKAGE_PREFIX)
+    dp = sp.add_parser("deploy")
+    dp.add_argument("remote")
+    dp.add_argument("target", choices=["kennel", "cattleshed"])
+    dp.add_argument("--env", choices=["master", "develop"], required=True)
 
     args = parser.parse_args()
 
@@ -263,6 +302,8 @@ def main():
         do_build(debug=args.debug, target=args.target)
     elif args.op == "package":
         do_package(debug=args.debug, target=args.target, env=args.env, prefix=args.prefix)
+    elif args.op == "deploy":
+        do_deploy(remote=args.remote, target=args.target, env=args.env)
 
 
 if __name__ == "__main__":
