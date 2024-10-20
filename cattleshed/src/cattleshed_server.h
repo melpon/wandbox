@@ -141,7 +141,7 @@ class GetVersionHandler
         return;
       }
 
-      SPDLOG_DEBUG("[0x{}] add version: {} {}", (void*)this, current_.name,
+      SPDLOG_INFO("[0x{}] add version: {} {}", (void*)this, current_.name,
                    ver);
       versions_.push_back(std::make_pair(current_.name, ver));
 
