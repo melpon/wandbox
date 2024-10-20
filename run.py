@@ -240,7 +240,7 @@ def do_package(debug: bool, target: str, env: str, prefix: str):
     rm_rf(os.path.join(prefix, f"{target}-{env}"))
 
 
-def do_deploy(remote: str, target: str, env: str):
+def do_deploy(remote: str, target: str, env: str, prefix: str):
     package_dir = os.path.join(BASE_DIR, "_package")
 
     cmd(
@@ -252,8 +252,8 @@ def do_deploy(remote: str, target: str, env: str):
     )
     remote_command = f"""
 set -ex
-mkdir -p /opt/wandbox-data/release
-pushd /opt/wandbox-data/release
+mkdir -p {prefix}
+pushd {prefix}
   tar xf /tmp/{target}-{env}.tar.gz
   rm /tmp/{target}-{env}.tar.gz
 
@@ -292,9 +292,11 @@ def main():
     pp.add_argument("--debug", action="store_true")
     pp.add_argument("--prefix", default=PACKAGE_PREFIX)
     dp = sp.add_parser("deploy")
+    dp.set_defaults(op="deploy")
     dp.add_argument("remote")
     dp.add_argument("target", choices=["kennel", "cattleshed"])
     dp.add_argument("--env", choices=["master", "develop"], required=True)
+    pp.add_argument("--prefix", default=PACKAGE_PREFIX)
 
     args = parser.parse_args()
 
@@ -303,7 +305,7 @@ def main():
     elif args.op == "package":
         do_package(debug=args.debug, target=args.target, env=args.env, prefix=args.prefix)
     elif args.op == "deploy":
-        do_deploy(remote=args.remote, target=args.target, env=args.env)
+        do_deploy(remote=args.remote, target=args.target, env=args.env, prefix=args.prefix)
 
 
 if __name__ == "__main__":
