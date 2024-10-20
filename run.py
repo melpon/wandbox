@@ -296,7 +296,7 @@ def main():
     dp.add_argument("remote")
     dp.add_argument("target", choices=["kennel", "cattleshed"])
     dp.add_argument("--env", choices=["master", "develop"], required=True)
-    pp.add_argument("--prefix", default=PACKAGE_PREFIX)
+    dp.add_argument("--prefix", default=PACKAGE_PREFIX)
 
     args = parser.parse_args()
 
