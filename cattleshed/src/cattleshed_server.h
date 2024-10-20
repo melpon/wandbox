@@ -74,8 +74,8 @@ class GetVersionHandler
       {
         auto c = wandbox::piped_spawn(wandbox::opendir("/"),
                                       current_.version_command);
-        SPDLOG_DEBUG("[0x{}] run [{}]", (void*)this,
-                     boost::algorithm::join(current_.version_command, " "));
+        SPDLOG_INFO("[0x{}] run [{}]", (void*)this,
+                    boost::algorithm::join(current_.version_command, " "));
         child_ = std::make_shared<wandbox::unique_child_pid>(std::move(c.pid));
         pipe_stdout_ = std::make_shared<boost::asio::posix::stream_descriptor>(
             *ioc_, c.fd_stdout.get());
@@ -141,7 +141,7 @@ class GetVersionHandler
         return;
       }
 
-      SPDLOG_DEBUG("[0x{}] add version: {} {}", (void*)this, current_.name,
+      SPDLOG_INFO("[0x{}] add version: {} {}", (void*)this, current_.name,
                    ver);
       versions_.push_back(std::make_pair(current_.name, ver));
 
