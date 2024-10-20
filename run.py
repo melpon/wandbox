@@ -137,7 +137,9 @@ def install_deps(source_dir: str, build_dir: str, install_dir: str, debug: bool)
         install_cppdb(**install_cppdb_args)
 
 
-def do_build(debug: bool, target: str, cattleshed_install_dir=None, kennel_install_dir=None):
+def do_build(
+    debug: bool, target: str, env: str, cattleshed_install_dir=None, kennel_install_dir=None
+):
     configuration = "debug" if debug else "release"
     cmake_configuration = "Debug" if debug else "Release"
     source_dir = os.path.join(BASE_DIR, "_source", configuration)
@@ -168,6 +170,15 @@ def do_build(debug: bool, target: str, cattleshed_install_dir=None, kennel_insta
                     f"-DCMAKE_MODULE_PATH={os.path.join(BASE_DIR, 'cmake')}",
                     f"-DCMAKE_INSTALL_PREFIX={cattleshed_install_dir}",
                     f"-DCMAKE_BUILD_TYPE={cmake_configuration}",
+                    *(
+                        [
+                            "-DCATTLESHED_STOREDIR=/tmp/cattleshed-develop-log",
+                            "-DCATTLESHED_BASEDIR=/tmp/cattleshed-develop",
+                            "-DCATTLESHED_LISTEN_PORT=50052",
+                        ]
+                        if env == "develop"
+                        else []
+                    ),
                 ]
             )
             cmd(
@@ -213,6 +224,15 @@ def do_build(debug: bool, target: str, cattleshed_install_dir=None, kennel_insta
                     f"-DPROTOC_GEN_JSONIF_CPP={os.path.join(install_dir, 'protoc-gen-jsonif', 'bin', 'protoc-gen-jsonif-cpp')}",
                     f"-DCppDB_ROOT_DIR={os.path.join(install_dir, 'cppdb')}",
                     f"-DSQLite3_INCLUDE_DIR={os.path.join(install_dir, 'sqlite3', 'include')}",
+                    *(
+                        [
+                            "-DKENNEL_PORT=3501",
+                            "-DKENNEL_CATTLESHED_PORT=50052",
+                            "-DKENNEL_URL=https://develop.wandbox.org",
+                        ]
+                        if env == "develop"
+                        else []
+                    ),
                 ]
             )
             cmd(
@@ -233,7 +253,7 @@ def do_package(debug: bool, target: str, env: str, prefix: str):
     build_dir = os.path.join(BASE_DIR, "_build", configuration)
     package_dir = os.path.join(BASE_DIR, "_package")
     mkdir_p(package_dir)
-    do_build(debug, target, f"{prefix}/cattleshed-{env}", f"{prefix}/kennel-{env}")
+    do_build(debug, target, env, f"{prefix}/cattleshed-{env}", f"{prefix}/kennel-{env}")
     cmd(["cmake", "--install", os.path.join(build_dir, target), "--config", cmake_configuration])
     with cd(prefix):
         cmd(["tar", "czf", os.path.join(package_dir, f"{target}-{env}.tar.gz"), f"{target}-{env}"])
@@ -284,6 +304,7 @@ def main():
     bp = sp.add_parser("build")
     bp.set_defaults(op="build")
     bp.add_argument("target", choices=["kennel", "cattleshed"])
+    bp.add_argument("--env", choices=["master", "develop"], required=True)
     bp.add_argument("--debug", action="store_true")
     pp = sp.add_parser("package")
     pp.set_defaults(op="package")
@@ -301,7 +322,7 @@ def main():
     args = parser.parse_args()
 
     if args.op == "build":
-        do_build(debug=args.debug, target=args.target)
+        do_build(debug=args.debug, target=args.target, env=args.env)
     elif args.op == "package":
         do_package(debug=args.debug, target=args.target, env=args.env, prefix=args.prefix)
     elif args.op == "deploy":
