@@ -11,6 +11,7 @@ find_package(CppDB REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
+find_package(utf8_range REQUIRED)
 find_package(Spdlog REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(Ggrpc REQUIRED)
@@ -90,7 +91,7 @@ add_custom_command(
   COMMAND $<TARGET_FILE:protobuf::protoc>
   ARGS
     --jsonif-cpp_out "${CMAKE_CURRENT_BINARY_DIR}/proto"
-    -I "${CMAKE_CURRENT_SOURCE_DIR}/../_install/protoc-gen-jsonif/proto"
+    -I "${PROTOC_GEN_JSONIF_DIR}/proto"
     -I "${CMAKE_CURRENT_SOURCE_DIR}/../proto"
     --plugin=protoc-gen-jsonif-cpp="${PROTOC_GEN_JSONIF_CPP}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../proto/kennel.proto"
@@ -131,14 +132,12 @@ target_compile_definitions(kennel PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
 target_include_directories(kennel PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto")
 target_link_libraries(kennel
   Boost::json
-  protobuf::libprotobuf
-  gRPC::grpc++
+  Ggrpc::ggrpc
   CppDB::CppDB
   SQLite::SQLite3
   Threads::Threads
   Spdlog::Spdlog
-  CLI11::CLI11
-  Ggrpc::Ggrpc)
+  CLI11::CLI11)
 
 set_sanitizer(kennel)
 

@@ -29,7 +29,7 @@ boost::beast::http::response<boost::beast::http::string_body> BadRequest(
   res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
   res.set(boost::beast::http::field::content_type, "text/html");
   res.keep_alive(req.keep_alive());
-  res.body() = why.to_string();
+  res.body() = why;
   res.prepare_payload();
   return res;
 }
@@ -42,7 +42,7 @@ boost::beast::http::response<boost::beast::http::string_body> NotFound(
   res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
   res.set(boost::beast::http::field::content_type, "text/html");
   res.keep_alive(req.keep_alive());
-  res.body() = "The resource '" + target.to_string() + "' was not found.";
+  res.body() = "The resource '" + std::string(target) + "' was not found.";
   res.prepare_payload();
   return res;
 }
@@ -55,7 +55,7 @@ boost::beast::http::response<boost::beast::http::string_body> ServerError(
   res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
   res.set(boost::beast::http::field::content_type, "text/html");
   res.keep_alive(req.keep_alive());
-  res.body() = "An error occurred: '" + what.to_string() + "'";
+  res.body() = "An error occurred: '" + std::string(what) + "'";
   res.prepare_payload();
   return res;
 }
@@ -136,13 +136,13 @@ static wandbox::cattleshed::Issuer make_issuer(
   issuer.set_remote_addr("");
   auto it = req.find("X-Real-IP");
   if (it != req.end()) {
-    issuer.set_real_ip(it->value().to_string());
+    issuer.set_real_ip(std::string(it->value()));
   }
   it = req.find("X-Forwarded-For");
   if (it != req.end()) {
-    issuer.set_forwarded_for(it->value().to_string());
+    issuer.set_forwarded_for(std::string(it->value()));
   }
-  issuer.set_path_info(req.target().to_string());
+  issuer.set_path_info(std::string(req.target()));
   issuer.set_github_username(std::move(github_user));
   return issuer;
 }
@@ -285,7 +285,7 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
       return;
     }
 
-    SPDLOG_DEBUG("[{}] requested", req_.target().to_string());
+    SPDLOG_DEBUG("[{}] requested", std::string(req_.target()));
 
     // 念のため catch しておく（投げっぱなしだとプロセスごと落ちてしまうので）
     try {
@@ -315,15 +315,15 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
         SendResponse(NotFound(req_, req_.target()));
       }
     } catch (const char* e) {
-      SPDLOG_ERROR("[{}] Unexpected exception: {}", req_.target().to_string(),
+      SPDLOG_ERROR("[{}] Unexpected exception: {}", std::string(req_.target()),
                    e);
       SendResponse(ServerError(req_, e));
     } catch (std::exception& e) {
-      SPDLOG_ERROR("[{}] Unexpected exception: {}", req_.target().to_string(),
+      SPDLOG_ERROR("[{}] Unexpected exception: {}", std::string(req_.target()),
                    e.what());
       SendResponse(ServerError(req_, e.what()));
     } catch (...) {
-      SPDLOG_ERROR("[{}] Unexpected exception", req_.target().to_string());
+      SPDLOG_ERROR("[{}] Unexpected exception", std::string(req_.target()));
       SendResponse(ServerError(req_, "unexpected"));
     }
   }
@@ -367,7 +367,7 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
     permlink pl(config_.database);
     wandbox::kennel::GetPermlinkResponse presp;
     try {
-      presp = pl.get_permlink(permlink_id.to_string());
+      presp = pl.get_permlink(permlink_id);
     } catch (cppdb::null_value_fetch) {
       SendResponse(NotFound(req_, req_.target()));
       return;
@@ -651,7 +651,7 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
                   std::placeholders::_1, std::placeholders::_2,
                   sp->need_eof()));
 
-    SPDLOG_INFO("[{}] responsed {}", req_.target().to_string(),
+    SPDLOG_INFO("[{}] responsed {}", std::string(req_.target()),
                 (int)sp->result());
   }
 
