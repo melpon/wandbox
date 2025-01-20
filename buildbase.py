@@ -691,7 +691,7 @@ def build_and_install_boost(
 ):
     version_underscore = version.replace(".", "_")
     archive = download(
-        f"https://boostorg.jfrog.io/artifactory/main/release/{version}/source/boost_{version_underscore}.tar.gz",
+        f"https://archives.boost.io/release/{version}/source/boost_{version_underscore}.tar.gz",
         source_dir,
     )
     extract(archive, output_dir=build_dir, output_dirname="boost")
