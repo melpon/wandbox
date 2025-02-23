@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import Form from "react-bootstrap/Form";
 import { useTranslation } from "react-i18next";
 
-import { wandboxSlice } from "~/features/slice";
+import { EditorType, TabKeyType, TabWidthType, wandboxSlice } from "~/features/slice";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
 
@@ -16,35 +16,35 @@ const EditorSettings: React.FC = () => {
   const actions = wandboxSlice.actions;
 
   const onChangeMode = useCallback(
-    (e): void => {
-      const mode = e.target.value;
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      const mode = e.target.value as EditorType;
       dispatch(actions.setEditorSettingsMode(mode));
     },
     [settings]
   );
   const onChangeTabKey = useCallback(
-    (e): void => {
-      const tabKey = e.target.value;
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      const tabKey = e.target.value as TabKeyType;
       dispatch(actions.setEditorSettingsTabKey(tabKey));
     },
     [settings]
   );
   const onChangeTabWidth = useCallback(
-    (e): void => {
-      const tabWidth = e.target.value;
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      const tabWidth = e.target.value as TabWidthType;
       dispatch(actions.setEditorSettingsTabWidth(tabWidth));
     },
     [settings]
   );
   const onChangeFixedHeight = useCallback(
-    (e): void => {
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
       const fixedHeight = e.target.checked;
       dispatch(actions.setEditorSettingsFixedHeight(fixedHeight));
     },
     [settings]
   );
   const onChangeFixedResultHeight = useCallback(
-    (e): void => {
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
       const fixedResultHeight = e.target.checked;
       dispatch(actions.setEditorSettingsFixedResultHeight(fixedResultHeight));
     },

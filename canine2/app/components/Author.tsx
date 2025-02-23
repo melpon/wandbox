@@ -8,6 +8,7 @@ import { wandboxSlice } from "~/features/slice";
 import { useSelector } from "react-redux";
 import { getDateFnsLocale } from "~/utils/getDateFnsLocale";
 import { useTranslation } from "react-i18next";
+import { GithubUser } from "~/types";
 
 export interface AuthorDataProps {
   permlinkData: PermlinkData;
@@ -134,6 +135,7 @@ const Author: React.FC<AuthorProps> = ({ permlinkData, author }) => {
                 className="w-100 h-100"
                 style={{ borderRadius: "50%" }}
                 src={author.avatar_url}
+                alt={`${author.login}'s avatar`}
               />
             </a>
           )}

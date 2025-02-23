@@ -13,20 +13,27 @@
   },
   "[javascript]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
   },
   "[javascriptreact]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
   },
   "[typescript]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
   },
   "[typescriptreact]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
   },
+  "eslint.workingDirectories": [
+    "./canine2",
+  ],
   "files.associations": {
     "*.cs": "csharp",
     "*.txt": "plaintext",
@@ -44,6 +51,7 @@
     "unordered_map": "cpp",
     "unordered_set": "cpp",
     "string_view": "cpp",
-    "rope": "cpp"
+    "rope": "cpp",
+    "wrangler.json": "jsonc",
   }
 }

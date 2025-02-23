@@ -100,9 +100,8 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
 
   return (
     <CodeMirror6
-      className={`wb-editor flex-grow-1 ${
-        stdinOpened ? "wb-stdinactive" : ""
-      } ${show ? "" : "d-none"}`}
+      className={`wb-editor flex-grow-1 ${stdinOpened ? "wb-stdinactive" : ""
+        } ${show ? "" : "d-none"}`}
       text={source.text}
       view={view}
       option={option}

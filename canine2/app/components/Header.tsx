@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import Navbar from "react-bootstrap/Navbar";
 import { Nav, NavDropdown } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useLoaderData, useRouteLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
@@ -11,7 +11,7 @@ import { wandboxSlice } from "~/features/slice";
 import { WandboxLoaderData } from "~/types";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface HeaderProps {}
+interface HeaderProps { }
 
 const Header: React.FC<HeaderProps> = (): React.ReactElement => {
   const { t, i18n } = useTranslation();
@@ -134,6 +134,7 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
               title={
                 <img
                   src={githubUser.avatar_url}
+                  alt="GitHub User Avatar"
                   style={{ width: 24, height: 24, borderRadius: 12 }}
                 />
               }

@@ -16,7 +16,6 @@ import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorTabs } from "./Editor/EditorTabs";
 import type { CodeMirror6Option } from "./CodeMirror6";
 import { CodeMirror6 } from "./CodeMirror6";
-import { ModemFill } from "react-bootstrap-icons";
 
 export interface EditorProps {
   compilerList: CompilerList;
@@ -68,9 +67,9 @@ const Editor: React.FC<EditorProps> = (props) => {
     permlinkData === null
       ? sources
       : createEditorSourceData(
-          permlinkData.parameter.code,
-          permlinkData.parameter.codes
-        );
+        permlinkData.parameter.code,
+        permlinkData.parameter.codes
+      );
 
   const compileState = useCompileStateSelector();
   const doCompile = useCompile(dispatch, compileState, compilerList);
@@ -112,9 +111,8 @@ const Editor: React.FC<EditorProps> = (props) => {
 
   return (
     <div
-      className={`${
-        fixedHeight ? "wb-editor-fixedheight" : ""
-      } d-flex flex-column flex-md-row gap-8px`}
+      className={`${fixedHeight ? "wb-editor-fixedheight" : ""
+        } d-flex flex-column flex-md-row gap-8px`}
     >
       <div className="d-flex flex-column flex-grow-1">
         <EditorTabs
@@ -162,6 +160,7 @@ const Editor: React.FC<EditorProps> = (props) => {
             onViewCreated={(view) => {
               dispatch(actions.setStdinView(view));
             }}
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             onViewDestroyed={(view) => {
               dispatch(actions.setStdinView(undefined));
             }}

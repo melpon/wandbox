@@ -1,7 +1,7 @@
 import { AnyJson } from "~/hooks/fetch";
-import { resolvePermlinkData } from "~/hooks/permlink";
+import { PermlinkData, resolvePermlinkData } from "~/hooks/permlink";
 import { getSessionStorage } from "~/sessions.server";
-import { GithubAccessToken, GithubUser, WandboxLoaderData } from "~/types";
+import { GithubAccessToken, GithubUser } from "~/types";
 
 export class WandboxError extends Error {
   constructor(public statusCode: number, public errorMessage: string) {
@@ -31,7 +31,7 @@ export async function getGithubAccessToken(env: Env, url: URL): Promise<string |
   if (!resp.ok) {
     return null;
   }
-  const json = await resp.json<GithubAccessToken | {access_token: undefined}>();
+  const json = await resp.json<GithubAccessToken | { access_token: undefined }>();
   if (json.access_token === undefined) {
     console.error(json);
     return null;
@@ -51,7 +51,7 @@ export async function getGithubUser(accessToken: string): Promise<GithubUser | n
     console.error(await resp.text());
     return null;
   }
-  const json = await resp.json<GithubUser | {id: undefined}>();
+  const json = await resp.json<GithubUser | { id: undefined }>();
   if (json.id === undefined) {
     console.error(json);
     return null;
@@ -77,9 +77,9 @@ export function withClientIP(headers: HeadersInit, request: Request): HeadersIni
 export function withCors(headers: HeadersInit, request: Request): HeadersInit {
   const allowHeaders = request.headers.get("Access-Control-Request-Headers");
   if (allowHeaders !== null) {
-    headers = {...headers, "Access-Control-Allow-Headers": allowHeaders};
+    headers = { ...headers, "Access-Control-Allow-Headers": allowHeaders };
   }
-  headers = {...headers, "Access-Control-Allow-Origin": "*"};
+  headers = { ...headers, "Access-Control-Allow-Origin": "*" };
   return headers;
 }
 
@@ -126,7 +126,7 @@ export async function fetchListData(env: Env, request: Request): Promise<AnyJson
   const headers = withClientIP(
     {
       "content-type": "application/json",
-      "Accept-Encoding": "identity", 
+      "Accept-Encoding": "identity",
     },
     request
   );
@@ -156,7 +156,7 @@ export async function fetchSponsorsData(env: Env, request: Request): Promise<Any
   const headers = withClientIP(
     {
       "content-type": "application/json",
-      "Accept-Encoding": "identity", 
+      "Accept-Encoding": "identity",
     },
     request
   );
@@ -186,7 +186,7 @@ export function redirectWithCookie(url: string, cookie: string): Response {
   });
 }
 
-export async function updateSession(env: Env, request: Request, permlinkId: string | null): Promise<{cookie: string, githubUser: GithubUser, permlinkData: PermlinkData | null}> {
+export async function updateSession(env: Env, request: Request, permlinkId: string | null): Promise<{ cookie: string, githubUser: GithubUser, permlinkData: PermlinkData | null }> {
   const ss = getSessionStorage(env);
   const session = await ss.getSession(request.headers.get("Cookie"));
 
@@ -198,9 +198,9 @@ export async function updateSession(env: Env, request: Request, permlinkId: stri
     permlinkId === null
       ? null
       : resolvePermlinkData(
-          permlinkId,
-          await fetchPermlinkData(env, permlinkId, request)
-        );
+        permlinkId,
+        await fetchPermlinkData(env, permlinkId, request)
+      );
 
   const cookie = await ss.commitSession(session, {
     maxAge: 30 * 24 * 60 * 60,

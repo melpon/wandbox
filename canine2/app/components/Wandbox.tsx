@@ -51,6 +51,9 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     setError
   );
 
+  const dispatch = useAppDispatch();
+  const actions = wandboxSlice.actions;
+
   useEffect((): void => {
     if (permlinkId === undefined) {
       dispatch(actions.setPermlinkData(null));
@@ -135,9 +138,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       storageExists,
     })
   );
-
-  const dispatch = useAppDispatch();
-  const actions = wandboxSlice.actions;
 
   // compilerList と permlinkData は state に保存しておく
   useEffect(() => {
@@ -295,9 +295,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         pullRight={true}
         rootClassName="wb-sidebar-root"
         sidebarClassName="wb-sidebar"
-        contentClassName={`${
-          sidebarLocked ? "wb-sidebar-locked" : ""
-        } py-24px px-8px px-md-32px d-flex flex-column`}
+        contentClassName={`${sidebarLocked ? "wb-sidebar-locked" : ""} py-24px px-8px px-md-32px d-flex flex-column`}
         contentId="wb-main-content"
       >
         <div className="d-flex flex-column flex-md-row gap-16px">

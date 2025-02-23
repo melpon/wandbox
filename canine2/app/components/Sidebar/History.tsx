@@ -27,7 +27,7 @@ const History: React.FC = () => {
 
   return (
     <div className="wb-history flex-grow-1 d-flex flex-column px-16px py-8px gap-8px">
-      {[...history.histories].reverse().map((x, i) => {
+      {[...history.histories].reverse().map((x) => {
         return (
           <div
             key={`wb-history-${x.id}`}
@@ -64,9 +64,8 @@ const History: React.FC = () => {
               <p className={`wb-title wb-${x.type}`}>{x.title}</p>
             </div>
             <div
-              className={`d-flex justify-content-between px-8px pt-8px ${
-                x.title.length === 0 ? "mt-8px" : ""
-              }`}
+              className={`d-flex justify-content-between px-8px pt-8px ${x.title.length === 0 ? "mt-8px" : ""
+                }`}
             >
               <div className="d-flex flex-column justify-content-center">
                 <p>

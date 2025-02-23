@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import {
   EditorView,
   keymap,
@@ -15,9 +15,8 @@ import { bracketMatching, syntaxHighlighting, HighlightStyle, foldGutter, foldKe
 import { history, historyKeymap, defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } from "@codemirror/autocomplete";
-import { commentKeymap } from "@codemirror/comment";
 import { lintKeymap } from "@codemirror/lint";
-import { tags } from "@codemirror/highlight";
+import { tags } from "@lezer/highlight";
 import { vim } from "@replit/codemirror-vim";
 
 // --color-prettylights-syntax-comment: #6e7781;
@@ -132,7 +131,6 @@ const defaultKeyMaps: KeyBinding[] = [
   ...searchKeymap,
   ...historyKeymap,
   ...foldKeymap,
-  ...commentKeymap,
   ...completionKeymap,
   ...lintKeymap,
 ];

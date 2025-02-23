@@ -19,10 +19,10 @@ export function useGetSponsors(
   url: string,
   onError: (error: string) => void
 ): [
-  SponsorsGetData | null,
-  number,
-  (url: string | null, opts: RequestInit) => void
-] {
+    SponsorsGetData | null,
+    number,
+    (url: string | null, opts: RequestInit) => void
+  ] {
   const headers = {
     "Content-Type": "application/json",
   };

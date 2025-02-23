@@ -95,9 +95,8 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
       <code
         ref={ref}
         id="wb-result-console"
-        className={`wb-console ${
-          fixedResultHeight ? "wb-result-fixedheight" : ""
-        } p-16px`}
+        className={`wb-console ${fixedResultHeight ? "wb-result-fixedheight" : ""
+          } p-16px`}
       >
         {mergedResults.map((r, index): React.ReactElement | null => {
           if (

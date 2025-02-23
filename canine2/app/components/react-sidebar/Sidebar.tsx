@@ -88,6 +88,8 @@ interface SidebarProps {
 
   // callback called when the overlay is clicked
   onSetOpen?: (open: boolean) => void;
+
+  children: React.ReactNode;
 }
 
 const Sidebar: React.FC<SidebarProps> = (props) => {

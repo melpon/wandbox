@@ -1,11 +1,12 @@
 import type { EditorView } from "@codemirror/view";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
-import { castDraft } from "immer";
+import { castDraft, WritableDraft } from "immer";
 
 import { normalizePath } from "~/utils/normalizePath";
 import type { CompilerList } from "~/hooks/compilerList";
 import type { PermlinkData } from "~/hooks/permlink";
+import { GithubUser } from "~/types";
 
 export interface EditorSourceData {
   id: string;
@@ -108,7 +109,7 @@ export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
 function sourceToHistorySource(
   sources: EditorSourceData[],
-  views: EditorViewMap
+  views: EditorViewMap | WritableDraft<EditorViewMap>
 ): HistoryEditorSourceData[] {
   return sources
     .map((s) => {
@@ -126,12 +127,12 @@ function sourceToHistorySource(
 
 export function getSourceText(
   source: EditorSourceData,
-  view: EditorView | undefined
+  view?: EditorView | WritableDraft<EditorView>
 ): string {
   return view !== undefined ? view.state.doc.toString() : source.text;
 }
 
-export function getStdin(stdin: string, stdinView?: EditorView): string {
+export function getStdin(stdin: string, stdinView?: EditorView | WritableDraft<EditorView>): string {
   return stdinView !== undefined ? stdinView!.state.doc.toString() : stdin;
 }
 
@@ -403,9 +404,9 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         displayName: ci.displayName,
         version: ci.version,
-        sources: sourceToHistorySource(state.sources, state.views as any),
+        sources: sourceToHistorySource(state.sources, state.views),
         currentTab: state.currentTab,
-        stdin: getStdin(state.stdin, state.stdinView as any),
+        stdin: getStdin(state.stdin, state.stdinView),
         title: state.title,
         description: state.description,
         results: state.results,
@@ -439,9 +440,9 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         displayName: ci.displayName,
         version: ci.version,
-        sources: sourceToHistorySource(state.sources, state.views as any),
+        sources: sourceToHistorySource(state.sources, state.views),
         currentTab: state.currentTab,
-        stdin: getStdin(state.stdin, state.stdinView as any),
+        stdin: getStdin(state.stdin, state.stdinView),
         title: state.title,
         description: state.description,
         // results は最終的に結果が得られた後に設定する
@@ -591,7 +592,8 @@ export const wandboxSlice = createSlice({
       state.breakpoint = action.payload;
     },
   },
-  extraReducers: (builder) => {},
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  extraReducers: (builder) => { },
 });
 
 export const wandboxReducer = wandboxSlice.reducer;

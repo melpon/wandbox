@@ -9,7 +9,7 @@ import { updateSession } from "~/utils/handleApi";
 export const loader: LoaderFunction = async ({ request, params, context }) => {
   const env = context.cloudflare.env;
   const { permlinkId } = params;
-  const {cookie, githubUser, permlinkData} = await updateSession(env, request, permlinkId ?? null)
+  const { cookie, githubUser, permlinkData } = await updateSession(env, request, permlinkId ?? null)
 
   const data: WandboxLoaderData = { githubUser, permlinkData, env: context.cloudflare.env };
 
@@ -20,7 +20,7 @@ export const loader: LoaderFunction = async ({ request, params, context }) => {
   });
 };
 
-export default function () {
+export default function Permlink() {
   return (
     <Provider store={store}>
       <Wandbox />

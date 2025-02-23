@@ -95,7 +95,8 @@ export function createBody(
       state.views[state.sources[defaultEditorTab].id]
     ),
     codes: state.sources
-      .map((s, tab) => ({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map((s, _tab) => ({
         file: s.filename,
         code: getSourceText(s, state.views[s.id]),
       }))
@@ -133,7 +134,7 @@ export function compile(
       const read = (
         // eslint-disable-next-line @typescript-eslint/ban-types
         read: Function,
-        result: ReadableStreamDefaultReadResult<AnyJson>
+        result: ReadableStreamReadResult<AnyJson>
       ): void => {
         if (result.done) {
           onComplete();

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import {
-  LayoutSidebarReverse,
   PinAngle,
   PinAngleFill,
   X,

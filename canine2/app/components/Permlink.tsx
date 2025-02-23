@@ -13,6 +13,9 @@ import { useAppDispatch } from "~/store";
 import { wandboxSlice } from "~/features/slice";
 import { useTranslation } from "react-i18next";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const twttr: any;
+
 interface TweetButtonProps {
   permlinkId: string;
 }
@@ -26,8 +29,9 @@ const TweetButton: React.FC<TweetButtonProps> = ({ permlinkId }) => {
     const url = `${document.location.origin}/permlink/${permlinkId}`;
     let elem: HTMLElement | null = null;
     if (typeof twttr !== "undefined") {
-      twttr.ready((twttr) => {
-        twttr.widgets.createShareButton(url, ref, {}).then((x) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      twttr.ready((twttr: any) => {
+        twttr.widgets.createShareButton(url, ref, {}).then((x: HTMLElement) => {
           elem = x;
         });
       });
