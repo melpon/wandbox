@@ -4,6 +4,7 @@
 // CodeMirror Mode Elixir, copyright (c) by Marijn Haverbeke, Ian Walter, and
 // others. Distributed under an MIT license: http://codemirror.net/LICENSE.
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 const wordObj = (words) => {

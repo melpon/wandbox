@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import Navbar from "react-bootstrap/Navbar";
 import { Nav, NavDropdown } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useRouteLoaderData } from "@remix-run/react";
+import { useLoaderData, useRouteLoaderData } from "@remix-run/react";
 
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
@@ -20,14 +20,14 @@ const Header: React.FC<HeaderProps> = (): React.ReactElement => {
       sidebarState,
     })
   );
-  const rootLoaderData = useRouteLoaderData<WandboxLoaderData>("root")
+  const loaderData = useLoaderData<WandboxLoaderData>();
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
 
-  if (rootLoaderData === undefined) {
-    return <p>"Root loader data not found"</p>;
+  if (loaderData === undefined) {
+    return <p>Root loader data not found</p>;
   }
-  const { githubUser, env } = rootLoaderData;
+  const { githubUser, env } = loaderData;
 
   return (
     <Navbar

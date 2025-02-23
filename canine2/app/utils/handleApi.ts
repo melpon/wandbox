@@ -1,5 +1,7 @@
 import { AnyJson } from "~/hooks/fetch";
-import { GithubAccessToken, GithubUser } from "~/types";
+import { resolvePermlinkData } from "~/hooks/permlink";
+import { getSessionStorage } from "~/sessions.server";
+import { GithubAccessToken, GithubUser, WandboxLoaderData } from "~/types";
 
 export class WandboxError extends Error {
   constructor(public statusCode: number, public errorMessage: string) {
@@ -182,4 +184,27 @@ export function redirectWithCookie(url: string, cookie: string): Response {
       "Set-Cookie": cookie,
     },
   });
+}
+
+export async function updateSession(env: Env, request: Request, permlinkId: string | null): Promise<{cookie: string, githubUser: GithubUser, permlinkData: PermlinkData | null}> {
+  const ss = getSessionStorage(env);
+  const session = await ss.getSession(request.headers.get("Cookie"));
+
+  const githubUser = session.has("github_user")
+    ? JSON.parse(session.get("github_user"))
+    : null;
+
+  const permlinkData =
+    permlinkId === null
+      ? null
+      : resolvePermlinkData(
+          permlinkId,
+          await fetchPermlinkData(env, permlinkId, request)
+        );
+
+  const cookie = await ss.commitSession(session, {
+    maxAge: 30 * 24 * 60 * 60,
+    sameSite: "lax",
+  });
+  return { cookie, githubUser, permlinkData };
 }

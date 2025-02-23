@@ -1,4 +1,4 @@
-import type { MetaFunction, MetaDescriptor, LinksFunction, LoaderFunction } from "@remix-run/cloudflare";
+import type { MetaFunction, MetaDescriptor, LinksFunction } from "@remix-run/cloudflare";
 import {
   Links,
   Meta,
@@ -11,47 +11,11 @@ import "./tailwind.css";
 import "./styles/wandbox.scss";
 
 //import wandboxStyles from "./styles/wandbox.css";
-import { getSessionStorage } from "./sessions.server";
-import { fetchPermlinkData } from "./entry.server";
-import type { PermlinkData } from "./hooks/permlink";
-import { resolvePermlinkData } from "./hooks/permlink";
-import type { WandboxLoaderData } from "~/types";
+import { PermlinkData } from "./hooks/permlink";
 
-export const loader: LoaderFunction = async ({ request, params, context }) => {
-  const env = context.cloudflare.env;
-  const ss = getSessionStorage(env);
-  const session = await ss.getSession(request.headers.get("Cookie"));
-
-  const githubUser = session.has("github_user")
-    ? JSON.parse(session.get("github_user"))
-    : null;
-
-  const { permlinkId } = params;
-  const permlinkData =
-    permlinkId === undefined
-      ? null
-      : resolvePermlinkData(
-          permlinkId,
-          await fetchPermlinkData(env, permlinkId, request)
-        );
-
-  const data: WandboxLoaderData = { githubUser, permlinkData, env: context.cloudflare.env };
-
-  const cookie = await ss.commitSession(session, {
-    maxAge: 30 * 24 * 60 * 60,
-    sameSite: "lax",
-  });
-  return Response.json(data, {
-    headers: {
-      "Set-Cookie": cookie,
-    },
-  });
-};
-
-export const meta: MetaFunction = ({ params, data }) => {
+export const meta: MetaFunction = ({ data }) => {
   let title: string;
-  // const permlinkData: PermlinkData | null = (data as any).permlinkData;
-  const permlinkData = null;
+  const permlinkData: PermlinkData | null = (data as any)?.permlinkData ?? null;
 
   if (permlinkData === null) {
     title = "Wandbox";

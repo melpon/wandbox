@@ -7,7 +7,7 @@ export const loader: LoaderFunction = async ({ request, params, context }) => {
     }
     const env = context.cloudflare.env;
     const json = await fetchPermlinkData(env, params.permlinkId, request);
-    var responseHeaders: HeadersInit = {};
+    let responseHeaders: HeadersInit = {};
     responseHeaders = withCors(responseHeaders, request);
     return Response.json(json, { headers: responseHeaders });
 }

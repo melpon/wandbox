@@ -20,7 +20,7 @@ async function actionAndLoader(request: Request, context: AppLoadContext): Promi
       headers: headers,
       body: json === null ? undefined : JSON.stringify(json),
     });
-    var responseHeaders: HeadersInit = resp.headers;
+    let responseHeaders: HeadersInit = resp.headers;
     responseHeaders = withCors(responseHeaders, request);
     return new Response(await resp.text(), {
       headers: responseHeaders,
