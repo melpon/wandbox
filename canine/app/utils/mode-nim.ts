@@ -1,6 +1,7 @@
 // https://github.com/PMunch/nim-playground-frontend/blob/3a8ad04cc34708e8f25820b3c7be3b4bf83769f1/codemirror/mode/nim/nim.js
 // の旧 CodeMirror の設定からコピペして CodeMirror6 に対応したもの。
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 var ERRORCLASS = "error";

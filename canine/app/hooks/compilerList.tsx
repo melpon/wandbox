@@ -99,7 +99,7 @@ export function useCompilerList(
     "Content-Type": "application/json",
   };
 
-  const resolver = useCallback((json): CompilerInfo[] => {
+  const resolver = useCallback((json: AnyJson): CompilerInfo[] => {
     return (json as AnyJson[]).map(resolveCompilerInfo);
   }, []);
 

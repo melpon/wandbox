@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useLayoutEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { wandboxSlice } from "~/features/slice";
 import type { Breakpoint } from "~/features/slice";
+import useIsomorphicLayoutEffect from "~/hooks/useIsomorphicLayoutEffect";
 import { useAppDispatch } from "~/store";
 
 // Breakpoint の変更を検出して反映するコンポーネント
@@ -33,7 +34,7 @@ const UpdateBreakpoint: React.FC = () => {
     }
   }, []);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     updateBreakpoint();
   }, []);
 

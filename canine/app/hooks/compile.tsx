@@ -26,7 +26,7 @@ export function useCompile(
 
   const [, setError] = useError();
   const onError = useCallback(
-    (error) => {
+    (error: string) => {
       dispatch(actions.setRunning(false));
       setError(error.toString());
     },

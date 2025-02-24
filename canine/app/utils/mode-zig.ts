@@ -1,6 +1,7 @@
 // https://github.com/ziglang/vscode-zig/blob/ac25b33a6b3cfd60efbdd6e01459c22e79902af8/syntaxes/zig.tmLanguage.json
 // を参考にしながら実装
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 import { simpleMode } from "@codemirror/legacy-modes/mode/simple-mode";

@@ -4,6 +4,7 @@
 // CodeMirror Mode Elixir, copyright (c) by Marijn Haverbeke, Ian Walter, and
 // others. Distributed under an MIT license: http://codemirror.net/LICENSE.
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 const wordObj = (words) => {
@@ -166,7 +167,7 @@ const tokenBase = (stream, state) => {
     stream.match(/^[\d_]*(?:\.[\d_]+)?(?:[eE][+\-]?[\d_]+)?/);
     return "number";
   } else if (ch === "?") {
-    while (stream.match(/^\\[CM]-/)) {}
+    while (stream.match(/^\\[CM]-/)) { }
 
     if (stream.eat("\\")) {
       stream.eatWhile(/\w/);
@@ -366,14 +367,14 @@ export const elixir = {
         state.lastTok === "."
           ? "property"
           : keywords.propertyIsEnumerable(stream.current())
-          ? "keyword"
-          : /^[A-Z]/.test(word)
-          ? "tag"
-          : state.lastTok === "def" ||
-            state.lastTok === "class" ||
-            state.varList
-          ? "def"
-          : "variable";
+            ? "keyword"
+            : /^[A-Z]/.test(word)
+              ? "tag"
+              : state.lastTok === "def" ||
+                state.lastTok === "class" ||
+                state.varList
+                ? "def"
+                : "variable";
 
       const isColumnIndent = stream.column() === stream.indentation();
       if (style === "keyword") {

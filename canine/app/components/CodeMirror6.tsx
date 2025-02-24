@@ -1,27 +1,24 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   EditorView,
   keymap,
   drawSelection,
   highlightActiveLine,
   KeyBinding,
+  lineNumbers,
+  highlightActiveLineGutter,
+  rectangularSelection,
 } from "@codemirror/view";
 import type { Extension, StateCommand } from "@codemirror/state";
 import { EditorState, StateEffect, Transaction } from "@codemirror/state";
-import { history, historyKeymap } from "@codemirror/history";
-import { foldGutter, foldKeymap } from "@codemirror/fold";
-import { indentOnInput, getIndentUnit, indentUnit } from "@codemirror/language";
-import { lineNumbers, highlightActiveLineGutter } from "@codemirror/gutter";
-import { defaultKeymap, indentWithTab } from "@codemirror/commands";
-import { bracketMatching } from "@codemirror/matchbrackets";
-import { closeBrackets, closeBracketsKeymap } from "@codemirror/closebrackets";
+import { bracketMatching, syntaxHighlighting, HighlightStyle, foldGutter, foldKeymap, indentOnInput, getIndentUnit, indentUnit } from "@codemirror/language";
+import { history, historyKeymap, defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
-import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
-import { commentKeymap } from "@codemirror/comment";
-import { rectangularSelection } from "@codemirror/rectangular-selection";
+import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { lintKeymap } from "@codemirror/lint";
-import { HighlightStyle, tags } from "@codemirror/highlight";
+import { tags } from "@lezer/highlight";
 import { vim } from "@replit/codemirror-vim";
+import useIsomorphicLayoutEffect from "~/hooks/useIsomorphicLayoutEffect";
 
 // --color-prettylights-syntax-comment: #6e7781;
 // --color-prettylights-syntax-constant: #0550ae;
@@ -122,7 +119,7 @@ const codeMirrorDefaultExtensions: Extension[] = [
   drawSelection(),
   EditorState.allowMultipleSelections.of(true),
   indentOnInput(),
-  highlightStyle,
+  syntaxHighlighting(highlightStyle),
   closeBrackets(),
   autocompletion(),
   rectangularSelection(),
@@ -135,7 +132,6 @@ const defaultKeyMaps: KeyBinding[] = [
   ...searchKeymap,
   ...historyKeymap,
   ...foldKeymap,
-  ...commentKeymap,
   ...completionKeymap,
   ...lintKeymap,
 ];
@@ -220,7 +216,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const localView = useRef<EditorView>();
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (view !== undefined) {
       return;
     }

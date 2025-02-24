@@ -75,7 +75,11 @@ const ErrorContext = createContext<ErrorContextType>({
   },
 });
 
-const Error: React.FC = (props): React.ReactElement => {
+interface ErrorProps {
+  children: React.ReactNode;
+}
+
+const Error: React.FC<ErrorProps> = (props): React.ReactElement => {
   const [state, setState] = useState<ErrorState>({
     valid: false,
     value: "",

@@ -13,7 +13,7 @@ const store = configureStore({
 export type AppStore = typeof store;
 export type AppState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-export const useAppStore = (): AppStore => useStore();
+export const useAppStore = (): AppStore => useStore<AppState>();
 export const useAppDispatch = (): AppDispatch => useDispatch<AppDispatch>();
 
 export default store;

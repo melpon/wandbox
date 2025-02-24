@@ -1,11 +1,12 @@
-import React, { useLayoutEffect, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import { default as AnsiUp } from "ansi_up";
+import { AnsiUp } from "ansi_up";
 
 import type { ResultData } from "~/features/slice";
 import type { PermlinkData } from "~/hooks/permlink";
 import type { AppState } from "~/store";
+import useIsomorphicLayoutEffect from "~/hooks/useIsomorphicLayoutEffect";
 
 interface ResultProps {
   permlinkData: PermlinkData | null;
@@ -71,7 +72,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
   );
 
   // スクロールを一番下に持ってくる
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (ref.current === null || !running) {
       return;
     }
@@ -95,9 +96,8 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
       <code
         ref={ref}
         id="wb-result-console"
-        className={`wb-console ${
-          fixedResultHeight ? "wb-result-fixedheight" : ""
-        } p-16px`}
+        className={`wb-console ${fixedResultHeight ? "wb-result-fixedheight" : ""
+          } p-16px`}
       >
         {mergedResults.map((r, index): React.ReactElement | null => {
           if (

@@ -1,14 +1,14 @@
-import { createCookie, createCloudflareKVSessionStorage } from "remix";
+import { createCookie, createWorkersKVSessionStorage, SessionStorage, SessionData } from "@remix-run/cloudflare";
 
-const sessionCookie = createCookie("__session", {
-  secrets: [WANDBOX_KV_COOKIE_SECRET],
-  sameSite: true,
-});
-
-const { getSession, commitSession, destroySession } =
-  createCloudflareKVSessionStorage({
-    kv: KV_SESSION,
-    cookie: sessionCookie,
+export function getSessionStorage(env: Env): SessionStorage<SessionData, SessionData> {
+  return createWorkersKVSessionStorage({
+    kv: env.KV_SESSION, // Cloudflare KV
+    cookie: createCookie("session", {
+      secrets: [env.WANDBOX_KV_COOKIE_SECRET], // シークレットキーを環境変数から取得
+      secure: true,
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+    }),
   });
-
-export { getSession, commitSession, destroySession };
+}
