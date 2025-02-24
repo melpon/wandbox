@@ -13,5 +13,7 @@ export type GithubUser = {
 export type WandboxLoaderData = {
   githubUser: GithubUser | null;
   permlinkData: any;
+  sponsors: any;
+  compilerList: any;
   env: Env;
 };

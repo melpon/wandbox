@@ -47,7 +47,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
   const onRun = useCallback((): void => {
     dispatch(actions.setRunning(true));
     dispatch(actions.setSharable(true));
-    dispatch(actions.prepareRun());
+    dispatch(actions.prepareRun(compilerList));
     doCompile();
   }, [doCompile]);
 
@@ -145,7 +145,7 @@ const Run: React.FC<RunProps> = (props): React.ReactElement => {
       dispatch(actions.setResults(permlinkData.results));
     }
 
-    dispatch(actions.pushQuickSave());
+    dispatch(actions.pushQuickSave(compilerList));
 
     dispatch(actions.setNavigate("/"));
   }, [compilerList, permlinkData]);

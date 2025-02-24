@@ -76,7 +76,7 @@ const Editor: React.FC<EditorProps> = (props) => {
   const onRun = useCallback(() => {
     dispatch(actions.setRunning(true));
     dispatch(actions.setSharable(true));
-    dispatch(actions.prepareRun());
+    dispatch(actions.prepareRun(compilerList));
     doCompile();
   }, [doCompile]);
 

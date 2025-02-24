@@ -140,9 +140,6 @@ const WANDBOX_MAX_QUICKSAVE_COUNT = 5;
 const WANDBOX_MAX_HISTORY_COUNT = 50;
 
 const initialState = {
-  compilerList: null as CompilerList | null,
-  permlinkData: null as PermlinkData | null,
-
   currentLanguage: "",
   currentCompilerName: "",
   currentSwitches: {} as { [name: string]: string | boolean },
@@ -202,12 +199,6 @@ export const wandboxSlice = createSlice({
   name: "wandbox",
   initialState: initialState,
   reducers: {
-    setCompilerList: (state, action: PayloadAction<CompilerList | null>) => {
-      state.compilerList = action.payload;
-    },
-    setPermlinkData: (state, action: PayloadAction<PermlinkData | null>) => {
-      state.permlinkData = action.payload;
-    },
     setCurrentLanguage: (state, action: PayloadAction<string>) => {
       state.currentLanguage = action.payload;
     },
@@ -382,11 +373,9 @@ export const wandboxSlice = createSlice({
     setEditorChanged: (state, action: PayloadAction<boolean>) => {
       state.editorChanged = action.payload;
     },
-    pushQuickSave: (state) => {
-      if (state.compilerList === null) {
-        return;
-      }
-      const ci = state.compilerList.compilers.find(
+    pushQuickSave: (state, action: PayloadAction<CompilerList>) => {
+      const compilerList = action.payload;
+      const ci = compilerList.compilers.find(
         (x) => x.name === state.currentCompilerName
       );
       if (ci === undefined) {
@@ -418,11 +407,9 @@ export const wandboxSlice = createSlice({
       }
       h.keyCounter += 1;
     },
-    prepareRun: (state) => {
-      if (state.compilerList === null) {
-        return;
-      }
-      const ci = state.compilerList.compilers.find(
+    prepareRun: (state, action: PayloadAction<CompilerList>) => {
+      const compilerList = action.payload;
+      const ci = compilerList.compilers.find(
         (x) => x.name === state.currentCompilerName
       );
       if (ci === undefined) {

@@ -37,7 +37,7 @@
 		"bootstrap": "^5.3.3",
 		"can-ndjson-stream": "^1.0.2",
 		"date-fns": "^4.1.0",
-		"i18next": "^24.2.2",
+		"i18next": "^23.16.8",
 		"i18next-browser-languagedetector": "^8.0.4",
 		"immer": "^10.1.1",
 		"isbot": "^4.1.0",
@@ -46,7 +46,8 @@
 		"react-bootstrap-icons": "^1.11.5",
 		"react-dom": "^18.2.0",
 		"react-i18next": "^15.4.1",
-		"react-redux": "^9.2.0"
+		"react-redux": "^9.2.0",
+		"remix-i18next": "^6.4.1"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",

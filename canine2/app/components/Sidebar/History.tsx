@@ -10,8 +10,13 @@ import { wandboxSlice } from "~/features/slice";
 import { Trans, useTranslation } from "react-i18next";
 import { getDateFnsLocale } from "~/utils/getDateFnsLocale";
 import { t } from "i18next";
+import { CompilerList } from "~/hooks/compilerList";
 
-const History: React.FC = () => {
+export interface HistoryProps {
+  compilerList: CompilerList;
+}
+
+const History: React.FC<HistoryProps> = ({ compilerList }) => {
   const { i18n } = useTranslation();
   const { permlinkId } = useParams();
   const { history, breakpoint } = useSelector(
@@ -124,7 +129,7 @@ const History: React.FC = () => {
                     variant="info"
                     onClick={() => {
                       if (permlinkId === undefined) {
-                        dispatch(actions.pushQuickSave());
+                        dispatch(actions.pushQuickSave(compilerList));
                       }
                       navigate(`/permlink/${x.permlinkId}`);
                       // スマホではロードしたら画面を閉じる
@@ -148,7 +153,7 @@ const History: React.FC = () => {
                         navigate(`/`);
                       }
                       if (permlinkId === undefined) {
-                        dispatch(actions.pushQuickSave());
+                        dispatch(actions.pushQuickSave(compilerList));
                       }
                       dispatch(actions.loadQuickSave(x));
                       // スマホではロードしたら画面を閉じる

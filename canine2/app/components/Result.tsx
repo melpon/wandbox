@@ -6,6 +6,7 @@ import { AnsiUp } from "ansi_up";
 import type { ResultData } from "~/features/slice";
 import type { PermlinkData } from "~/hooks/permlink";
 import type { AppState } from "~/store";
+import useIsomorphicLayoutEffect from "~/hooks/useIsomorphicLayoutEffect";
 
 interface ResultProps {
   permlinkData: PermlinkData | null;
@@ -71,7 +72,7 @@ const Result: React.FC<ResultProps> = (props): React.ReactElement | null => {
   );
 
   // スクロールを一番下に持ってくる
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (ref.current === null || !running) {
       return;
     }

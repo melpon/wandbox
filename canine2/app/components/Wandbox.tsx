@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "@remix-run/react";
+import { useLoaderData, useParams } from "@remix-run/react";
 
-import { useCompilerList } from "~/hooks/compilerList";
+import { CompilerList, useCompilerList } from "~/hooks/compilerList";
 import { useError } from "~/hooks/error";
-import { useGetPermlink } from "~/hooks/permlink";
+import { PermlinkData, useGetPermlink } from "~/hooks/permlink";
 import { Header } from "~/components/Header";
 import { Compiler } from "~/components/Compiler";
 import { Permlink } from "~/components/Permlink";
@@ -27,9 +27,10 @@ import {
 } from "~/features/actions";
 import { SidebarBase } from "~/components/SidebarBase";
 import i18n from "~/i18n";
-import { useGetSponsors } from "~/hooks/sponsors";
+import { SponsorsGetData, useGetSponsors } from "~/hooks/sponsors";
 import { Sponsors } from "./Sponsors";
 import { UpdateBreakpoint } from "./UpdateBreakpoint";
+import { WandboxLoaderData } from "~/types";
 
 const Wandbox: React.FC = (): React.ReactElement | null => {
   // 参照しておかないとグローバルな初期化コード自体が消えてしまうので、
@@ -38,49 +39,33 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
 
   const { permlinkId } = useParams();
   const [, setError] = useError();
-  const compilerList = useCompilerList(`/api/list.json`, setError);
+  const {
+    compilerList,
+    sponsors,
+    permlinkData
+  }: {
+    compilerList: CompilerList,
+    sponsors: SponsorsGetData,
+    permlinkData: PermlinkData | null
+  } = useLoaderData<WandboxLoaderData>();
 
-  const [permlinkResp, , doGetPermlink] = useGetPermlink(
-    permlinkId === undefined ? "" : permlinkId,
-    setError
-  );
   const [localStorageChanged, setLocalStorageChanged] = useState(false);
-
-  const [sponsors, , doGetSponsors] = useGetSponsors(
-    "/api/sponsors.json",
-    setError
-  );
 
   const dispatch = useAppDispatch();
   const actions = wandboxSlice.actions;
 
   useEffect((): void => {
-    if (permlinkId === undefined) {
-      dispatch(actions.setPermlinkData(null));
+    if (permlinkData === null) {
       return;
     }
 
-    doGetPermlink(`/api/permlink/${permlinkId}`, {});
-  }, [permlinkId]);
-
-  useEffect((): void => {
-    if (permlinkResp === null) {
-      return;
-    }
-
-    dispatch(actions.setPermlinkData(permlinkResp));
     // stdin がある場合は標準入力用のエディタを開く
-    if (permlinkResp.parameter.stdin.length !== 0) {
+    if (permlinkData.parameter.stdin.length !== 0) {
       dispatch(actions.setStdinOpened(true));
     }
-  }, [permlinkResp]);
-
-  useEffect((): void => {
-    doGetSponsors(null, {});
   }, []);
 
   const {
-    permlinkData,
     currentLanguage,
     currentCompilerName,
     currentSwitches,
@@ -100,7 +85,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   } = useSelector(
     ({
       wandbox: {
-        permlinkData,
         currentLanguage,
         currentCompilerName,
         currentSwitches,
@@ -119,7 +103,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         storageExists,
       },
     }: AppState) => ({
-      permlinkData,
       currentLanguage,
       currentCompilerName,
       currentSwitches,
@@ -138,11 +121,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       storageExists,
     })
   );
-
-  // compilerList と permlinkData は state に保存しておく
-  useEffect(() => {
-    dispatch(actions.setCompilerList(compilerList));
-  }, [compilerList]);
 
   // 設定データのロード（初回に一回だけ読み込む）
   useEffect((): void => {
@@ -225,7 +203,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     }
 
     const timer = setTimeout(() => {
-      dispatch(actions.pushQuickSave());
+      dispatch(actions.pushQuickSave(compilerList));
       dispatch(actions.setEditorChanged(false));
     }, 10000);
     return () => {
@@ -240,11 +218,11 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     }
     let language: string;
     let docTitle: string;
-    if (permlinkResp === null) {
+    if (permlinkData === null) {
       language = currentLanguage;
       if (title.length !== 0) {
         docTitle = title;
-      } else if (compilerList !== null && currentCompilerName.length !== 0) {
+      } else if (currentCompilerName.length !== 0) {
         const ci = compilerList.compilers.find(
           (x) => x.name === currentCompilerName
         );
@@ -257,22 +235,18 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         docTitle = "";
       }
     } else {
-      language = permlinkResp.parameter.compilerInfo.language;
-      if (permlinkResp.parameter.title.length !== 0) {
-        docTitle = permlinkResp.parameter.title;
+      language = permlinkData.parameter.compilerInfo.language;
+      if (permlinkData.parameter.title.length !== 0) {
+        docTitle = permlinkData.parameter.title;
       } else {
-        docTitle = `${permlinkResp.parameter.compilerInfo.displayName} ${permlinkResp.parameter.compilerInfo.version}`;
+        docTitle = `${permlinkData.parameter.compilerInfo.displayName} ${permlinkData.parameter.compilerInfo.version}`;
       }
     }
     document.title =
       (language.length === 0 ? "" : `[${language}] `) +
       (docTitle.length === 0 ? "" : `${docTitle} - `) +
       "Wandbox";
-  }, [permlinkResp, currentLanguage, title, currentCompilerName, compilerList]);
-
-  if (compilerList === null) {
-    return null;
-  }
+  }, [currentLanguage, title, currentCompilerName]);
 
   const sidebarContent = <SidebarBase />;
 
@@ -313,9 +287,8 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
 
           <div className="d-flex flex-column">
             <Compiler compilerList={compilerList} permlinkData={permlinkData} />
-            {sponsors !== null &&
-              (sponsors.corporate.length !== 0 ||
-                sponsors.personal.length !== 0) && (
+            {(sponsors.corporate.length !== 0 ||
+              sponsors.personal.length !== 0) && (
                 <>
                   <div className="wb-line-horizontal my-16px d-none d-md-block" />
                   <div className="d-none d-md-block">

@@ -1,3 +1,4 @@
+import "./styles/wandbox.scss";
 import type { MetaFunction, MetaDescriptor, LinksFunction } from "@remix-run/cloudflare";
 import {
   Links,
@@ -8,7 +9,6 @@ import {
 } from "@remix-run/react";
 
 import "./tailwind.css";
-import "./styles/wandbox.scss";
 
 //import wandboxStyles from "./styles/wandbox.css";
 import { PermlinkData } from "./hooks/permlink";

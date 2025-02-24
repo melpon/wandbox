@@ -18,6 +18,7 @@ import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } 
 import { lintKeymap } from "@codemirror/lint";
 import { tags } from "@lezer/highlight";
 import { vim } from "@replit/codemirror-vim";
+import useIsomorphicLayoutEffect from "~/hooks/useIsomorphicLayoutEffect";
 
 // --color-prettylights-syntax-comment: #6e7781;
 // --color-prettylights-syntax-constant: #0550ae;
@@ -215,7 +216,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const localView = useRef<EditorView>();
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (view !== undefined) {
       return;
     }

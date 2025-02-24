@@ -1,3 +1,4 @@
+import { CompilerInfo, CompilerList, resolveCompilerInfo } from "~/hooks/compilerList";
 import { AnyJson } from "~/hooks/fetch";
 import { PermlinkData, resolvePermlinkData } from "~/hooks/permlink";
 import { getSessionStorage } from "~/sessions.server";
@@ -144,6 +145,22 @@ export async function fetchListData(env: Env, request: Request): Promise<AnyJson
   });
 
   return body;
+}
+
+export function createCompilerList(compilerListJson: AnyJson[]): CompilerList {
+  const compilerInfos = compilerListJson.map(resolveCompilerInfo);
+  const languages: { [lang: string]: CompilerInfo[] } = {};
+  for (const info of compilerInfos) {
+    if (info.language in languages) {
+      languages[info.language].push(info);
+    } else {
+      languages[info.language] = [info];
+    }
+  }
+  return {
+    compilers: compilerInfos,
+    languages: languages,
+  };
 }
 
 export async function fetchSponsorsData(env: Env, request: Request): Promise<AnyJson> {
