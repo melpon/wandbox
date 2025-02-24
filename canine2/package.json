@@ -5,13 +5,12 @@
 	"type": "module",
 	"scripts": {
 		"build": "remix vite:build",
-		"deploy": "npm run build && wrangler pages deploy",
+		"deploy:develop": "npm run build && wrangler deploy --env develop",
+		"deploy:master": "npm run build && wrangler deploy --env master",
 		"dev": "remix vite:dev",
 		"lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-		"start": "wrangler pages dev ./build/client",
 		"typecheck": "tsc",
 		"typegen": "wrangler types",
-		"preview": "npm run build && wrangler pages dev",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
@@ -51,6 +50,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",
+		"@remix-run/cloudflare-workers": "^2.15.3",
 		"@remix-run/dev": "^2.15.3",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",

@@ -6,12 +6,13 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "wandbox-local",
 	"compatibility_date": "2025-02-14",
-	"pages_build_output_dir": "./build/client",
-	"observability": {
-		"enabled": true
-	},
-  "zone_id": "c3cbf0990f6c7eccfdcd4aede36ce2f9",
-  "account_id": "a88d1d39ba893e18fa44d5cf1ec1115e",
+	// "pages_build_output_dir": "./build/client",
+  "workers_dev": false,
+  "main": "./server.ts",
+	//"observability": {
+	//	"enabled": true
+	//},
+  //"account_id": "a88d1d39ba893e18fa44d5cf1ec1115e",
   "kv_namespaces": [ 
     { "binding": "KV_SESSION", "id": "639a875898404175a8121a01647dfbea" },
     { "binding": "KV_CACHE", "id": "346f95298b6e443d886793fdea9ef733" },
@@ -21,44 +22,26 @@
     "WANDBOX_GITHUB_CLIENT_ID": "d097a8f338db3c15fe08",
   },
 
+  "assets": {
+    "directory": "./build/client"
+  },
+
+  "build": {
+    "command": "npm run build",
+  },
+
   "env": {
     "develop": {
       "name": "wandbox-develop",
       "route": "develop.wandbox.org/*",
+      "kv_namespaces": [ 
+        { "binding": "KV_SESSION", "id": "bc11bbbcbc674e579edde29210c9a910" },
+        { "binding": "KV_CACHE", "id": "0f1102750a824e3782af83870be86376" },
+      ],
+      "vars": {
+        "WANDBOX_URL_PREFIX": "https://api-develop.wandbox.org",
+        "WANDBOX_GITHUB_CLIENT_ID": "d097a8f338db3c15fe08",
+      },
     },
   },
-  /**
-   * Smart Placement
-   * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-   */
-  // "placement": { "mode": "smart" },
-
-  /**
-   * Bindings
-   * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-   * databases, object storage, AI inference, real-time communication and more.
-   * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-   */
-
-  /**
-   * Environment Variables
-   * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-   */
-  // "vars": { "MY_VARIABLE": "production_value" },
-  /**
-   * Note: Use secrets to store sensitive data.
-   * https://developers.cloudflare.com/workers/configuration/secrets/
-   */
-
-  /**
-   * Static Assets
-   * https://developers.cloudflare.com/workers/static-assets/binding/
-   */
-  // "assets": { "directory": "./public/", "binding": "ASSETS" },
-
-  /**
-   * Service Bindings (communicate between multiple Workers)
-   * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-   */
-  // "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
 }
