@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { AnsiUp } from "ansi_up";

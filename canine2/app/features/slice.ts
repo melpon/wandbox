@@ -5,7 +5,6 @@ import { castDraft, WritableDraft } from "immer";
 
 import { normalizePath } from "~/utils/normalizePath";
 import type { CompilerList } from "~/hooks/compilerList";
-import type { PermlinkData } from "~/hooks/permlink";
 import { GithubUser } from "~/types";
 
 export interface EditorSourceData {

@@ -105,6 +105,8 @@ const History: React.FC<HistoryProps> = ({ compilerList }) => {
                           values={{ user: x.githubUser.login }}
                           components={{
                             a: (
+                              // 勝手にコンテンツ入れてくれるはずなので無効にする
+                              // eslint-disable-next-line jsx-a11y/anchor-has-content
                               <a
                                 href={x.githubUser.html_url}
                                 target="_blank"

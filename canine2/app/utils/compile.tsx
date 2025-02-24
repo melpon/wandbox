@@ -113,6 +113,7 @@ export function compile(
   compilerList: CompilerList,
   onRead: (result: AnyJson) => void,
   onComplete: () => void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onError: (reason: any) => void
 ): void {
   const body = createBody(state, compilerList);

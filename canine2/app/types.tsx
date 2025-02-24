@@ -12,8 +12,11 @@ export type GithubUser = {
 
 export type WandboxLoaderData = {
   githubUser: GithubUser | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   permlinkData: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sponsors: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   compilerList: any;
   env: Env;
 };

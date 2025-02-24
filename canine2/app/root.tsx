@@ -1,4 +1,3 @@
-import "./styles/wandbox.scss";
 import type { MetaFunction, MetaDescriptor, LinksFunction } from "@remix-run/cloudflare";
 import {
   Links,
@@ -9,12 +8,14 @@ import {
 } from "@remix-run/react";
 
 import "./tailwind.css";
+import "./styles/wandbox.scss";
 
 //import wandboxStyles from "./styles/wandbox.css";
 import { PermlinkData } from "./hooks/permlink";
 
 export const meta: MetaFunction = ({ data }) => {
   let title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const permlinkData: PermlinkData | null = (data as any)?.permlinkData ?? null;
 
   if (permlinkData === null) {

@@ -4,6 +4,7 @@ import { withClientIP, withCors } from "~/utils/handleApi";
 async function actionAndLoader(request: Request, context: AppLoadContext): Promise<Response> {
   const url = new URL(request.url);
   const env = context.cloudflare.env;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let json: any = null;
   if (request.method === "POST") {
     json = await request.json();

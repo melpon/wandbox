@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLoaderData, useParams } from "@remix-run/react";
 
-import { CompilerList, useCompilerList } from "~/hooks/compilerList";
-import { useError } from "~/hooks/error";
-import { PermlinkData, useGetPermlink } from "~/hooks/permlink";
+import { CompilerList } from "~/hooks/compilerList";
+import { PermlinkData } from "~/hooks/permlink";
 import { Header } from "~/components/Header";
 import { Compiler } from "~/components/Compiler";
 import { Permlink } from "~/components/Permlink";
@@ -27,7 +26,7 @@ import {
 } from "~/features/actions";
 import { SidebarBase } from "~/components/SidebarBase";
 import i18n from "~/i18n";
-import { SponsorsGetData, useGetSponsors } from "~/hooks/sponsors";
+import { SponsorsGetData } from "~/hooks/sponsors";
 import { Sponsors } from "./Sponsors";
 import { UpdateBreakpoint } from "./UpdateBreakpoint";
 import { WandboxLoaderData } from "~/types";
@@ -38,7 +37,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   i18n;
 
   const { permlinkId } = useParams();
-  const [, setError] = useError();
   const {
     compilerList,
     sponsors,
@@ -248,7 +246,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       "Wandbox";
   }, [currentLanguage, title, currentCompilerName]);
 
-  const sidebarContent = <SidebarBase />;
+  const sidebarContent = <SidebarBase compilerList={compilerList} />;
 
   return (
     <div id="wb-main" className="d-flex flex-column">
