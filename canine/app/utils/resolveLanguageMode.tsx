@@ -1,5 +1,5 @@
 import { Extension } from "@codemirror/state";
-import { StreamLanguage } from "@codemirror/stream-parser";
+import { StreamLanguage } from "@codemirror/language";
 
 const LANGUAGE_MODE = [
   {

@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { formatDistanceToNow, formatRFC3339 } from "date-fns";
-import { useNavigate, useParams } from "remix";
+import { useNavigate, useParams } from "@remix-run/react";
 
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
@@ -10,8 +10,13 @@ import { wandboxSlice } from "~/features/slice";
 import { Trans, useTranslation } from "react-i18next";
 import { getDateFnsLocale } from "~/utils/getDateFnsLocale";
 import { t } from "i18next";
+import { CompilerList } from "~/hooks/compilerList";
 
-const History: React.FC = () => {
+export interface HistoryProps {
+  compilerList: CompilerList;
+}
+
+const History: React.FC<HistoryProps> = ({ compilerList }) => {
   const { i18n } = useTranslation();
   const { permlinkId } = useParams();
   const { history, breakpoint } = useSelector(
@@ -27,7 +32,7 @@ const History: React.FC = () => {
 
   return (
     <div className="wb-history flex-grow-1 d-flex flex-column px-16px py-8px gap-8px">
-      {[...history.histories].reverse().map((x, i) => {
+      {[...history.histories].reverse().map((x) => {
         return (
           <div
             key={`wb-history-${x.id}`}
@@ -64,9 +69,8 @@ const History: React.FC = () => {
               <p className={`wb-title wb-${x.type}`}>{x.title}</p>
             </div>
             <div
-              className={`d-flex justify-content-between px-8px pt-8px ${
-                x.title.length === 0 ? "mt-8px" : ""
-              }`}
+              className={`d-flex justify-content-between px-8px pt-8px ${x.title.length === 0 ? "mt-8px" : ""
+                }`}
             >
               <div className="d-flex flex-column justify-content-center">
                 <p>
@@ -101,6 +105,8 @@ const History: React.FC = () => {
                           values={{ user: x.githubUser.login }}
                           components={{
                             a: (
+                              // 勝手にコンテンツ入れてくれるはずなので無効にする
+                              // eslint-disable-next-line jsx-a11y/anchor-has-content
                               <a
                                 href={x.githubUser.html_url}
                                 target="_blank"
@@ -125,7 +131,7 @@ const History: React.FC = () => {
                     variant="info"
                     onClick={() => {
                       if (permlinkId === undefined) {
-                        dispatch(actions.pushQuickSave());
+                        dispatch(actions.pushQuickSave(compilerList));
                       }
                       navigate(`/permlink/${x.permlinkId}`);
                       // スマホではロードしたら画面を閉じる
@@ -149,7 +155,7 @@ const History: React.FC = () => {
                         navigate(`/`);
                       }
                       if (permlinkId === undefined) {
-                        dispatch(actions.pushQuickSave());
+                        dispatch(actions.pushQuickSave(compilerList));
                       }
                       dispatch(actions.loadQuickSave(x));
                       // スマホではロードしたら画面を閉じる

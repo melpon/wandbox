@@ -1,6 +1,7 @@
 // https://github.com/ponylang/pony-playground/blob/8a242a799adc3925ed303cdc6648ed47c806136c/static/mode-pony.js
 // の ACE 用の設定から CodeMirror6 に対応したもの
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 import { simpleMode } from "@codemirror/legacy-modes/mode/simple-mode";

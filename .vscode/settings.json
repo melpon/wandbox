@@ -32,7 +32,7 @@
     "editor.detectIndentation": false,
   },
   "eslint.workingDirectories": [
-    "./canine2",
+    "./canine",
   ],
   "files.associations": {
     "*.cs": "csharp",

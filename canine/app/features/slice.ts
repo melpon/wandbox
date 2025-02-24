@@ -1,11 +1,11 @@
 import type { EditorView } from "@codemirror/view";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
-import { castDraft } from "immer";
+import { castDraft, WritableDraft } from "immer";
 
 import { normalizePath } from "~/utils/normalizePath";
 import type { CompilerList } from "~/hooks/compilerList";
-import type { PermlinkData } from "~/hooks/permlink";
+import { GithubUser } from "~/types";
 
 export interface EditorSourceData {
   id: string;
@@ -108,7 +108,7 @@ export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
 function sourceToHistorySource(
   sources: EditorSourceData[],
-  views: EditorViewMap
+  views: EditorViewMap | WritableDraft<EditorViewMap>
 ): HistoryEditorSourceData[] {
   return sources
     .map((s) => {
@@ -126,12 +126,12 @@ function sourceToHistorySource(
 
 export function getSourceText(
   source: EditorSourceData,
-  view: EditorView | undefined
+  view?: EditorView | WritableDraft<EditorView>
 ): string {
   return view !== undefined ? view.state.doc.toString() : source.text;
 }
 
-export function getStdin(stdin: string, stdinView?: EditorView): string {
+export function getStdin(stdin: string, stdinView?: EditorView | WritableDraft<EditorView>): string {
   return stdinView !== undefined ? stdinView!.state.doc.toString() : stdin;
 }
 
@@ -139,9 +139,6 @@ const WANDBOX_MAX_QUICKSAVE_COUNT = 5;
 const WANDBOX_MAX_HISTORY_COUNT = 50;
 
 const initialState = {
-  compilerList: null as CompilerList | null,
-  permlinkData: null as PermlinkData | null,
-
   currentLanguage: "",
   currentCompilerName: "",
   currentSwitches: {} as { [name: string]: string | boolean },
@@ -201,12 +198,6 @@ export const wandboxSlice = createSlice({
   name: "wandbox",
   initialState: initialState,
   reducers: {
-    setCompilerList: (state, action: PayloadAction<CompilerList | null>) => {
-      state.compilerList = action.payload;
-    },
-    setPermlinkData: (state, action: PayloadAction<PermlinkData | null>) => {
-      state.permlinkData = action.payload;
-    },
     setCurrentLanguage: (state, action: PayloadAction<string>) => {
       state.currentLanguage = action.payload;
     },
@@ -381,11 +372,9 @@ export const wandboxSlice = createSlice({
     setEditorChanged: (state, action: PayloadAction<boolean>) => {
       state.editorChanged = action.payload;
     },
-    pushQuickSave: (state) => {
-      if (state.compilerList === null) {
-        return;
-      }
-      const ci = state.compilerList.compilers.find(
+    pushQuickSave: (state, action: PayloadAction<CompilerList>) => {
+      const compilerList = action.payload;
+      const ci = compilerList.compilers.find(
         (x) => x.name === state.currentCompilerName
       );
       if (ci === undefined) {
@@ -403,9 +392,9 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         displayName: ci.displayName,
         version: ci.version,
-        sources: sourceToHistorySource(state.sources, state.views as any),
+        sources: sourceToHistorySource(state.sources, state.views),
         currentTab: state.currentTab,
-        stdin: getStdin(state.stdin, state.stdinView as any),
+        stdin: getStdin(state.stdin, state.stdinView),
         title: state.title,
         description: state.description,
         results: state.results,
@@ -417,11 +406,9 @@ export const wandboxSlice = createSlice({
       }
       h.keyCounter += 1;
     },
-    prepareRun: (state) => {
-      if (state.compilerList === null) {
-        return;
-      }
-      const ci = state.compilerList.compilers.find(
+    prepareRun: (state, action: PayloadAction<CompilerList>) => {
+      const compilerList = action.payload;
+      const ci = compilerList.compilers.find(
         (x) => x.name === state.currentCompilerName
       );
       if (ci === undefined) {
@@ -439,9 +426,9 @@ export const wandboxSlice = createSlice({
         runtimeOptionRaw: state.runtimeOptionRaw,
         displayName: ci.displayName,
         version: ci.version,
-        sources: sourceToHistorySource(state.sources, state.views as any),
+        sources: sourceToHistorySource(state.sources, state.views),
         currentTab: state.currentTab,
-        stdin: getStdin(state.stdin, state.stdinView as any),
+        stdin: getStdin(state.stdin, state.stdinView),
         title: state.title,
         description: state.description,
         // results は最終的に結果が得られた後に設定する
@@ -591,7 +578,8 @@ export const wandboxSlice = createSlice({
       state.breakpoint = action.payload;
     },
   },
-  extraReducers: (builder) => {},
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  extraReducers: (builder) => { },
 });
 
 export const wandboxReducer = wandboxSlice.reducer;

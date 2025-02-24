@@ -49,13 +49,14 @@ const Compiler: React.FC<CompilerProps> = (props) => {
   const actions = wandboxSlice.actions;
   const dispatch = useAppDispatch();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setError] = useError();
   const [loadedTemplate, templateFetchId, doLoadTemplate] = useGetTemplate(
     "",
     setError
   );
 
-  const onSelectLanguage = useCallback((language): void => {
+  const onSelectLanguage = useCallback((language: string): void => {
     dispatch(actions.setCurrentLanguage(language));
     // 言語を選択するとコンパイラ名を自動で設定済みにする
     // head 以外のコンパイラを設定する
@@ -148,9 +149,9 @@ const Compiler: React.FC<CompilerProps> = (props) => {
     permlinkData === null
       ? currentSwitches
       : optionsToSwitch(
-          permlinkData.parameter.options,
-          permlinkData.parameter.compilerInfo
-        );
+        permlinkData.parameter.options,
+        permlinkData.parameter.compilerInfo
+      );
 
   const readOnly = permlinkData !== null;
 

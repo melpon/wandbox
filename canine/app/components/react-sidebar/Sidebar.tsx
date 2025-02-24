@@ -88,6 +88,8 @@ interface SidebarProps {
 
   // callback called when the overlay is clicked
   onSetOpen?: (open: boolean) => void;
+
+  children: React.ReactNode;
 }
 
 const Sidebar: React.FC<SidebarProps> = (props) => {
@@ -199,6 +201,7 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
       >
         {sidebar}
       </div>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={overlayClassName}
         style={overlayStyle}
