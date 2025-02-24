@@ -43,5 +43,17 @@
         "WANDBOX_GITHUB_CLIENT_ID": "d097a8f338db3c15fe08",
       },
     },
+    "master": {
+      "name": "wandbox",
+      "route": "wandbox.org/*",
+      "vars": {
+        "WANDBOX_URL_PREFIX": "https://api.wandbox.org",
+        "WANDBOX_GITHUB_CLIENT_ID": "f9d429d939d997e6b08e",
+      },
+      "kv_namespaces": [
+        { "binding": "KV_SESSION", "id": "5c938730ff3d489fb02730317a5c17d3" },
+        { "binding": "KV_CACHE", "id": "5edf9e985c504b6b8099c405585145ad" },
+      ],
+    },
   },
 }
