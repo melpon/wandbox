@@ -10,8 +10,7 @@
 		"dev": "remix vite:dev",
 		"lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
 		"typecheck": "tsc",
-		"typegen": "wrangler types",
-		"cf-typegen": "wrangler types"
+		"typegen": "wrangler types"
 	},
 	"dependencies": {
 		"@codemirror/autocomplete": "^6.18.6",
