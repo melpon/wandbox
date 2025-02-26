@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLoaderData, useParams } from "@remix-run/react";
 
@@ -80,6 +80,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     sidebarLocked,
     history,
     storageExists,
+    clangdWorker,
   } = useSelector(
     ({
       wandbox: {
@@ -99,6 +100,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         sidebarLocked,
         history,
         storageExists,
+        clangdWorker,
       },
     }: AppState) => ({
       currentLanguage,
@@ -117,6 +119,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       sidebarLocked,
       history,
       storageExists,
+      clangdWorker,
     })
   );
 
@@ -295,7 +298,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
                 </>
               )}
           </div>
-          <div className="flex-grow-1 d-flex flex-column gap-8px">
+          <div className="flex-grow-1 d-flex flex-column gap-8px mt-4px">
             <div className="d-none d-md-flex gap-16px">
               <Title permlinkData={permlinkData} />
               {permlinkData !== null && (

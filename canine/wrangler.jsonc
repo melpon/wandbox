@@ -23,7 +23,9 @@
   },
 
   "assets": {
-    "directory": "./build/client"
+    "directory": "./build/client",
+    "binding": "ASSETS",
+    "run_worker_first": true,
   },
 
   "build": {

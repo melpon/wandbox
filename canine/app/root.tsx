@@ -71,10 +71,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
+        {/*
         <script
           src="https://platform.twitter.com/widgets.js"
           type="text/javascript"
         />
+        */}
       </body>
     </html>
   );

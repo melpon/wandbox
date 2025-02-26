@@ -6,6 +6,7 @@ import { castDraft, WritableDraft } from "immer";
 import { normalizePath } from "~/utils/normalizePath";
 import type { CompilerList } from "~/hooks/compilerList";
 import { GithubUser } from "~/types";
+import { LanguageServerClient } from "~/clangd/codemirror-languageserver";
 
 export interface EditorSourceData {
   id: string;
@@ -106,6 +107,8 @@ export interface HistoryData {
 
 export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
+export type ClangdWorkerState = "initial" | "loading" | "ready" | "error";
+
 function sourceToHistorySource(
   sources: EditorSourceData[],
   views: EditorViewMap | WritableDraft<EditorViewMap>
@@ -149,6 +152,11 @@ const initialState = {
   description: "",
   author: null as GithubUser | null,
   titleDialogOpened: false,
+
+  clangdWorker: null as Worker | null,
+  clangdWorkerState: "initial" as ClangdWorkerState,
+  clangdWorkerStatus: "",
+  clangdClient: null as LanguageServerClient | null,
 
   currentTab: 0,
   tabCounter: 0,
@@ -198,6 +206,18 @@ export const wandboxSlice = createSlice({
   name: "wandbox",
   initialState: initialState,
   reducers: {
+    setClangdWorker: (state, action: PayloadAction<Worker | null>) => {
+      state.clangdWorker = action.payload;
+    },
+    setClangdWorkerState: (state, action: PayloadAction<ClangdWorkerState>) => {
+      state.clangdWorkerState = action.payload;
+    },
+    setClangdWorkerStatus: (state, action: PayloadAction<string>) => {
+      state.clangdWorkerStatus = action.payload;
+    },
+    setClangdClient: (state, action: PayloadAction<LanguageServerClient | null>) => {
+      state.clangdClient = action.payload;
+    },
     setCurrentLanguage: (state, action: PayloadAction<string>) => {
       state.currentLanguage = action.payload;
     },

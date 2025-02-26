@@ -20,6 +20,9 @@ import { tags } from "@lezer/highlight";
 import { vim } from "@replit/codemirror-vim";
 import useIsomorphicLayoutEffect from "~/hooks/useIsomorphicLayoutEffect";
 
+import { BrowserMessageReader, BrowserMessageWriter, createMessageConnection } from 'vscode-jsonrpc/browser';
+import { LanguageServerClient, languageServerWithTransport } from "~/clangd/codemirror-languageserver";
+
 // --color-prettylights-syntax-comment: #6e7781;
 // --color-prettylights-syntax-constant: #0550ae;
 // --color-prettylights-syntax-entity: #8250df;
@@ -147,6 +150,7 @@ export interface CodeMirror6Option {
   viewportMargin?: number;
   readOnly?: boolean;
   languageSupport?: Extension;
+  languageServer?: Extension;
 }
 
 export interface CodeMirror6Props {
@@ -198,6 +202,9 @@ function optionToExtension(option: CodeMirror6Option): Extension[] {
   if (option.languageSupport !== undefined) {
     ext.push(option.languageSupport);
   }
+  if (option.languageServer !== undefined) {
+    ext.push(option.languageServer);
+  }
   return ext;
 }
 
@@ -228,7 +235,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
 
     const startState = EditorState.create({
       doc: text,
-      extensions: optionToExtension(option),
+      extensions: [...optionToExtension(option)],
     });
 
     const dispatch = (tr: Transaction) => {
