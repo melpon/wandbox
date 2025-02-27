@@ -44,23 +44,6 @@ export default {
         headers.append("Cross-Origin-Embedder-Policy", "require-corp");
       }
       return new Response(response.body, { status: response.status, headers: headers });
-
-      //let response: Response;
-      ////try {
-      ////  response = await handleRemixRequest(request, loadContext);
-      ////} catch (error) {
-      ////  response = await env.ASSETS.fetch(request);
-      ////}
-      //const url = new URL(request.url);
-      //if (url.pathname.startsWith("/assets") || url.pathname.startsWith("/static")) {
-      //  response = await env.ASSETS.fetch(request);
-      //} else {
-      //  response = await handleRemixRequest(request, loadContext);
-      //}
-      //const headers = new Headers(response.headers);
-      //headers.append("Cross-Origin-Opener-Policy", "same-origin");
-      //headers.append("Cross-Origin-Embedder-Policy", "require-corp");
-      //return new Response(response.body, { status: response.status, headers });
     } catch (error) {
       console.log(error);
       return new Response("An unexpected error occurred", { status: 500 });

@@ -85,6 +85,7 @@ interface LSPNotifyMap {
   initialized: LSP.InitializedParams;
   "textDocument/didChange": LSP.DidChangeTextDocumentParams;
   "textDocument/didOpen": LSP.DidOpenTextDocumentParams;
+  "workspace/didChangeConfiguration": LSP.DidChangeConfigurationParams;
 }
 
 // Server to client
@@ -229,6 +230,10 @@ export class LanguageServerClient {
     return await this.request("textDocument/completion", params, timeout);
   }
 
+  public async workspaceDidChangeConfiguration(params: LSP.DidChangeConfigurationParams) {
+    return await this.notify("workspace/didChangeConfiguration", params);
+  }
+
   public attachPlugin(plugin: LanguageServerPlugin) {
     this.plugins.push(plugin);
   }
@@ -261,6 +266,12 @@ export class LanguageServerClient {
     console.log("processNotification", method, params);
     for (const plugin of this.plugins) {
       plugin.processNotification(method, params);
+    }
+  }
+
+  public update() {
+    for (const plugin of this.plugins) {
+      plugin.requestUpdate();
     }
   }
 }
@@ -331,6 +342,9 @@ class LanguageServerPlugin implements PluginValue {
     }
   }
 
+  public requestUpdate() {
+    this.sendChange({ documentText: this.view.state.doc.toString() });
+  }
   public requestDiagnostics(view: EditorView) {
     this.sendChange({ documentText: view.state.doc.toString() });
   }

@@ -7,6 +7,7 @@ import { normalizePath } from "~/utils/normalizePath";
 import type { CompilerList } from "~/hooks/compilerList";
 import { GithubUser } from "~/types";
 import { LanguageServerClient } from "~/clangd/codemirror-languageserver";
+import { ClangdServer } from "~/clangd/ClangdServer";
 
 export interface EditorSourceData {
   id: string;
@@ -157,6 +158,7 @@ const initialState = {
   clangdWorkerState: "initial" as ClangdWorkerState,
   clangdWorkerStatus: "",
   clangdClient: null as LanguageServerClient | null,
+  clangdServer: null as ClangdServer | null,
 
   currentTab: 0,
   tabCounter: 0,
@@ -217,6 +219,9 @@ export const wandboxSlice = createSlice({
     },
     setClangdClient: (state, action: PayloadAction<LanguageServerClient | null>) => {
       state.clangdClient = action.payload;
+    },
+    setClangdServer: (state, action: PayloadAction<ClangdServer | null>) => {
+      state.clangdServer = action.payload;
     },
     setCurrentLanguage: (state, action: PayloadAction<string>) => {
       state.currentLanguage = action.payload;

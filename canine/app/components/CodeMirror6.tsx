@@ -20,9 +20,6 @@ import { tags } from "@lezer/highlight";
 import { vim } from "@replit/codemirror-vim";
 import useIsomorphicLayoutEffect from "~/hooks/useIsomorphicLayoutEffect";
 
-import { BrowserMessageReader, BrowserMessageWriter, createMessageConnection } from 'vscode-jsonrpc/browser';
-import { LanguageServerClient, languageServerWithTransport } from "~/clangd/codemirror-languageserver";
-
 // --color-prettylights-syntax-comment: #6e7781;
 // --color-prettylights-syntax-constant: #0550ae;
 // --color-prettylights-syntax-entity: #8250df;
