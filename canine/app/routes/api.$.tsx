@@ -2,8 +2,16 @@ import { ActionFunction, AppLoadContext, LoaderFunction } from "@remix-run/cloud
 import { withClientIP, withCors } from "~/utils/handleApi";
 
 async function actionAndLoader(request: Request, context: AppLoadContext): Promise<Response> {
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: withCors({}, request),
+    });
+  }
+
   const url = new URL(request.url);
   const env = context.cloudflare.env;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let json: any = null;
   if (request.method === "POST") {
@@ -16,6 +24,7 @@ async function actionAndLoader(request: Request, context: AppLoadContext): Promi
     },
     request
   );
+
   const resp = await fetch(`${env.WANDBOX_URL_PREFIX}${url.pathname}`, {
     method: request.method,
     headers: headers,
@@ -23,6 +32,7 @@ async function actionAndLoader(request: Request, context: AppLoadContext): Promi
   });
   let responseHeaders: HeadersInit = resp.headers;
   responseHeaders = withCors(responseHeaders, request);
+
   return new Response(await resp.text(), {
     headers: responseHeaders,
     status: resp.status,
