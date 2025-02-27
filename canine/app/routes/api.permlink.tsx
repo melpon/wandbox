@@ -1,6 +1,16 @@
-import { ActionFunction } from "@remix-run/cloudflare";
+import { ActionFunction, LoaderFunction } from "@remix-run/cloudflare";
 import { getSessionStorage } from "~/sessions.server";
-import { withClientIP } from "~/utils/handleApi";
+import { withClientIP, withCors } from "~/utils/handleApi";
+
+export const loader: LoaderFunction = async ({ request }) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: withCors({}, request),
+    });
+  }
+  return new Response(null, { status: 404 });
+}
 
 export const action: ActionFunction = async ({ request, context }) => {
   const env = context.cloudflare.env;
