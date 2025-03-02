@@ -58,7 +58,13 @@ export default defineConfig({
       fs.statSync("public/static/wasm/clangd.wasm.part001").size +
       fs.statSync("public/static/wasm/clangd.wasm.part002").size +
       fs.statSync("public/static/wasm/clangd.wasm.part003").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part004").size
+      fs.statSync("public/static/wasm/clangd.wasm.part004").size +
+      fs.statSync("public/static/wasm/clangd.wasm.part005").size +
+      fs.statSync("public/static/wasm/clangd.wasm.part006").size +
+      fs.statSync("public/static/wasm/clangd.wasm.part007").size +
+      fs.statSync("public/static/wasm/clangd.wasm.part008").size +
+      fs.statSync("public/static/wasm/clangd.wasm.part009").size +
+      fs.statSync("public/static/wasm/clangd.wasm.part010").size
     ),
   },
 });

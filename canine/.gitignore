@@ -8,4 +8,4 @@ node_modules
 .wrangler
 
 /public/static/wasm
-/build-clangd-wasm
+/build-clangd-wasm/build

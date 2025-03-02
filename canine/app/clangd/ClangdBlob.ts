@@ -1,13 +1,14 @@
 
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cache", 1);
+    const request = indexedDB.open("cache", 2);
 
     request.onupgradeneeded = () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains("cache")) {
-        db.createObjectStore("cache");
+      if (db.objectStoreNames.contains("cache")) {
+        db.deleteObjectStore("cache");
       }
+      db.createObjectStore("cache");
     };
 
     request.onsuccess = () => {

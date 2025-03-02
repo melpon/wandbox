@@ -45,10 +45,11 @@ LLVM_VER_MAJOR=18
 
 cd `dirname $0`
 WORKSPACE_DIR=$PWD
-ROOT_DIR=$WORKSPACE_DIR/build-clangd-wasm
-rm -rf $ROOT_DIR
-mkdir -p $ROOT_DIR
-cd $ROOT_DIR
+OUTPUT_DIR=$WORKSPACE_DIR/../public/static/wasm/
+BULID_DIR=$WORKSPACE_DIR/build
+rm -rf $BULID_DIR
+mkdir -p $BULID_DIR
+cd $BULID_DIR
 
 # 1. Get Emscripten
 
@@ -101,21 +102,23 @@ pushd llvm-project
   cmake --build build --target clangd
 
   ## Copy installed headers to WASI sysroot
-  cp -r build/lib/clang/$LLVM_VER_MAJOR/include/* $ROOT_DIR/wasi-sysroot/include/
+  cp -r build/lib/clang/$LLVM_VER_MAJOR/include/* $BULID_DIR/wasi-sysroot/include/
+
+  mkdir -p $BULID_DIR/wasi-sysroot/wandbox/
 
   ## Boost のヘッダーを入れる
   rm -rf boost_1_87_0.tar.gz boost_1_87_0
   curl -LO https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
   tar xf boost_1_87_0.tar.gz
-  cp -r boost_1_87_0/boost $ROOT_DIR/wasi-sysroot/boost/
+  cp -r boost_1_87_0/boost $BULID_DIR/wasi-sysroot/wandbox/boost/
 
   ## Build clangd (2nd time, for the real thing)
   emcmake cmake -G Ninja -S llvm -B build \
       -DCMAKE_CXX_FLAGS="-pthread -Dwait4=__syscall_wait4" \
-      -DCMAKE_EXE_LINKER_FLAGS="-pthread -s ENVIRONMENT=worker -s NO_INVOKE_RUN -s EXIT_RUNTIME -s INITIAL_MEMORY=2GB -s ALLOW_MEMORY_GROWTH -s MAXIMUM_MEMORY=4GB -s STACK_SIZE=256kB -s EXPORTED_RUNTIME_METHODS=FS,callMain -s MODULARIZE -s EXPORT_ES6 -s WASM_BIGINT -s ASSERTIONS -s ASYNCIFY -s PTHREAD_POOL_SIZE='Math.max(navigator.hardwareConcurrency, 8)' --embed-file=$ROOT_DIR/wasi-sysroot/include@/usr/include --embed-file=$ROOT_DIR/wasi-sysroot/boost@/usr/local/include/boost" \
+      -DCMAKE_EXE_LINKER_FLAGS="-pthread -s ENVIRONMENT=worker -s NO_INVOKE_RUN -s EXIT_RUNTIME -s INITIAL_MEMORY=2GB -s ALLOW_MEMORY_GROWTH -s MAXIMUM_MEMORY=4GB -s STACK_SIZE=256kB -s EXPORTED_RUNTIME_METHODS=FS,callMain -s MODULARIZE -s EXPORT_ES6 -s WASM_BIGINT -s ASSERTIONS -s ASYNCIFY -s PTHREAD_POOL_SIZE='Math.max(navigator.hardwareConcurrency, 8)' --embed-file=$BULID_DIR/wasi-sysroot/include@/usr/include --embed-file=$BULID_DIR/wasi-sysroot/wandbox@/usr/local/include/wandbox" \
       -DCMAKE_BUILD_TYPE=MinSizeRel \
       -DLLVM_TARGET_ARCH=wasm32-emscripten \
-      -DLLVM_DEFAULT_TARGET_TRIPLE=wasm32-wasi \
+      -DLLVM_DEFAULT_TARGET_TRIPLE=wasm32-wasi-threads \
       -DLLVM_TARGETS_TO_BUILD=WebAssembly \
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
       -DLLVM_TABLEGEN=$PWD/build-native/bin/llvm-tblgen \
@@ -135,13 +138,13 @@ pushd llvm-project
 popd
 
 # 4. Copy the final binary
-rm -rf $WORKSPACE_DIR/public/static/wasm/
-mkdir -p $WORKSPACE_DIR/public/static/wasm/
-cp llvm-project/build/bin/clangd* $WORKSPACE_DIR/public/static/wasm/
+rm -rf $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
+cp llvm-project/build/bin/clangd* $OUTPUT_DIR
 
 # 5. Cloudflare Workers にアップロード可能なのは 25MB までなので
 # 24MB 以下になるように wasm ファイルを分割する
-pushd $WORKSPACE_DIR/public/static/wasm/
+pushd $OUTPUT_DIR
   split -b 24M clangd.wasm --numeric-suffixes=1 --suffix-length=3 clangd.wasm.part
   rm clangd.wasm
 popd

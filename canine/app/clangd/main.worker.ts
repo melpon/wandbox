@@ -49,11 +49,12 @@ self.onmessage = (ev: MessageEvent) => {
 function write_compiler_arguments(clangd, workspace_path: string, compiler_arguments: string[]) {
   const flags = [
     ...compiler_arguments,
-    "--target=wasm32-wasi",
+    "--target=wasm32-wasi-thread",
     "-isystem/usr/include/c++/v1",
-    "-isystem/usr/include/wasm32-wasi/c++/v1",
+    "-isystem/usr/include/wasm32-wasi-threads/c++/v1",
     "-isystem/usr/include",
-    "-isystem/usr/include/wasm32-wasi",
+    "-isystem/usr/include/wasm32-wasi-threads",
+    "-pthread",
   ];
 
   // file:// で始まってたら消してあげる
@@ -74,6 +75,12 @@ async function start(workspace_path: string, compiler_arguments: string[]): Prom
       `${wasmBase}clangd.wasm.part002`,
       `${wasmBase}clangd.wasm.part003`,
       `${wasmBase}clangd.wasm.part004`,
+      `${wasmBase}clangd.wasm.part005`,
+      `${wasmBase}clangd.wasm.part006`,
+      `${wasmBase}clangd.wasm.part007`,
+      `${wasmBase}clangd.wasm.part008`,
+      `${wasmBase}clangd.wasm.part009`,
+      `${wasmBase}clangd.wasm.part010`,
     ];
     const jsModule = import(  /* @vite-ignore */ `${wasmBase}clangd.js`);
 

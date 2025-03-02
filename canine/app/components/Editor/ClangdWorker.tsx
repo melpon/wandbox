@@ -76,7 +76,7 @@ function switchesToOptions(currentSwitches: { [name: string]: string | boolean }
       args.push("-pedantic-errors");
       break;
   }
-  console.log("args", args);
+  args.push("-isystem/usr/local/include/wandbox");
 
   return args;
 }
@@ -115,7 +115,7 @@ const ClangdWorker: React.FC<ClangdWorkerProps> = ({ clangdWorker, clangdWorkerS
     };
     server.onProgress = (value, max) => {
       if (value !== max) {
-        dispatch(actions.setClangdWorkerStatus("[clangd] Loading... " + Math.floor((value / max) * 100) + " %"));
+        dispatch(actions.setClangdWorkerStatus("[clangd] Downloading... " + Math.floor((value / max) * 100) + " %"));
       } else {
         dispatch(actions.setClangdWorkerStatus("[clangd] Starting..."));
       }
