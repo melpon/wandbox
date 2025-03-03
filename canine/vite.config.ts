@@ -37,6 +37,11 @@ export default defineConfig({
         server.middlewares.use((req, res, next) => {
           res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
           res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+          if (req.url?.startsWith("/static/wasm/clangd.wasm")) {
+            res.setHeader("Content-Type", "application/wasm");
+            fs.createReadStream("public-r2/clangd.wasm").pipe(res);
+            return;
+          }
           next();
         });
       },
@@ -54,17 +59,6 @@ export default defineConfig({
     format: "es",
   },
   define: {
-    __WASM_SIZE__: (
-      fs.statSync("public/static/wasm/clangd.wasm.part001").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part002").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part003").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part004").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part005").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part006").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part007").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part008").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part009").size +
-      fs.statSync("public/static/wasm/clangd.wasm.part010").size
-    ),
+    __WASM_SIZE__: fs.statSync("public-r2/clangd.wasm").size,
   },
 });

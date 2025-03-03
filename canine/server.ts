@@ -13,7 +13,16 @@ export default {
       const url = new URL(request.url);
       let response: Response;
       if (url.pathname == "/favicon.ico" || url.pathname.startsWith("/assets") || url.pathname.startsWith("/static")) {
-        response = await env.ASSETS.fetch(request);
+        if (url.pathname.endsWith("clangd.wasm")) {
+          // clangd.wasm は R2 から配信する
+          const r = await env.R2_BUCKET.get(env.WANDBOX_R2_PREFIX + "clangd.wasm");
+          if (r === null) {
+            return new Response("Not found", { status: 404 });
+          }
+          response = new Response(r.body, { status: 200 });
+        } else {
+          response = await env.ASSETS.fetch(request);
+        }
       } else {
         const loadContext = getLoadContext({
           request,
@@ -35,6 +44,8 @@ export default {
         });
         response = await handleRemixRequest(request, loadContext);
       }
+
+      // 必要なファイルに COEP と COOP を設定する
       const headers = new Headers(response.headers);
       if (url.pathname == "/" || url.pathname.startsWith("/permlink") ||
         (url.pathname.startsWith("/assets/main.worker") && url.pathname.endsWith(".js")) ||

@@ -71,16 +71,7 @@ async function start(workspace_path: string, compiler_arguments: string[]): Prom
   try {
     const wasmBase = `${import.meta.env.BASE_URL}static/wasm/`;
     const wasmUrls = [
-      `${wasmBase}clangd.wasm.part001`,
-      `${wasmBase}clangd.wasm.part002`,
-      `${wasmBase}clangd.wasm.part003`,
-      `${wasmBase}clangd.wasm.part004`,
-      `${wasmBase}clangd.wasm.part005`,
-      `${wasmBase}clangd.wasm.part006`,
-      `${wasmBase}clangd.wasm.part007`,
-      `${wasmBase}clangd.wasm.part008`,
-      `${wasmBase}clangd.wasm.part009`,
-      `${wasmBase}clangd.wasm.part010`,
+      `${wasmBase}clangd.wasm`,
     ];
     const jsModule = import(  /* @vite-ignore */ `${wasmBase}clangd.js`);
 
@@ -92,6 +83,9 @@ async function start(workspace_path: string, compiler_arguments: string[]): Prom
       const wasmSize = __WASM_SIZE__;
       for (const wasmUrl of wasmUrls) {
         const wasmResponse = await fetch(wasmUrl);
+        if (wasmResponse.status.toString()[0] !== "2") {
+          throw new Error(`Failed to fetch ${wasmUrl}`);
+        }
         const wasmReader = wasmResponse.body!.getReader();
         for (; ;) {
           const { done, value } = await wasmReader.read();

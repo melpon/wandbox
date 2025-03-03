@@ -46,7 +46,8 @@ LLVM_VER_MAJOR=18
 cd `dirname $0`
 WORKSPACE_DIR=$PWD
 OUTPUT_DIR=$WORKSPACE_DIR/../public/static/wasm/
-BULID_DIR=$WORKSPACE_DIR/build
+OUTPUT_R2_DIR=$WORKSPACE_DIR/../public-r2/
+BULID_DIR=$WORKSPACE_DIR/../../build-clangd-wasm-build
 rm -rf $BULID_DIR
 mkdir -p $BULID_DIR
 cd $BULID_DIR
@@ -141,10 +142,6 @@ popd
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
 cp llvm-project/build/bin/clangd* $OUTPUT_DIR
-
-# 5. Cloudflare Workers にアップロード可能なのは 25MB までなので
-# 24MB 以下になるように wasm ファイルを分割する
-pushd $OUTPUT_DIR
-  split -b 24M clangd.wasm --numeric-suffixes=1 --suffix-length=3 clangd.wasm.part
-  rm clangd.wasm
-popd
+# clangd.wasm は R2 用のディレクトリに配置する
+rm $OUTPUT_DIR/clangd.wasm
+cp llvm-project/build/bin/clangd.wasm $OUTPUT_R2_DIR

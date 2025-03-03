@@ -4,9 +4,11 @@
 	"sideEffects": false,
 	"type": "module",
 	"scripts": {
+		"r2:develop": "wrangler r2 object put wandbox-resources/develop/clangd.wasm --file=public-r2/clangd.wasm",
+		"r2:master": "wrangler r2 object put wandbox-resources/master/clangd.wasm --file=public-r2/clangd.wasm",
 		"build": "remix vite:build",
-		"deploy:develop": "npm run build && wrangler deploy --env develop",
-		"deploy:master": "npm run build && wrangler deploy --env master",
+		"deploy:develop": "npm run build && npm run r2:develop && wrangler deploy --env develop",
+		"deploy:master": "npm run build && npm run r2:master && wrangler deploy --env master",
 		"dev": "remix vite:dev",
 		"lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
 		"typecheck": "tsc",
