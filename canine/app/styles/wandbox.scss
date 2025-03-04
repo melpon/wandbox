@@ -128,8 +128,55 @@ p, h1, h2, h3, h4, h5, h6 {
   .cm-lintRange-warning {
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="3">%3Cpath%20d%3D%22m0%202.5%20l2%20-1.5%20l1%200%20l2%201.5%20l1%200%22%20stroke%3D%22%23f80%22%20fill%3D%22none%22%20stroke-width%3D%221.5%22%2F%3E</svg>');
   }
+  .cm-completionInfo {
+    .documentation {
+      white-space: normal;
+    }
+  }
   .cm-tooltip-section {
-    white-space: pre-wrap;
+    h3 {
+      font-size: 1.2rem;
+    }
+    hr {
+      margin: 0.5rem 0;
+    }
+    pre {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .cm-completionLabel {
+    color: $color-gray2;
+    font-size: 0.7rem;
+
+    .cm-completionMatchedText {
+      color: $color-primary;
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-left: 0.25rem;
+      margin-right: 0.25rem;
+    }
+  }
+  .cm-completionDetail {
+    color: $color-gray2;
+    text-decoration: none;
+    font-style: normal;
+    font-size: 0.8rem;
+    float: right;
+    margin-right: 0.25rem;
+  }
+
+  [aria-selected="true"] {
+    .cm-completionLabel {
+      color: $color-gray;
+
+      .cm-completionMatchedText {
+        color: $color-white;
+      }
+    }
+    .cm-completionDetail {
+      color: $color-gray;
+    }
   }
 
   .documentation.cm-tooltip-section {

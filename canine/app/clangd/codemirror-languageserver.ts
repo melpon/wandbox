@@ -447,12 +447,14 @@ class LanguageServerPlugin implements PluginValue {
         detail,
         label,
         kind,
+        insertText,
         textEdit,
         documentation,
         additionalTextEdits,
       }) => {
         const completion: Completion = {
-          label,
+          label: insertText,
+          displayLabel: label,
           detail,
           apply(view: EditorView, completion: Completion, from: number, to: number) {
             if (isLSPTextEdit(textEdit)) {
@@ -492,7 +494,13 @@ class LanguageServerPlugin implements PluginValue {
           type: kind && CompletionItemKindMap[kind].toLowerCase(),
         };
         if (documentation) {
-          completion.info = formatContents(documentation);
+          const contents = formatContents(documentation);
+          completion.info = () => {
+            const dom = document.createElement("div");
+            dom.classList.add("documentation");
+            dom.innerHTML = contents;
+            return dom;
+          };
         }
         return completion;
       },
@@ -501,7 +509,16 @@ class LanguageServerPlugin implements PluginValue {
     return {
       from: pos,
       options,
-      filter: false,
+      getMatch: (completion, matched) => {
+        // displayLabel の何文字目から何文字目まで label なのかを調べる
+        const { displayLabel, label } = completion;
+        const start = displayLabel?.indexOf(label);
+        if (start === undefined || start === -1) {
+          return [];
+        }
+        const end = start + label.length;
+        return [start, end];
+      },
     };
   }
 
