@@ -1,7 +1,7 @@
 
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cache", 2);
+    const request = indexedDB.open("cache", 3);
 
     request.onupgradeneeded = () => {
       const db = request.result;

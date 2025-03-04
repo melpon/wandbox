@@ -77,6 +77,7 @@ function switchesToOptions(currentSwitches: { [name: string]: string | boolean }
       break;
   }
   args.push("-isystem/usr/local/include/wandbox");
+  args.push("-I/usr/local/include/wandbox/hpplib");
 
   return args;
 }

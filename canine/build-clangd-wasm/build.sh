@@ -42,15 +42,17 @@ WASI_SDK_VER=22.0
 WASI_SDK_VER_MAJOR=22
 LLVM_VER=18.1.2
 LLVM_VER_MAJOR=18
+HPPLIB_URL=https://github.com/melpon/wandbox-builder/releases/download/head-assets-ubuntu-24.04/hpplib.tar.gz
+HPPLIB_JSON_URL=https://github.com/melpon/wandbox-builder/releases/download/head-assets-ubuntu-24.04/hpplib.json
 
 cd `dirname $0`
 WORKSPACE_DIR=$PWD
 OUTPUT_DIR=$WORKSPACE_DIR/../public/static/wasm/
 OUTPUT_R2_DIR=$WORKSPACE_DIR/../public-r2/
-BULID_DIR=$WORKSPACE_DIR/../../build-clangd-wasm-build
-rm -rf $BULID_DIR
-mkdir -p $BULID_DIR
-cd $BULID_DIR
+BUILD_DIR=$WORKSPACE_DIR/../../build-clangd-wasm-build
+rm -rf $BUILD_DIR
+mkdir -p $BUILD_DIR
+cd $BUILD_DIR
 
 # 1. Get Emscripten
 
@@ -103,20 +105,26 @@ pushd llvm-project
   cmake --build build --target clangd
 
   ## Copy installed headers to WASI sysroot
-  cp -r build/lib/clang/$LLVM_VER_MAJOR/include/* $BULID_DIR/wasi-sysroot/include/
+  cp -r build/lib/clang/$LLVM_VER_MAJOR/include/* $BUILD_DIR/wasi-sysroot/include/
 
-  mkdir -p $BULID_DIR/wasi-sysroot/wandbox/
+  mkdir -p $BUILD_DIR/wasi-sysroot/wandbox/
 
   ## Boost のヘッダーを入れる
   rm -rf boost_1_87_0.tar.gz boost_1_87_0
   curl -LO https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
   tar xf boost_1_87_0.tar.gz
-  cp -r boost_1_87_0/boost $BULID_DIR/wasi-sysroot/wandbox/boost/
+  cp -r boost_1_87_0/boost $BUILD_DIR/wasi-sysroot/wandbox/boost/
+
+  ## hpplib を入れる
+  curl -LO $HPPLIB_URL
+  curl -LO $HPPLIB_JSON_URL
+  tar xf hpplib.tar.gz
+  cp -r hpplib/ $BUILD_DIR/wasi-sysroot/wandbox/hpplib/
 
   ## Build clangd (2nd time, for the real thing)
   emcmake cmake -G Ninja -S llvm -B build \
       -DCMAKE_CXX_FLAGS="-pthread -Dwait4=__syscall_wait4" \
-      -DCMAKE_EXE_LINKER_FLAGS="-pthread -s ENVIRONMENT=worker -s NO_INVOKE_RUN -s EXIT_RUNTIME -s INITIAL_MEMORY=2GB -s ALLOW_MEMORY_GROWTH -s MAXIMUM_MEMORY=4GB -s STACK_SIZE=256kB -s EXPORTED_RUNTIME_METHODS=FS,callMain -s MODULARIZE -s EXPORT_ES6 -s WASM_BIGINT -s ASSERTIONS -s ASYNCIFY -s PTHREAD_POOL_SIZE='Math.max(navigator.hardwareConcurrency, 8)' --embed-file=$BULID_DIR/wasi-sysroot/include@/usr/include --embed-file=$BULID_DIR/wasi-sysroot/wandbox@/usr/local/include/wandbox" \
+      -DCMAKE_EXE_LINKER_FLAGS="-pthread -s ENVIRONMENT=worker -s NO_INVOKE_RUN -s EXIT_RUNTIME -s INITIAL_MEMORY=2GB -s ALLOW_MEMORY_GROWTH -s MAXIMUM_MEMORY=4GB -s STACK_SIZE=256kB -s EXPORTED_RUNTIME_METHODS=FS,callMain -s MODULARIZE -s EXPORT_ES6 -s WASM_BIGINT -s ASSERTIONS -s ASYNCIFY -s PTHREAD_POOL_SIZE='Math.max(navigator.hardwareConcurrency, 8)' --embed-file=$BUILD_DIR/wasi-sysroot/include@/usr/include --embed-file=$BUILD_DIR/wasi-sysroot/wandbox@/usr/local/include/wandbox" \
       -DCMAKE_BUILD_TYPE=MinSizeRel \
       -DLLVM_TARGET_ARCH=wasm32-emscripten \
       -DLLVM_DEFAULT_TARGET_TRIPLE=wasm32-wasi-threads \
@@ -142,6 +150,7 @@ popd
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
 cp llvm-project/build/bin/clangd* $OUTPUT_DIR
+cp llvm-project/hpplib.json $OUTPUT_DIR
 # clangd.wasm は R2 用のディレクトリに配置する
 rm $OUTPUT_DIR/clangd.wasm
 cp llvm-project/build/bin/clangd.wasm $OUTPUT_R2_DIR

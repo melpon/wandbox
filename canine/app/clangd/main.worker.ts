@@ -82,7 +82,7 @@ async function start(workspace_path: string, compiler_arguments: string[]): Prom
       const chunks: Uint8Array[] = [];
       const wasmSize = __WASM_SIZE__;
       for (const wasmUrl of wasmUrls) {
-        const wasmResponse = await fetch(wasmUrl);
+        const wasmResponse = await fetch(wasmUrl, { headers: { "Accept-Encoding": "gzip" } });
         if (wasmResponse.status.toString()[0] !== "2") {
           throw new Error(`Failed to fetch ${wasmUrl}`);
         }
