@@ -50,7 +50,7 @@ jobs:
         python3 run.py deploy wandbox-ubuntu-24.04 kennel --env develop
     - uses: actions/setup-node@v2
       with:
-        node-version: '16'
+        node-version: '22'
     - name: Cache node modules
       uses: actions/cache@v4
       env:

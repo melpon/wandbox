@@ -110,6 +110,39 @@ export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
 export type ClangdWorkerState = "initial" | "loading" | "ready" | "error";
 
+export interface HppInfo {
+  // repo infos
+  name: string;
+  // username/reponame
+  repository: string;
+  description: string;
+  headerDescription: string;
+
+  // release infos
+  tagName: string;
+  // RFC3339
+  publishedAt: string;
+}
+export interface MergedHppInfo {
+  name: string;
+  repository: string;
+  description: string;
+  headerDescription: string;
+
+  wandbox: {
+    tagName: string;
+    publishedAt: string;
+  } | null;
+  clangd: {
+    tagName: string;
+    publishedAt: string;
+  } | null;
+}
+export interface Hpplib {
+  wandbox: HppInfo[];
+  clangd: HppInfo[];
+}
+
 function sourceToHistorySource(
   sources: EditorSourceData[],
   views: EditorViewMap | WritableDraft<EditorViewMap>

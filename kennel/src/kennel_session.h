@@ -240,7 +240,7 @@ struct KennelSessionConfig {
   std::shared_ptr<CattleshedClientManager> cm;
   std::shared_ptr<KennelSharedData> sd;
   std::shared_ptr<wandbox::kennel::SponsorFile> sponsor_file;
-  std::shared_ptr<std::string> hpplib_json_content;
+  std::shared_ptr<std::string> hpplib_json;
   std::string database;
   std::string url;
 };
@@ -367,12 +367,21 @@ class KennelSession : public std::enable_shared_from_this<KennelSession> {
   }
 
   void HandleGetHpplib() {
+    std::string contents;
+    std::ifstream ifs(config_.hpplib_json->c_str());
+    if (!ifs) {
+      contents = "[]";
+    } else {
+      std::stringstream ss;
+      ss << ifs.rdbuf();
+      contents = ss.str();
+    }
     boost::beast::http::response<boost::beast::http::string_body> resp{
         boost::beast::http::status::ok, 11};
     resp.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
     resp.set(boost::beast::http::field::content_type, "application/json");
     resp.keep_alive(req_.keep_alive());
-    resp.body() = *config_.hpplib_json_content;
+    resp.body() = contents;
     resp.prepare_payload();
     SendResponse(resp);
   }

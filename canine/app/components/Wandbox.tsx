@@ -16,7 +16,7 @@ import { Author, AuthorData } from "~/components/Author";
 import Sidebar from "~/components/react-sidebar/Sidebar";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
-import { wandboxSlice } from "~/features/slice";
+import { MergedHppInfo, wandboxSlice } from "~/features/slice";
 import {
   applySettings,
   loadHistory,
@@ -40,11 +40,13 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
   const {
     compilerList,
     sponsors,
-    permlinkData
+    permlinkData,
+    hpplib,
   }: {
     compilerList: CompilerList,
     sponsors: SponsorsGetData,
     permlinkData: PermlinkData | null
+    hpplib: MergedHppInfo[],
   } = useLoaderData<WandboxLoaderData>();
 
   const [localStorageChanged, setLocalStorageChanged] = useState(false);
@@ -80,7 +82,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
     sidebarLocked,
     history,
     storageExists,
-    clangdWorker,
   } = useSelector(
     ({
       wandbox: {
@@ -100,7 +101,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
         sidebarLocked,
         history,
         storageExists,
-        clangdWorker,
       },
     }: AppState) => ({
       currentLanguage,
@@ -119,7 +119,6 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
       sidebarLocked,
       history,
       storageExists,
-      clangdWorker,
     })
   );
 
@@ -287,7 +286,7 @@ const Wandbox: React.FC = (): React.ReactElement | null => {
           </div>
 
           <div className="d-flex flex-column">
-            <Compiler compilerList={compilerList} permlinkData={permlinkData} />
+            <Compiler compilerList={compilerList} permlinkData={permlinkData} hpplib={hpplib} />
             {(sponsors.corporate.length !== 0 ||
               sponsors.personal.length !== 0) && (
                 <>

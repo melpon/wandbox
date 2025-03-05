@@ -5,7 +5,7 @@ import type { CompilerList, CompilerInfo } from "~/hooks/compilerList";
 import type { PermlinkData } from "~/hooks/permlink";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
-import { wandboxSlice } from "~/features/slice";
+import { MergedHppInfo, wandboxSlice } from "~/features/slice";
 import { useGetTemplate } from "~/hooks/template";
 import { useError } from "~/hooks/error";
 import { createEditorSourceData } from "~/utils/createEditorSourceData";
@@ -18,10 +18,11 @@ import { optionsToSwitch } from "~/utils/optionsToSwitch";
 interface CompilerProps {
   compilerList: CompilerList;
   permlinkData: PermlinkData | null;
+  hpplib: MergedHppInfo[];
 }
 
 const Compiler: React.FC<CompilerProps> = (props) => {
-  const { compilerList, permlinkData } = props;
+  const { compilerList, permlinkData, hpplib } = props;
   const {
     currentLanguage,
     currentCompilerName,
@@ -173,6 +174,7 @@ const Compiler: React.FC<CompilerProps> = (props) => {
           compilerInfos={compilerInfos}
           readOnly={readOnly}
           templates={compilerInfo === null ? [] : compilerInfo.templates}
+          hpplib={hpplib}
           onSelectCompiler={onSelectCompiler}
           onDeselectCompiler={onDeselectCompiler}
           onLoadTemplate={onLoadTemplate}

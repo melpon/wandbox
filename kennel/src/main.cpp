@@ -77,17 +77,6 @@ int main(int argc, char* argv[]) {
     SPDLOG_INFO("Sponsor file {} load completed", sponsor_json);
   }
 
-  std::string hpplib_json_content;
-  std::ifstream ifs(hpplib_json.c_str());
-  if (!ifs) {
-    SPDLOG_WARN("Header only library information file {} not found", hpplib_json);
-    hpplib_json_content = "[]";
-  } else {
-    std::stringstream ss;
-    ss << ifs.rdbuf();
-    hpplib_json_content = ss.str();
-  }
-
   auto channel = grpc::CreateChannel(
       cattleshed_host + ":" + std::to_string(cattleshed_port),
       grpc::InsecureChannelCredentials());
@@ -142,7 +131,7 @@ int main(int argc, char* argv[]) {
   config.initial_cattleshed_info = info;
   config.sponsor_file =
       std::make_shared<wandbox::kennel::SponsorFile>(std::move(sponsor_file));
-  config.hpplib_json_content = std::make_shared<std::string>(std::move(hpplib_json_content));
+  config.hpplib_json = std::make_shared<std::string>(std::move(hpplib_json));
   config.database = std::move(database);
   config.url = std::move(url);
   SPDLOG_INFO("Start to listen {}:{}", host, port);
