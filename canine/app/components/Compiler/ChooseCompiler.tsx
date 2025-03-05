@@ -1,35 +1,12 @@
 import React, { useState } from "react";
-import { Dropdown, Modal } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import { ThreeDots } from "react-bootstrap-icons";
 import ListGroup from "react-bootstrap/ListGroup";
 import { useTranslation } from "react-i18next";
 import { MergedHppInfo } from "~/features/slice";
 
 import { CompilerInfo } from "~/hooks/compilerList";
-
-interface HpplibDialogProps {
-  show: boolean;
-  hpplib: MergedHppInfo[];
-  onHide: () => void;
-}
-const HpplibDialog: React.FC<HpplibDialogProps> = ({ show, hpplib, onHide }): React.ReactElement => {
-  return (<Modal show={show} onHide={onHide} >
-    <Modal.Header closeButton>
-      <Modal.Title>利用可能なヘッダーオンリーライブラリ</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <ListGroup>
-        {hpplib.map((hpp) => {
-          return (
-            <ListGroup.Item key={hpp.name}>
-              {hpp.name}
-            </ListGroup.Item>
-          );
-        })}
-      </ListGroup>
-    </Modal.Body>
-  </Modal>);
-};
+import { HpplibDialog } from "~/components/Compiler/HpplibDialog";
 
 interface ChooseCompilerProps {
   compilerInfo: CompilerInfo | null;
