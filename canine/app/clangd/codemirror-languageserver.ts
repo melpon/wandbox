@@ -429,14 +429,8 @@ class LanguageServerPlugin implements PluginValue {
           .sort((a, b) => {
             const aText = a.sortText ?? a.label;
             const bText = b.sortText ?? b.label;
-            switch (true) {
-              case aText.startsWith(token.text) &&
-                !bText.startsWith(token.text):
-                return -1;
-              case !aText.startsWith(token.text) &&
-                bText.startsWith(token.text):
-                return 1;
-            }
+            if (aText < bText) return -1;
+            if (aText > bText) return 1;
             return 0;
           });
       }

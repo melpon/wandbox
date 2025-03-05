@@ -78,6 +78,8 @@ function switchesToOptions(currentSwitches: { [name: string]: string | boolean }
   }
   args.push("-isystem/usr/local/include/wandbox");
   args.push("-I/usr/local/include/wandbox/hpplib");
+  // mmap を使ってるプロジェクトをコンパイルするために必要
+  args.push("-D_WASI_EMULATED_MMAN");
 
   return args;
 }
