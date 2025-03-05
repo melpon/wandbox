@@ -19,10 +19,10 @@ export function usePostPermlink(
   url: string,
   onError: (error: string) => void
 ): [
-  PermlinkPostData | null,
-  number,
-  (url: string | null, opts: RequestInit) => void
-] {
+    PermlinkPostData | null,
+    number,
+    (url: string | null, opts: RequestInit) => void
+  ] {
   const headers = {
     "Content-Type": "application/json",
   };
@@ -92,10 +92,10 @@ export function useGetPermlink(
   permlinkId: string,
   onError: (error: string) => void
 ): [
-  PermlinkData | null,
-  number,
-  (url: string | null, opts: RequestInit) => void
-] {
+    PermlinkData | null,
+    number,
+    (url: string | null, opts: RequestInit) => void
+  ] {
   const headers = {
     "Content-Type": "application/json",
   };

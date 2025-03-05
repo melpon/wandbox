@@ -23,10 +23,10 @@ export function useGetTemplate(
   url: string,
   onError: (error: string) => void
 ): [
-  TemplateGetData | null,
-  number,
-  (url: string | null, opts: RequestInit) => void
-] {
+    TemplateGetData | null,
+    number,
+    (url: string | null, opts: RequestInit) => void
+  ] {
   const headers = {
     "Content-Type": "application/json",
   };

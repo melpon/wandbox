@@ -2,6 +2,7 @@ node_modules
 
 /.cache
 /build
-/dist
-/public/build
-/app/styles
+.env
+.dev.vars
+
+.wrangler

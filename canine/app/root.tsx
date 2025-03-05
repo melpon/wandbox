@@ -1,25 +1,22 @@
+import type { MetaFunction, MetaDescriptor, LinksFunction } from "@remix-run/cloudflare";
 import {
-  json,
   Links,
-  LiveReload,
-  LoaderFunction,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
-} from "remix";
-import type { MetaFunction, HtmlMetaDescriptor, LinksFunction } from "remix";
+} from "@remix-run/react";
 
-import wandboxStyles from "./styles/wandbox.css";
-import { getSession, commitSession } from "./sessions.server";
-import { fetchPermlinkData } from "./entry.server";
-import type { PermlinkData } from "./hooks/permlink";
-import { resolvePermlinkData } from "./hooks/permlink";
+import "./tailwind.css";
+import "./styles/wandbox.scss";
 
-export const meta: MetaFunction = ({ params, data }) => {
+//import wandboxStyles from "./styles/wandbox.css";
+import { PermlinkData } from "./hooks/permlink";
+
+export const meta: MetaFunction = ({ data }) => {
   let title: string;
-  const permlinkData: PermlinkData | null = data.permlinkData;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const permlinkData: PermlinkData | null = (data as any)?.permlinkData ?? null;
 
   if (permlinkData === null) {
     title = "Wandbox";
@@ -31,7 +28,7 @@ export const meta: MetaFunction = ({ params, data }) => {
     }
   }
 
-  const result: HtmlMetaDescriptor = {};
+  const result: MetaDescriptor = {};
   result.title = title;
 
   // Twitter カードの設定
@@ -40,80 +37,49 @@ export const meta: MetaFunction = ({ params, data }) => {
     result["twitter:title"] = title;
     result["twitter:description"] = permlinkData.parameter.code.slice(0, 100);
   }
-  return result;
+  return [result];
 };
 
-export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: wandboxStyles }];
-};
+// export const links: LinksFunction = () => {
+//   return [{ rel: "stylesheet", href: wandboxStyles }];
+// };
+export const links: LinksFunction = () => [
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  {
+    rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+  },
+  //{ rel: "stylesheet", href: wandboxStyles },
+];
 
-export const loader: LoaderFunction = async ({ request, params }) => {
-  const session = await getSession(request.headers.get("Cookie"));
 
-  const githubUser = session.has("github_user")
-    ? JSON.parse(session.get("github_user"))
-    : null;
-
-  const { permlinkId } = params;
-  const permlinkData =
-    permlinkId === undefined
-      ? null
-      : resolvePermlinkData(
-          permlinkId,
-          await fetchPermlinkData(permlinkId, request)
-        );
-
-  const data: WandboxLoaderData = { githubUser, permlinkData };
-
-  const cookie = await commitSession(session, {
-    maxAge: 30 * 24 * 60 * 60,
-    sameSite: "lax",
-  });
-  return json(data, {
-    headers: {
-      "Set-Cookie": cookie,
-    },
-  });
-};
-
-export default function App() {
-  const data: WandboxLoaderData = useLoaderData();
-  // permlinkData はタイトルの設定のために用意しているだけなので HTML 生成時には除ける
-  const data2: WandboxLoaderData = {
-    githubUser: data.githubUser,
-    permlinkData: null,
-  };
+export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html>
+    <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
       <body>
-        <Outlet />
+        {children}
         <ScrollRestoration />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.WANDBOX_GITHUB_CLIENT_ID = ${JSON.stringify(
-                WANDBOX_GITHUB_CLIENT_ID
-              )};
-              window.WANDBOX_LOADER_DATA = ${JSON.stringify(data)}
-            `,
-          }}
-        />
         <Scripts />
         <script
           src="https://platform.twitter.com/widgets.js"
           type="text/javascript"
         />
-        {process.env.NODE_ENV === "development" && <LiveReload />}
       </body>
     </html>
   );
+}
+
+export default function App() {
+  return <Outlet />;
 }

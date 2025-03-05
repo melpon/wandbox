@@ -75,8 +75,8 @@ const Command: React.FC<CommandProps> = (props): React.ReactElement => {
           ? compilerOptionRaw
           : runtimeOptionRaw
         : info.compilerOptionRaw
-        ? permlinkData.parameter.compilerOptionRaw
-        : permlinkData.parameter.runtimeOptionRaw
+          ? permlinkData.parameter.compilerOptionRaw
+          : permlinkData.parameter.runtimeOptionRaw
     );
     return `$ ${command} ${options.join(" ")} ${rawOptions}`;
   }, [

@@ -1,0 +1,59 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "wandbox-local",
+	"compatibility_date": "2025-02-14",
+	// "pages_build_output_dir": "./build/client",
+  "workers_dev": false,
+  "main": "./server.ts",
+	//"observability": {
+	//	"enabled": true
+	//},
+  //"account_id": "a88d1d39ba893e18fa44d5cf1ec1115e",
+  "kv_namespaces": [ 
+    { "binding": "KV_SESSION", "id": "639a875898404175a8121a01647dfbea" },
+    { "binding": "KV_CACHE", "id": "346f95298b6e443d886793fdea9ef733" },
+  ],
+  "vars": {
+    "WANDBOX_URL_PREFIX": "https://api-develop.wandbox.org",
+    "WANDBOX_GITHUB_CLIENT_ID": "d097a8f338db3c15fe08",
+  },
+
+  "assets": {
+    "directory": "./build/client"
+  },
+
+  "build": {
+    "command": "npm run build",
+  },
+
+  "env": {
+    "develop": {
+      "name": "wandbox-develop",
+      "route": "develop.wandbox.org/*",
+      "kv_namespaces": [ 
+        { "binding": "KV_SESSION", "id": "bc11bbbcbc674e579edde29210c9a910" },
+        { "binding": "KV_CACHE", "id": "0f1102750a824e3782af83870be86376" },
+      ],
+      "vars": {
+        "WANDBOX_URL_PREFIX": "https://api-develop.wandbox.org",
+        "WANDBOX_GITHUB_CLIENT_ID": "d097a8f338db3c15fe08",
+      },
+    },
+    "master": {
+      "name": "wandbox",
+      "route": "wandbox.org/*",
+      "vars": {
+        "WANDBOX_URL_PREFIX": "https://api.wandbox.org",
+        "WANDBOX_GITHUB_CLIENT_ID": "f9d429d939d997e6b08e",
+      },
+      "kv_namespaces": [
+        { "binding": "KV_SESSION", "id": "5c938730ff3d489fb02730317a5c17d3" },
+        { "binding": "KV_CACHE", "id": "5edf9e985c504b6b8099c405585145ad" },
+      ],
+    },
+  },
+}

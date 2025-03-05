@@ -122,7 +122,7 @@ export function useFetch<T>(
   }, [counter]);
 
   const doFetch = useCallback(
-    (url, opts): void => {
+    (url: string | null, opts: RequestInit): void => {
       setUrl(url || defaultUrl);
       setOpts(Object.assign(defaultOpts, opts));
       setCounter((counter): number => counter + 1);

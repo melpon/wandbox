@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import {
-  LayoutSidebarReverse,
   PinAngle,
   PinAngleFill,
   X,
@@ -15,8 +14,13 @@ import type { Breakpoint, WandboxState } from "~/features/slice";
 import { wandboxSlice } from "~/features/slice";
 import { History } from "./Sidebar/History";
 import { EditorSettings } from "./Sidebar/EditorSettings";
+import { CompilerList } from "~/hooks/compilerList";
 
-const SidebarBase: React.FC = () => {
+export interface SidebarBaseProps {
+  compilerList: CompilerList;
+}
+
+const SidebarBase: React.FC<SidebarBaseProps> = ({ compilerList }) => {
   const { t } = useTranslation();
   const { sidebarLocked, sidebarState, breakpoint } = useSelector(
     ({ wandbox: { sidebarLocked, sidebarState, breakpoint } }: AppState) => ({
@@ -60,7 +64,7 @@ const SidebarBase: React.FC = () => {
 
   const title =
     state === "editorSettings" ? t("settings.title") : t("history.title");
-  const content = state === "editorSettings" ? <EditorSettings /> : <History />;
+  const content = state === "editorSettings" ? <EditorSettings /> : <History compilerList={compilerList} />;
 
   return (
     <div className="d-flex flex-column">
