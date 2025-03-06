@@ -177,9 +177,9 @@ export async function fetchHpplibData(env: Env, request: Request): Promise<AnyJs
   // ローカル側の hpplib.json を取得する
   {
     const url = new URL(request.url);
-    const resp = await fetch(`${url.origin}/static/wasm/hpplib.json`, {
+    const resp = env.ASSETS === undefined ? await fetch(`${url.origin}/static/wasm/hpplib.json`, {
       headers: headers,
-    });
+    }) : await env.ASSETS.fetch(`${url.origin}/static/wasm/hpplib.json`, { headers: headers });
     if (resp.status !== 200) {
       throw new WandboxError(resp.status, await resp.text());
     }
