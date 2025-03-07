@@ -35,13 +35,14 @@
 
 import { autocompletion, insertCompletionText } from "@codemirror/autocomplete";
 import { setDiagnostics } from "@codemirror/lint";
-import { Facet } from "@codemirror/state";
-import { EditorView, hoverTooltip, Tooltip, ViewPlugin } from "@codemirror/view";
+import { Facet, StateEffect, StateField } from "@codemirror/state";
+import { EditorView, hoverTooltip, showTooltip, Tooltip, ViewPlugin } from "@codemirror/view";
 import {
   CompletionItemKind,
   CompletionTriggerKind,
   DiagnosticSeverity,
   PublishDiagnosticsParams,
+  SignatureHelpTriggerKind,
 } from "vscode-languageserver-protocol";
 import type * as LSP from "vscode-languageserver-protocol";
 
@@ -50,7 +51,7 @@ import type {
   CompletionContext,
   CompletionResult,
 } from "@codemirror/autocomplete";
-import type { Text } from "@codemirror/state";
+import { Extension, Text } from "@codemirror/state";
 import type { PluginValue, ViewUpdate } from "@codemirror/view";
 import * as marked from "marked";
 import { MessageConnection } from 'vscode-jsonrpc/browser';
@@ -78,6 +79,7 @@ interface LSPRequestMap {
     LSP.CompletionParams,
     LSP.CompletionItem[] | LSP.CompletionList | null
   ];
+  "textDocument/signatureHelp": [LSP.SignatureHelpParams, LSP.SignatureHelp],
 }
 
 // Client to server
@@ -168,6 +170,10 @@ export class LanguageServerClient {
             signatureInformation: {
               documentationFormat: ["markdown", "plaintext"],
             },
+            parameterInformation: {
+              labelOffsetSupport: true,
+            },
+            activeParameterSupport: true,
           },
           declaration: {
             dynamicRegistration: true,
@@ -206,6 +212,7 @@ export class LanguageServerClient {
       timeout * 3,
     );
     this.capabilities = capabilities;
+    console.log("ServerCapabilities", this.capabilities);
     this.notify("initialized", {});
     this.ready = true;
   }
@@ -228,6 +235,10 @@ export class LanguageServerClient {
 
   public async textDocumentCompletion(params: LSP.CompletionParams) {
     return await this.request("textDocument/completion", params, timeout);
+  }
+
+  public async textDocumentSignatureHelp(params: LSP.SignatureHelpParams) {
+    return await this.request("textDocument/signatureHelp", params, timeout);
   }
 
   public async workspaceDidChangeConfiguration(params: LSP.DidChangeConfigurationParams) {
@@ -285,6 +296,12 @@ class LanguageServerPlugin implements PluginValue {
 
   private changesTimeout: number;
 
+  public signatureHelpOpened: boolean = false;
+  private activeSignatureHelp: LSP.SignatureHelp | null = null;
+  private activeSignature: number | null = null;
+
+  private lastSentDocumentText: string = "";
+
   constructor(private view: EditorView, private allowHTMLContent: boolean) {
     this.client = this.view.state.facet(client);
     this.documentUri = this.view.state.facet(documentUri);
@@ -317,6 +334,7 @@ class LanguageServerPlugin implements PluginValue {
     if (this.client.initializePromise) {
       await this.client.initializePromise;
     }
+    this.lastSentDocumentText = documentText;
     this.client.textDocumentDidOpen({
       textDocument: {
         uri: this.documentUri,
@@ -329,7 +347,9 @@ class LanguageServerPlugin implements PluginValue {
 
   public async sendChange({ documentText }: { documentText: string }) {
     if (!this.client.ready) { return; }
+    if (this.lastSentDocumentText === documentText) { return; }
     try {
+      this.lastSentDocumentText = documentText;
       await this.client.textDocumentDidChange({
         textDocument: {
           uri: this.documentUri,
@@ -446,6 +466,7 @@ class LanguageServerPlugin implements PluginValue {
         documentation,
         additionalTextEdits,
       }) => {
+
         const completion: Completion = {
           label: insertText,
           displayLabel: label,
@@ -516,6 +537,171 @@ class LanguageServerPlugin implements PluginValue {
     };
   }
 
+  createSignatureHelpTooltip(pos: number, signatureHelp: LSP.SignatureHelp): Tooltip {
+    return {
+      pos: pos,
+      create: (view) => {
+        // e   <div class="cm-signatureHelp">
+        // e1    <div class="cm-signatureHelp-selection">左要素
+        // e1a     <div>上矢印</div>
+        // e1b     <div>1/3</div>
+        // e1c     <div>上矢印</div>
+        //       </div>
+        // e2    <div /> ← セパレーター
+        // e3    <div>右要素
+        // e3a     <div class="cm-signatureHelp-signature">ここにシグネチャの内容</div>
+        // e3b     <hr />
+        // e3c     <div>ここにパラメータのドキュメント</div>
+        // e3d     <hr />
+        // e3e     <div>ここにシグネチャのドキュメント</div>
+        //       </div>
+        //     </div>
+        const e = document.createElement("div");
+        const e1 = document.createElement("div");
+        const e1a = document.createElement("div");
+        const e1b = document.createElement("div");
+        const e1c = document.createElement("div");
+        const e2 = document.createElement("div");
+        const e3 = document.createElement("div");
+        const e3a = document.createElement("div");
+        const e3b = document.createElement("hr");
+        const e3c = document.createElement("div");
+        const e3d = document.createElement("hr");
+        const e3e = document.createElement("div");
+        e.appendChild(e1);
+        e.appendChild(e2);
+        e.appendChild(e3);
+        e1.appendChild(e1a);
+        e1.appendChild(e1b);
+        e1.appendChild(e1c);
+        e3.appendChild(e3a);
+
+        e.classList.add("cm-signatureHelp");
+        e1.classList.add("cm-signatureHelp-selection");
+        e3a.classList.add("cm-signatureHelp-signature");
+
+        // CSS は全部ここでやってしまう
+        e.classList.add("flex", "flex-row", "align-items-end");
+        e.style.cssText = "max-width: 500px;";
+        e1.classList.add("flex-column", "align-items-center", "px-2px", "flex-grow-1");
+        e1a.classList.add("flex", "justify-content-center");
+        // bi bi-chevron-up
+        e1a.innerHTML = String.raw`
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"/>
+            </svg>`
+        e1b.style.cssText = "margin-top: -4px; margin-bottom: -4px;";
+        e1c.classList.add("flex", "justify-content-center");
+        // bi bi-chevron-down
+        e1c.innerHTML = String.raw`
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+            </svg>`
+        e2.classList.add("border-left", "h-100");
+        e3.classList.add("flex-column", "px-2px", "align-self-start", "flex-grow-1");
+        e3.style.cssText = "border-left: 1px solid #bbb";
+        e3a.classList.add("py-4px", "lh-sm");
+        e3a.style.cssText = "font-family: monospace;";
+        e3b.classList.add("m-0");
+        e3c.classList.add("py-4px", "lh-sm", "text-break");
+        e3d.classList.add("m-0");
+        e3e.classList.add("py-4px", "lh-sm", "text-break");
+
+        e1a.onclick = () => {
+          if (this.activeSignatureHelp === null) { return; }
+          const signatures = signatureHelp.signatures
+          this.activeSignature = ((this.activeSignature || 0) + signatures.length - 1) % signatures.length;
+          view.dispatch({
+            effects: signatureHelpOpen.of({ tooltip: this.createSignatureHelpTooltip(pos, this.activeSignatureHelp) }),
+          })
+          view.focus();
+        };
+        e1c.onclick = () => {
+          if (this.activeSignatureHelp === null) { return; }
+          const signatures = signatureHelp.signatures
+          this.activeSignature = ((this.activeSignature || 0) + 1) % signatures.length;
+          view.dispatch({
+            effects: signatureHelpOpen.of({ tooltip: this.createSignatureHelpTooltip(pos, this.activeSignatureHelp) }),
+          })
+          view.focus();
+        };
+
+        const signature = signatureHelp.signatures[this.activeSignature || 0];
+        const parameter = signature.parameters === undefined || signature.parameters.length == 0 ? null : signature.parameters[signatureHelp.activeParameter || 0];
+        e1b.textContent = ((this.activeSignature || 0) + 1) + "/" + signatureHelp.signatures.length;
+        const paramLabel = parameter === null ? null : typeof parameter.label === "string" ? parameter.label : signature.label.substring(parameter.label[0], parameter.label[1]);
+        const index = paramLabel === null ? -1 : signature.label.indexOf(paramLabel);
+        if (index === -1) {
+          e3a.textContent = signature.label;
+        } else {
+          // paramLabel の部分を強調表示する
+          const start = signature.label.substring(0, index);
+          const end = signature.label.substring(index + paramLabel.length);
+          if (start.length > 0) {
+            const e3ax = document.createElement("span");
+            e3ax.textContent = start;
+            e3a.appendChild(e3ax);
+          }
+          {
+            const e3ax = document.createElement("strong");
+            e3ax.textContent = paramLabel;
+            e3a.appendChild(e3ax);
+          }
+          if (end.length > 0) {
+            const e3ax = document.createElement("span");
+            e3ax.textContent = end;
+            e3a.appendChild(e3ax);
+          }
+        }
+        if (parameter !== null && parameter.documentation !== undefined) {
+          e3c.innerHTML = formatContents(parameter.documentation);
+          e3.appendChild(e3b);
+          e3.appendChild(e3c);
+        }
+        if (signature.documentation !== undefined) {
+          e3e.innerHTML = formatContents(signature.documentation);
+          e3.appendChild(e3d);
+          e3.appendChild(e3e);
+        }
+        return { dom: e };
+      },
+      above: true,
+    }
+  }
+
+  public async requestSignatureHelp(
+    view: EditorView,
+    triggerCharacter: string | null,
+    isRetrigger: boolean,
+  ): Promise<{ tooltip: Tooltip | null } | null> {
+    if (!this.client.ready || !this.client.capabilities!.signatureHelpProvider) { return null; }
+    this.sendChange({
+      documentText: view.state.doc.toString(),
+    });
+    const offset = view.state.selection.main.from;
+
+    const result = await this.client.textDocumentSignatureHelp({
+      textDocument: { uri: this.documentUri },
+      position: offsetToPos(view.state.doc, offset),
+      context: {
+        triggerKind: triggerCharacter === null ? SignatureHelpTriggerKind.ContentChange : SignatureHelpTriggerKind.TriggerCharacter,
+        triggerCharacter: triggerCharacter || undefined,
+        isRetrigger,
+        activeSignatureHelp: this.activeSignatureHelp || undefined,
+      },
+    });
+    this.activeSignatureHelp = result;
+    if (result.signatures.length === 0) {
+      return { tooltip: null };
+    }
+    this.signatureHelpOpened = true;
+    this.activeSignature = result.activeSignature || 0;
+
+    return {
+      tooltip: this.createSignatureHelpTooltip(offset, result),
+    }
+  }
+
   public processNotification(method: string, params: any) {
     try {
       switch (method) {
@@ -556,6 +742,91 @@ class LanguageServerPlugin implements PluginValue {
 
     this.view.dispatch(setDiagnostics(this.view.state, diagnostics));
   }
+}
+
+type SignatureHelpConfig = {
+  keydown: (key: string, view: EditorView) => void;
+  update: (view: EditorView) => void;
+}
+const signatureHelpConfig = Facet.define<SignatureHelpConfig, SignatureHelpConfig>({
+  combine: (values) => values.length === 0 ? { keydown: () => { }, update: () => { } } : values[0]
+});
+type SignatureHelpState = {
+  tooltip: Tooltip | null,
+}
+const signatureHelpOpen = StateEffect.define<{ tooltip: Tooltip }>();
+const signatureHelpClose = StateEffect.define();
+
+const signatureHelpField = StateField.define<SignatureHelpState>({
+  create() {
+    return {
+      tooltip: null,
+    };
+  },
+  update(value, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(signatureHelpOpen)) {
+        return {
+          tooltip: effect.value.tooltip,
+        };
+      }
+      if (effect.is(signatureHelpClose)) {
+        return {
+          tooltip: null,
+        };
+      }
+    }
+    return value;
+  },
+  provide: f => showTooltip.compute([f], state => state.field(f).tooltip),
+});
+
+const signatureHelpUpdateListener = EditorView.updateListener.of((update) => {
+  const config = update.view.state.facet(signatureHelpConfig);
+  const field = update.view.state.field(signatureHelpField, false);
+  if (field === undefined) {
+    return false;
+  }
+  if (!update.selectionSet && !update.docChanged) {
+    return false;
+  }
+
+  let key: string | null = null;
+  for (const tr of update.transactions) {
+    const typing = tr.isUserEvent("input.type");
+    if (typing) {
+      const pos = tr.newSelection.main.from;
+      key = tr.newDoc.sliceString(pos - 1, pos);
+      break;
+    }
+  }
+  if (key !== null) {
+    config.keydown(key, update.view);
+  }
+
+  // signatureHelp が出てる間はカーソルの移動や変更などでも更新する
+  if (key === null && field.tooltip !== null) {
+    config.update(update.view);
+  }
+
+});
+//export const signatureHelpCharacters = EditorView.domEventHandlers({
+//  keydown(event, view) {
+//    const config = view.state.facet(signatureHelpConfig);
+//    const field = view.state.field(signatureHelpField, false);
+//    if (field === undefined) {
+//      return false;
+//    }
+//    return config.keydown(event, view)
+//  }
+//});
+
+function createSignatureHelp(config: SignatureHelpConfig): Extension {
+  return [
+    signatureHelpConfig.of(config),
+    signatureHelpField,
+    signatureHelpUpdateListener,
+  ]
 }
 
 interface LanguageServerOptions {
@@ -615,6 +886,39 @@ export function createLanguageServerExtension(options: LanguageServerOptions) {
           );
         },
       ],
+    }),
+    createSignatureHelp({
+      keydown: (key, view) => {
+        if (plugin == null) { return; }
+
+        const triggerCharacters = plugin.client.capabilities?.signatureHelpProvider?.triggerCharacters || [];
+        const retriggerCharacters = plugin.client.capabilities?.signatureHelpProvider?.retriggerCharacters || [];
+        const triggerIndex = triggerCharacters.indexOf(key);
+        const retriggerIndex = retriggerCharacters.indexOf(key);
+        const isRetrigger = plugin.signatureHelpOpened && retriggerIndex !== -1;
+        if (triggerIndex === -1 && !isRetrigger) {
+          return;
+        }
+        plugin.requestSignatureHelp(view, key, isRetrigger).then(r => {
+          if (r === null) {
+            return;
+          }
+          view.dispatch({
+            effects: r.tooltip === null ? signatureHelpClose.of(null) : signatureHelpOpen.of({ tooltip: r.tooltip }),
+          })
+        });
+      },
+      update: (view) => {
+        if (plugin == null) { return; }
+        plugin.requestSignatureHelp(view, null, false).then(r => {
+          if (r === null) {
+            return;
+          }
+          view.dispatch({
+            effects: r.tooltip === null ? signatureHelpClose.of(null) : signatureHelpOpen.of({ tooltip: r.tooltip }),
+          })
+        });
+      }
     }),
   ];
 }
