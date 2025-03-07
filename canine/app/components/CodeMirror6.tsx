@@ -14,7 +14,7 @@ import { EditorState, StateEffect, Transaction } from "@codemirror/state";
 import { bracketMatching, syntaxHighlighting, HighlightStyle, foldGutter, foldKeymap, indentOnInput, getIndentUnit, indentUnit } from "@codemirror/language";
 import { history, historyKeymap, defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
-import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } from "@codemirror/autocomplete";
+import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap, acceptCompletion } from "@codemirror/autocomplete";
 import { lintKeymap } from "@codemirror/lint";
 import { tags } from "@lezer/highlight";
 import { vim } from "@replit/codemirror-vim";
@@ -133,6 +133,7 @@ const defaultKeyMaps: KeyBinding[] = [
   ...historyKeymap,
   ...foldKeymap,
   ...completionKeymap,
+  { key: "Tab", run: acceptCompletion },
   ...lintKeymap,
 ];
 
