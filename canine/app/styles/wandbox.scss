@@ -7,6 +7,8 @@ body {
   background-color: white;
 }
 
+$font-family-monospace: Consolas, "Courier New", monospace;
+
 a {
   color: inherit;
   text-decoration: none;
@@ -26,6 +28,7 @@ $color-gray: #d0d7de;
 $color-gray2: #57606a;
 // ヘッダー背景や白地用のテキスト色
 $color-primary: #24292f;
+$color-primary-transparent: rgba($color-primary, 0.6);
 // リンク色
 $color-blue: #0969da;
 // タグの背景色
@@ -117,6 +120,22 @@ p, h1, h2, h3, h4, h5, h6 {
   }
   .cm-scroller {
     overflow: auto;
+    font-family: inherit;
+  }
+  .cm-tooltip-autocomplete {
+    > ul {
+      font-family: $font-family-monospace;
+      font-size: 14px;
+
+      > li {
+        padding: 0;
+        padding-left: 2px;
+        line-height: 19px;
+        height: 19px;
+        display: flex;
+        white-space: pre;
+      }
+    }
   }
 
   .cm-lintRange {
@@ -146,27 +165,175 @@ p, h1, h2, h3, h4, h5, h6 {
   }
 
   .cm-completionLabel {
-    color: $color-gray2;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
+    color: $color-primary-transparent;
 
     .cm-completionMatchedText {
       color: $color-primary;
       text-decoration: none;
-      font-size: 0.85rem;
-      margin-left: 0.25rem;
-      margin-right: 0.25rem;
+      font-size: 0.875rem;
+      margin-left: 0.125rem;
+      margin-right: 0.125rem;
     }
+
+  }
+  /* kind は以下のようになってて、これを toLowerCase してる */
+  /* const Text: 1; */
+  /* const Method: 2; */
+  /* const Function: 3; */
+  /* const Constructor: 4; */
+  /* const Field: 5; */
+  /* const Variable: 6; */
+  /* const Class: 7; */
+  /* const Interface: 8; */
+  /* const Module: 9; */
+  /* const Property: 10; */
+  /* const Unit: 11; */
+  /* const Value: 12; */
+  /* const Enum: 13; */
+  /* const Keyword: 14; */
+  /* const Snippet: 15; */
+  /* const Color: 16; */
+  /* const File: 17; */
+  /* const Reference: 18; */
+  /* const Folder: 19; */
+  /* const EnumMember: 20; */
+  /* const Constant: 21; */
+  /* const Struct: 22; */
+  /* const Event: 23; */
+  /* const Operator: 24; */
+  /* const TypeParameter: 25; */
+  .cm-completionIcon {
+    font: normal normal normal 16px/1 codicon;
+    display: inline-block;
+    text-decoration: none;
+    text-rendering: auto;
+    text-align: center;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    display: flex;
+    align-items: center;
+    opacity: 1;
+    padding: 0;
+    margin-right: 0.125rem;
+  }
+  .cm-completionIcon-text:after {
+    color: #3b3b3b;
+    content: "\ea93";
+  }
+  .cm-completionIcon-method:after {
+    color: #652d90;
+    content: "\ea8c";
+  }
+  .cm-completionIcon-function:after {
+    color: #652d90;
+    content: "\ea8c";
+  }
+  .cm-completionIcon-constructor:after {
+    color: #652d90;
+    content: "\ea8c";
+  }
+  .cm-completionIcon-field:after {
+    color: #007acc;
+    content: "\eb5f";
+  }
+  .cm-completionIcon-variable:after {
+    color: #007acc;
+    content: "\ea88";
+  }
+  .cm-completionIcon-class:after {
+    color: #d67e00;
+    content: "\eb5b";
+  }
+  .cm-completionIcon-interface:after {
+    color: #0076c0;
+    content: "\eb61";
+  }
+  .cm-completionIcon-module:after {
+    color: #3b3b3b;
+    content: "\ea8b";
+  }
+  .cm-completionIcon-property:after {
+    color: #3b3b3b;
+    content: "\eb65";
+  }
+  .cm-completionIcon-unit:after {
+    color: #3b3b3b;
+    content: "\ea96";
+  }
+  .cm-completionIcon-value:after {
+    color: #d67e00;
+    content: "\ea95";
+  }
+  .cm-completionIcon-enum:after {
+    color: #d67e00;
+    content: "\ea95";
+  }
+  .cm-completionIcon-keyword:after {
+    color: #3b3b3b;
+    content: "\eb62";
+  }
+  .cm-completionIcon-snippet:after {
+    color: #3b3b3b;
+    content: "\eb66";
+  }
+  .cm-completionIcon-color:after {
+    color: #3b3b3b;
+    content: "\eb5c";
+  }
+  .cm-completionIcon-file:after {
+    color: #3b3b3b;
+    content: "\eb60";
+  }
+  .cm-completionIcon-reference:after {
+    color: #3b3b3b;
+    content: "\ea94";
+  }
+  .cm-completionIcon-folder:after {
+    color: #3b3b3b;
+    content: "\ea83";
+  }
+  .cm-completionIcon-enummember:after {
+    color: #007acc;
+    content: "\eb5e";
+  }
+  .cm-completionIcon-constant:after {
+    color: #3b3b3b;
+    content: "\eb5d";
+  }
+  .cm-completionIcon-struct:after {
+    color: #3b3b3b;
+    content: "\ea91";
+  }
+  .cm-completionIcon-event:after {
+    color: #d67e00;
+    content: "\ea86";
+  }
+  .cm-completionIcon-operator:after {
+    color: #3b3b3b;
+    content: "\eb64";
+  }
+  .cm-completionIcon-typeparameter:after {
+    color: #3b3b3b;
+    content: "\ea92";
   }
   .cm-completionDetail {
-    color: $color-gray2;
+    color: $color-primary-transparent;
     text-decoration: none;
     font-style: normal;
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
     float: right;
     margin-right: 0.25rem;
+    margin-left: auto;
   }
 
   [aria-selected="true"] {
+    [class*="cm-completionIcon-"]:after {
+      color: $color-white;
+    }
     .cm-completionLabel {
       color: $color-gray;
 
@@ -177,6 +344,10 @@ p, h1, h2, h3, h4, h5, h6 {
     .cm-completionDetail {
       color: $color-gray;
     }
+  }
+
+  .cm-signatureHelp-signature {
+    font-family: $font-family-monospace;
   }
 
   .documentation.cm-tooltip-section {

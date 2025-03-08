@@ -601,7 +601,6 @@ class LanguageServerPlugin implements PluginValue {
         e3.classList.add("flex-column", "px-2px", "align-self-start", "flex-grow-1");
         e3.style.cssText = "border-left: 1px solid #bbb";
         e3a.classList.add("py-4px", "lh-sm");
-        e3a.style.cssText = "font-family: monospace;";
         e3b.classList.add("m-0");
         e3c.classList.add("py-4px", "lh-sm", "text-break");
         e3d.classList.add("m-0");

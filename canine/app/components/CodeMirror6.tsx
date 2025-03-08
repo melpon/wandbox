@@ -60,6 +60,22 @@ const highlightStyle = HighlightStyle.define([
   { tag: tags.processingInstruction, color: "#0a3069" },
 ]);
 
+const wandboxTheme = EditorView.theme({
+  "&": {
+    fontSize: "14px",
+  },
+  ".cm-content": {
+    // fontFamily: "Menlo, Monaco, Lucida Console, monospace",
+    fontFamily: 'Consolas, "Courier New", monospace',
+  },
+  ".cm-line": {
+    lineHeight: "19px",
+  },
+  ".cm-scroller": {
+    fontFamily: 'inherit',
+  }
+});
+
 export const insertTabWithSpace: StateCommand = ({ state, dispatch }) => {
   const cursor =
     state.selection.main.head -
@@ -114,6 +130,7 @@ export const tabWithSpaceBinding: KeyBinding = {
 };
 
 const codeMirrorDefaultExtensions: Extension[] = [
+  wandboxTheme,
   history(),
   foldGutter(),
   drawSelection(),

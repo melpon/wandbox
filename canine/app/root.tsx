@@ -9,6 +9,7 @@ import {
 
 import "./tailwind.css";
 import "./styles/wandbox.scss";
+import "@vscode/codicons/dist/codicon.css";
 
 //import wandboxStyles from "./styles/wandbox.css";
 import { PermlinkData } from "./hooks/permlink";
