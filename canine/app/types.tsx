@@ -18,5 +18,7 @@ export type WandboxLoaderData = {
   sponsors: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   compilerList: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  hpplib: any;
   env: Env;
 };

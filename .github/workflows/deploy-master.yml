@@ -50,7 +50,7 @@ jobs:
         python3 run.py deploy wandbox-ubuntu-24.04 kennel --env master
     - uses: actions/setup-node@v2
       with:
-        node-version: '16'
+        node-version: '22'
     - name: Cache node modules
       uses: actions/cache@v4
       env:
@@ -62,12 +62,12 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - name: Build Workers
-      working-directory: canine
-      run: |
-        set -ex
-        npm install
-        npm run build
+    # - name: Build Workers
+    #   working-directory: canine
+    #   run: |
+    #     set -ex
+    #     npm install
+    #     npm run build
     # - name: Publish canine
     #   working-directory: canine
     #   env:

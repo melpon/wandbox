@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import {
   vitePlugin as remix,
   cloudflareDevProxyVitePlugin as remixCloudflareDevProxy,
@@ -14,6 +15,10 @@ declare module "@remix-run/cloudflare" {
 }
 
 export default defineConfig({
+  build: {
+    minify: true,
+    target: "esnext",
+  },
   plugins: [
     remixCloudflareDevProxy({ getLoadContext }),
     remix({
@@ -26,6 +31,21 @@ export default defineConfig({
       },
     }),
     tsconfigPaths(),
+    {
+      name: "isolation",
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+          res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+          if (req.url?.startsWith("/static/wasm/clangd.wasm")) {
+            res.setHeader("Content-Type", "application/wasm");
+            fs.createReadStream("public-r2/clangd.wasm").pipe(res);
+            return;
+          }
+          next();
+        });
+      },
+    },
   ],
   ssr: {
     resolve: {
@@ -35,7 +55,10 @@ export default defineConfig({
   resolve: {
     mainFields: ["browser", "module", "main"],
   },
-  build: {
-    minify: true,
+  worker: {
+    format: "es",
+  },
+  define: {
+    __WASM_SIZE__: fs.statSync("public-r2/clangd.wasm").size,
   },
 });

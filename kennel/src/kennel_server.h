@@ -21,6 +21,7 @@ struct KennelServerConfig {
   std::shared_ptr<wandbox::kennel::SponsorFile> sponsor_file;
   std::string database;
   std::string url;
+  std::shared_ptr<std::string> hpplib_json;
 };
 
 class KennelServer : public std::enable_shared_from_this<KennelServer> {
@@ -93,6 +94,7 @@ class KennelServer : public std::enable_shared_from_this<KennelServer> {
       config.cm = config_.cm;
       config.sd = shared_data_;
       config.sponsor_file = config_.sponsor_file;
+      config.hpplib_json = config_.hpplib_json;
       config.database = config_.database;
       config.url = config_.url;
       KennelSession::Create(std::move(socket_), std::move(config))->Run();

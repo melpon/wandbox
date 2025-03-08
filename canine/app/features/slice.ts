@@ -6,6 +6,8 @@ import { castDraft, WritableDraft } from "immer";
 import { normalizePath } from "~/utils/normalizePath";
 import type { CompilerList } from "~/hooks/compilerList";
 import { GithubUser } from "~/types";
+import { LanguageServerClient } from "~/clangd/codemirror-languageserver";
+import { ClangdServer } from "~/clangd/ClangdServer";
 
 export interface EditorSourceData {
   id: string;
@@ -106,6 +108,41 @@ export interface HistoryData {
 
 export type Breakpoint = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
+export type ClangdWorkerState = "initial" | "loading" | "ready" | "error";
+
+export interface HppInfo {
+  // repo infos
+  name: string;
+  // username/reponame
+  repository: string;
+  description: string;
+  headerDescription: string;
+
+  // release infos
+  tagName: string;
+  // RFC3339
+  publishedAt: string;
+}
+export interface MergedHppInfo {
+  name: string;
+  repository: string;
+  description: string;
+  headerDescription: string;
+
+  wandbox: {
+    tagName: string;
+    publishedAt: string;
+  } | null;
+  clangd: {
+    tagName: string;
+    publishedAt: string;
+  } | null;
+}
+export interface Hpplib {
+  wandbox: HppInfo[];
+  clangd: HppInfo[];
+}
+
 function sourceToHistorySource(
   sources: EditorSourceData[],
   views: EditorViewMap | WritableDraft<EditorViewMap>
@@ -149,6 +186,12 @@ const initialState = {
   description: "",
   author: null as GithubUser | null,
   titleDialogOpened: false,
+
+  clangdWorker: null as Worker | null,
+  clangdWorkerState: "initial" as ClangdWorkerState,
+  clangdWorkerStatus: "",
+  clangdClient: null as LanguageServerClient | null,
+  clangdServer: null as ClangdServer | null,
 
   currentTab: 0,
   tabCounter: 0,
@@ -198,6 +241,21 @@ export const wandboxSlice = createSlice({
   name: "wandbox",
   initialState: initialState,
   reducers: {
+    setClangdWorker: (state, action: PayloadAction<Worker | null>) => {
+      state.clangdWorker = action.payload;
+    },
+    setClangdWorkerState: (state, action: PayloadAction<ClangdWorkerState>) => {
+      state.clangdWorkerState = action.payload;
+    },
+    setClangdWorkerStatus: (state, action: PayloadAction<string>) => {
+      state.clangdWorkerStatus = action.payload;
+    },
+    setClangdClient: (state, action: PayloadAction<LanguageServerClient | null>) => {
+      state.clangdClient = action.payload;
+    },
+    setClangdServer: (state, action: PayloadAction<ClangdServer | null>) => {
+      state.clangdServer = action.payload;
+    },
     setCurrentLanguage: (state, action: PayloadAction<string>) => {
       state.currentLanguage = action.payload;
     },

@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
   std::string cattleshed_host = "127.0.0.1";
   int cattleshed_port = 50051;
   std::string sponsor_json = "./sponsors.json";
+  std::string hpplib_json = "/opt/wandbox-data/wandbox-hpplib/hpplib.json";
   std::string database = "sqlite3:db=kennel.sqlite;@pool_size=10";
   std::string url = "http://localhost:8787";
   int log_level = spdlog::level::info;
@@ -40,6 +41,7 @@ int main(int argc, char* argv[]) {
   app.add_option("--cattleshed-host", cattleshed_host, "Cattleshed host");
   app.add_option("--cattleshed-port", cattleshed_port, "Cattleshed port");
   app.add_option("--sponsorsfile", sponsor_json, "Sponsors file");
+  app.add_option("--hpplibfile", hpplib_json, "Header only library file");
   app.add_option("--database", database, "Database URI");
   app.add_option("--url", url, "Public URL for Wandbox");
   app.add_option("--log-level", log_level, "Log severity level threshold")
@@ -129,6 +131,7 @@ int main(int argc, char* argv[]) {
   config.initial_cattleshed_info = info;
   config.sponsor_file =
       std::make_shared<wandbox::kennel::SponsorFile>(std::move(sponsor_file));
+  config.hpplib_json = std::make_shared<std::string>(std::move(hpplib_json));
   config.database = std::move(database);
   config.url = std::move(url);
   SPDLOG_INFO("Start to listen {}:{}", host, port);

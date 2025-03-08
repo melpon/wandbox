@@ -33,7 +33,7 @@ async function actionAndLoader(request: Request, context: AppLoadContext): Promi
   let responseHeaders: HeadersInit = resp.headers;
   responseHeaders = withCors(responseHeaders, request);
 
-  return new Response(await resp.text(), {
+  return new Response(resp.body, {
     headers: responseHeaders,
     status: resp.status,
     statusText: resp.statusText,

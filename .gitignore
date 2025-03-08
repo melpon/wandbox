@@ -1,3 +1,4 @@
+/__pycache__/
 /_source/
 /_build/
 /_install/
@@ -10,5 +11,6 @@
 /test/_tmp/
 /test/_build/
 /test/_crash/
+/build-clangd-wasm-build/
 *.swp
 *.sqlite

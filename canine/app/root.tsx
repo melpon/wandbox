@@ -9,6 +9,7 @@ import {
 
 import "./tailwind.css";
 import "./styles/wandbox.scss";
+import "@vscode/codicons/dist/codicon.css";
 
 //import wandboxStyles from "./styles/wandbox.css";
 import { PermlinkData } from "./hooks/permlink";
@@ -71,10 +72,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
+        {/*
         <script
           src="https://platform.twitter.com/widgets.js"
           type="text/javascript"
         />
+        */}
       </body>
     </html>
   );
