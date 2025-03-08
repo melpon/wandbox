@@ -124,13 +124,29 @@ const ClangdWorker: React.FC<ClangdWorkerProps> = ({ clangdWorker, clangdWorkerS
       }
     };
     server.onError = (error) => {
-      dispatch(actions.setClangdWorkerStatus("[clangd] Error"));
-      dispatch(actions.setClangdWorkerState("error"));
+      // dispatch(actions.setClangdWorkerStatus("[clangd] Error"));
+      // dispatch(actions.setClangdWorkerState("error"));
       console.error(error);
+      dispatch(actions.setClangdWorkerStatus("[clangd] Restarting..."));
+      dispatch(actions.setClangdWorkerState("error"));
     };
     server.start('file:///home/web_user/', switchesToOptions(currentSwitches));
     dispatch(actions.setClangdServer(server));
   }, [currentSwitches]);
+
+  // エラーが起きたら再起動する
+  useEffect(() => {
+    if (clangdWorkerState !== "error" || clangdServer === null) {
+      return;
+    }
+    clangdClient?.close();
+    clangdWorker?.terminate();
+    dispatch(actions.setClangdWorkerState("initial"));
+    dispatch(actions.setClangdWorker(null));
+    dispatch(actions.setClangdClient(null));
+    clangdServer.start('file:///home/web_user/', switchesToOptions(currentSwitches));
+  }, [clangdWorkerState, clangdClient, clangdWorker, clangdServer, currentSwitches]);
+
   useEffect(() => {
     if (clangdServer === null || clangdClient === null) {
       return;
