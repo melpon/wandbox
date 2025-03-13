@@ -31,6 +31,10 @@
     "editor.tabSize": 2,
     "editor.detectIndentation": false,
   },
+  "[rust]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+  },
   "eslint.workingDirectories": [
     "./canine",
   ],

@@ -1,0 +1,314 @@
+{
+    "switches": {
+        "warning": {
+            "flags": [
+                "-Wall",
+                "-Wextra"
+            ],
+            "display-name": "Warnings"
+        },
+        "optimize": {
+            "flags": [
+                "-O2",
+                "-march=native"
+            ],
+            "display-name": "Optimization"
+        },
+        "cpp-verbose": {
+            "flags": [
+                "-v"
+            ],
+            "display-name": "Verbose"
+        },
+        "cpp-no-pedantic": {
+            "flags": [],
+            "display-name": "no pedantic",
+            "display-flags": "",
+            "group": "cpp-pedantic"
+        },
+        "cpp-pedantic": {
+            "flags": [
+                "-pedantic"
+            ],
+            "display-name": "-pedantic",
+            "display-flags": "-pedantic",
+            "group": "cpp-pedantic"
+        },
+        "cpp-pedantic-errors": {
+            "flags": [
+                "-pedantic-errors"
+            ],
+            "display-name": "-pedantic-errors",
+            "display-flags": "-pedantic-errors",
+            "group": "cpp-pedantic"
+        },
+        "std-c-default": {
+            "flags": [],
+            "display-name": "Compiler Default",
+            "group": "std-c"
+        },
+        "c89": {
+            "flags": [
+                "-std=c89"
+            ],
+            "display-name": "C89",
+            "group": "std-c"
+        },
+        "gnu89": {
+            "flags": [
+                "-std=gnu89"
+            ],
+            "display-name": "C89(GNU)",
+            "group": "std-c"
+        },
+        "c99": {
+            "flags": [
+                "-std=c99"
+            ],
+            "display-name": "C99",
+            "group": "std-c"
+        },
+        "gnu99": {
+            "flags": [
+                "-std=gnu99"
+            ],
+            "display-name": "C99(GNU)",
+            "group": "std-c"
+        },
+        "c1x": {
+            "flags": [
+                "-std=c1x"
+            ],
+            "display-name": "C11",
+            "group": "std-c"
+        },
+        "gnu1x": {
+            "flags": [
+                "-std=gnu1x"
+            ],
+            "display-name": "C11(GNU)",
+            "group": "std-c"
+        },
+        "c11": {
+            "flags": [
+                "-std=c11"
+            ],
+            "display-name": "C11",
+            "group": "std-c"
+        },
+        "gnu11": {
+            "flags": [
+                "-std=gnu11"
+            ],
+            "display-name": "C11(GNU)",
+            "group": "std-c"
+        },
+        "std-c++-default": {
+            "flags": [],
+            "display-name": "Compiler Default",
+            "group": "std-cxx"
+        },
+        "c++98": {
+            "flags": [
+                "-std=c++98"
+            ],
+            "display-name": "C++03",
+            "group": "std-cxx"
+        },
+        "gnu++98": {
+            "flags": ["-std=gnu++98"],
+            "display-name": "C++03(GNU)",
+            "group": "std-cxx"
+        },
+        "c++0x": {
+            "flags": [
+                "-std=c++0x"
+            ],
+            "display-name": "C++0x",
+            "group": "std-cxx"
+        },
+        "gnu++0x": {
+            "flags": ["-std=gnu++0x"],
+            "display-name": "C++0x(GNU)",
+            "group": "std-cxx"
+        },
+        "c++11": {
+            "flags": [
+                "-std=c++11"
+            ],
+            "display-name": "C++11",
+            "group": "std-cxx"
+        },
+        "gnu++11": {
+            "flags": ["-std=gnu++11"],
+            "display-name": "C++11(GNU)",
+            "group": "std-cxx"
+        },
+        "c++1y": {
+            "flags": [
+                "-std=c++1y"
+            ],
+            "display-name": "C++1y",
+            "group": "std-cxx"
+        },
+        "gnu++1y": {
+            "flags": ["-std=gnu++1y"],
+            "display-name": "C++1y(GNU)",
+            "group": "std-cxx"
+        },
+        "c++14": {
+            "flags": [
+                "-std=c++14"
+            ],
+            "display-name": "C++14",
+            "group": "std-cxx"
+        },
+        "gnu++14": {
+            "flags": ["-std=gnu++14"],
+            "display-name": "C++14(GNU)",
+            "group": "std-cxx"
+        },
+        "c++1z": {
+            "flags": [
+                "-std=c++1z"
+            ],
+            "display-name": "C++1z",
+            "group": "std-cxx"
+        },
+        "gnu++1z": {
+            "flags": ["-std=gnu++1z"],
+            "display-name": "C++1z(GNU)",
+            "group": "std-cxx"
+        },
+        "c++17": {
+            "flags": [
+                "-std=c++17"
+            ],
+            "display-name": "C++17",
+            "group": "std-cxx"
+        },
+        "gnu++17": {
+            "flags": ["-std=gnu++17"],
+            "display-name": "C++17(GNU)",
+            "group": "std-cxx"
+        },
+        "c++2a": {
+            "flags": [
+                "-std=c++2a"
+            ],
+            "display-name": "C++2a",
+            "group": "std-cxx"
+        },
+        "gnu++2a": {
+            "flags": ["-std=gnu++2a"],
+            "display-name": "C++2a(GNU)",
+            "group": "std-cxx"
+        },
+        "c++2b": {
+            "flags": [
+                "-std=c++2b"
+            ],
+            "display-name": "C++2b",
+            "group": "std-cxx"
+        },
+        "gnu++2b": {
+            "flags": ["-std=gnu++2b"],
+            "display-name": "C++2b(GNU)",
+            "group": "std-cxx"
+        }
+    },
+    "compilers": [
+        {
+            "name": "gcc-head-c",
+            "compile-command": [
+                "/opt/wandbox/gcc-head/bin/gcc",
+                "-oprog.exe",
+                "-Wl,-rpath,/opt/wandbox/gcc-head/lib64",
+                "prog.c"
+            ],
+            "version-command": [
+                "/bin/sh",
+                "-c",
+                "/opt/wandbox/gcc-head/bin/gcc --version | head -1 | cut -d' ' -f3-"
+            ],
+            "display-name": "gcc HEAD",
+            "display-compile-command": "gcc prog.c",
+            "language": "C",
+            "output-file": "prog.c",
+            "run-command": ["./prog.exe"],
+            "displayable": true,
+            "compiler-option-raw": true,
+            "switches": [
+                "warning",
+                "optimize",
+                "cpp-verbose",
+                "std-c-default",
+                "c89",
+                "gnu89",
+                "c99",
+                "gnu99",
+                "c11",
+                "gnu11",
+                "cpp-no-pedantic",
+                "cpp-pedantic",
+                "cpp-pedantic-errors"
+            ],
+            "initial-checked": [
+                "warning",
+                "gnu11"
+            ],
+            "jail-name": "melpon2-default",
+            "templates": [
+                "gcc-c"
+            ]
+        },
+        {
+            "name": "gcc-13.2.0-c",
+            "compile-command": [
+                "/opt/wandbox/gcc-13.2.0/bin/gcc",
+                "-oprog.exe",
+                "-Wl,-rpath,/opt/wandbox/gcc-13.2.0/lib64",
+                "prog.c"
+            ],
+            "version-command": [
+                "/bin/echo",
+                "13.2.0"
+            ],
+            "display-name": "gcc",
+            "display-compile-command": "gcc prog.c",
+            "language": "C",
+            "output-file": "prog.c",
+            "run-command": ["./prog.exe"],
+            "displayable": true,
+            "compiler-option-raw": true,
+            "switches": [
+                "warning",
+                "optimize",
+                "cpp-verbose",
+                "std-c-default",
+                "c89",
+                "gnu89",
+                "c99",
+                "gnu99",
+                "c11",
+                "gnu11",
+                "cpp-no-pedantic",
+                "cpp-pedantic",
+                "cpp-pedantic-errors"
+            ],
+            "initial-checked": [
+                "warning",
+                "gnu11"
+            ],
+            "jail-name": "melpon2-default",
+            "templates": [
+                "gcc-c"
+            ]
+        }
+    ],
+    "templates": {
+        "gcc-c": {
+            "code": "// This file is a \"Hello, world!\" in C language by gcc for wandbox.\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(void)\n{\n    puts(\"Hello, Wandbox!\");\n    return EXIT_SUCCESS;\n}\n\n// GCC reference:\n//   https://gcc.gnu.org/\n\n// C language references:\n//   https://msdn.microsoft.com/library/fw5abdx6.aspx\n//   https://www.gnu.org/software/gnu-c-manual/\n"
+        }
+    }
+}

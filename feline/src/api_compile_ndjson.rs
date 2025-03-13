@@ -1,0 +1,383 @@
+use crate::{
+    podman::run_streaming,
+    types::{AppConfig, CompileNdjsonResult, CompileParameter, Compiler, Config},
+};
+use anyhow::Result;
+use axum::{Json, body::Body, extract::State, http::StatusCode, response::IntoResponse};
+use rand::{self, Rng, distr::Alphanumeric};
+use std::{
+    path::{Path, PathBuf},
+    sync::Arc,
+};
+use tokio::{fs, io::AsyncWriteExt as _, sync::mpsc, time::Duration};
+use tokio_stream::{StreamExt as _, wrappers::ReceiverStream};
+
+async fn create_file_with_dirs(path: &Path, content: &[u8]) -> Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).await?;
+    }
+    let mut file = fs::File::create(&path).await?;
+    file.write_all(&content).await?;
+    Ok(())
+}
+
+// 戻り値のパスが必ず dir の下にあることを保証する
+// file_path が絶対パスだったり "../" みたいな文字列が含まれて dir の外を指定したらエラーになる
+pub fn resolve_safe_path(dir: &Path, file_path: &Path) -> Result<PathBuf> {
+    // 絶対パスは一括でアウト
+    if file_path.is_absolute() {
+        return Err(anyhow::anyhow!("Invalid path"));
+    }
+
+    let full_path = dir.join(file_path);
+    let mut full_path_normed: PathBuf = PathBuf::new();
+
+    let mut components = full_path.components();
+    while let Some(component) = components.next() {
+        match component {
+            std::path::Component::Normal(part) => {
+                full_path_normed.push(part);
+            }
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                if !full_path_normed.pop() {
+                    return Err(anyhow::anyhow!("Invalid path"));
+                }
+            }
+            std::path::Component::RootDir => {
+                full_path_normed.push("/");
+            }
+            _ => {
+                return Err(anyhow::anyhow!("Invalid path"));
+            }
+        }
+    }
+    if full_path_normed.starts_with(dir) {
+        return Ok(full_path_normed);
+    } else {
+        return Err(anyhow::anyhow!("Invalid path"));
+    }
+}
+
+pub fn resolve_arguments(
+    config: &Config,
+    options: &str,
+    option_raw: &str,
+    runtime: bool,
+) -> Vec<String> {
+    let mut args: Vec<String> = vec![];
+    // options は , 区切りのオプション
+    for opt in options.split(',') {
+        // switches に一致するオプションがあったら flags を追加
+        if let Some(switches) = config.switches.get(opt) {
+            if switches.runtime != runtime {
+                continue;
+            }
+            args.extend(switches.flags.clone());
+        }
+    }
+    // option_raw は \n 区切りのオプション
+    let mut opts: Vec<&str> = option_raw.split('\n').collect();
+    if !opts.is_empty() && opts[opts.len() - 1].is_empty() {
+        opts.pop();
+    }
+    args.extend(opts.iter().map(|v| v.to_string()));
+    args
+}
+
+fn get_compiler<'a>(config: &'a Config, name: &str) -> Result<&'a Compiler> {
+    config
+        .compilers
+        .iter()
+        .find(|v| &v.name == name)
+        .ok_or(anyhow::anyhow!("Compiler not found"))
+}
+
+pub async fn post_api_compile_ndjson(
+    State(config): State<Arc<AppConfig>>,
+    Json(body): Json<CompileParameter>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let r: Result<()> = async {
+        let info: &Compiler = get_compiler(&config.config, &body.compiler)?;
+
+        // ユーザーが実行するための環境を作る
+        // ここは podman に守られてないので注意して実装する
+        let base_dir = {
+            let now = chrono::Local::now();
+            let timestamp = now.format("%Y%m%d_%H%M%S").to_string();
+
+            let random_str = rand::rng()
+                .sample_iter(&Alphanumeric)
+                .take(6)
+                .map(char::from)
+                .collect::<String>();
+
+            let random_dir = format!("wandbox_{}_{}", timestamp, random_str);
+            Path::new(&config.safe_run_dir).join(&random_dir)
+        };
+
+        let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&info.output_file))?;
+        create_file_with_dirs(&path, &body.code.as_bytes()).await?;
+        for code in &body.codes {
+            let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&code.file))?;
+            create_file_with_dirs(&path, &code.code.as_bytes()).await?;
+        }
+
+        Ok(())
+    }
+    .await;
+    r.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    // プログラムを実行していく
+    let (tx, rx) = mpsc::channel::<CompileNdjsonResult>(100);
+    tokio::spawn(async move {
+        // 気軽に await? できるようにしてるだけ
+        let r: Result<()> = async move {
+            let info: &Compiler = get_compiler(&config.config, &body.compiler)?;
+            let args: Vec<String> = resolve_arguments(
+                &config.config,
+                &body.options,
+                &body.compiler_option_raw,
+                false,
+            );
+
+            tx.send(CompileNdjsonResult {
+                r#type: "Control".to_string(),
+                data: b"Start".to_vec(),
+            })
+            .await?;
+
+            // コンパイルフェーズ
+            let mut crx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
+                &config.podman,
+                &info.compile_command[0],
+                info.compile_command[1..]
+                    .iter()
+                    .cloned()
+                    .chain(args)
+                    .collect(),
+                b"".to_vec(),
+                Duration::from_secs(60),
+            );
+            let mut cont = true;
+            while let Some(v) = crx.recv().await {
+                // StdOut と StdErr を CompilerMessageS と CompilerMessageE に変換する
+                let v = match v.r#type.as_str() {
+                    "StdOut" => CompileNdjsonResult {
+                        r#type: "CompilerMessageS".to_string(),
+                        data: v.data,
+                    },
+                    "StdErr" => CompileNdjsonResult {
+                        r#type: "CompilerMessageE".to_string(),
+                        data: v.data,
+                    },
+                    _ => v,
+                };
+                // Signal か、ExitCode の 0 以外だったらコンパイルフェーズで終了
+                if v.r#type == "Signal" || (v.r#type == "ExitCode" && v.data != b"0") {
+                    cont = false;
+                }
+                // ExitCode 0 は送信しない
+                if v.r#type == "ExitCode" && v.data == b"0" {
+                    continue;
+                }
+                tx.send(v).await?;
+            }
+            if !cont {
+                return Ok(());
+            }
+
+            // 実行フェーズ
+            let args: Vec<String> = resolve_arguments(
+                &config.config,
+                &body.options,
+                &body.runtime_option_raw,
+                true,
+            );
+            let mut rrx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
+                &config.podman,
+                &info.run_command[0],
+                info.run_command[1..].iter().cloned().chain(args).collect(),
+                b"".to_vec(),
+                Duration::from_secs(60),
+            );
+            while let Some(v) = rrx.recv().await {
+                tx.send(v).await?;
+            }
+
+            tx.send(CompileNdjsonResult {
+                r#type: "Control".to_string(),
+                data: b"Finish".to_vec(),
+            })
+            .await?;
+
+            Ok(())
+        }
+        .await;
+
+        if let Err(e) = r {
+            eprintln!("Error {}", e);
+        }
+    });
+
+    let stream = ReceiverStream::new(rx).map(|v| serde_json::to_string(&v).map(|v| v + "\n"));
+    Ok(Body::from_stream(stream))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        AppConfig, create_app,
+        types::{Code, CompilerInfo, Config, PodmanConfig},
+    };
+    use axum::{
+        Router,
+        body::{Body, Bytes},
+        http::{Request, Response, StatusCode, header},
+    };
+    use http_body_util::BodyExt;
+    use tower::ServiceExt;
+
+    #[tokio::test]
+    async fn test_resolve_safe_path() {
+        // dir が絶対パス
+        {
+            let dir = Path::new("/tmp");
+
+            let file_path: &Path = Path::new("foo/bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap(), Path::new("/tmp/foo/bar"));
+
+            let file_path: &Path = Path::new("../bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+
+            let file_path: &Path = Path::new("../../bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+
+            let file_path: &Path = Path::new("foo/../bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap(), Path::new("/tmp/bar"));
+
+            let file_path: &Path = Path::new("foo/.././././../tmp/../tmp/foo/bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap(), Path::new("/tmp/foo/bar"));
+
+            let file_path: &Path = Path::new("/foo/bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+
+            let file_path: &Path = Path::new("/tmp/foo");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+        }
+
+        // dir が相対パス
+        {
+            let dir: &Path = Path::new("tmp");
+
+            let file_path: &Path = Path::new("foo/bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap(), Path::new("tmp/foo/bar"));
+
+            let file_path: &Path = Path::new("../bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+
+            let file_path: &Path = Path::new("../../bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+
+            let file_path: &Path = Path::new("foo/../bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap(), Path::new("tmp/bar"));
+
+            let file_path: &Path = Path::new("foo/.././././../tmp/../tmp/foo/bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap(), Path::new("tmp/foo/bar"));
+
+            let file_path: &Path = Path::new("/foo/bar");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+
+            let file_path: &Path = Path::new("/tmp/foo");
+            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            assert_eq!(path.unwrap_err().to_string(), "Invalid path");
+        }
+    }
+
+    #[tokio::test]
+    async fn test_post_api_compile_ndjson() {
+        let config: Config = serde_json::from_reader(
+            std::fs::File::open("src/tests/data/api_compile_input.json").unwrap(),
+        )
+        .unwrap();
+        let podman_config: PodmanConfig = PodmanConfig::new("wandbox-runner");
+        let app_config: AppConfig = AppConfig {
+            podman: podman_config.clone(),
+            config: config.clone(),
+            // 後で消しておきたい
+            safe_run_dir: "_tmp".to_string(),
+            ..AppConfig::default()
+        };
+        let app: Router = create_app(app_config);
+
+        let body: CompileParameter = CompileParameter {
+            compiler: "test".to_string(),
+            code: "echo Hello; cat subfile".to_string(),
+            codes: vec![Code {
+                file: "subfile".to_string(),
+                code: "Subfile".to_string(),
+            }],
+            options: "warning".to_string(),
+            stdin: b"".to_vec(),
+            compiler_option_raw: "".to_string(),
+            runtime_option_raw: "".to_string(),
+            github_user: "".to_string(),
+            title: "".to_string(),
+            description: "".to_string(),
+            save: false,
+            created_at: 0,
+            is_private: false,
+            compiler_info: CompilerInfo {
+                ..CompilerInfo::default()
+            },
+        };
+        let request: Request<Body> = Request::builder()
+            .method("POST")
+            .uri("/api/compile.ndjson")
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(serde_json::to_string(&body).unwrap()))
+            .unwrap();
+
+        // `oneshot()` を使ってリクエストをシミュレート
+        let response: Response<Body> = app.oneshot(request).await.unwrap();
+
+        // ステータスコードの確認
+        assert_eq!(response.status(), StatusCode::OK);
+
+        // レスポンスボディの確認
+        let body: Bytes = response.into_body().collect().await.unwrap().to_bytes();
+        print!("{:?}", String::from_utf8_lossy(&body.to_vec()));
+        assert!(!body.is_empty());
+        let json: Vec<CompileNdjsonResult> = body
+            .split(|b| *b == b'\n')
+            .filter(|v| !v.is_empty())
+            .map(|v| serde_json::from_slice(&v).unwrap())
+            .collect();
+
+        assert_eq!(json.len(), 5);
+        assert_eq!(json[0].r#type, "Control");
+        assert_eq!(json[0].data, b"Start");
+        assert_eq!(json[1].r#type, "CompilerMessageS");
+        assert_eq!(json[1].data, b"compile\n");
+        assert_eq!(json[2].r#type, "StdOut");
+        assert_eq!(json[2].data, b"run\n");
+        assert_eq!(json[3].r#type, "ExitCode");
+        assert_eq!(json[3].data, b"0");
+        assert_eq!(json[4].r#type, "Control");
+        assert_eq!(json[4].data, b"Finish");
+    }
+}
