@@ -1,15 +1,22 @@
 use crate::{
     podman::run_streaming,
-    types::{AppConfig, CompileNdjsonResult, CompileParameter, Compiler, Config},
+    types::{
+        AppConfig, Code, CompileNdjsonResult, CompileParameter, Compiler, Config, PodmanConfig,
+    },
+    util::make_random_str,
 };
 use anyhow::Result;
 use axum::{Json, body::Body, extract::State, http::StatusCode, response::IntoResponse};
-use rand::{self, Rng, distr::Alphanumeric};
 use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use tokio::{fs, io::AsyncWriteExt as _, sync::mpsc, time::Duration};
+use tokio::{
+    fs,
+    io::AsyncWriteExt as _,
+    sync::mpsc::{self, Receiver},
+    time::Duration,
+};
 use tokio_stream::{StreamExt as _, wrappers::ReceiverStream};
 
 async fn create_file_with_dirs(path: &Path, content: &[u8]) -> Result<()> {
@@ -93,41 +100,42 @@ fn get_compiler<'a>(config: &'a Config, name: &str) -> Result<&'a Compiler> {
         .ok_or(anyhow::anyhow!("Compiler not found"))
 }
 
-pub async fn post_api_compile_ndjson(
-    State(config): State<Arc<AppConfig>>,
-    Json(body): Json<CompileParameter>,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let r: Result<()> = async {
-        let info: &Compiler = get_compiler(&config.config, &body.compiler)?;
+pub async fn prepare_environment(
+    config: &Config,
+    safe_run_dir: &str,
+    compiler: &str,
+    code: &str,
+    codes: &Vec<Code>,
+) -> Result<PathBuf> {
+    let info: &Compiler = get_compiler(&config, &compiler)?;
 
-        // ユーザーが実行するための環境を作る
-        // ここは podman に守られてないので注意して実装する
-        let base_dir = {
-            let now = chrono::Local::now();
-            let timestamp = now.format("%Y%m%d_%H%M%S").to_string();
+    // ユーザーが実行するための環境を作る
+    // ここは podman に守られてないので注意して実装する
+    let base_dir: PathBuf = {
+        let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
+        let timestamp: String = now.format("%Y%m%d_%H%M%S").to_string();
 
-            let random_str = rand::rng()
-                .sample_iter(&Alphanumeric)
-                .take(6)
-                .map(char::from)
-                .collect::<String>();
+        let random_str: String = make_random_str(6);
 
-            let random_dir = format!("wandbox_{}_{}", timestamp, random_str);
-            Path::new(&config.safe_run_dir).join(&random_dir)
-        };
+        let random_dir: String = format!("wandbox_{}_{}", timestamp, random_str);
+        Path::new(&safe_run_dir).join(&random_dir)
+    };
 
-        let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&info.output_file))?;
-        create_file_with_dirs(&path, &body.code.as_bytes()).await?;
-        for code in &body.codes {
-            let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&code.file))?;
-            create_file_with_dirs(&path, &code.code.as_bytes()).await?;
-        }
-
-        Ok(())
+    let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&info.output_file))?;
+    create_file_with_dirs(&path, &code.as_bytes()).await?;
+    for code in codes {
+        let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&code.file))?;
+        create_file_with_dirs(&path, &code.code.as_bytes()).await?;
     }
-    .await;
-    r.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
+    Ok(base_dir)
+}
+
+pub fn run_compile_ndjson(
+    config: Arc<AppConfig>,
+    base_dir: PathBuf,
+    body: CompileParameter,
+) -> Receiver<CompileNdjsonResult> {
     // プログラムを実行していく
     let (tx, rx) = mpsc::channel::<CompileNdjsonResult>(100);
     tokio::spawn(async move {
@@ -140,6 +148,10 @@ pub async fn post_api_compile_ndjson(
                 &body.compiler_option_raw,
                 false,
             );
+            let base_dir: PathBuf = base_dir.canonicalize()?;
+            let base_dir_str: &str = base_dir.to_str().ok_or(anyhow::anyhow!("Invalid path"))?;
+            let podman_config: PodmanConfig =
+                config.podman.with_workdir(base_dir_str, "/home/wandbox");
 
             tx.send(CompileNdjsonResult {
                 r#type: "Control".to_string(),
@@ -149,7 +161,7 @@ pub async fn post_api_compile_ndjson(
 
             // コンパイルフェーズ
             let mut crx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
-                &config.podman,
+                &podman_config,
                 &info.compile_command[0],
                 info.compile_command[1..]
                     .iter()
@@ -195,7 +207,7 @@ pub async fn post_api_compile_ndjson(
                 true,
             );
             let mut rrx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
-                &config.podman,
+                &podman_config,
                 &info.run_command[0],
                 info.run_command[1..].iter().cloned().chain(args).collect(),
                 b"".to_vec(),
@@ -219,7 +231,24 @@ pub async fn post_api_compile_ndjson(
             eprintln!("Error {}", e);
         }
     });
+    rx
+}
 
+pub async fn post_api_compile_ndjson(
+    State(config): State<Arc<AppConfig>>,
+    Json(body): Json<CompileParameter>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let r: Result<PathBuf> = prepare_environment(
+        &config.config,
+        &config.safe_run_dir,
+        &body.compiler,
+        &body.code,
+        &body.codes,
+    )
+    .await;
+    let base_dir: PathBuf = r.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    let rx: Receiver<CompileNdjsonResult> = run_compile_ndjson(config.clone(), base_dir, body);
     let stream = ReceiverStream::new(rx).map(|v| serde_json::to_string(&v).map(|v| v + "\n"));
     Ok(Body::from_stream(stream))
 }
@@ -308,8 +337,23 @@ mod tests {
         }
     }
 
+    struct RemoveDirGuard {
+        path: PathBuf,
+    }
+    impl Drop for RemoveDirGuard {
+        fn drop(&mut self) {
+            if self.path.exists() {
+                std::fs::remove_dir_all(&self.path).expect("Failed to remove test dir");
+            }
+        }
+    }
+
     #[tokio::test]
     async fn test_post_api_compile_ndjson() {
+        let _guard: RemoveDirGuard = RemoveDirGuard {
+            path: "_tmp".into(),
+        };
+
         let config: Config = serde_json::from_reader(
             std::fs::File::open("src/tests/data/api_compile_input.json").unwrap(),
         )
@@ -318,7 +362,6 @@ mod tests {
         let app_config: AppConfig = AppConfig {
             podman: podman_config.clone(),
             config: config.clone(),
-            // 後で消しておきたい
             safe_run_dir: "_tmp".to_string(),
             ..AppConfig::default()
         };
@@ -352,7 +395,6 @@ mod tests {
             .body(Body::from(serde_json::to_string(&body).unwrap()))
             .unwrap();
 
-        // `oneshot()` を使ってリクエストをシミュレート
         let response: Response<Body> = app.oneshot(request).await.unwrap();
 
         // ステータスコードの確認
@@ -360,7 +402,6 @@ mod tests {
 
         // レスポンスボディの確認
         let body: Bytes = response.into_body().collect().await.unwrap().to_bytes();
-        print!("{:?}", String::from_utf8_lossy(&body.to_vec()));
         assert!(!body.is_empty());
         let json: Vec<CompileNdjsonResult> = body
             .split(|b| *b == b'\n')
@@ -371,10 +412,14 @@ mod tests {
         assert_eq!(json.len(), 5);
         assert_eq!(json[0].r#type, "Control");
         assert_eq!(json[0].data, b"Start");
+        // コンパイル時のコマンドは、引数に渡されたオプションをそのまま表示する内容になっている
+        // warning を指定したので -Wall -Wextra が表示される
         assert_eq!(json[1].r#type, "CompilerMessageS");
-        assert_eq!(json[1].data, b"compile\n");
+        assert_eq!(json[1].data, b"-Wall -Wextra\n");
+        // 実行時は code に書いた内容を bash で実行するだけ
+        // code の内容は echo Hello; cat subfile なので、Hello と Subfile が表示される
         assert_eq!(json[2].r#type, "StdOut");
-        assert_eq!(json[2].data, b"run\n");
+        assert_eq!(json[2].data, b"Hello\nSubfile");
         assert_eq!(json[3].r#type, "ExitCode");
         assert_eq!(json[3].data, b"0");
         assert_eq!(json[4].r#type, "Control");

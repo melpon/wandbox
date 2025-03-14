@@ -8,25 +8,54 @@ use tokio::{
 };
 
 impl PodmanConfig {
-    pub fn new(image: &str) -> PodmanConfig {
-        PodmanConfig {
+    #[cfg(test)]
+    pub fn new(image: &str) -> Self {
+        Self {
             image: image.to_string(),
             ..PodmanConfig::default()
         }
     }
+    // ユーザーの作業用ディレクトリ
+    pub fn with_workdir(self: &Self, src: &str, dst: &str) -> Self {
+        let mut mounts: Vec<(String, String, bool)> = self.mounts.clone();
+        mounts.push((src.to_string(), dst.to_string(), true));
+        return Self {
+            mounts: mounts,
+            workdir: dst.to_string(),
+            ..self.clone()
+        };
+    }
 }
 
 pub fn with_podman(config: &PodmanConfig, program: &str, args: &[String]) -> Command {
-    // podman run --rm --init -i $image -v src:dst -v src2:dst2 $program $args
-    // let mut args: Vec<String> = vec![];
+    // $ podman run --rm --init -i \
+    //     -v src:dst:ro -v src2:dst2 --workdir dst2 $image \
+    //     bash -c 'ulimit -t $cpusec && exec "$@"' \
+    //     _ $program $args
+    let mut xs: Vec<String> = vec![];
+    // podman run に渡す引数
+    xs.extend(["--rm", "--init", "-i"].map(|x| x.to_string()));
+    for (src, dst, writable) in &config.mounts {
+        let ro: &str = if *writable { "" } else { ":ro" };
+        xs.push("-v".to_string());
+        xs.push(format!("{}:{}{}", src, dst, ro));
+    }
+    if config.workdir != "" {
+        xs.push("--workdir".to_string());
+        xs.push(config.workdir.clone());
+    }
+
+    xs.push(config.image.clone());
+
+    // ここからはコンテナで実行するプログラムの引数
+    let ulimit = format!(
+        r#"ulimit -t {} && exec "$@""#,
+        if config.cpusec > 0 { config.cpusec } else { 30 }
+    );
+    xs.extend(["bash", "-c", ulimit.as_str(), "_"].map(|x| x.to_string()));
+
     let mut cmd: Command = Command::new("podman");
-    cmd.arg("run")
-        .arg("--rm")
-        .arg("--init")
-        .arg("-i")
-        .arg(&config.image)
-        .arg(&program)
-        .args(args);
+    cmd.arg("run").args(xs).arg(&program).args(args);
     return cmd;
 }
 
@@ -288,5 +317,37 @@ mod tests {
         assert_eq!(vs.len(), 1);
         assert_eq!(vs[0].r#type, "Control");
         assert_eq!(vs[0].data, b"Timeout");
+    }
+
+    #[tokio::test]
+    async fn test_run_streaming_cpu() {
+        // CPU 時間を使い切ると SIGKILL されることを確認する
+        let mut config = PodmanConfig::new("wandbox-runner");
+        config.cpusec = 1;
+        let mut rx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
+            &config,
+            "bash",
+            vec![
+                "-c".to_string(),
+                r#"
+                    yes > /dev/null
+                "#
+                .to_string(),
+            ],
+            b"".to_vec(),
+            Duration::from_secs(30),
+        );
+        let mut vs: Vec<CompileNdjsonResult> = vec![];
+        while let Some(v) = rx.recv().await {
+            vs.push(v);
+        }
+        assert_eq!(vs.len(), 2);
+        assert_eq!(vs[0].r#type, "StdErr");
+        assert_eq!(
+            vs[0].data,
+            b"bash: line 2:     3 Killed                  yes > /dev/null\n"
+        );
+        assert_eq!(vs[1].r#type, "ExitCode");
+        assert_eq!(vs[1].data, b"137");
     }
 }

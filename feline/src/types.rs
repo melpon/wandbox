@@ -1,10 +1,15 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::collections::HashMap;
+use sqlx::SqlitePool;
+use std::{collections::HashMap, sync::Arc};
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct AppConfig {
+    // Default で作りたいので Option にする
+    // 通常は絶対値が入るので、unwrap しても問題ない
+    pub sqlite: Option<Arc<SqlitePool>>,
+    // https://wandbox.org/
+    pub wandbox_url: String,
     pub podman: PodmanConfig,
-    pub database_url: String,
     pub config: Config,
     pub version_info: HashMap<String, String>,
     pub safe_run_dir: String,
@@ -13,8 +18,11 @@ pub struct AppConfig {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
 pub struct PodmanConfig {
     pub image: String,
-    // src, dst, is_readwrite
-    pub mount_dirs: Vec<(String, String, bool)>,
+    // src, dst, writable
+    pub mounts: Vec<(String, String, bool)>,
+    pub workdir: String,
+    // 利用可能な CPU 時間
+    pub cpusec: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
@@ -153,6 +161,12 @@ pub struct PostPermlinkRequest {
     pub github_user: String,
     pub codes: Vec<Code>,
     pub results: Vec<CompileNdjsonResult>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct PostPermlinkResponse {
+    pub permlink: String,
+    pub url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

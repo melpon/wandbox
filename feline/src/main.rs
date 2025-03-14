@@ -1,18 +1,25 @@
+mod api_compile_json;
 mod api_compile_ndjson;
 mod api_list_json;
+mod api_permlink;
 mod config;
 mod db;
 mod podman;
 mod types;
+mod util;
 
+use api_compile_json::post_api_compile_json;
 use api_compile_ndjson::post_api_compile_ndjson;
 use api_list_json::get_api_list_json;
+use api_permlink::get_api_permlink;
+use api_permlink::post_api_permlink;
 use axum::{
     Router,
     routing::{get, post},
 };
 use clap::Parser;
 use config::get_version_info;
+use sqlx::SqlitePool;
 use std::{fs, net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use types::{AppConfig, Config, PodmanConfig};
@@ -28,6 +35,8 @@ struct Args {
     podman_config_file: String,
     #[arg(long)]
     safe_run_dir: String,
+    #[arg(long)]
+    wandbox_url: String,
 }
 
 #[tokio::main]
@@ -41,8 +50,10 @@ async fn main() {
             .as_str(),
     )
     .unwrap();
+    let sqlite: Arc<SqlitePool> = Arc::new(SqlitePool::connect(&args.database_url).await.unwrap());
     let app: Router = create_app(AppConfig {
-        database_url: args.database_url,
+        sqlite: Some(sqlite),
+        wandbox_url: args.wandbox_url,
         config: config.clone(),
         podman: podman_config.clone(),
         version_info: get_version_info(&podman_config, &config).await.unwrap(),
@@ -63,5 +74,8 @@ fn create_app(config: AppConfig) -> Router {
     return Router::new()
         .route("/api/list.json", get(get_api_list_json))
         .route("/api/compile.ndjson", post(post_api_compile_ndjson))
+        .route("/api/compile.json", post(post_api_compile_json))
+        .route("/api/permlink/{permlink_id}", get(get_api_permlink))
+        .route("/api/permlink", post(post_api_permlink))
         .with_state(shared_config);
 }

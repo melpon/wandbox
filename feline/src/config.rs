@@ -115,9 +115,8 @@ pub async fn get_version_info(
 
 #[cfg(test)]
 mod tests {
-    use crate::types::Compiler;
-
     use super::*;
+    use crate::types::Compiler;
     use std::fs;
 
     #[test]

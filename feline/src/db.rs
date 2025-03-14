@@ -1,6 +1,9 @@
-use crate::types::{
-    Code, CompileNdjsonResult, CompileParameter, CompileResult, CompilerInfo, GetPermlinkResponse,
-    PostPermlinkRequest,
+use crate::{
+    types::{
+        Code, CompileNdjsonResult, CompileParameter, CompileResult, CompilerInfo,
+        GetPermlinkResponse, PostPermlinkRequest,
+    },
+    util::merge_compile_result,
 };
 use anyhow::Result;
 use chrono::{NaiveDateTime, Utc};
@@ -94,14 +97,14 @@ pub async fn make_permlink(
     Ok(())
 }
 
-pub async fn get_permlink(pool: &SqlitePool, permlink_name: String) -> Result<GetPermlinkResponse> {
+pub async fn get_permlink(pool: &SqlitePool, permlink_name: &str) -> Result<GetPermlinkResponse> {
     let mut tx: sqlx::Transaction<'_, Sqlite> = pool.begin().await?;
 
     // `link` テーブルから `link_id` と `code_id` を取得
     let (link_id, code_id) = sqlx::query_as::<_, (i64, i64)>(
         r#"SELECT id as "id!", code_id as "code_id!" FROM link WHERE permlink = ?"#,
     )
-    .bind(permlink_name.clone())
+    .bind(permlink_name)
     .fetch_one(&mut *tx)
     .await?;
 
@@ -154,7 +157,7 @@ pub async fn get_permlink(pool: &SqlitePool, permlink_name: String) -> Result<Ge
     .fetch_one(&mut *tx)
     .await?;
 
-    let mut parameter = CompileParameter {
+    let mut parameter: CompileParameter = CompileParameter {
         compiler,
         code,
         options,
@@ -170,17 +173,7 @@ pub async fn get_permlink(pool: &SqlitePool, permlink_name: String) -> Result<Ge
             .and_utc()
             .timestamp(),
         is_private: private,
-        compiler_info: CompilerInfo {
-            name: "".to_string(),
-            version: "".to_string(),
-            language: "".to_string(),
-            display_name: "".to_string(),
-            templates: vec![],
-            compiler_option_raw: false,
-            runtime_option_raw: false,
-            display_compile_command: "".to_string(),
-            switches: vec![],
-        },
+        compiler_info: CompilerInfo::default(),
         codes: vec![],
     };
 
@@ -208,56 +201,15 @@ pub async fn get_permlink(pool: &SqlitePool, permlink_name: String) -> Result<Ge
         .fetch_optional(&mut *tx)
         .await?
     {
-        parameter.compiler_info =
-            serde_json::from_str(&row.json).unwrap_or_else(|_| CompilerInfo {
-                name: "".to_string(),
-                version: "".to_string(),
-                language: "".to_string(),
-                display_name: "".to_string(),
-                templates: vec![],
-                compiler_option_raw: false,
-                runtime_option_raw: false,
-                display_compile_command: "".to_string(),
-                switches: vec![],
-            });
+        parameter.compiler_info = serde_json::from_str(&row.json).unwrap_or_default();
     }
 
     tx.commit().await?;
 
     // CompileResult を計算する
-    let mut result: CompileResult = CompileResult::default();
-    for r in &results {
-        match r.r#type.as_str() {
-            "Control" => {}
-            "CompilerStdout" => {
-                result.compiler_output.extend(&r.data);
-                result.compiler_message.extend(&r.data);
-            }
-            "CompilerStderr" => {
-                result.compiler_error.extend(&r.data);
-                result.compiler_message.extend(&r.data);
-            }
-            "Stdout" => {
-                result.program_output.extend(&r.data);
-                result.program_message.extend(&r.data);
-            }
-            "Stderr" => {
-                result.program_error.extend(&r.data);
-                result.program_message.extend(&r.data);
-            }
-            "ExitCode" => {
-                result.status.push_str(&String::from_utf8_lossy(&r.data));
-            }
-            "Signal" => {
-                result.signal.push_str(&String::from_utf8_lossy(&r.data));
-            }
-            _ => {
-                // TODO: エラーハンドリング
-            }
-        }
-    }
-    result.permlink = permlink_name.clone().to_string();
-    result.url = format!("https://wandbox.org/permlink/{}", permlink_name.clone());
+    let mut result: CompileResult = merge_compile_result(&results);
+    result.permlink = permlink_name.to_string();
+    result.url = format!("https://wandbox.org/permlink/{}", permlink_name);
 
     Ok(GetPermlinkResponse {
         parameter,
@@ -276,7 +228,7 @@ mod tests {
     use std::path::Path;
 
     async fn setup_test_db() -> SqlitePool {
-        let pool: sqlx::Pool<Sqlite> = SqlitePool::connect(":memory:")
+        let pool: SqlitePool = SqlitePool::connect(":memory:")
             .await
             .expect("Failed to create in-memory DB");
 
@@ -309,15 +261,15 @@ mod tests {
             }],
             results: vec![
                 CompileNdjsonResult {
-                    r#type: "Stdout".to_string(),
+                    r#type: "StdOut".to_string(),
                     data: b"Hello, World!\n".to_vec(),
                 },
                 CompileNdjsonResult {
-                    r#type: "Stderr".to_string(),
+                    r#type: "StdErr".to_string(),
                     data: b"hoge\n".to_vec(),
                 },
                 CompileNdjsonResult {
-                    r#type: "Stderr".to_string(),
+                    r#type: "StdErr".to_string(),
                     data: b"fuga\n".to_vec(),
                 },
                 CompileNdjsonResult {
@@ -367,7 +319,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_make_permlink() {
-        let pool: sqlx::Pool<Sqlite> = setup_test_db().await;
+        let pool: SqlitePool = setup_test_db().await;
 
         let permlink_name: String = "test_permlink".to_string();
         let req: PostPermlinkRequest = fixture_post_permlink_request();
@@ -414,7 +366,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_permlink() {
-        let pool: sqlx::Pool<Sqlite> = setup_test_db().await;
+        let pool: SqlitePool = setup_test_db().await;
 
         let permlink_name: String = "test_permlink".to_string();
         let req: PostPermlinkRequest = fixture_post_permlink_request();
@@ -423,8 +375,7 @@ mod tests {
         let result: Result<()> = make_permlink(&pool, &permlink_name, &req, &compiler_info).await;
         assert!(result.is_ok());
 
-        let response: Result<GetPermlinkResponse> =
-            get_permlink(&pool, permlink_name.clone()).await;
+        let response: Result<GetPermlinkResponse> = get_permlink(&pool, &permlink_name).await;
         assert!(response.is_ok(), "get_permlink failed: {:?}", response);
 
         let response: GetPermlinkResponse = response.unwrap();
