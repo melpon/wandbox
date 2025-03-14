@@ -23,7 +23,7 @@ async fn create_file_with_dirs(path: &Path, content: &[u8]) -> Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).await?;
     }
-    let mut file = fs::File::create(&path).await?;
+    let mut file: fs::File = fs::File::create(&path).await?;
     file.write_all(&content).await?;
     Ok(())
 }
@@ -350,8 +350,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_post_api_compile_ndjson() {
+        let safe_run_dir: String = format!("_tmp/{}", make_random_str(8));
         let _guard: RemoveDirGuard = RemoveDirGuard {
-            path: "_tmp".into(),
+            path: safe_run_dir.clone().into(),
         };
 
         let config: Config = serde_json::from_reader(
@@ -362,7 +363,7 @@ mod tests {
         let app_config: AppConfig = AppConfig {
             podman: podman_config.clone(),
             config: config.clone(),
-            safe_run_dir: "_tmp".to_string(),
+            safe_run_dir: safe_run_dir.clone(),
             ..AppConfig::default()
         };
         let app: Router = create_app(app_config);

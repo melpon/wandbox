@@ -1,6 +1,6 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sqlx::SqlitePool;
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, path::PathBuf, sync::Arc};
 
 #[derive(Debug, Clone, Default)]
 pub struct AppConfig {
@@ -13,6 +13,9 @@ pub struct AppConfig {
     pub config: Config,
     pub version_info: HashMap<String, String>,
     pub safe_run_dir: String,
+    // ヘッダーオンリーライブラリの情報が入った JSON ファイルへのパス
+    // 外から更新されるのでリクエストが来るたびにファイルから読み込む
+    pub hpplib_file: PathBuf,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
@@ -77,6 +80,22 @@ pub struct Compiler {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Template {
     pub code: String,
+    pub codes: Option<Vec<Code>>,
+    pub stdin: Option<String>,
+    pub options: Option<String>,
+    pub compiler_option_raw: Option<String>,
+    pub runtime_option_raw: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct TemplateResponse {
+    pub name: String,
+    pub code: String,
+    pub codes: Option<Vec<Code>>,
+    pub stdin: Option<String>,
+    pub options: Option<String>,
+    pub compiler_option_raw: Option<String>,
+    pub runtime_option_raw: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
@@ -236,7 +255,20 @@ pub struct GetPermlinkResponse {
     pub result: CompileResult,
 }
 
-// ✅ `Vec<u8>` を `String` に変換して JSON に格納
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct TimestampSponsor {
+    pub name: String,
+    pub url: String,
+    pub due_date: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct SponsorResponse {
+    pub corporate: Vec<TimestampSponsor>,
+    pub personal: Vec<TimestampSponsor>,
+}
+
+// Vec<u8> を文字列として扱うための serialize/deserialize 関数
 fn serialize_utf8<S>(bytes: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -245,11 +277,10 @@ where
     serializer.serialize_str(&utf8_string)
 }
 
-// ✅ JSON `String` を `Vec<u8>` に戻す
 fn deserialize_utf8<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    Ok(s.into_bytes()) // UTF-8 のバイナリとして `Vec<u8>` に変換
+    Ok(s.into_bytes())
 }

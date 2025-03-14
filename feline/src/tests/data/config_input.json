@@ -308,7 +308,7 @@
     ],
     "templates": {
         "gcc-c": {
-            "code": "// This file is a \"Hello, world!\" in C language by gcc for wandbox.\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(void)\n{\n    puts(\"Hello, Wandbox!\");\n    return EXIT_SUCCESS;\n}\n\n// GCC reference:\n//   https://gcc.gnu.org/\n\n// C language references:\n//   https://msdn.microsoft.com/library/fw5abdx6.aspx\n//   https://www.gnu.org/software/gnu-c-manual/\n"
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void)\n{\n    puts(\"Hello, Wandbox!\");\n    return EXIT_SUCCESS;\n}\n"
         }
     }
 }

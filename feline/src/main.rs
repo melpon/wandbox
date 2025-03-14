@@ -1,7 +1,10 @@
 mod api_compile_json;
 mod api_compile_ndjson;
+mod api_hpplib;
 mod api_list_json;
 mod api_permlink;
+mod api_sponsors;
+mod api_template;
 mod config;
 mod db;
 mod podman;
@@ -10,9 +13,12 @@ mod util;
 
 use api_compile_json::post_api_compile_json;
 use api_compile_ndjson::post_api_compile_ndjson;
+use api_hpplib::get_api_hpplib;
 use api_list_json::get_api_list_json;
 use api_permlink::get_api_permlink;
 use api_permlink::post_api_permlink;
+use api_sponsors::get_api_sponsors_json;
+use api_template::get_api_template;
 use axum::{
     Router,
     routing::{get, post},
@@ -29,6 +35,8 @@ use types::{AppConfig, Config, PodmanConfig};
 struct Args {
     #[arg(long)]
     config_file: String,
+    #[arg(long)]
+    hpplib_file: String,
     #[arg(long)]
     database_url: String,
     #[arg(long)]
@@ -58,6 +66,7 @@ async fn main() {
         podman: podman_config.clone(),
         version_info: get_version_info(&podman_config, &config).await.unwrap(),
         safe_run_dir: args.safe_run_dir,
+        hpplib_file: args.hpplib_file.into(),
     });
 
     // バインドするアドレス
@@ -77,5 +86,8 @@ fn create_app(config: AppConfig) -> Router {
         .route("/api/compile.json", post(post_api_compile_json))
         .route("/api/permlink/{permlink_id}", get(get_api_permlink))
         .route("/api/permlink", post(post_api_permlink))
+        .route("/api/sponsors.json", get(get_api_sponsors_json))
+        .route("/api/template/{template_name}", get(get_api_template))
+        .route("/api/hpplib.json", get(get_api_hpplib))
         .with_state(shared_config);
 }

@@ -40,6 +40,7 @@
   ],
   "files.associations": {
     "*.cs": "csharp",
+    "CMakeLists.txt": "cmake",
     "*.txt": "plaintext",
     "*.ipp": "cpp",
     "array": "cpp",
@@ -57,5 +58,6 @@
     "string_view": "cpp",
     "rope": "cpp",
     "wrangler.json": "jsonc",
+    "memory_resource": "cpp"
   }
 }

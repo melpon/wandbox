@@ -106,8 +106,9 @@ mod tests {
     #[tokio::test]
     async fn test_post_api_compile_json() {
         let sqlite: SqlitePool = setup_test_db().await;
+        let safe_run_dir: String = format!("_tmp/{}", make_random_str(8));
         let _guard: RemoveDirGuard = RemoveDirGuard {
-            path: "_tmp".into(),
+            path: safe_run_dir.clone().into(),
         };
 
         let config: Config = serde_json::from_reader(
@@ -119,7 +120,7 @@ mod tests {
             sqlite: Some(Arc::new(sqlite)),
             podman: podman_config.clone(),
             config: config.clone(),
-            safe_run_dir: "_tmp".to_string(),
+            safe_run_dir: safe_run_dir.clone(),
             wandbox_url: "https://wandbox.org/".to_string(),
             version_info: HashMap::from([("test".to_string(), "0.1.2".to_string())]),
             ..AppConfig::default()
@@ -193,6 +194,7 @@ mod tests {
 
         let body: Bytes = response.into_body().collect().await.unwrap().to_bytes();
         assert!(!body.is_empty());
+        println!("{:?}", String::from_utf8_lossy(&body.to_vec()));
         let json: CompileResult = serde_json::from_slice(&body).unwrap();
         // permlink と url 以外は同じ
         assert_eq!(
