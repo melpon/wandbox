@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO codes (code_id, \"order\", file, code) VALUES (?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "05c3cb9ba97ace9491d3ba7461d2fba97c241f3f80238bcf8429d0fedade691c"
+}

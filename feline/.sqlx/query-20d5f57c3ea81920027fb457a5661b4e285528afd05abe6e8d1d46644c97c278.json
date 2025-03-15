@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT file as \"file!\", code as \"code!\"FROM codes WHERE code_id = ? ORDER BY \"order\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "file!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "code!",
+        "ordinal": 1,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "20d5f57c3ea81920027fb457a5661b4e285528afd05abe6e8d1d46644c97c278"
+}
