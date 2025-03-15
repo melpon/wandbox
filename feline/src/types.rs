@@ -40,8 +40,6 @@ pub struct PodmanConfig {
     pub fsize: Option<u64>,
     // 最大プロセス数
     pub nproc: Option<u64>,
-    // 仮想メモリの最大サイズ（B）
-    pub r#as: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]

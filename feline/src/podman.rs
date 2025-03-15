@@ -56,9 +56,8 @@ pub fn with_podman(config: &PodmanConfig, program: &str, args: &[String]) -> Com
         config.data,
         config.fsize,
         config.nproc,
-        config.r#as,
     ];
-    let ulimit_names = ["cpu", "nofile", "data", "fsize", "nproc", "as"];
+    let ulimit_names = ["cpu", "nofile", "data", "fsize", "nproc"];
     for (ulimit, name) in ulimits.iter().zip(ulimit_names.iter()) {
         if let Some(ulimit) = ulimit {
             xs.extend(["--ulimit".to_string(), format!("{}={}", name, ulimit)]);
