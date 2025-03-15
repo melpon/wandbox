@@ -96,6 +96,7 @@ pushd {prefix}
   pushd {target}-{env}
     mkdir -p var
     chown -R ubuntu:ubuntu var/
+    su - ubuntu -c 'podman build -t wandbox-runner {prefix}/{target}-{env}/Containerfiles/wandbox-runner'
   popd
 popd
 cp /opt/wandbox-data/release/{target}-{env}/{target}.service /etc/systemd/system/{target}-{env}.service
