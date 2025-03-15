@@ -172,7 +172,7 @@ def download(url: str, output_dir: Optional[str] = None, filename: Optional[str]
 def read_version_file(path: str) -> Dict[str, str]:
     versions = {}
 
-    lines = open(path).readlines()
+    lines = open(path, encoding="utf-8").readlines()
     for line in lines:
         line = line.strip()
 
@@ -205,13 +205,13 @@ def versioned(func):
             del kwargs["ignore_version"]
 
         if os.path.exists(version_file):
-            ver = open(version_file).read()
+            ver = open(version_file, encoding="utf-8").read()
             if ver.strip() == version.strip():
                 return
 
         r = func(version=version, *args, **kwargs)
 
-        with open(version_file, "w") as f:
+        with open(version_file, "w", encoding="utf-8") as f:
             f.write(version)
 
         return r
@@ -266,7 +266,7 @@ def _extractzip(z: zipfile.ZipFile, path: str):
         mod = info.external_attr >> 16
         if (mod & 0o120000) == 0o120000:
             # シンボリックリンク
-            with open(filepath, "r") as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 src = f.read()
             os.remove(filepath)
             with cd(os.path.dirname(filepath)):
@@ -389,11 +389,12 @@ def apply_patch(patch, dir, depth):
                     "--ignore-space-change",
                     "--ignore-whitespace",
                     "--whitespace=nowarn",
+                    "--reject",
                     patch,
                 ]
             )
         else:
-            with open(patch) as stdin:
+            with open(patch, encoding="utf-8") as stdin:
                 cmd(["patch", f"-p{depth}"], stdin=stdin)
 
 
@@ -410,6 +411,7 @@ def apply_patch_text(patch_text, dir, depth):
                     "--ignore-space-change",
                     "--ignore-whitespace",
                     "--whitespace=nowarn",
+                    "--reject",
                     f"--directory={directory}",
                     "-",
                 ],
@@ -460,7 +462,7 @@ def replace_vcproj_static_runtime(project_file: str):
 @versioned
 def install_webrtc(version, source_dir, install_dir, platform: str):
     win = platform.startswith("windows_")
-    filename = f'webrtc.{platform}.{"zip" if win else "tar.gz"}'
+    filename = f"webrtc.{platform}.{'zip' if win else 'tar.gz'}"
     rm_rf(os.path.join(source_dir, filename))
     archive = download(
         f"https://github.com/shiguredo-webrtc-build/webrtc-build/releases/download/{version}/{filename}",
@@ -563,7 +565,7 @@ def get_webrtc_info(
 def install_boost(version, source_dir, install_dir, sora_version, platform: str):
     win = platform.startswith("windows_")
     filename = (
-        f'boost-{version}_sora-cpp-sdk-{sora_version}_{platform}.{"zip" if win else "tar.gz"}'
+        f"boost-{version}_sora-cpp-sdk-{sora_version}_{platform}.{'zip' if win else 'tar.gz'}"
     )
     rm_rf(os.path.join(source_dir, filename))
     archive = download(
@@ -688,6 +690,7 @@ def build_and_install_boost(
     native_api_level,
     address_model="64",
     runtime_link=None,
+    android_build_platform="linux-x86_64",
 ):
     version_underscore = version.replace(".", "_")
     archive = download(
@@ -696,8 +699,17 @@ def build_and_install_boost(
     )
     extract(archive, output_dir=build_dir, output_dirname="boost")
     with cd(os.path.join(build_dir, "boost")):
-        bootstrap = ".\\bootstrap.bat" if target_os == "windows" else "./bootstrap.sh"
-        b2 = "b2" if target_os == "windows" else "./b2"
+        if target_os == "windows":
+            bootstrap = ".\\bootstrap.bat"
+            b2 = "b2"
+        elif target_os == "android" and android_build_platform == "windows-x86_64":
+            # Android を Windows でビルドする場合
+            bootstrap = ".\\bootstrap.bat"
+            b2 = "b2"
+        else:
+            bootstrap = "./bootstrap.sh"
+            b2 = "./b2"
+
         if runtime_link is None:
             runtime_link = "static" if target_os == "windows" else "shared"
 
@@ -713,7 +725,7 @@ def build_and_install_boost(
                 clangpp = cmdcap(["xcodebuild", "-find", "clang++"])
                 sysroot = cmdcap(["xcrun", "--sdk", sdk, "--show-sdk-path"])
                 boost_arch = "x86" if arch == "x86_64" else "arm"
-                with open("project-config.jam", "w") as f:
+                with open("project-config.jam", "w", encoding="utf-8") as f:
                     f.write(
                         f"using clang \
                         : iphone \
@@ -730,16 +742,16 @@ def build_and_install_boost(
                         b2,
                         "install",
                         "-d+0",
-                        f'--build-dir={os.path.join(build_dir, "boost", f"build-{arch}-{sdk}")}',
-                        f'--prefix={os.path.join(build_dir, "boost", f"install-{arch}-{sdk}")}',
+                        f"--build-dir={os.path.join(build_dir, 'boost', f'build-{arch}-{sdk}')}",
+                        f"--prefix={os.path.join(build_dir, 'boost', f'install-{arch}-{sdk}')}",
                         "--with-json",
                         "--with-filesystem",
                         "--layout=system",
                         "--ignore-site-config",
-                        f'variant={"debug" if debug else "release"}',
-                        f'cflags={" ".join(cflags)}',
-                        f'cxxflags={" ".join(cxxflags)}',
-                        f'linkflags={" ".join(linkflags)}',
+                        f"variant={'debug' if debug else 'release'}",
+                        f"cflags={' '.join(cflags)}",
+                        f"cxxflags={' '.join(cxxflags)}",
+                        f"linkflags={' '.join(linkflags)}",
                         f"toolset={toolset}",
                         f"visibility={visibility}",
                         f"target-os={target_os}",
@@ -778,21 +790,25 @@ def build_and_install_boost(
                     )
         elif target_os == "android":
             # Android の場合、android-ndk を使ってビルドする
-            with open("project-config.jam", "w") as f:
+            with open("project-config.jam", "w", encoding="utf-8") as f:
                 bin = os.path.join(
-                    android_ndk, "toolchains", "llvm", "prebuilt", "linux-x86_64", "bin"
+                    android_ndk, "toolchains", "llvm", "prebuilt", android_build_platform, "bin"
                 )
                 sysroot = os.path.join(
-                    android_ndk, "toolchains", "llvm", "prebuilt", "linux-x86_64", "sysroot"
+                    android_ndk, "toolchains", "llvm", "prebuilt", android_build_platform, "sysroot"
                 )
+
+                def escape(s):
+                    return s.replace("\\", "/").replace(":", "\\:")
+
                 f.write(
                     f"using clang \
                     : android \
-                    : {os.path.join(bin, 'clang++')} \
+                    : {escape(os.path.join(bin, 'clang++'))} \
                       --target=aarch64-none-linux-android{native_api_level} \
-                      --sysroot={sysroot} \
-                    : <archiver>{os.path.join(bin, 'llvm-ar')} \
-                      <ranlib>{os.path.join(bin, 'llvm-ranlib')} \
+                      --sysroot={escape(sysroot)} \
+                    : <archiver>{escape(os.path.join(bin, 'llvm-ar'))} \
+                      <ranlib>{escape(os.path.join(bin, 'llvm-ranlib'))} \
                     ; \
                     "
                 )
@@ -801,16 +817,16 @@ def build_and_install_boost(
                     b2,
                     "install",
                     "-d+0",
-                    f'--prefix={os.path.join(install_dir, "boost")}',
+                    f"--prefix={os.path.join(install_dir, 'boost')}",
                     "--with-json",
                     "--with-filesystem",
                     "--layout=system",
                     "--ignore-site-config",
-                    f'variant={"debug" if debug else "release"}',
+                    f"variant={'debug' if debug else 'release'}",
                     f"compileflags=--sysroot={sysroot}",
-                    f'cflags={" ".join(cflags)}',
-                    f'cxxflags={" ".join(cxxflags)}',
-                    f'linkflags={" ".join(linkflags)}',
+                    f"cflags={' '.join(cflags)}",
+                    f"cxxflags={' '.join(cxxflags)}",
+                    f"linkflags={' '.join(linkflags)}",
                     f"toolset={toolset}",
                     f"visibility={visibility}",
                     f"target-os={target_os}",
@@ -823,22 +839,22 @@ def build_and_install_boost(
             )
         else:
             if len(cxx) != 0:
-                with open("project-config.jam", "w") as f:
+                with open("project-config.jam", "w", encoding="utf-8") as f:
                     f.write(f"using {toolset} : : {cxx} : ;")
             cmd(
                 [
                     b2,
                     "install",
                     "-d+0",
-                    f'--prefix={os.path.join(install_dir, "boost")}',
+                    f"--prefix={os.path.join(install_dir, 'boost')}",
                     "--with-json",
                     "--with-filesystem",
                     "--layout=system",
                     "--ignore-site-config",
-                    f'variant={"debug" if debug else "release"}',
-                    f'cflags={" ".join(cflags)}',
-                    f'cxxflags={" ".join(cxxflags)}',
-                    f'linkflags={" ".join(linkflags)}',
+                    f"variant={'debug' if debug else 'release'}",
+                    f"cflags={' '.join(cflags)}",
+                    f"cxxflags={' '.join(cxxflags)}",
+                    f"linkflags={' '.join(linkflags)}",
                     f"toolset={toolset}",
                     f"visibility={visibility}",
                     f"target-os={target_os}",
@@ -854,7 +870,7 @@ def build_and_install_boost(
 @versioned
 def install_sora(version, source_dir, install_dir, platform: str):
     win = platform.startswith("windows_")
-    filename = f'sora-cpp-sdk-{version}_{platform}.{"zip" if win else "tar.gz"}'
+    filename = f"sora-cpp-sdk-{version}_{platform}.{'zip' if win else 'tar.gz'}"
     rm_rf(os.path.join(source_dir, filename))
     archive = download(
         f"https://github.com/shiguredo/sora-cpp-sdk/releases/download/{version}/{filename}",
@@ -951,7 +967,7 @@ def install_rootfs(version, install_dir, conf, arch="arm64"):
                 continue
             # 相対パスに置き換える
             relpath = os.path.relpath(targetpath, dir)
-            logging.debug(f"{linkpath[len(rootfs_dir):]} targets {target} to {relpath}")
+            logging.debug(f"{linkpath[len(rootfs_dir) :]} targets {target} to {relpath}")
             os.remove(linkpath)
             os.symlink(relpath, linkpath)
 
@@ -976,18 +992,19 @@ def install_rootfs(version, install_dir, conf, arch="arm64"):
 
 @versioned
 def install_android_ndk(version, install_dir, source_dir, platform="linux"):
-    if platform not in ("darwin", "linux"):
+    if platform not in ("windows", "darwin", "linux"):
         raise Exception(f"Not supported platform: {platform}")
 
-    if platform == "darwin":
+    if platform == "windows":
+        url = f"https://dl.google.com/android/repository/android-ndk-{version}-{platform}.zip"
+    elif platform == "darwin":
         url = f"https://dl.google.com/android/repository/android-ndk-{version}-{platform}.dmg"
-        file = f"android-ndk-{version}-{platform}.dmg"
     else:
         url = f"https://dl.google.com/android/repository/android-ndk-{version}-{platform}.zip"
     archive = download(url, source_dir)
     rm_rf(os.path.join(install_dir, "android-ndk"))
     if platform == "darwin":
-        cap = cmdcap(["hdiutil", "attach", os.path.join(source_dir, file)])
+        cap = cmdcap(["hdiutil", "attach", archive])
         # 以下のような結果が得られるはずなので、ここから /Volumes/Android NDK r26 のところだけ取り出す
         # /dev/disk4              GUID_partition_scheme
         # /dev/disk4s1            EFI
@@ -1373,7 +1390,7 @@ def install_openh264(version, source_dir, install_dir, is_windows):
                         file, os.path.join(install_dir, "openh264", "include", "wels", file)
                     )
         else:
-            cmd(["make", f'PREFIX={os.path.join(install_dir, "openh264")}', "install-headers"])
+            cmd(["make", f"PREFIX={os.path.join(install_dir, 'openh264')}", "install-headers"])
 
 
 @versioned
@@ -1590,7 +1607,15 @@ index 7f1b69f..bcf5577 100644
 
 
 @versioned
-def install_grpc(version, source_dir, build_dir, install_dir, debug: bool, cmake_args: List[str]):
+def install_grpc(
+    version,
+    source_dir,
+    build_dir,
+    install_dir,
+    debug: bool,
+    cmake_args: List[str],
+    cmake_build_args: List[str] = [],
+):
     grpc_source_dir = os.path.join(source_dir, "grpc")
     grpc_build_dir = os.path.join(build_dir, "grpc")
     grpc_install_dir = os.path.join(install_dir, "grpc")
@@ -1612,7 +1637,15 @@ def install_grpc(version, source_dir, build_dir, install_dir, debug: bool, cmake
             ]
         )
         cmd(
-            ["cmake", "--build", ".", f"-j{multiprocessing.cpu_count()}", "--config", configuration]
+            [
+                "cmake",
+                "--build",
+                ".",
+                f"-j{multiprocessing.cpu_count()}",
+                "--config",
+                configuration,
+                *cmake_build_args,
+            ]
         )
         cmd(["cmake", "--install", ".", "--config", configuration])
 
@@ -1631,184 +1664,49 @@ def install_spdlog(version, install_dir):
     git_clone_shallow("https://github.com/gabime/spdlog.git", version, spdlog_install_dir)
 
 
-@versioned
-def install_sqlite3(version, year, source_dir, build_dir, install_dir, debug, configure_args):
-    sqlite3_source_dir = os.path.join(source_dir, "sqlite3")
-    sqlite3_build_dir = os.path.join(build_dir, "sqlite3")
-    sqlite3_install_dir = os.path.join(install_dir, "sqlite3")
-    rm_rf(sqlite3_source_dir)
-    rm_rf(sqlite3_build_dir)
-    rm_rf(sqlite3_install_dir)
-
-    # 3.46.1 → 3460100
-    a, b, c, *_ = version.split(".")
-    version_number = f"{a}{b:>02}{c:>02}00"
-
-    url = f"https://www.sqlite.org/{year}/sqlite-autoconf-{version_number}.tar.gz"
-    path = download(url, source_dir)
-    extract(path, source_dir, "sqlite3")
-
-    mkdir_p(sqlite3_build_dir)
-    with cd(sqlite3_build_dir):
-        cmd(
-            [
-                os.path.join(sqlite3_source_dir, "configure"),
-                "--prefix",
-                sqlite3_install_dir,
-                "--disable-shared",
-                "--enable-static",
-                *(["--enable-debug"] if debug else []),
-                *configure_args,
-            ]
-        )
-        cmd(["make", f"-j{multiprocessing.cpu_count()}"])
-        cmd(["make", "install"])
-
-
-# CppDB を動的ライブラリではなく静的ライブラリとしてビルドするパッチ
-CPPDB_PATCH_NOSHARED = r"""
+BORINGSSL_PATCH_NO_BSSL = r"""
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5e81b09..d94bb84 100644
+index 38d63db..b97b175 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -231,16 +231,16 @@ set(CPPDB_SRC
- 	${INTERNAL_SOURCES}
- 	)
+@@ -795,7 +795,7 @@ endif()
  
--add_library(cppdb SHARED ${CPPDB_SRC})
-+#add_library(cppdb SHARED ${CPPDB_SRC})
- add_library(cppdb-static STATIC ${CPPDB_SRC})
--set_target_properties(cppdb PROPERTIES COMPILE_DEFINITIONS CPPDB_EXPORTS)
-+#set_target_properties(cppdb PROPERTIES COMPILE_DEFINITIONS CPPDB_EXPORTS)
- 
--if(NOT WIN32)
--	if(DL_LIB)
--		target_link_libraries(cppdb ${DL_LIB})
--	endif()
--	target_link_libraries(cppdb ${PTHREAD_LIB})
--endif()
-+#if(NOT WIN32)
-+#	if(DL_LIB)
-+#		target_link_libraries(cppdb ${DL_LIB})
-+#	endif()
-+#	target_link_libraries(cppdb ${PTHREAD_LIB})
-+#endif()
- 
- # Link and backends configuration
- 
-@@ -250,49 +250,50 @@ set(INST_LIBS)
- 
- foreach(LIB ${BACKEND_LIBRARIES} cppdb)
- 	
--	set(INST_LIBS ${INST_LIBS} ${LIB} ${LIB}-static)
-+#	set(INST_LIBS ${INST_LIBS} ${LIB} ${LIB}-static)
-+	set(INST_LIBS ${INST_LIBS} ${LIB}-static)
- 
--	if(WIN32)
--		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_SOVERSION} SOVERSION ${CPPDB_SOVERSION})
--	else()
--		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_VERSION} SOVERSION ${CPPDB_SOVERSION})
--	endif()
-+#	if(WIN32)
-+#		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_SOVERSION} SOVERSION ${CPPDB_SOVERSION})
-+#	else()
-+#		set_target_properties(${LIB} PROPERTIES VERSION ${CPPDB_VERSION} SOVERSION ${CPPDB_SOVERSION})
-+#	endif()
- 
-     
--	set_target_properties(${LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
--	set_target_properties(${LIB} PROPERTIES OUTPUT_NAME "${LIB}")
-+#	set_target_properties(${LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
-+#	set_target_properties(${LIB} PROPERTIES OUTPUT_NAME "${LIB}")
- 	set_target_properties(${LIB}-static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
- 	set_target_properties(${LIB}-static PROPERTIES OUTPUT_NAME "${LIB}")
- 	set_target_properties(${LIB}-static PROPERTIES PREFIX "lib") # Make sure import and normal library do not collide
- 
-  endforeach()
- 
--foreach(LIB ${BACKEND_LIBRARIES})
--	set_target_properties(${LIB} PROPERTIES COMPILE_DEFINITIONS CPPDB_DRIVER_EXPORTS)
--	target_link_libraries(${LIB} cppdb)
--endforeach()
--
--foreach(LIB ${INTERNAL_LIBRARIES})
--	target_link_libraries(cppdb ${LIB})
--endforeach()
-+#foreach(LIB ${BACKEND_LIBRARIES})
-+#	set_target_properties(${LIB} PROPERTIES COMPILE_DEFINITIONS CPPDB_DRIVER_EXPORTS)
-+#	target_link_libraries(${LIB} cppdb)
-+#endforeach()
-+#
-+#foreach(LIB ${INTERNAL_LIBRARIES})
-+#	target_link_libraries(cppdb ${LIB})
-+#endforeach()
- 
- # tests
- 
--add_executable(test_perf test/test_perf.cpp)
--add_executable(test_basic test/test_basic.cpp)
--add_executable(test_backend test/test_backend.cpp)
--add_executable(test_caching test/test_caching.cpp)
--add_executable(example examples/example1.cpp)
--
--set_target_properties(	test_perf test_backend test_basic test_caching example 
--			PROPERTIES 
--				COMPILE_DEFINITIONS CPPDB_EXPORTS)
--
--target_link_libraries(test_perf cppdb)
--target_link_libraries(test_basic cppdb)
--target_link_libraries(test_backend cppdb)
--target_link_libraries(test_caching cppdb)
--target_link_libraries(example cppdb)
-+#add_executable(test_perf test/test_perf.cpp)
-+#add_executable(test_basic test/test_basic.cpp)
-+#add_executable(test_backend test/test_backend.cpp)
-+#add_executable(test_caching test/test_caching.cpp)
-+#add_executable(example examples/example1.cpp)
-+#
-+#set_target_properties(	test_perf test_backend test_basic test_caching example 
-+#			PROPERTIES 
-+#				COMPILE_DEFINITIONS CPPDB_EXPORTS)
-+#
-+#target_link_libraries(test_perf cppdb)
-+#target_link_libraries(test_basic cppdb)
-+#target_link_libraries(test_backend cppdb)
-+#target_link_libraries(test_caching cppdb)
-+#target_link_libraries(example cppdb)
- 
- install(TARGETS ${INST_LIBS} 
- 	RUNTIME DESTINATION bin
+ if(INSTALL_ENABLED)
+   install(TARGETS crypto ssl EXPORT OpenSSLTargets)
+-  install(TARGETS bssl)
++  # install(TARGETS bssl)
+   install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+   install(EXPORT OpenSSLTargets
+           FILE OpenSSLTargets.cmake
 """
 
 
 @versioned
-def install_cppdb(
-    version, source_dir, build_dir, install_dir, debug, sqlite3_install_dir, cmake_args
+def install_boringssl(
+    version,
+    source_dir: str,
+    build_dir: str,
+    install_dir: str,
+    configuration: str,
+    cmake_args: List[str],
 ):
-    cppdb_source_dir = os.path.join(source_dir, "cppdb")
-    cppdb_build_dir = os.path.join(build_dir, "cppdb")
-    cppdb_install_dir = os.path.join(install_dir, "cppdb")
-    rm_rf(cppdb_source_dir)
-    rm_rf(cppdb_build_dir)
-    rm_rf(cppdb_install_dir)
-
-    git_clone_shallow("https://github.com/melpon/cppdb.git", version, cppdb_source_dir)
-    apply_patch_text(CPPDB_PATCH_NOSHARED, cppdb_source_dir, 1)
-
-    mkdir_p(cppdb_build_dir)
-    with cd(cppdb_build_dir):
-        configuration = "Debug" if debug else "Release"
+    boringssl_source_dir = os.path.join(source_dir, "boringssl")
+    boringssl_build_dir = os.path.join(build_dir, "boringssl")
+    boringssl_install_dir = os.path.join(install_dir, "boringssl")
+    rm_rf(boringssl_source_dir)
+    rm_rf(boringssl_build_dir)
+    rm_rf(boringssl_install_dir)
+    git_clone_shallow("https://boringssl.googlesource.com/boringssl", version, boringssl_source_dir)
+    apply_patch_text(BORINGSSL_PATCH_NO_BSSL, boringssl_source_dir, 1)
+    mkdir_p(boringssl_build_dir)
+    with cd(boringssl_build_dir):
         cmd(
             [
                 "cmake",
-                cppdb_source_dir,
+                f"-DCMAKE_INSTALL_PREFIX={cmake_path(boringssl_install_dir)}",
                 f"-DCMAKE_BUILD_TYPE={configuration}",
-                f"-DCMAKE_INSTALL_PREFIX={cppdb_install_dir}",
-                f"-DCMAKE_PREFIX_PATH={sqlite3_install_dir}",
-                "-DDISABLE_MYSQL=ON",
-                "-DDISABLE_PQ=ON",
-                "-DDISABLE_ODBC=ON",
-                "-DSQLITE_BACKEND_INTERNAL=ON",
+                "-DBUILD_SHARED_LIBS=OFF",
+                boringssl_source_dir,
                 *cmake_args,
             ]
         )
@@ -1816,6 +1714,69 @@ def install_cppdb(
             ["cmake", "--build", ".", f"-j{multiprocessing.cpu_count()}", "--config", configuration]
         )
         cmd(["cmake", "--install", ".", "--config", configuration])
+
+
+@versioned
+def install_opus(
+    version, source_dir, build_dir, install_dir, configuration: str, cmake_args: List[str]
+):
+    opus_source_dir = os.path.join(source_dir, "opus")
+    opus_build_dir = os.path.join(build_dir, "opus")
+    opus_install_dir = os.path.join(install_dir, "opus")
+    rm_rf(opus_source_dir)
+    rm_rf(opus_build_dir)
+    rm_rf(opus_install_dir)
+    git_clone_shallow("https://gitlab.xiph.org/xiph/opus", version, opus_source_dir)
+    mkdir_p(opus_build_dir)
+    with cd(opus_build_dir):
+        cmd(
+            [
+                "cmake",
+                f"-DCMAKE_INSTALL_PREFIX={cmake_path(opus_install_dir)}",
+                f"-DCMAKE_BUILD_TYPE={configuration}",
+                "-DOPUS_BUILD_SHARED_LIBRARY=OFF",
+                "-DOPUS_BUILD_TESTING=OFF",
+                "-DOPUS_BUILD_PROGRAMS=OFF",
+                "-DOPUS_STATIC_RUNTIME=ON",
+                opus_source_dir,
+                *cmake_args,
+            ]
+        )
+        cmd(
+            ["cmake", "--build", ".", f"-j{multiprocessing.cpu_count()}", "--config", configuration]
+        )
+        cmd(["cmake", "--install", ".", "--config", configuration])
+
+
+@versioned
+def install_nasm(version, source_dir, install_dir, platform: str):
+    if platform not in ("macosx", "win32", "win64"):
+        raise Exception(f"Unsupported platform: {platform}")
+    url = f"https://www.nasm.us/pub/nasm/releasebuilds/{version}/{platform}/nasm-{version}-{platform}.zip"
+    path = download(url, source_dir)
+    nasm_install_dir = os.path.join(install_dir, "nasm")
+    rm_rf(nasm_install_dir)
+    extract(path, install_dir, "nasm")
+
+
+@versioned
+def install_ninja(version, source_dir, install_dir, platform):
+    if platform not in ("win", "winarm64", "linux-aarch64", "linux", "mac"):
+        raise Exception(f"Unsupported platform: {platform}")
+    url = f"https://github.com/ninja-build/ninja/releases/download/{version}/ninja-{platform}.zip"
+    path = download(url, source_dir)
+    ninja_install_dir = os.path.join(install_dir, "ninja")
+    rm_rf(ninja_install_dir)
+    extract(path, install_dir, "ninja")
+
+
+@versioned
+def install_vswhere(version, install_dir):
+    url = f"https://github.com/microsoft/vswhere/releases/download/{version}/vswhere.exe"
+    vswhere_install_dir = os.path.join(install_dir, "vswhere")
+    rm_rf(vswhere_install_dir)
+    mkdir_p(vswhere_install_dir)
+    download(url, vswhere_install_dir)
 
 
 class PlatformTarget(object):
@@ -1888,7 +1849,10 @@ def get_build_platform() -> PlatformTarget:
     if arch in ("AMD64", "x86_64"):
         arch = "x86_64"
     elif arch in ("aarch64", "arm64"):
-        arch = "arm64"
+        if os == "ubuntu":
+            arch = "armv8"
+        else:
+            arch = "arm64"
     else:
         raise Exception(f"Arch {arch} not supported")
 
@@ -1987,8 +1951,8 @@ class Platform(object):
                 self._check(build.arch in ("x86_64", "arm64"))
         if target.os == "ubuntu":
             self._check(build.os == "ubuntu")
-            self._check(build.arch == "x86_64")
-            if target.arch == "x86_64":
+            self._check(build.arch in ("x86_64", "armv8"))
+            if build.arch == target.arch:
                 self._check(build.osver == target.osver)
         if target.os == "raspberry-pi-os":
             self._check(build.os == "ubuntu")
