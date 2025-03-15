@@ -12,7 +12,7 @@ ExecStart=@FELINE_DIR@/feline \
     --bind                      @FELINE_BIND_ADDR@ \
     --config-file               /opt/wandbox-data/release/cattleshed-conf/compilers.default \
     --hpplib-file               /opt/wandbox-data/wandbox-hpplib/hpplib.json \
-    --database-url              @FELINE_DIR@/var/kennel.sqlite \
+    --database-url              sqlite://@FELINE_DIR@/var/kennel.sqlite?mode=rwc \
     --database-migration-dir    @FELINE_DIR@/migrations \
     --podman-config-file        @FELINE_DIR@/podman.json \
     --safe-run-dir              @FELINE_SAFE_RUN_DIR@ \
