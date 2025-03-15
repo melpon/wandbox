@@ -211,27 +211,37 @@ pub struct PostPermlinkResponse {
     pub url: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
 pub struct CompileParameter {
     pub compiler: String,
     pub code: String,
+    #[serde(default)]
     pub codes: Vec<Code>,
+    #[serde(default)]
     pub options: String,
     #[serde(
         serialize_with = "serialize_utf8",
-        deserialize_with = "deserialize_utf8"
+        deserialize_with = "deserialize_utf8",
+        default
     )]
     pub stdin: Vec<u8>,
     #[serde(rename = "compiler-option-raw", default)]
     pub compiler_option_raw: String,
     #[serde(rename = "runtime-option-raw", default)]
     pub runtime_option_raw: String,
+    #[serde(default)]
     pub github_user: String,
+    #[serde(default)]
     pub title: String,
+    #[serde(default)]
     pub description: String,
+    #[serde(default)]
     pub save: bool,
+    #[serde(default)]
     pub created_at: i64,
+    #[serde(default)]
     pub is_private: bool,
+    #[serde(default)]
     pub compiler_info: CompilerInfo,
 }
 
