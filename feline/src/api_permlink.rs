@@ -2,34 +2,33 @@ use crate::{
     config::convert_config_to_compiler_info,
     db::{get_permlink, make_permlink},
     types::{
-        AppConfig, CompilerInfo, GetPermlinkResponse, PostPermlinkRequest, PostPermlinkResponse,
+        AppConfig, AppError, CompilerInfo, GetPermlinkResponse, PostPermlinkRequest,
+        PostPermlinkResponse,
     },
     util::make_random_str,
 };
-use anyhow::Result;
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use axum::{Json, extract::Path, extract::State};
 use std::sync::Arc;
 
 pub async fn get_api_permlink(
     State(config): State<Arc<AppConfig>>,
     Path(permlink_id): Path<String>,
-) -> Result<Json<GetPermlinkResponse>, (StatusCode, String)> {
-    let r: Result<GetPermlinkResponse> =
-        get_permlink(&config.sqlite.clone().unwrap(), &permlink_id).await;
-    let permlink = r.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+) -> Result<Json<GetPermlinkResponse>, AppError> {
+    let permlink: GetPermlinkResponse =
+        get_permlink(&config.sqlite.clone().unwrap(), &permlink_id).await?;
     return Ok(Json(permlink));
 }
 
 pub async fn post_api_permlink(
     State(config): State<Arc<AppConfig>>,
     Json(body): Json<PostPermlinkRequest>,
-) -> Result<Json<PostPermlinkResponse>, (StatusCode, String)> {
+) -> Result<Json<PostPermlinkResponse>, AppError> {
     let compiler_infos: Vec<CompilerInfo> =
         convert_config_to_compiler_info(&config.config, &config.version_info);
     let compiler_info: &CompilerInfo = compiler_infos
         .iter()
         .find(|c| c.name == body.compiler)
-        .ok_or((StatusCode::BAD_REQUEST, "Unknown compiler".to_string()))?;
+        .ok_or(anyhow::anyhow!("Unknown compiler"))?;
 
     let permlink_name: String = make_random_str(16);
     make_permlink(
@@ -38,8 +37,7 @@ pub async fn post_api_permlink(
         &body,
         &compiler_info,
     )
-    .await
-    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    .await?;
     let response = PostPermlinkResponse {
         permlink: permlink_name.clone(),
         url: format!("{}permlink/{}", config.wandbox_url, permlink_name),
@@ -74,7 +72,7 @@ mod tests {
             .await
             .expect("Failed to create in-memory DB");
 
-        // マイグレーションを適用
+        // マイグレーション
         let migrator: Migrator = Migrator::new(Path::new("./migrations"))
             .await
             .expect("Failed to load migrations");

@@ -1,3 +1,7 @@
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sqlx::SqlitePool;
 use std::{collections::HashMap, path::PathBuf, sync::Arc};
@@ -13,6 +17,7 @@ pub struct AppConfig {
     pub config: Config,
     pub version_info: HashMap<String, String>,
     pub safe_run_dir: String,
+    pub safe_run_log_dir: String,
     // ヘッダーオンリーライブラリの情報が入った JSON ファイルへのパス
     // 外から更新されるのでリクエストが来るたびにファイルから読み込む
     pub hpplib_file: PathBuf,
@@ -268,6 +273,33 @@ pub struct SponsorResponse {
     pub personal: Vec<TimestampSponsor>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct Issuer {
+    #[serde(rename = "remoteAddr")]
+    pub remote_addr: String,
+    #[serde(rename = "realIp")]
+    pub real_ip: String,
+    #[serde(rename = "forwardedFor")]
+    pub forwarded_for: String,
+    #[serde(rename = "pathInfo")]
+    pub path_info: String,
+    #[serde(rename = "githubUsername")]
+    pub github_username: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct RunLog {
+    pub compiler: String,
+    pub stdin: String,
+    #[serde(rename = "compilerOptionRaw")]
+    pub compiler_option_raw: String,
+    #[serde(rename = "runtimeOptionRaw")]
+    pub runtime_option_raw: String,
+    #[serde(rename = "compilerOptions")]
+    pub compiler_options: String,
+    pub issuer: Issuer,
+}
+
 // Vec<u8> を文字列として扱うための serialize/deserialize 関数
 fn serialize_utf8<S>(bytes: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -283,4 +315,29 @@ where
 {
     let s = String::deserialize(deserializer)?;
     Ok(s.into_bytes())
+}
+
+// anyhow::Error をレスポンスとして返せるようにする仕組み
+pub struct AppError(anyhow::Error);
+
+// Tell axum how to convert `AppError` into a response.
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Error: {}", self.0),
+        )
+            .into_response()
+    }
+}
+
+// This enables using `?` on functions that return `Result<_, anyhow::Error>` to turn them into
+// `Result<_, AppError>`. That way you don't need to do that manually.
+impl<E> From<E> for AppError
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
 }

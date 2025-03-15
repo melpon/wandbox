@@ -1,5 +1,4 @@
-use crate::types::AppConfig;
-use anyhow::Result;
+use crate::types::{AppConfig, AppError};
 use axum::{
     extract::State,
     http::StatusCode,
@@ -11,23 +10,12 @@ use tokio::fs;
 
 pub async fn get_api_hpplib(
     State(config): State<Arc<AppConfig>>,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let str = fs::read_to_string(&config.hpplib_file).await.map_err(|e| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Failed to open file: {}", e),
-        )
-    })?;
-    let resp = Response::builder()
+) -> Result<impl IntoResponse, AppError> {
+    let str: String = fs::read_to_string(&config.hpplib_file).await?;
+    let resp: Response<String> = Response::builder()
         .status(StatusCode::OK)
         .header(CONTENT_TYPE, "application/json")
-        .body(str)
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Failed to create response: {}", e),
-            )
-        })?;
+        .body(str)?;
     Ok(resp)
 }
 

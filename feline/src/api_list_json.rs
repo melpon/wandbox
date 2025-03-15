@@ -47,10 +47,7 @@ mod tests {
             .body(Body::empty())
             .unwrap();
 
-        // `oneshot()` を使ってリクエストをシミュレート
         let response: Response<Body> = app.oneshot(request).await.unwrap();
-
-        // ステータスコードの確認
         assert_eq!(response.status(), StatusCode::OK);
 
         // レスポンスボディの確認

@@ -1,17 +1,16 @@
-use crate::types::{AppConfig, Template, TemplateResponse};
-use anyhow::Result;
-use axum::{Json, extract::Path, extract::State, http::StatusCode};
+use crate::types::{AppConfig, AppError, Template, TemplateResponse};
+use axum::{Json, extract::Path, extract::State};
 use std::sync::Arc;
 
 pub async fn get_api_template(
     State(config): State<Arc<AppConfig>>,
     Path(template_name): Path<String>,
-) -> Result<Json<TemplateResponse>, (StatusCode, String)> {
+) -> Result<Json<TemplateResponse>, AppError> {
     let t: &Template = config
         .config
         .templates
         .get(&template_name)
-        .ok_or((StatusCode::NOT_FOUND, "Template not found".to_string()))?;
+        .ok_or(anyhow::anyhow!("Template not found"))?;
     let r: TemplateResponse = TemplateResponse {
         name: template_name.clone(),
         code: t.code.clone(),

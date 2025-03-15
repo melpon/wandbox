@@ -5,7 +5,6 @@ use crate::{
     },
     util::merge_compile_result,
 };
-use anyhow::Result;
 use chrono::{NaiveDateTime, Utc};
 use sqlx::{Error, Sqlite, SqlitePool, query, query_scalar};
 
@@ -14,13 +13,13 @@ pub async fn make_permlink(
     permlink_name: &str,
     req: &PostPermlinkRequest,
     compiler_info: &CompilerInfo,
-) -> Result<()> {
+) -> Result<(), anyhow::Error> {
     let mut tx: sqlx::Transaction<'_, Sqlite> = pool.begin().await?;
 
     let now: NaiveDateTime = Utc::now().naive_local();
     let now_str: String = now.format("%Y-%m-%d %H:%M:%S").to_string();
 
-    // code テーブルへ挿入
+    // code への追加
     let code_id: i64 = query_scalar!(
         "INSERT INTO code (title, description, compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at, updated_at, github_user) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
@@ -42,7 +41,7 @@ pub async fn make_permlink(
     .fetch_one(&mut *tx)
     .await?;
 
-    // codes テーブルへ挿入
+    // codes への追加
     if !req.codes.is_empty() {
         for (order, code) in req.codes.iter().enumerate() {
             let order_value: i32 = (order as i32) + 1;
@@ -58,7 +57,8 @@ pub async fn make_permlink(
         }
     }
 
-    // compiler_info を JSON に変換し、保存
+    // 保存時の compiler_info を保存
+    // フィールド作ったりするのは面倒なので JSON で
     let compiler_info_json: String = serde_json::to_string(compiler_info)?;
     query!(
         "INSERT INTO compiler_info (code_id, json) VALUES (?, ?)",
@@ -68,7 +68,7 @@ pub async fn make_permlink(
     .execute(&mut *tx)
     .await?;
 
-    // link テーブルへ挿入
+    // link への追加
     let link_id: i64 = query_scalar!(
         "INSERT INTO link (permlink, code_id) VALUES (?, ?) RETURNING id",
         permlink_name,
@@ -78,7 +78,7 @@ pub async fn make_permlink(
     .await?
     .ok_or(Error::RowNotFound)?;
 
-    // link_output テーブルへ挿入
+    // link_output への追加
     for (order, output) in req.results.iter().enumerate() {
         let order_value: i32 = (order as i32) + 1;
         query!(
@@ -97,10 +97,13 @@ pub async fn make_permlink(
     Ok(())
 }
 
-pub async fn get_permlink(pool: &SqlitePool, permlink_name: &str) -> Result<GetPermlinkResponse> {
+pub async fn get_permlink(
+    pool: &SqlitePool,
+    permlink_name: &str,
+) -> Result<GetPermlinkResponse, anyhow::Error> {
     let mut tx: sqlx::Transaction<'_, Sqlite> = pool.begin().await?;
 
-    // `link` テーブルから `link_id` と `code_id` を取得
+    // link テーブルから id と code_id を取得
     let (link_id, code_id) = sqlx::query_as::<_, (i64, i64)>(
         r#"SELECT id as "id!", code_id as "code_id!" FROM link WHERE permlink = ?"#,
     )
@@ -108,7 +111,7 @@ pub async fn get_permlink(pool: &SqlitePool, permlink_name: &str) -> Result<GetP
     .fetch_one(&mut *tx)
     .await?;
 
-    // `code` テーブルから情報を取得
+    // code_id から code テーブルの情報を取得
     let (
         compiler,
         code,
@@ -177,7 +180,7 @@ pub async fn get_permlink(pool: &SqlitePool, permlink_name: &str) -> Result<GetP
         codes: vec![],
     };
 
-    // `codes` テーブルからコードを取得
+    // code_id から codes テーブルの情報を取得
     let codes: Vec<Code> = sqlx::query_as!(
         Code,
         r#"SELECT file as "file!", code as "code!"FROM codes WHERE code_id = ? ORDER BY "order""#,
@@ -187,7 +190,7 @@ pub async fn get_permlink(pool: &SqlitePool, permlink_name: &str) -> Result<GetP
     .await?;
     parameter.codes = codes;
 
-    // `link_output` テーブルから結果を取得
+    // link_id から link_output テーブルの情報を取得
     let results: Vec<CompileNdjsonResult> = sqlx::query_as!(
         CompileNdjsonResult,
         "SELECT type, output as data FROM link_output WHERE link_id = ? ORDER BY \"order\"",
@@ -196,7 +199,7 @@ pub async fn get_permlink(pool: &SqlitePool, permlink_name: &str) -> Result<GetP
     .fetch_all(&mut *tx)
     .await?;
 
-    // `compiler_info` を取得（存在する場合）
+    // code_id から compiler_info テーブルの情報を取得（存在する場合）
     if let Some(row) = sqlx::query!("SELECT json FROM compiler_info WHERE code_id = ?", code_id)
         .fetch_optional(&mut *tx)
         .await?
@@ -232,7 +235,7 @@ mod tests {
             .await
             .expect("Failed to create in-memory DB");
 
-        // マイグレーションを適用
+        // マイグレーション
         let migrator: Migrator = Migrator::new(Path::new("./migrations"))
             .await
             .expect("Failed to load migrations");
@@ -325,38 +328,34 @@ mod tests {
         let req: PostPermlinkRequest = fixture_post_permlink_request();
         let compiler_info: CompilerInfo = fixture_compiler_info();
 
-        let result: Result<()> = make_permlink(&pool, &permlink_name, &req, &compiler_info).await;
+        let result: Result<(), anyhow::Error> =
+            make_permlink(&pool, &permlink_name, &req, &compiler_info).await;
         assert!(result.is_ok());
 
-        // `code` テーブルにデータが入っているか確認
         let code_count: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM code")
             .fetch_one(&pool)
             .await
             .unwrap();
         assert_eq!(code_count, 1);
 
-        // `codes` テーブルのレコード数を確認
         let codes_count: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM codes")
             .fetch_one(&pool)
             .await
             .unwrap();
         assert_eq!(codes_count, req.codes.len() as i64);
 
-        // `compiler_info` テーブルのレコード数を確認
         let compiler_info_count: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM compiler_info")
             .fetch_one(&pool)
             .await
             .unwrap();
         assert_eq!(compiler_info_count, 1);
 
-        // `link` テーブルにデータが入っているか確認
         let link_count: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM link")
             .fetch_one(&pool)
             .await
             .unwrap();
         assert_eq!(link_count, 1);
 
-        // `link_output` テーブルのレコード数を確認
         let link_output_count: i64 = sqlx::query_scalar!("SELECT COUNT(*) FROM link_output")
             .fetch_one(&pool)
             .await
@@ -372,22 +371,24 @@ mod tests {
         let req: PostPermlinkRequest = fixture_post_permlink_request();
         let compiler_info: CompilerInfo = fixture_compiler_info();
 
-        let result: Result<()> = make_permlink(&pool, &permlink_name, &req, &compiler_info).await;
+        let result: Result<(), anyhow::Error> =
+            make_permlink(&pool, &permlink_name, &req, &compiler_info).await;
         assert!(result.is_ok());
 
-        let response: Result<GetPermlinkResponse> = get_permlink(&pool, &permlink_name).await;
+        let response: Result<GetPermlinkResponse, anyhow::Error> =
+            get_permlink(&pool, &permlink_name).await;
         assert!(response.is_ok(), "get_permlink failed: {:?}", response);
 
         let response: GetPermlinkResponse = response.unwrap();
 
-        // ✅ `permlink` が正しいか確認
+        // permlink が正しいか確認
         assert_eq!(response.result.permlink, permlink_name);
         assert_eq!(
             response.result.url,
             format!("https://wandbox.org/permlink/{}", permlink_name)
         );
 
-        // ✅ `CompileParameter` の各フィールドを検証
+        // CompileParameter の各フィールドを検証
         assert_eq!(response.parameter.compiler, req.compiler);
         assert_eq!(response.parameter.code, req.code);
         assert_eq!(response.parameter.options, req.options);
@@ -405,16 +406,16 @@ mod tests {
         assert_eq!(response.parameter.description, req.description);
         assert_eq!(response.parameter.is_private, false);
 
-        // ✅ `codes` フィールドの比較
+        // codes フィールドの比較
         assert_eq!(response.parameter.codes, req.codes);
 
-        // ✅ `compiler_info` の比較
+        // compiler_info の比較
         assert_eq!(response.parameter.compiler_info, compiler_info);
 
-        // ✅ `results` フィールドの比較
+        // results フィールドの比較
         assert_eq!(response.results, req.results);
 
-        // ✅ `result` フィールドの比較
+        // result フィールドの比較
         assert_eq!(response.result.status, "0");
         assert_eq!(response.result.compiler_output, b"");
         assert_eq!(response.result.compiler_error, b"");

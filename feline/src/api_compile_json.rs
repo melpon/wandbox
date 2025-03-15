@@ -1,38 +1,64 @@
 use crate::{
-    api_compile_ndjson::{prepare_environment, run_compile_ndjson},
+    api_compile_ndjson::{log_run_codes, prepare_environment, run_compile_ndjson},
     config::convert_config_to_compiler_info,
     db::make_permlink,
     types::{
-        AppConfig, CompileNdjsonResult, CompileParameter, CompileResult, CompilerInfo,
-        PostPermlinkRequest,
+        AppConfig, AppError, CompileNdjsonResult, CompileParameter, CompileResult, CompilerInfo,
+        Issuer, PostPermlinkRequest,
     },
-    util::{make_permlink_request, make_random_str, merge_compile_result},
+    util::{make_issuer, make_permlink_request, make_random_str, merge_compile_result},
 };
-use anyhow::Result;
-use axum::{Json, extract::State, http::StatusCode};
+use anyhow::anyhow;
+use axum::{
+    Json,
+    extract::State,
+    http::{HeaderMap, Uri},
+};
 use std::{path::PathBuf, sync::Arc};
 use tokio::sync::mpsc::Receiver;
 
 pub async fn post_api_compile_json(
+    uri: Uri,
+    headers: HeaderMap,
     State(config): State<Arc<AppConfig>>,
     Json(body): Json<CompileParameter>,
-) -> Result<Json<CompileResult>, (StatusCode, String)> {
+) -> Result<Json<CompileResult>, AppError> {
+    let issuer: Issuer = make_issuer(uri.path(), &headers, &body.github_user)?;
+    let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
+    let unique_name: String = make_random_str(6);
     let compiler_infos: Vec<CompilerInfo> =
         convert_config_to_compiler_info(&config.config, &config.version_info);
     let compiler_info: &CompilerInfo = compiler_infos
         .iter()
         .find(|c| c.name == body.compiler)
-        .ok_or((StatusCode::BAD_REQUEST, "Unknown compiler".to_string()))?;
+        .ok_or(anyhow!("Unknown compiler"))?;
 
-    let r: Result<PathBuf> = prepare_environment(
+    log_run_codes(
+        &config.config,
+        &config.safe_run_log_dir,
+        &now,
+        &unique_name,
+        &body.compiler,
+        &body.stdin,
+        &body.compiler_option_raw,
+        &body.runtime_option_raw,
+        &body.options,
+        &issuer,
+        &body.code,
+        &body.codes,
+    )
+    .await?;
+
+    let base_dir: PathBuf = prepare_environment(
         &config.config,
         &config.safe_run_dir,
+        &now,
+        &unique_name,
         &body.compiler,
         &body.code,
         &body.codes,
     )
-    .await;
-    let base_dir: PathBuf = r.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    .await?;
 
     let mut rx: Receiver<CompileNdjsonResult> =
         run_compile_ndjson(config.clone(), base_dir, body.clone());
@@ -50,8 +76,7 @@ pub async fn post_api_compile_json(
             &preq,
             &compiler_info,
         )
-        .await
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+        .await?;
         result.permlink = permlink_name.clone();
         result.url = format!("{}permlink/{}", config.wandbox_url, permlink_name);
     }
@@ -72,7 +97,7 @@ mod tests {
     };
     use http_body_util::BodyExt;
     use sqlx::{SqlitePool, migrate::Migrator};
-    use std::{collections::HashMap, path::Path};
+    use std::{collections::HashMap, fs::remove_dir_all, path::Path};
     use tower::ServiceExt;
 
     async fn setup_test_db() -> SqlitePool {
@@ -98,18 +123,20 @@ mod tests {
     impl Drop for RemoveDirGuard {
         fn drop(&mut self) {
             if self.path.exists() {
-                std::fs::remove_dir_all(&self.path).expect("Failed to remove test dir");
+                remove_dir_all(&self.path).expect("Failed to remove test dir");
             }
         }
     }
 
     #[tokio::test]
     async fn test_post_api_compile_json() {
-        let sqlite: SqlitePool = setup_test_db().await;
-        let safe_run_dir: String = format!("_tmp/{}", make_random_str(8));
+        let base_dir: String = format!("_tmp/{}", make_random_str(8));
+        let safe_run_dir: String = format!("{}/jail", &base_dir);
+        let safe_run_log_dir: String = format!("{}/log", &base_dir);
         let _guard: RemoveDirGuard = RemoveDirGuard {
-            path: safe_run_dir.clone().into(),
+            path: base_dir.clone().into(),
         };
+        let sqlite: SqlitePool = setup_test_db().await;
 
         let config: Config = serde_json::from_reader(
             std::fs::File::open("src/tests/data/api_compile_input.json").unwrap(),
@@ -121,6 +148,7 @@ mod tests {
             podman: podman_config.clone(),
             config: config.clone(),
             safe_run_dir: safe_run_dir.clone(),
+            safe_run_log_dir: safe_run_log_dir.clone(),
             wandbox_url: "https://wandbox.org/".to_string(),
             version_info: HashMap::from([("test".to_string(), "0.1.2".to_string())]),
             ..AppConfig::default()
@@ -156,11 +184,8 @@ mod tests {
             .unwrap();
 
         let response: Response<Body> = app.clone().oneshot(request).await.unwrap();
-
-        // ステータスコードの確認
         assert_eq!(response.status(), StatusCode::OK);
 
-        // レスポンスボディの確認
         let body: Bytes = response.into_body().collect().await.unwrap().to_bytes();
         assert!(!body.is_empty());
         let json: CompileResult = serde_json::from_slice(&body).unwrap();
@@ -194,7 +219,6 @@ mod tests {
 
         let body: Bytes = response.into_body().collect().await.unwrap().to_bytes();
         assert!(!body.is_empty());
-        println!("{:?}", String::from_utf8_lossy(&body.to_vec()));
         let json: CompileResult = serde_json::from_slice(&body).unwrap();
         // permlink と url 以外は同じ
         assert_eq!(
@@ -308,5 +332,52 @@ mod tests {
                 url: "https://wandbox.org/permlink/".to_string() + &permlink,
             }
         );
+
+        // safe_run_dir と safe_run_log_dir の中に作ったファイルやディレクトリが存在することを確認する
+
+        // {safe_run_dir}/20250315/wandbox_20250315_115310_3R1C6V
+        // みたいな感じでディレクトリが存在している
+        //
+        // 2回実行してるので2回分のディレクトリができている
+        let mut file_entry: i32 = 0;
+        let mut dir_entry: i32 = 0;
+        for entry in std::fs::read_dir(&safe_run_dir).unwrap() {
+            let entry: std::fs::DirEntry = entry.unwrap();
+            let path: PathBuf = entry.path();
+            if path.is_file() {
+                file_entry += 1;
+            } else if path.is_dir() {
+                dir_entry += 1;
+            }
+            let name: &str = path.file_name().unwrap().to_str().unwrap();
+            assert!(name.starts_with("wandbox_"));
+        }
+        assert_eq!(file_entry, 0);
+        assert_eq!(dir_entry, 2);
+
+        // {safe_run_log_dir}/20250315/wandbox_20250315_115310_3R1C6V
+        // {safe_run_log_dir}/20250315/wandbox_20250315_115310_3R1C6V.json
+        // みたいな感じでファイルとディレクトリが存在している
+        let entry: std::fs::DirEntry = std::fs::read_dir(&safe_run_log_dir)
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap();
+        let mut file_entry: i32 = 0;
+        let mut dir_entry: i32 = 0;
+        for entry in std::fs::read_dir(&entry.path()).unwrap() {
+            let entry: std::fs::DirEntry = entry.unwrap();
+            let path: PathBuf = entry.path();
+            if path.is_file() {
+                file_entry += 1;
+            } else if path.is_dir() {
+                dir_entry += 1;
+            }
+            let name: &str = path.file_name().unwrap().to_str().unwrap();
+            assert!(name.starts_with("wandbox_"));
+        }
+        // 1回目と2回目の実行の間に日を跨いだらテストに失敗するけどそうそう起きないはず
+        assert_eq!(file_entry, 2);
+        assert_eq!(dir_entry, 2);
     }
 }

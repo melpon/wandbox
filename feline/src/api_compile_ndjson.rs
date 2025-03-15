@@ -1,39 +1,53 @@
 use crate::{
     podman::run_streaming,
     types::{
-        AppConfig, Code, CompileNdjsonResult, CompileParameter, Compiler, Config, PodmanConfig,
+        AppConfig, AppError, Code, CompileNdjsonResult, CompileParameter, Compiler, Config, Issuer,
+        PodmanConfig, RunLog,
     },
-    util::make_random_str,
+    util::{base64_encode, make_issuer, make_random_str},
 };
-use anyhow::Result;
-use axum::{Json, body::Body, extract::State, http::StatusCode, response::IntoResponse};
+use axum::{
+    Json,
+    body::Body,
+    extract::State,
+    http::{HeaderMap, Uri},
+    response::IntoResponse,
+};
 use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
 use tokio::{
-    fs,
+    fs::{File, create_dir_all},
     io::AsyncWriteExt as _,
     sync::mpsc::{self, Receiver},
     time::Duration,
 };
 use tokio_stream::{StreamExt as _, wrappers::ReceiverStream};
 
-async fn create_file_with_dirs(path: &Path, content: &[u8]) -> Result<()> {
+async fn create_file_with_dirs(path: &Path, content: &[u8]) -> Result<(), anyhow::Error> {
     if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).await?;
+        create_dir_all(parent).await?;
     }
-    let mut file: fs::File = fs::File::create(&path).await?;
+    let mut file: File = File::create(&path).await?;
     file.write_all(&content).await?;
     Ok(())
 }
 
 // 戻り値のパスが必ず dir の下にあることを保証する
 // file_path が絶対パスだったり "../" みたいな文字列が含まれて dir の外を指定したらエラーになる
-pub fn resolve_safe_path(dir: &Path, file_path: &Path) -> Result<PathBuf> {
+pub fn resolve_safe_path(dir: &Path, file_path: &Path) -> Result<PathBuf, anyhow::Error> {
     // 絶対パスは一括でアウト
     if file_path.is_absolute() {
         return Err(anyhow::anyhow!("Invalid path"));
+    }
+    // dir が空文字なのは多分設定を忘れてるのでエラーにしておく
+    if dir
+        .to_str()
+        .ok_or(anyhow::anyhow!("Invalid dir"))?
+        .is_empty()
+    {
+        return Err(anyhow::anyhow!("dir is empty"));
     }
 
     let full_path = dir.join(file_path);
@@ -92,7 +106,7 @@ pub fn resolve_arguments(
     args
 }
 
-fn get_compiler<'a>(config: &'a Config, name: &str) -> Result<&'a Compiler> {
+fn get_compiler<'a>(config: &'a Config, name: &str) -> Result<&'a Compiler, anyhow::Error> {
     config
         .compilers
         .iter()
@@ -103,22 +117,20 @@ fn get_compiler<'a>(config: &'a Config, name: &str) -> Result<&'a Compiler> {
 pub async fn prepare_environment(
     config: &Config,
     safe_run_dir: &str,
+    timestamp: &chrono::DateTime<chrono::Local>,
+    unique_name: &str,
     compiler: &str,
     code: &str,
     codes: &Vec<Code>,
-) -> Result<PathBuf> {
+) -> Result<PathBuf, anyhow::Error> {
     let info: &Compiler = get_compiler(&config, &compiler)?;
 
     // ユーザーが実行するための環境を作る
     // ここは podman に守られてないので注意して実装する
     let base_dir: PathBuf = {
-        let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
-        let timestamp: String = now.format("%Y%m%d_%H%M%S").to_string();
-
-        let random_str: String = make_random_str(6);
-
-        let random_dir: String = format!("wandbox_{}_{}", timestamp, random_str);
-        Path::new(&safe_run_dir).join(&random_dir)
+        let fmtstr: String = timestamp.format("%Y%m%d_%H%M%S").to_string();
+        let dir: String = format!("wandbox_{}_{}", fmtstr, unique_name);
+        Path::new(&safe_run_dir).join(&dir)
     };
 
     let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&info.output_file))?;
@@ -131,6 +143,50 @@ pub async fn prepare_environment(
     Ok(base_dir)
 }
 
+pub async fn log_run_codes(
+    config: &Config,
+    safe_run_log_dir: &str,
+    timestamp: &chrono::DateTime<chrono::Local>,
+    unique_name: &str,
+    compiler: &str,
+    stdin: &[u8],
+    compiler_option_raw: &str,
+    runtime_option_raw: &str,
+    compiler_options: &str,
+    issuer: &Issuer,
+    code: &str,
+    codes: &Vec<Code>,
+) -> Result<(), anyhow::Error> {
+    let info: &Compiler = get_compiler(&config, &compiler)?;
+    let run_log: RunLog = RunLog {
+        compiler: compiler.to_string(),
+        stdin: base64_encode(&stdin),
+        compiler_option_raw: compiler_option_raw.to_string(),
+        runtime_option_raw: runtime_option_raw.to_string(),
+        compiler_options: compiler_options.to_string(),
+        issuer: issuer.clone(),
+    };
+    let (base_base_dir, name) = {
+        let date: String = timestamp.format("%Y%m%d").to_string();
+        let fmtstr: String = timestamp.format("%Y%m%d_%H%M%S").to_string();
+        let dir: String = format!("wandbox_{}_{}", fmtstr, unique_name);
+        (Path::new(&safe_run_log_dir).join(&date), dir)
+    };
+    let json_file: String = name.clone() + ".json";
+    let path: PathBuf = resolve_safe_path(&base_base_dir, &Path::new(&json_file))?;
+    create_file_with_dirs(&path, &serde_json::to_string_pretty(&run_log)?.as_bytes()).await?;
+
+    let base_dir: PathBuf = base_base_dir.join(&name);
+    let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&info.output_file))?;
+    create_file_with_dirs(&path, &code.as_bytes()).await?;
+    for code in codes {
+        let path: PathBuf = resolve_safe_path(&base_dir, &Path::new(&code.file))?;
+        create_file_with_dirs(&path, &code.code.as_bytes()).await?;
+    }
+
+    Ok(())
+}
+
 pub fn run_compile_ndjson(
     config: Arc<AppConfig>,
     base_dir: PathBuf,
@@ -140,7 +196,7 @@ pub fn run_compile_ndjson(
     let (tx, rx) = mpsc::channel::<CompileNdjsonResult>(100);
     tokio::spawn(async move {
         // 気軽に await? できるようにしてるだけ
-        let r: Result<()> = async move {
+        let r: Result<(), anyhow::Error> = async move {
             let info: &Compiler = get_compiler(&config.config, &body.compiler)?;
             let args: Vec<String> = resolve_arguments(
                 &config.config,
@@ -228,25 +284,48 @@ pub fn run_compile_ndjson(
         .await;
 
         if let Err(e) = r {
-            eprintln!("Error {}", e);
+            log::error!("Error {}", e);
         }
     });
     rx
 }
 
 pub async fn post_api_compile_ndjson(
+    uri: Uri,
+    headers: HeaderMap,
     State(config): State<Arc<AppConfig>>,
     Json(body): Json<CompileParameter>,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let r: Result<PathBuf> = prepare_environment(
+) -> Result<impl IntoResponse, AppError> {
+    let issuer: Issuer = make_issuer(uri.path(), &headers, &body.github_user)?;
+    let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
+    let unique_name: String = make_random_str(6);
+
+    log_run_codes(
+        &config.config,
+        &config.safe_run_log_dir,
+        &now,
+        &unique_name,
+        &body.compiler,
+        &body.stdin,
+        &body.compiler_option_raw,
+        &body.runtime_option_raw,
+        &body.options,
+        &issuer,
+        &body.code,
+        &body.codes,
+    )
+    .await?;
+
+    let base_dir: PathBuf = prepare_environment(
         &config.config,
         &config.safe_run_dir,
+        &now,
+        &unique_name,
         &body.compiler,
         &body.code,
         &body.codes,
     )
-    .await;
-    let base_dir: PathBuf = r.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    .await?;
 
     let rx: Receiver<CompileNdjsonResult> = run_compile_ndjson(config.clone(), base_dir, body);
     let stream = ReceiverStream::new(rx).map(|v| serde_json::to_string(&v).map(|v| v + "\n"));
@@ -275,31 +354,31 @@ mod tests {
             let dir = Path::new("/tmp");
 
             let file_path: &Path = Path::new("foo/bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap(), Path::new("/tmp/foo/bar"));
 
             let file_path: &Path = Path::new("../bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
 
             let file_path: &Path = Path::new("../../bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
 
             let file_path: &Path = Path::new("foo/../bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap(), Path::new("/tmp/bar"));
 
             let file_path: &Path = Path::new("foo/.././././../tmp/../tmp/foo/bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap(), Path::new("/tmp/foo/bar"));
 
             let file_path: &Path = Path::new("/foo/bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
 
             let file_path: &Path = Path::new("/tmp/foo");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
         }
 
@@ -308,31 +387,31 @@ mod tests {
             let dir: &Path = Path::new("tmp");
 
             let file_path: &Path = Path::new("foo/bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap(), Path::new("tmp/foo/bar"));
 
             let file_path: &Path = Path::new("../bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
 
             let file_path: &Path = Path::new("../../bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
 
             let file_path: &Path = Path::new("foo/../bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap(), Path::new("tmp/bar"));
 
             let file_path: &Path = Path::new("foo/.././././../tmp/../tmp/foo/bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap(), Path::new("tmp/foo/bar"));
 
             let file_path: &Path = Path::new("/foo/bar");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
 
             let file_path: &Path = Path::new("/tmp/foo");
-            let path: Result<PathBuf> = resolve_safe_path(dir, file_path);
+            let path: Result<PathBuf, anyhow::Error> = resolve_safe_path(dir, file_path);
             assert_eq!(path.unwrap_err().to_string(), "Invalid path");
         }
     }
@@ -350,9 +429,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_post_api_compile_ndjson() {
-        let safe_run_dir: String = format!("_tmp/{}", make_random_str(8));
+        let base_dir: String = format!("_tmp/{}", make_random_str(8));
+        let safe_run_dir: String = format!("{}/jail", &base_dir);
+        let safe_run_log_dir: String = format!("{}/log", &base_dir);
         let _guard: RemoveDirGuard = RemoveDirGuard {
-            path: safe_run_dir.clone().into(),
+            path: base_dir.clone().into(),
         };
 
         let config: Config = serde_json::from_reader(
@@ -364,6 +445,7 @@ mod tests {
             podman: podman_config.clone(),
             config: config.clone(),
             safe_run_dir: safe_run_dir.clone(),
+            safe_run_log_dir: safe_run_log_dir.clone(),
             ..AppConfig::default()
         };
         let app: Router = create_app(app_config);
@@ -397,8 +479,6 @@ mod tests {
             .unwrap();
 
         let response: Response<Body> = app.oneshot(request).await.unwrap();
-
-        // ステータスコードの確認
         assert_eq!(response.status(), StatusCode::OK);
 
         // レスポンスボディの確認

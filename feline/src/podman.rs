@@ -1,8 +1,7 @@
 use crate::types::{CompileNdjsonResult, PodmanConfig};
-use anyhow::Result;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
-    process::Command,
+    process::{Child, ChildStderr, ChildStdin, ChildStdout, Command},
     sync::mpsc,
     time::{Duration, sleep},
 };
@@ -75,23 +74,23 @@ pub fn run_streaming(
         let txout: mpsc::Sender<CompileNdjsonResult> = tx.clone();
         let txerr: mpsc::Sender<CompileNdjsonResult> = tx.clone();
         let txexit: mpsc::Sender<CompileNdjsonResult> = tx.clone();
-        let r: Result<()> = async move {
-            let mut command = with_podman(&config, &program, &args);
-            let mut child = command
+        let r: Result<(), anyhow::Error> = async move {
+            let mut command: Command = with_podman(&config, &program, &args);
+            let mut child: Child = command
                 .stdin(std::process::Stdio::piped())
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
                 .spawn()?;
 
-            let mut stdin = child
+            let mut stdin: ChildStdin = child
                 .stdin
                 .take()
                 .ok_or(anyhow::anyhow!("Failed to open stdin"))?;
-            let mut stdout = child
+            let mut stdout: ChildStdout = child
                 .stdout
                 .take()
                 .ok_or(anyhow::anyhow!("Failed to open stdout"))?;
-            let mut stderr = child
+            let mut stderr: ChildStderr = child
                 .stderr
                 .take()
                 .ok_or(anyhow::anyhow!("Failed to open stderr"))?;
@@ -102,12 +101,12 @@ pub fn run_streaming(
                     let end = std::cmp::min(n + 1024, stdin_data.len());
                     let r: Result<(), std::io::Error> = stdin.write_all(&stdin_data[n..end]).await;
                     if let Err(e) = r {
-                        eprintln!("Error: {}", e);
+                        log::error!("Error: {}", e);
                         return;
                     }
                     let r = stdin.flush().await;
                     if let Err(e) = r {
-                        eprintln!("Error: {}", e);
+                        log::error!("Error: {}", e);
                         return;
                     }
                     n = end;
@@ -129,7 +128,7 @@ pub fn run_streaming(
                         })
                         .await;
                     if let Err(e) = r {
-                        eprintln!("Error: {}", e);
+                        log::error!("Error: {}", e);
                     }
                 }
             });
@@ -147,7 +146,7 @@ pub fn run_streaming(
                         })
                         .await;
                     if let Err(e) = r {
-                        eprintln!("Error: {}", e);
+                        log::error!("Error: {}", e);
                     }
                 }
             });
@@ -201,7 +200,7 @@ pub fn run_streaming(
                 })
                 .await;
             if let Err(e) = r {
-                eprintln!("Error: {}", e);
+                log::error!("Error: {}", e);
             }
         }
     });

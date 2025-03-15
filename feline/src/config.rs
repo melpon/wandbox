@@ -1,6 +1,5 @@
 use crate::podman::with_podman;
 use crate::types::{CompilerInfo, Config, PodmanConfig, Switch, SwitchOption};
-use anyhow::Result;
 use std::collections::HashMap;
 
 pub fn convert_config_to_compiler_info(
@@ -92,7 +91,10 @@ pub fn convert_config_to_compiler_info(
         .collect()
 }
 
-async fn run_version_command(config: &PodmanConfig, command: &[String]) -> Result<String> {
+async fn run_version_command(
+    config: &PodmanConfig,
+    command: &[String],
+) -> Result<String, anyhow::Error> {
     let stdout: Vec<u8> = with_podman(&config, &command[0], &command[1..].to_vec())
         .output()
         .await?
@@ -104,7 +106,7 @@ async fn run_version_command(config: &PodmanConfig, command: &[String]) -> Resul
 pub async fn get_version_info(
     podman: &PodmanConfig,
     config: &Config,
-) -> Result<HashMap<String, String>> {
+) -> Result<HashMap<String, String>, anyhow::Error> {
     let mut version_info: HashMap<String, String> = HashMap::new();
     for compiler in &config.compilers {
         let version: String = run_version_command(&podman, &compiler.version_command).await?;
