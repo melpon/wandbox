@@ -222,7 +222,9 @@ pub struct CompileParameter {
         deserialize_with = "deserialize_utf8"
     )]
     pub stdin: Vec<u8>,
+    #[serde(rename = "compiler-option-raw", default)]
     pub compiler_option_raw: String,
+    #[serde(rename = "runtime-option-raw", default)]
     pub runtime_option_raw: String,
     pub github_user: String,
     pub title: String,
