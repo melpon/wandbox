@@ -1,0 +1,24 @@
+[Unit]
+Description=Feline for Compiler Sandbox API Server
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+Environment=RUST_LOG=info
+WorkingDirectory=@FELINE_DIR@
+Restart=on-failure
+ExecStart=@FELINE_DIR@/feline \
+    --bind                      @FELINE_BIND_ADDR@ \
+    --config-file               /opt/wandbox-data/release/cattleshed-conf/compilers.default \
+    --hpplib-file               /opt/wandbox-data/wandbox-hpplib/hpplib.json \
+    --database-url              @FELINE_DIR@/var/kennel.sqlite \
+    --database-migration-dir    @FELINE_DIR@/migrations \
+    --podman-config-file        @FELINE_DIR@/podman.json \
+    --safe-run-dir              @FELINE_SAFE_RUN_DIR@ \
+    --safe-run-log-dir          @FELINE_SAFE_RUN_LOG_DIR@ \
+    --wandbox-url               @WANDBOX_URL@
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

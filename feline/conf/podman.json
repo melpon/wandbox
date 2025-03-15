@@ -1,0 +1,12 @@
+{
+    "image": "wandbox-runner",
+    "mounts": [
+        ["/opt/wandbox", "/opt/wandbox", false]
+    ],
+    "cpu": 30,
+    "nofile": 1024,
+    "data": 1073741824,
+    "fsize": 5242880,
+    "nproc": 128,
+    "as": 2147483648
+}

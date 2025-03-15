@@ -1,1 +1,16 @@
 FROM docker.io/library/ubuntu:24.04
+
+RUN apt-get update \
+  && apt-get install -y \
+    libonig-dev \
+    libonig5 \
+    libz3-4 \
+    silversearcher-ag \
+    libgmp-dev \
+    nginx \
+    cmake \
+    libgfortran5 \
+    libgcc-14-dev \
+    libtinfo5 \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*

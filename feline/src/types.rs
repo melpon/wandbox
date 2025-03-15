@@ -28,9 +28,20 @@ pub struct PodmanConfig {
     pub image: String,
     // src, dst, writable
     pub mounts: Vec<(String, String, bool)>,
+    #[serde(default)]
     pub workdir: String,
-    // 利用可能な CPU 時間
-    pub cpusec: u32,
+    // 利用可能な CPU 時間（秒）
+    pub cpu: u64,
+    // 同時利用可能なファイルディスクリプタ数
+    pub nofile: Option<u64>,
+    // データセグメントの最大サイズ（B）
+    pub data: Option<u64>,
+    // 最大ファイルサイズ（B）
+    pub fsize: Option<u64>,
+    // 最大プロセス数
+    pub nproc: Option<u64>,
+    // 仮想メモリの最大サイズ（B）
+    pub r#as: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]

@@ -27,10 +27,15 @@ impl PodmanConfig {
 }
 
 pub fn with_podman(config: &PodmanConfig, program: &str, args: &[String]) -> Command {
-    // $ podman run --rm --init -i \
-    //     -v src:dst:ro -v src2:dst2 --workdir dst2 $image \
-    //     bash -c 'ulimit -t $cpusec && exec "$@"' \
-    //     _ $program $args
+    // $ nice -- \
+    //     podman run --rm --init -i \
+    //     -v src:dst:ro -v src2:dst2 --workdir dst2 \
+    //     --ulimit cpu=30 --ulimit nofile=1024 \
+    //     --ulimit ... \
+    //     $image $program $args
+    let podman_program: &str = "nice";
+    let podman_args: [&str; 3] = ["--", "podman", "run"];
+
     let mut xs: Vec<String> = vec![];
     // podman run に渡す引数
     xs.extend(["--rm", "--init", "-i"].map(|x| x.to_string()));
@@ -44,17 +49,40 @@ pub fn with_podman(config: &PodmanConfig, program: &str, args: &[String]) -> Com
         xs.push(config.workdir.clone());
     }
 
-    xs.push(config.image.clone());
+    // ulimit シリーズ
+    let ulimits = [
+        Some(if config.cpu > 0 { config.cpu } else { 30 }),
+        config.nofile,
+        config.data,
+        config.fsize,
+        config.nproc,
+        config.r#as,
+    ];
+    let ulimit_names = ["cpu", "nofile", "data", "fsize", "nproc", "as"];
+    for (ulimit, name) in ulimits.iter().zip(ulimit_names.iter()) {
+        if let Some(ulimit) = ulimit {
+            xs.extend(["--ulimit".to_string(), format!("{}={}", name, ulimit)]);
+        }
+    }
 
-    // ここからはコンテナで実行するプログラムの引数
-    let ulimit = format!(
-        r#"ulimit -t {} && exec "$@""#,
-        if config.cpusec > 0 { config.cpusec } else { 30 }
-    );
-    xs.extend(["bash", "-c", ulimit.as_str(), "_"].map(|x| x.to_string()));
-
-    let mut cmd: Command = Command::new("podman");
-    cmd.arg("run").args(xs).arg(&program).args(args);
+    if log::log_enabled!(log::Level::Info) {
+        let args: String = [podman_program.to_string()]
+            .iter()
+            .chain(&podman_args.map(|x| x.to_string()))
+            .chain(xs.iter())
+            .chain([config.image.clone(), program.to_string()].iter())
+            .chain(args.iter())
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(" ");
+        log::info!("Command: {}", args);
+    }
+    let mut cmd: Command = Command::new(podman_program);
+    cmd.args(&podman_args)
+        .args(&xs)
+        .arg(&config.image)
+        .arg(&program)
+        .args(args);
     return cmd;
 }
 
@@ -322,7 +350,7 @@ mod tests {
     async fn test_run_streaming_cpu() {
         // CPU 時間を使い切ると SIGKILL されることを確認する
         let mut config = PodmanConfig::new("wandbox-runner");
-        config.cpusec = 1;
+        config.cpu = 1;
         let mut rx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
             &config,
             "bash",

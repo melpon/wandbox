@@ -31,6 +31,8 @@ use axum::{
 use clap::Parser;
 use config::get_version_info;
 use sqlx::SqlitePool;
+use sqlx::migrate::Migrator;
+use std::path::Path;
 use std::{fs, net::SocketAddrV4, sync::Arc};
 use tokio::net::TcpListener;
 use types::{AppConfig, Config, PodmanConfig};
@@ -39,11 +41,15 @@ use types::{AppConfig, Config, PodmanConfig};
 #[command(about = "Feline API server")]
 struct Args {
     #[arg(long)]
+    bind: String,
+    #[arg(long)]
     config_file: String,
     #[arg(long)]
     hpplib_file: String,
     #[arg(long)]
     database_url: String,
+    #[arg(long)]
+    database_migration_dir: String,
     #[arg(long)]
     podman_config_file: String,
     #[arg(long)]
@@ -67,7 +73,13 @@ async fn main() {
             .as_str(),
     )
     .unwrap();
+
     let sqlite: Arc<SqlitePool> = Arc::new(SqlitePool::connect(&args.database_url).await.unwrap());
+    let migrator: Migrator = Migrator::new(Path::new(&args.database_migration_dir))
+        .await
+        .unwrap();
+    migrator.run(&*sqlite).await.unwrap();
+
     let app: Router = create_app(AppConfig {
         sqlite: Some(sqlite),
         wandbox_url: args.wandbox_url,
@@ -79,7 +91,7 @@ async fn main() {
         hpplib_file: args.hpplib_file.into(),
     });
 
-    let addr: SocketAddrV4 = "127.0.0.1:3000".parse().unwrap();
+    let addr: SocketAddrV4 = args.bind.parse().unwrap();
     log::info!("Server running on http://{}", addr);
     let listener: TcpListener = tokio::net::TcpListener::bind(addr).await.unwrap();
 

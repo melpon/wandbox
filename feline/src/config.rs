@@ -121,6 +121,18 @@ mod tests {
     use crate::types::Compiler;
     use std::fs;
 
+    // 本番と同じ JSON データが読めるか確認する
+    // scp wandbox-ubuntu-24.04:/opt/wandbox-data/release/cattleshed-conf/compilers.default ./
+    // で拾ってきたデータを使ってテストする
+    #[test]
+    #[ignore]
+    fn test_load() {
+        let input_json: String =
+            fs::read_to_string("./compilers.default").expect("Failed to read input JSON");
+        let _config: Config =
+            serde_json::from_str(&input_json).expect("Failed to parse input JSON");
+    }
+
     #[test]
     fn test_convert_config() {
         let input_json: String = fs::read_to_string("src/tests/data/config_input.json")
