@@ -107,10 +107,15 @@ pub struct Template {
 pub struct TemplateResponse {
     pub name: String,
     pub code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub codes: Option<Vec<Code>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub stdin: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub compiler_option_raw: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub runtime_option_raw: Option<String>,
 }
 
@@ -186,7 +191,9 @@ pub struct PostPermlinkRequest {
     pub compiler: String,
     pub code: String,
     pub options: String,
+    #[serde(rename = "compiler-option-raw", default)]
     pub compiler_option_raw: String,
+    #[serde(rename = "runtime-option-raw", default)]
     pub runtime_option_raw: String,
     #[serde(
         serialize_with = "serialize_utf8",
