@@ -184,10 +184,13 @@ pub struct CompileNdjsonResult {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PostPermlinkRequest {
+    #[serde(default)]
     pub title: String,
+    #[serde(default)]
     pub description: String,
     pub compiler: String,
     pub code: String,
+    #[serde(default)]
     pub options: String,
     #[serde(rename = "compiler-option-raw", default)]
     pub compiler_option_raw: String,
@@ -195,11 +198,15 @@ pub struct PostPermlinkRequest {
     pub runtime_option_raw: String,
     #[serde(
         serialize_with = "serialize_utf8",
-        deserialize_with = "deserialize_utf8"
+        deserialize_with = "deserialize_utf8",
+        default
     )]
     pub stdin: Vec<u8>,
+    #[serde(default)]
     pub github_user: String,
+    #[serde(default)]
     pub codes: Vec<Code>,
+    #[serde(default)]
     pub results: Vec<CompileNdjsonResult>,
 }
 
