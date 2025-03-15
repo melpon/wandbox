@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - feature/feline
   workflow_dispatch:
 
 jobs:
