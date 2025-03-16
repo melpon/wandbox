@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT type, output as data FROM link_output WHERE link_id = ? ORDER BY \"order\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "type",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "data",
+        "ordinal": 1,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "e8bf8de58f66685b5c4ef0015ca6503804197320af2ba600d7a92208aae04723"
+}

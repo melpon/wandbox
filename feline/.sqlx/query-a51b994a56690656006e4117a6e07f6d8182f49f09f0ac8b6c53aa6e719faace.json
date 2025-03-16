@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO code (title, description, compiler, code, optimize, warning, options, compiler_option_raw, runtime_option_raw, stdin, created_at, updated_at, github_user) \n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 13
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a51b994a56690656006e4117a6e07f6d8182f49f09f0ac8b6c53aa6e719faace"
+}

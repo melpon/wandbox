@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT json FROM compiler_info WHERE code_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "json",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c4d8b3b99026134addf729e7a61f4357ac4f27746f8b031b44cd7453deaf7067"
+}

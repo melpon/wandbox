@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO compiler_info (code_id, json) VALUES (?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "6dcdc74bae36b7c4c401c157ea99e4077eb6205693c49bdecdf904e6c23a798f"
+}

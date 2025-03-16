@@ -1,0 +1,22 @@
+[package]
+name = "feline"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.97"
+axum = "0.8.1"
+chrono = "0.4.40"
+clap = { version = "4.5.31", features = ["derive"] }
+env_logger = "0.11.7"
+log = "0.4.26"
+rand = "0.9.0"
+serde = { version = "1.0.218", features = ["derive"] }
+serde_json = "1.0.140"
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "sqlite"] }
+tokio = { version = "1.44.0", features = ["full"] }
+tokio-stream = "0.1.17"
+
+[dev-dependencies]
+http-body-util = "0.1.2"
+tower = "0.5.2"
