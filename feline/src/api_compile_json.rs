@@ -1,7 +1,7 @@
 use crate::{
-    api_compile_ndjson::{log_run_codes, prepare_environment, run_compile_ndjson},
     config::convert_config_to_compiler_info,
     db::make_permlink,
+    jail::{log_run_codes, prepare_environment, run_compile_ndjson},
     types::{
         AppConfig, AppError, CompileNdjsonResult, CompileParameter, CompileResult, CompilerInfo,
         Issuer, PostPermlinkRequest,

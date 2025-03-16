@@ -1,4 +1,4 @@
-use crate::podman::with_podman;
+use crate::jail::with_podman;
 use crate::types::{CompilerInfo, Config, PodmanConfig, Switch, SwitchOption};
 use std::collections::HashMap;
 
