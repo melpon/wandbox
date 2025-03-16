@@ -7,5 +7,6 @@
     "nofile": 1024,
     "data": 1073741824,
     "fsize": 5242880,
-    "nproc": 128
+    "nproc": 128,
+    "max_output_bytes": 131072
 }

@@ -40,6 +40,9 @@ pub struct PodmanConfig {
     pub fsize: Option<u64>,
     // 最大プロセス数
     pub nproc: Option<u64>,
+
+    // 標準出力、標準エラーに出力していいバイト数
+    pub max_output_bytes: Option<u64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]

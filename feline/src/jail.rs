@@ -109,11 +109,12 @@ pub fn run_streaming(
     let program: String = program.to_string();
 
     let (tx, rx) = mpsc::channel::<CompileNdjsonResult>(100);
+    let tx2: mpsc::Sender<CompileNdjsonResult> = tx.clone();
 
     tokio::spawn(async move {
-        let txout: mpsc::Sender<CompileNdjsonResult> = tx.clone();
-        let txerr: mpsc::Sender<CompileNdjsonResult> = tx.clone();
-        let txexit: mpsc::Sender<CompileNdjsonResult> = tx.clone();
+        let (sender, mut receiver) = mpsc::channel::<CompileNdjsonResult>(100);
+        let sender_stdout: mpsc::Sender<CompileNdjsonResult> = sender.clone();
+        let sender_stderr: mpsc::Sender<CompileNdjsonResult> = sender;
         let r: Result<(), anyhow::Error> = async move {
             let mut command: Command = with_podman(&config, &program, &args);
             let mut child: Child = command
@@ -161,7 +162,7 @@ pub fn run_streaming(
                     if n == 0 {
                         break;
                     }
-                    let r = txout
+                    let r = sender_stdout
                         .send(CompileNdjsonResult {
                             r#type: "StdOut".to_string(),
                             data: buf[..n].to_vec(),
@@ -179,7 +180,7 @@ pub fn run_streaming(
                     if n == 0 {
                         break;
                     }
-                    let r = txerr
+                    let r = sender_stderr
                         .send(CompileNdjsonResult {
                             r#type: "StdErr".to_string(),
                             data: buf[..n].to_vec(),
@@ -191,42 +192,60 @@ pub fn run_streaming(
                 }
             });
 
-            tokio::select! {
-                status = child.wait() => {
-                    if let Err(e) = status {
-                        return Err(e.into());
+            let mut send_bytes: u64 = 0;
+            loop {
+                tokio::select! {
+                    r = receiver.recv() => {
+                        if let Some(v) = r {
+                            // 一定量以上のデータを出力したら強制終了
+                            send_bytes += v.data.len() as u64;
+                            if config.max_output_bytes.is_some_and(|v| send_bytes > v) {
+                                child.kill().await?;
+                                tx2.send(CompileNdjsonResult {
+                                        r#type: "Control".to_string(),
+                                        data: b"Killed".to_vec(),
+                                    })
+                                    .await?;
+                                break;
+                            }
+                            tx2.send(v).await?;
+                        }
                     }
-                    let status = status.unwrap();
-                    #[cfg(unix)]
-                    {
-                        use std::os::unix::process::ExitStatusExt;
-                        if let Some(signal) = status.signal() {
-                            txexit
-                                .send(CompileNdjsonResult {
-                                    r#type: "Signal".to_string(),
-                                    data: signal.to_string().as_bytes().to_vec(),
+                    status = child.wait() => {
+                        if let Err(e) = status {
+                            return Err(e.into());
+                        }
+                        let status = status.unwrap();
+                        #[cfg(unix)]
+                        {
+                            use std::os::unix::process::ExitStatusExt;
+                            if let Some(signal) = status.signal() {
+                                tx2.send(CompileNdjsonResult {
+                                        r#type: "Signal".to_string(),
+                                        data: signal.to_string().as_bytes().to_vec(),
+                                    })
+                                    .await?;
+                            }
+                        }
+
+                        if let Some(code) = status.code() {
+                            tx2.send(CompileNdjsonResult {
+                                    r#type: "ExitCode".to_string(),
+                                    data: code.to_string().as_bytes().to_vec(),
                                 })
                                 .await?;
                         }
+                        break;
                     }
-
-                    if let Some(code) = status.code() {
-                        txexit
-                            .send(CompileNdjsonResult {
-                                r#type: "ExitCode".to_string(),
-                                data: code.to_string().as_bytes().to_vec(),
+                    _ = sleep(sigkill_timeout) => {
+                        child.kill().await?;
+                        tx2.send(CompileNdjsonResult {
+                                r#type: "Control".to_string(),
+                                data: b"Timeout".to_vec(),
                             })
                             .await?;
+                        break;
                     }
-                }
-                _ = sleep(sigkill_timeout) => {
-                    child.kill().await?;
-                    txexit
-                        .send(CompileNdjsonResult {
-                            r#type: "Control".to_string(),
-                            data: b"Timeout".to_vec(),
-                        })
-                        .await?;
                 }
             }
             Ok(())
@@ -235,8 +254,8 @@ pub fn run_streaming(
         if let Err(e) = r {
             let r = tx
                 .send(CompileNdjsonResult {
-                    r#type: "SystemError".to_string(),
-                    data: e.to_string().as_bytes().to_vec(),
+                    r#type: "Control".to_string(),
+                    data: [b"SystemError: ", e.to_string().as_bytes()].concat(),
                 })
                 .await;
             if let Err(e) = r {
@@ -677,7 +696,7 @@ mod tests {
     #[tokio::test]
     async fn test_run_streaming_cpu() {
         // CPU 時間を使い切ると SIGKILL されることを確認する
-        let mut config = PodmanConfig::new("wandbox-runner");
+        let mut config: PodmanConfig = PodmanConfig::new("wandbox-runner");
         config.cpu = 1;
         let mut rx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
             &config,
@@ -704,6 +723,38 @@ mod tests {
         );
         assert_eq!(vs[1].r#type, "ExitCode");
         assert_eq!(vs[1].data, b"137");
+    }
+
+    #[tokio::test]
+    async fn test_run_streaming_output_flood() {
+        // 出力しまくると SIGKILL されることを確認する
+        let mut config: PodmanConfig = PodmanConfig::new("wandbox-runner");
+        config.max_output_bytes = Some(10);
+        let mut rx: mpsc::Receiver<CompileNdjsonResult> = run_streaming(
+            &config,
+            "bash",
+            vec![
+                "-c".to_string(),
+                r#"
+                    echo -n "0123456789"
+                    sleep 1
+                    # ここで SIGKILL されるはず
+                    echo -n "x"
+                "#
+                .to_string(),
+            ],
+            b"".to_vec(),
+            Duration::from_secs(30),
+        );
+        let mut vs: Vec<CompileNdjsonResult> = vec![];
+        while let Some(v) = rx.recv().await {
+            vs.push(v);
+        }
+        assert_eq!(vs.len(), 2);
+        assert_eq!(vs[0].r#type, "StdOut");
+        assert_eq!(vs[0].data, b"0123456789");
+        assert_eq!(vs[1].r#type, "Control");
+        assert_eq!(vs[1].data, b"Killed");
     }
 
     #[tokio::test]
