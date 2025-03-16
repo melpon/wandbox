@@ -14,8 +14,12 @@ pub async fn get_api_permlink(
     State(config): State<Arc<AppConfig>>,
     Path(permlink_id): Path<String>,
 ) -> Result<Json<GetPermlinkResponse>, AppError> {
-    let permlink: GetPermlinkResponse =
-        get_permlink(&config.sqlite.clone().unwrap(), &permlink_id).await?;
+    let permlink: GetPermlinkResponse = get_permlink(
+        &config.sqlite.clone().unwrap(),
+        &permlink_id,
+        &config.wandbox_url,
+    )
+    .await?;
     return Ok(Json(permlink));
 }
 

@@ -100,6 +100,7 @@ pub async fn make_permlink(
 pub async fn get_permlink(
     pool: &SqlitePool,
     permlink_name: &str,
+    wandbox_url: &str,
 ) -> Result<GetPermlinkResponse, anyhow::Error> {
     let mut tx: sqlx::Transaction<'_, Sqlite> = pool.begin().await?;
 
@@ -212,7 +213,7 @@ pub async fn get_permlink(
     // CompileResult を計算する
     let mut result: CompileResult = merge_compile_result(&results);
     result.permlink = permlink_name.to_string();
-    result.url = format!("https://wandbox.org/permlink/{}", permlink_name);
+    result.url = format!("{}permlink/{}", wandbox_url, permlink_name);
 
     Ok(GetPermlinkResponse {
         parameter,
@@ -376,7 +377,7 @@ mod tests {
         assert!(result.is_ok());
 
         let response: Result<GetPermlinkResponse, anyhow::Error> =
-            get_permlink(&pool, &permlink_name).await;
+            get_permlink(&pool, &permlink_name, "https://wandbox.org/").await;
         assert!(response.is_ok(), "get_permlink failed: {:?}", response);
 
         let response: GetPermlinkResponse = response.unwrap();

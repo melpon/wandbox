@@ -246,7 +246,7 @@ pub struct CompileParameter {
     pub created_at: i64,
     #[serde(default)]
     pub is_private: bool,
-    #[serde(default)]
+    #[serde(rename = "compiler-info", default)]
     pub compiler_info: CompilerInfo,
 }
 
