@@ -7,7 +7,7 @@ mod api_sponsors;
 mod api_template;
 mod config;
 mod db;
-mod podman;
+mod jail;
 mod types;
 mod util;
 
