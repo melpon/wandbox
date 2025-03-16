@@ -14,3 +14,6 @@ RUN apt-get update \
     libtinfo6 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r wandbox && useradd -r -g wandbox -m wandbox
+USER wandbox
