@@ -315,7 +315,7 @@ pub fn run_compile_ndjson(
                 &podman_config,
                 &info.run_command[0],
                 info.run_command[1..].iter().cloned().chain(args).collect(),
-                b"".to_vec(),
+                body.stdin,
                 Duration::from_secs(60),
             );
             while let Some(v) = rrx.recv().await {
