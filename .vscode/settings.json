@@ -31,11 +31,16 @@
     "editor.tabSize": 2,
     "editor.detectIndentation": false,
   },
+  "[rust]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+  },
   "eslint.workingDirectories": [
     "./canine",
   ],
   "files.associations": {
     "*.cs": "csharp",
+    "CMakeLists.txt": "cmake",
     "*.txt": "plaintext",
     "*.ipp": "cpp",
     "array": "cpp",
@@ -53,5 +58,6 @@
     "string_view": "cpp",
     "rope": "cpp",
     "wrangler.json": "jsonc",
+    "memory_resource": "cpp"
   }
 }

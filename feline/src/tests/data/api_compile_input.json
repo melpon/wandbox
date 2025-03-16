@@ -1,0 +1,43 @@
+{
+    "switches": {
+        "warning": {
+            "flags": [
+                "--",
+                "-Wall",
+                "-Wextra"
+            ],
+            "display-name": "Warnings"
+        }
+    },
+    "compilers": [
+        {
+            "name": "test",
+            "compile-command": [
+                "bash",
+                "-c",
+                "echo $@"
+            ],
+            "version-command": [
+                "echo",
+                "0.1.2"
+            ],
+            "display-name": "test compiler",
+            "display-compile-command": "test prog.sh",
+            "language": "Bash",
+            "output-file": "prog.sh",
+            "run-command": [
+                "bash",
+                "prog.sh"
+            ],
+            "displayable": true,
+            "compiler-option-raw": true,
+            "switches": [
+                "warning"
+            ],
+            "initial-checked": [],
+            "jail-name": "",
+            "templates": []
+        }
+    ],
+    "templates": {}
+}

@@ -14,7 +14,7 @@ import { EditorState, StateEffect, Transaction } from "@codemirror/state";
 import { bracketMatching, syntaxHighlighting, HighlightStyle, foldGutter, foldKeymap, indentOnInput, getIndentUnit, indentUnit } from "@codemirror/language";
 import { history, historyKeymap, defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
-import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } from "@codemirror/autocomplete";
+import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap, acceptCompletion } from "@codemirror/autocomplete";
 import { lintKeymap } from "@codemirror/lint";
 import { tags } from "@lezer/highlight";
 import { vim } from "@replit/codemirror-vim";
@@ -59,6 +59,22 @@ const highlightStyle = HighlightStyle.define([
   { tag: tags.variableName, color: "#953800" },
   { tag: tags.processingInstruction, color: "#0a3069" },
 ]);
+
+const wandboxTheme = EditorView.theme({
+  "&": {
+    fontSize: "14px",
+  },
+  ".cm-content": {
+    // fontFamily: "Menlo, Monaco, Lucida Console, monospace",
+    fontFamily: 'Consolas, "Courier New", monospace',
+  },
+  ".cm-line": {
+    lineHeight: "19px",
+  },
+  ".cm-scroller": {
+    fontFamily: 'inherit',
+  }
+});
 
 export const insertTabWithSpace: StateCommand = ({ state, dispatch }) => {
   const cursor =
@@ -114,6 +130,7 @@ export const tabWithSpaceBinding: KeyBinding = {
 };
 
 const codeMirrorDefaultExtensions: Extension[] = [
+  wandboxTheme,
   history(),
   foldGutter(),
   drawSelection(),
@@ -133,6 +150,7 @@ const defaultKeyMaps: KeyBinding[] = [
   ...historyKeymap,
   ...foldKeymap,
   ...completionKeymap,
+  { key: "Tab", run: acceptCompletion },
   ...lintKeymap,
 ];
 
@@ -147,6 +165,7 @@ export interface CodeMirror6Option {
   viewportMargin?: number;
   readOnly?: boolean;
   languageSupport?: Extension;
+  languageServer?: Extension;
 }
 
 export interface CodeMirror6Props {
@@ -198,6 +217,9 @@ function optionToExtension(option: CodeMirror6Option): Extension[] {
   if (option.languageSupport !== undefined) {
     ext.push(option.languageSupport);
   }
+  if (option.languageServer !== undefined) {
+    ext.push(option.languageServer);
+  }
   return ext;
 }
 
@@ -228,7 +250,7 @@ const CodeMirror6 = (props: CodeMirror6Props): React.ReactElement => {
 
     const startState = EditorState.create({
       doc: text,
-      extensions: optionToExtension(option),
+      extensions: [...optionToExtension(option)],
     });
 
     const dispatch = (tr: Transaction) => {

@@ -20,15 +20,25 @@
   "vars": {
     "WANDBOX_URL_PREFIX": "https://api-develop.wandbox.org",
     "WANDBOX_GITHUB_CLIENT_ID": "d097a8f338db3c15fe08",
+    "WANDBOX_R2_PREFIX": "develop/",
   },
 
   "assets": {
-    "directory": "./build/client"
+    "directory": "./build/client",
+    "binding": "ASSETS",
+    "run_worker_first": true,
   },
 
   "build": {
     "command": "npm run build",
   },
+
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "wandbox-resources",
+    }
+  ],
 
   "env": {
     "develop": {
@@ -41,18 +51,32 @@
       "vars": {
         "WANDBOX_URL_PREFIX": "https://api-develop.wandbox.org",
         "WANDBOX_GITHUB_CLIENT_ID": "d097a8f338db3c15fe08",
+        "WANDBOX_R2_PREFIX": "develop/",
       },
+      "r2_buckets": [
+        {
+          "binding": "R2_BUCKET",
+          "bucket_name": "wandbox-resources",
+        }
+      ],
     },
     "master": {
       "name": "wandbox",
       "route": "wandbox.org/*",
-      "vars": {
-        "WANDBOX_URL_PREFIX": "https://api.wandbox.org",
-        "WANDBOX_GITHUB_CLIENT_ID": "f9d429d939d997e6b08e",
-      },
       "kv_namespaces": [
         { "binding": "KV_SESSION", "id": "5c938730ff3d489fb02730317a5c17d3" },
         { "binding": "KV_CACHE", "id": "5edf9e985c504b6b8099c405585145ad" },
+      ],
+      "vars": {
+        "WANDBOX_URL_PREFIX": "https://api.wandbox.org",
+        "WANDBOX_GITHUB_CLIENT_ID": "f9d429d939d997e6b08e",
+        "WANDBOX_R2_PREFIX": "master/",
+      },
+      "r2_buckets": [
+        {
+          "binding": "R2_BUCKET",
+          "bucket_name": "wandbox-resources",
+        }
       ],
     },
   },

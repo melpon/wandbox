@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO link_output (link_id, \"order\", type, output) VALUES (?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "95e1caabcb2f0731d129dc5bd6701d2defd4820b1905a63f5abd854bd08d4506"
+}

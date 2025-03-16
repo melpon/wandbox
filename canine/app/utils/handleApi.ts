@@ -1,5 +1,6 @@
+import { Hpplib, MergedHppInfo } from "~/features/slice";
 import { CompilerInfo, CompilerList, resolveCompilerInfo } from "~/hooks/compilerList";
-import { AnyJson } from "~/hooks/fetch";
+import { AnyJson, JsonMap } from "~/hooks/fetch";
 import { PermlinkData, resolvePermlinkData } from "~/hooks/permlink";
 import { getSessionStorage } from "~/sessions.server";
 import { GithubAccessToken, GithubUser } from "~/types";
@@ -145,6 +146,109 @@ export async function fetchListData(env: Env, request: Request): Promise<AnyJson
   });
 
   return body;
+}
+
+export async function fetchHpplibData(env: Env, request: Request): Promise<AnyJson> {
+  const hpplibKey = "hpplib";
+  const cache = await env.KV_CACHE.get(hpplibKey, "json");
+  if (cache !== null) {
+    return cache as AnyJson;
+  }
+
+  const result: JsonMap = {};
+  const headers = withClientIP(
+    {
+      "content-type": "application/json",
+      "Accept-Encoding": "identity",
+    },
+    request
+  );
+  // Wandbox 本体側の hpplib.json を取得する
+  {
+    const resp = await fetch(`${env.WANDBOX_URL_PREFIX}/api/hpplib.json`, {
+      headers: headers,
+    });
+    if (resp.status !== 200) {
+      throw new WandboxError(resp.status, await resp.text());
+    }
+    const body = await resp.json<AnyJson>();
+    result["wandbox"] = body;
+  }
+  // ローカル側の hpplib.json を取得する
+  {
+    const url = new URL(request.url);
+    const resp = env.ASSETS === undefined ? await fetch(`${url.origin}/static/wasm/hpplib.json`, {
+      headers: headers,
+    }) : await env.ASSETS.fetch(`${url.origin}/static/wasm/hpplib.json`, { headers: headers });
+    if (resp.status !== 200) {
+      throw new WandboxError(resp.status, await resp.text());
+    }
+    const body = await resp.json<AnyJson>();
+    result["clangd"] = body;
+  }
+
+  // 10分間キャッシュする
+  await env.KV_CACHE.put(hpplibKey, JSON.stringify(result), {
+    expirationTtl: 10 * 60,
+  });
+
+  return result;
+}
+
+export function mergeHpplib(hpplib: Hpplib): MergedHppInfo[] {
+  const infos: MergedHppInfo[] = [];
+
+  const names = new Set([...hpplib.wandbox, ...hpplib.clangd].map((info) => info.name));
+  for (const name of names) {
+    const w = hpplib.wandbox.find((info) => info.name === name);
+    const c = hpplib.clangd.find((info) => info.name === name);
+    if (w === undefined && c === undefined) {
+      // これは無いはずだけど一応処理
+      continue;
+    } else if (w !== undefined && c === undefined) {
+      infos.push({
+        name: w.name,
+        repository: w.repository,
+        description: w.description,
+        headerDescription: w.headerDescription,
+        wandbox: {
+          tagName: w.tagName,
+          publishedAt: w.publishedAt,
+        },
+        clangd: null,
+      });
+    } else if (w === undefined && c !== undefined) {
+      infos.push({
+        name: c.name,
+        repository: c.repository,
+        description: c.description,
+        headerDescription: c.headerDescription,
+        wandbox: null,
+        clangd: {
+          tagName: c.tagName,
+          publishedAt: c.publishedAt,
+        },
+      });
+    } else if (w !== undefined && c !== undefined) {
+      // 基本 wandbox 側の方が新しいはずなので wandbox の情報を優先する
+      infos.push({
+        name: w.name,
+        repository: w.repository,
+        description: w.description,
+        headerDescription: w.headerDescription,
+        wandbox: {
+          tagName: w.tagName,
+          publishedAt: w.publishedAt,
+        },
+        clangd: {
+          tagName: c.tagName,
+          publishedAt: c.publishedAt,
+        },
+      });
+    }
+  }
+
+  return infos;
 }
 
 export function createCompilerList(compilerListJson: AnyJson[]): CompilerList {

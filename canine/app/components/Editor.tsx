@@ -16,6 +16,7 @@ import { CodeEditor } from "./Editor/CodeEditor";
 import { EditorTabs } from "./Editor/EditorTabs";
 import type { CodeMirror6Option } from "./CodeMirror6";
 import { CodeMirror6 } from "./CodeMirror6";
+import { ClangdWorker } from "./Editor/ClangdWorker";
 
 export interface EditorProps {
   compilerList: CompilerList;
@@ -35,6 +36,13 @@ const Editor: React.FC<EditorProps> = (props) => {
     tabKey,
     tabWidth,
     fixedHeight,
+    clangdWorker,
+    clangdWorkerState,
+    clangdWorkerStatus,
+    clangdClient,
+    clangdServer,
+    currentLanguage,
+    currentSwitches,
   } = useSelector(
     ({
       wandbox: {
@@ -45,6 +53,13 @@ const Editor: React.FC<EditorProps> = (props) => {
         stdinView,
         currentTab,
         editorSettings: { mode, tabKey, tabWidth, fixedHeight },
+        clangdWorker,
+        clangdWorkerState,
+        clangdWorkerStatus,
+        clangdClient,
+        clangdServer,
+        currentLanguage,
+        currentSwitches,
       },
     }: AppState) => ({
       sources,
@@ -57,6 +72,13 @@ const Editor: React.FC<EditorProps> = (props) => {
       tabKey,
       tabWidth,
       fixedHeight,
+      clangdWorker,
+      clangdWorkerState,
+      clangdWorkerStatus,
+      clangdClient,
+      clangdServer,
+      currentLanguage,
+      currentSwitches,
     })
   );
   const dispatch = useAppDispatch();
@@ -133,6 +155,14 @@ const Editor: React.FC<EditorProps> = (props) => {
             />
           );
         })}
+        <ClangdWorker
+          clangdWorker={clangdWorker}
+          clangdWorkerState={clangdWorkerState}
+          clangdWorkerStatus={clangdWorkerStatus}
+          clangdClient={clangdClient}
+          clangdServer={clangdServer}
+          currentSwitches={currentSwitches}
+        />
       </div>
       {!stdinOpened && (
         <Button

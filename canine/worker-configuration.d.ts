@@ -3,8 +3,11 @@
 interface Env {
 	KV_SESSION: KVNamespace;
 	KV_CACHE: KVNamespace;
-	WANDBOX_URL_PREFIX: "https://api-develop.wandbox.org";
-	WANDBOX_GITHUB_CLIENT_ID: "d097a8f338db3c15fe08";
+	WANDBOX_URL_PREFIX: "https://api-develop.wandbox.org" | "https://api.wandbox.org";
+	WANDBOX_GITHUB_CLIENT_ID: "d097a8f338db3c15fe08" | "f9d429d939d997e6b08e";
+	WANDBOX_R2_PREFIX: "develop/" | "master/";
 	WANDBOX_GITHUB_CLIENT_SECRET: string;
 	WANDBOX_KV_COOKIE_SECRET: string;
+	R2_BUCKET: R2Bucket;
+	ASSETS: Fetcher;
 }

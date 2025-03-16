@@ -1,0 +1,39 @@
+{
+    "switches": {
+        "warning": {
+            "flags": [
+                "-Wall",
+                "-Wextra"
+            ],
+            "display-name": "Warnings"
+        }
+    },
+    "compilers": [
+        {
+            "name": "test",
+            "compile-command": [
+                "/bin/true"
+            ],
+            "version-command": [
+                "echo",
+                "0.1.2"
+            ],
+            "display-name": "test compiler",
+            "display-compile-command": "test prog.c",
+            "language": "C",
+            "output-file": "prog.c",
+            "run-command": ["./prog.exe"],
+            "displayable": true,
+            "compiler-option-raw": true,
+            "switches": [
+                "warning"
+            ],
+            "initial-checked": [
+                "warning"
+            ],
+            "jail-name": "",
+            "templates": []
+        }
+    ],
+    "templates": {}
+}

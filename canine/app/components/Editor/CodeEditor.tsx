@@ -14,6 +14,7 @@ import { wandboxSlice } from "~/features/slice";
 import type { AppState } from "~/store";
 import { useAppDispatch } from "~/store";
 import { useCompileStateSelector } from "~/utils/compile";
+import { createLanguageServerExtension } from "~/clangd/codemirror-languageserver";
 
 interface CodeEditorProps {
   source: EditorSourceData;
@@ -26,7 +27,7 @@ interface CodeEditorProps {
 const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
   const { source, view, tab, compilerList, permlinkData } = props;
 
-  const { currentLanguage, stdinOpened, currentTab, mode, tabKey, tabWidth } =
+  const { currentLanguage, stdinOpened, currentTab, mode, tabKey, tabWidth, clangdClient } =
     useSelector(
       ({
         wandbox: {
@@ -34,6 +35,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
           stdinOpened,
           currentTab,
           editorSettings: { mode, tabKey, tabWidth },
+          clangdClient,
         },
       }: AppState) => ({
         currentLanguage,
@@ -42,6 +44,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
         mode,
         tabKey,
         tabWidth,
+        clangdClient,
       })
     );
   const show = tab === currentTab;
@@ -64,6 +67,9 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
       : permlinkData.parameter.compilerInfo.language;
 
   const [languageSupport, setLanguageSupport] = useState<Extension | null>(
+    null
+  );
+  const [languageServer, setLanguageServer] = useState<Extension | null>(
     null
   );
   const resolvedLanguage = resolveLanguage(source.filename, language);
@@ -93,10 +99,25 @@ const CodeEditor: React.FC<CodeEditorProps> = (props): React.ReactElement => {
       indentUnit: tabKey !== "tab" ? parseInt(tabKey, 10) : undefined,
       indentWithTab: tabKey === "tab",
       languageSupport: languageSupport || undefined,
+      languageServer: languageServer || undefined,
       readOnly: permlinkData !== null,
       keymaps: [ctrlEnter],
     };
-  }, [mode, tabWidth, tabKey, languageSupport, permlinkData, ctrlEnter]);
+  }, [mode, tabWidth, tabKey, languageSupport, languageServer, permlinkData, ctrlEnter]);
+
+  useEffect(() => {
+    if (clangdClient === null || resolvedLanguage !== "C++") {
+      setLanguageServer(null);
+      return;
+    }
+    const lsp = createLanguageServerExtension({
+      client: clangdClient,
+      documentUri: "file:///home/web_user/" + (source.filename || "main.cpp"),
+      languageId: "cpp",
+      allowHTMLContent: true,
+    })
+    setLanguageServer(lsp);
+  }, [resolvedLanguage, clangdClient, source.filename]);
 
   return (
     <CodeMirror6

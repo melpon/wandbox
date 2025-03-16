@@ -1,0 +1,200 @@
+[
+  {
+    "name": "gcc-head-c",
+    "version": "15.0.1 20250308 (experimental)",
+    "language": "C",
+    "display-name": "gcc HEAD",
+    "templates": [
+      "gcc-c"
+    ],
+    "compiler-option-raw": true,
+    "runtime-option-raw": false,
+    "display-compile-command": "gcc prog.c",
+    "switches": [
+      {
+        "type": "single",
+        "name": "warning",
+        "display-name": "Warnings",
+        "display-flags": "-Wall -Wextra",
+        "default": true
+      },
+      {
+        "type": "single",
+        "name": "optimize",
+        "display-name": "Optimization",
+        "display-flags": "-O2 -march=native",
+        "default": false
+      },
+      {
+        "type": "single",
+        "name": "cpp-verbose",
+        "display-name": "Verbose",
+        "display-flags": "-v",
+        "default": false
+      },
+      {
+        "type": "select",
+        "name": "std-c",
+        "options": [
+          {
+            "name": "std-c-default",
+            "display-flags": "",
+            "display-name": "Compiler Default"
+          },
+          {
+            "name": "c89",
+            "display-flags": "-std=c89",
+            "display-name": "C89"
+          },
+          {
+            "name": "gnu89",
+            "display-flags": "-std=gnu89",
+            "display-name": "C89(GNU)"
+          },
+          {
+            "name": "c99",
+            "display-flags": "-std=c99",
+            "display-name": "C99"
+          },
+          {
+            "name": "gnu99",
+            "display-flags": "-std=gnu99",
+            "display-name": "C99(GNU)"
+          },
+          {
+            "name": "c11",
+            "display-flags": "-std=c11",
+            "display-name": "C11"
+          },
+          {
+            "name": "gnu11",
+            "display-flags": "-std=gnu11",
+            "display-name": "C11(GNU)"
+          }
+        ],
+        "default": "gnu11"
+      },
+      {
+        "type": "select",
+        "name": "cpp-pedantic",
+        "options": [
+          {
+            "name": "cpp-no-pedantic",
+            "display-flags": "",
+            "display-name": "no pedantic"
+          },
+          {
+            "name": "cpp-pedantic",
+            "display-flags": "-pedantic",
+            "display-name": "-pedantic"
+          },
+          {
+            "name": "cpp-pedantic-errors",
+            "display-flags": "-pedantic-errors",
+            "display-name": "-pedantic-errors"
+          }
+        ],
+        "default": "cpp-no-pedantic"
+      }
+    ]
+  },
+  {
+    "name": "gcc-13.2.0-c",
+    "version": "13.2.0",
+    "language": "C",
+    "display-name": "gcc",
+    "templates": [
+      "gcc-c"
+    ],
+    "compiler-option-raw": true,
+    "runtime-option-raw": false,
+    "display-compile-command": "gcc prog.c",
+    "switches": [
+      {
+        "type": "single",
+        "name": "warning",
+        "display-name": "Warnings",
+        "display-flags": "-Wall -Wextra",
+        "default": true
+      },
+      {
+        "type": "single",
+        "name": "optimize",
+        "display-name": "Optimization",
+        "display-flags": "-O2 -march=native",
+        "default": false
+      },
+      {
+        "type": "single",
+        "name": "cpp-verbose",
+        "display-name": "Verbose",
+        "display-flags": "-v",
+        "default": false
+      },
+      {
+        "type": "select",
+        "name": "std-c",
+        "options": [
+          {
+            "name": "std-c-default",
+            "display-flags": "",
+            "display-name": "Compiler Default"
+          },
+          {
+            "name": "c89",
+            "display-flags": "-std=c89",
+            "display-name": "C89"
+          },
+          {
+            "name": "gnu89",
+            "display-flags": "-std=gnu89",
+            "display-name": "C89(GNU)"
+          },
+          {
+            "name": "c99",
+            "display-flags": "-std=c99",
+            "display-name": "C99"
+          },
+          {
+            "name": "gnu99",
+            "display-flags": "-std=gnu99",
+            "display-name": "C99(GNU)"
+          },
+          {
+            "name": "c11",
+            "display-flags": "-std=c11",
+            "display-name": "C11"
+          },
+          {
+            "name": "gnu11",
+            "display-flags": "-std=gnu11",
+            "display-name": "C11(GNU)"
+          }
+        ],
+        "default": "gnu11"
+      },
+      {
+        "type": "select",
+        "name": "cpp-pedantic",
+        "options": [
+          {
+            "name": "cpp-no-pedantic",
+            "display-flags": "",
+            "display-name": "no pedantic"
+          },
+          {
+            "name": "cpp-pedantic",
+            "display-flags": "-pedantic",
+            "display-name": "-pedantic"
+          },
+          {
+            "name": "cpp-pedantic-errors",
+            "display-flags": "-pedantic-errors",
+            "display-name": "-pedantic-errors"
+          }
+        ],
+        "default": "cpp-no-pedantic"
+      }
+    ]
+  }
+]

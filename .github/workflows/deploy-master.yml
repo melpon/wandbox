@@ -30,27 +30,13 @@ jobs:
         echo "    ServerAliveInterval 60" >> $HOME/.ssh/config
         echo "    TCPKeepAlive yes" >> $HOME/.ssh/config
         ssh-keyscan -H $SSH_HOST >> $HOME/.ssh/known_hosts
-    - name: apt install
-      run: sudo apt-get install -y libcap-dev
-    - name: Get cached tools
-      id: cache-tools
-      uses: actions/cache@v4
-      with:
-        path: _install
-        key: install-deps-v3
-    - name: Package cattleshed
-      run: python3 run.py package --env master cattleshed
-    - name: Package kennel
-      run: python3 run.py package --env master kennel
-    - name: Deploy cattleshed to wandbox.org
+    - name: Deploy feline to wandbox.org
       run: |
-        python3 run.py deploy wandbox-ubuntu-24.04 cattleshed --env master
-    - name: Deploy kennel to wandbox.org
-      run: |
-        python3 run.py deploy wandbox-ubuntu-24.04 kennel --env master
+        python3 run.py package feline --env master
+        python3 run.py deploy wandbox-ubuntu-24.04 feline --env master
     - uses: actions/setup-node@v2
       with:
-        node-version: '16'
+        node-version: '22'
     - name: Cache node modules
       uses: actions/cache@v4
       env:
@@ -62,12 +48,12 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - name: Build Workers
-      working-directory: canine
-      run: |
-        set -ex
-        npm install
-        npm run build
+    # - name: Build Workers
+    #   working-directory: canine
+    #   run: |
+    #     set -ex
+    #     npm install
+    #     npm run build
     # - name: Publish canine
     #   working-directory: canine
     #   env:
