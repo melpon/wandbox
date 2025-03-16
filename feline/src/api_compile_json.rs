@@ -57,6 +57,7 @@ pub async fn post_api_compile_json(
         &body.compiler,
         &body.code,
         &body.codes,
+        &config.podman.image,
     )
     .await?;
 
@@ -97,7 +98,7 @@ mod tests {
     };
     use http_body_util::BodyExt;
     use sqlx::{SqlitePool, migrate::Migrator};
-    use std::{collections::HashMap, fs::remove_dir_all, path::Path};
+    use std::{collections::HashMap, path::Path};
     use tower::ServiceExt;
 
     async fn setup_test_db() -> SqlitePool {
@@ -123,7 +124,17 @@ mod tests {
     impl Drop for RemoveDirGuard {
         fn drop(&mut self) {
             if self.path.exists() {
-                remove_dir_all(&self.path).expect("Failed to remove test dir");
+                // 一部のディレクトリを podman 内ユーザーにしてるので、
+                // podman unshare を使ってうまいこと消す必要がある
+                let _ = std::process::Command::new("bash")
+                    .arg("-c")
+                    .arg(format!(
+                        "podman unshare chown -R $(id -u):$(id -g) {} && podman unshare rm -rf {}",
+                        self.path.to_str().unwrap(),
+                        self.path.to_str().unwrap()
+                    ))
+                    .output()
+                    .unwrap();
             }
         }
     }
@@ -157,7 +168,7 @@ mod tests {
 
         let req: CompileParameter = CompileParameter {
             compiler: "test".to_string(),
-            code: "echo Hello; cat subfile".to_string(),
+            code: "echo Hello && touch test && cat subfile".to_string(),
             codes: vec![Code {
                 file: "subfile".to_string(),
                 code: "Subfile".to_string(),
@@ -264,7 +275,7 @@ mod tests {
             CompileParameter { created_at: 0, ..p },
             CompileParameter {
                 compiler: "test".to_string(),
-                code: "echo Hello; cat subfile".to_string(),
+                code: "echo Hello && touch test && cat subfile".to_string(),
                 codes: vec![Code {
                     file: "subfile".to_string(),
                     code: "Subfile".to_string(),

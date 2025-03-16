@@ -15,11 +15,13 @@ use axum::{
 };
 use std::{
     path::{Path, PathBuf},
+    process::Output,
     sync::Arc,
 };
 use tokio::{
     fs::{File, create_dir_all},
     io::AsyncWriteExt as _,
+    process::Command,
     sync::mpsc::{self, Receiver},
     time::Duration,
 };
@@ -122,6 +124,7 @@ pub async fn prepare_environment(
     compiler: &str,
     code: &str,
     codes: &Vec<Code>,
+    image: &str,
 ) -> Result<PathBuf, anyhow::Error> {
     let info: &Compiler = get_compiler(&config, &compiler)?;
 
@@ -140,6 +143,52 @@ pub async fn prepare_environment(
         create_file_with_dirs(&path, &code.code.as_bytes()).await?;
     }
 
+    // 以下のコマンドを実行してコンテナ内のユーザーが書き込めるようにする
+    //
+    // $ podman run --rm wandbox-runner id -u wandbox
+    // 1001
+    // $ podman run --rm wandbox-runner id -g wandbox
+    // 1001
+    // $ podman unshare chown -R 1001:1001 base_dir
+
+    // まず uid と gid を取得
+    let uid: Output = Command::new("podman")
+        .arg("run")
+        .arg("--rm")
+        .arg(&image)
+        .arg("id")
+        .arg("-u")
+        .arg("wandbox")
+        .output()
+        .await?;
+    if !uid.status.success() {
+        return Err(anyhow::anyhow!("Failed to get uid"));
+    }
+    let uid: String = String::from_utf8(uid.stdout)?.trim().to_string();
+    let gid: Output = Command::new("podman")
+        .arg("run")
+        .arg("--rm")
+        .arg(&image)
+        .arg("id")
+        .arg("-u")
+        .arg("wandbox")
+        .output()
+        .await?;
+    if !gid.status.success() {
+        return Err(anyhow::anyhow!("Failed to get gid"));
+    }
+    let gid: String = String::from_utf8(gid.stdout)?.trim().to_string();
+    let r: Output = Command::new("podman")
+        .arg("unshare")
+        .arg("chown")
+        .arg("-R")
+        .arg(format!("{}:{}", uid, gid))
+        .arg(&base_dir)
+        .output()
+        .await?;
+    if !r.status.success() {
+        return Err(anyhow::anyhow!("Failed to unshare"));
+    }
     Ok(base_dir)
 }
 
@@ -324,6 +373,7 @@ pub async fn post_api_compile_ndjson(
         &body.compiler,
         &body.code,
         &body.codes,
+        &config.podman.image,
     )
     .await?;
 
@@ -422,7 +472,17 @@ mod tests {
     impl Drop for RemoveDirGuard {
         fn drop(&mut self) {
             if self.path.exists() {
-                std::fs::remove_dir_all(&self.path).expect("Failed to remove test dir");
+                // 一部のディレクトリを podman 内ユーザーにしてるので、
+                // podman unshare を使ってうまいこと消す必要がある
+                let _ = std::process::Command::new("bash")
+                    .arg("-c")
+                    .arg(format!(
+                        "podman unshare chown -R $(id -u):$(id -g) {} && podman unshare rm -rf {}",
+                        self.path.to_str().unwrap(),
+                        self.path.to_str().unwrap()
+                    ))
+                    .output()
+                    .unwrap();
             }
         }
     }
@@ -452,7 +512,7 @@ mod tests {
 
         let body: CompileParameter = CompileParameter {
             compiler: "test".to_string(),
-            code: "echo Hello; cat subfile".to_string(),
+            code: "echo Hello && touch test && cat subfile".to_string(),
             codes: vec![Code {
                 file: "subfile".to_string(),
                 code: "Subfile".to_string(),
