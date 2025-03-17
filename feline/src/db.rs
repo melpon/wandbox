@@ -173,7 +173,7 @@ pub async fn get_permlink(
         description,
         save: false,
         created_at: NaiveDateTime::parse_from_str(&created_at, "%Y-%m-%d %H:%M:%S")
-            .unwrap()
+            .unwrap_or(NaiveDateTime::default())
             .and_utc()
             .timestamp(),
         is_private: private,
@@ -232,7 +232,7 @@ mod tests {
     use std::path::Path;
 
     async fn setup_test_db() -> SqlitePool {
-        let pool: SqlitePool = SqlitePool::connect(":memory:")
+        let pool: SqlitePool = SqlitePool::connect("sqlite://:memory:")
             .await
             .expect("Failed to create in-memory DB");
 
