@@ -62,7 +62,7 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    env_logger::builder().format_source_path(true).init();
 
     let args: Args = Args::parse();
     let config: Config =
@@ -160,7 +160,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_logging_middleware() {
-        let _ = env_logger::builder().is_test(true).try_init();
+        let _ = env_logger::builder()
+            .is_test(true)
+            .format_source_path(true)
+            .try_init();
 
         let app: Router = Router::new()
             .route("/ok", get(ok_handler))
