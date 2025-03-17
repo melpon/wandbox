@@ -402,7 +402,11 @@ pub async fn prepare_environment(
         .output()
         .await?;
     if !uid.status.success() {
-        return Err(anyhow::anyhow!("Failed to get uid"));
+        return Err(anyhow::anyhow!(
+            "Failed to get uid: status={}, base_dir={}",
+            &uid.status,
+            base_dir.to_str().unwrap_or(""),
+        ));
     }
     let uid: String = String::from_utf8(uid.stdout)?.trim().to_string();
     let gid: Output = Command::new("podman")
@@ -415,7 +419,11 @@ pub async fn prepare_environment(
         .output()
         .await?;
     if !gid.status.success() {
-        return Err(anyhow::anyhow!("Failed to get gid"));
+        return Err(anyhow::anyhow!(
+            "Failed to get gid: status={}, base_dir={}",
+            &gid.status,
+            base_dir.to_str().unwrap_or(""),
+        ));
     }
     let gid: String = String::from_utf8(gid.stdout)?.trim().to_string();
     let r: Output = Command::new("podman")
@@ -427,7 +435,11 @@ pub async fn prepare_environment(
         .output()
         .await?;
     if !r.status.success() {
-        return Err(anyhow::anyhow!("Failed to unshare"));
+        return Err(anyhow::anyhow!(
+            "Failed to unshare: status={}, base_dir={}",
+            &r.status,
+            base_dir.to_str().unwrap_or(""),
+        ));
     }
     Ok(base_dir)
 }
