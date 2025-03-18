@@ -111,6 +111,16 @@ pub fn run_streaming(
     let (tx, rx) = mpsc::channel::<CompileNdjsonResult>(100);
     let tx2: mpsc::Sender<CompileNdjsonResult> = tx.clone();
 
+    let args_str: String = [program.to_string()]
+        .iter()
+        .chain(&args)
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(" ");
+    let args_str_stdin: String = args_str.clone();
+    let args_str_stdout: String = args_str.clone();
+    let args_str_stderr: String = args_str.clone();
+
     tokio::spawn(async move {
         let (sender, mut receiver) = mpsc::channel::<CompileNdjsonResult>(100);
         let sender_stdout: mpsc::Sender<CompileNdjsonResult> = sender.clone();
@@ -142,12 +152,12 @@ pub fn run_streaming(
                     let end = std::cmp::min(n + 1024, stdin_data.len());
                     let r: Result<(), std::io::Error> = stdin.write_all(&stdin_data[n..end]).await;
                     if let Err(e) = r {
-                        log::error!("Error: {}", e);
+                        log::error!("Error: {}, args={}", e, &args_str_stdin);
                         return;
                     }
                     let r = stdin.flush().await;
                     if let Err(e) = r {
-                        log::error!("Error: {}", e);
+                        log::error!("Error: {}, args={}", e, &args_str_stdin);
                         return;
                     }
                     n = end;
@@ -169,7 +179,8 @@ pub fn run_streaming(
                         })
                         .await;
                     if let Err(e) = r {
-                        log::error!("Error: {}", e);
+                        log::error!("Error: {}: args={}", e, &args_str_stdout);
+                        return;
                     }
                 }
             });
@@ -187,7 +198,8 @@ pub fn run_streaming(
                         })
                         .await;
                     if let Err(e) = r {
-                        log::error!("Error: {}", e);
+                        log::error!("Error: {}, args={}", e, args_str_stderr);
+                        return;
                     }
                 }
             });
@@ -259,7 +271,7 @@ pub fn run_streaming(
                 })
                 .await;
             if let Err(e) = r {
-                log::error!("Error: {}", e);
+                log::error!("Error: {}, args={}", e, args_str);
             }
         }
     });
