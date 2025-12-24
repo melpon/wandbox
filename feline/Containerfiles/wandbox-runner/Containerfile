@@ -12,6 +12,7 @@ RUN apt-get update \
     libgfortran5 \
     libgcc-14-dev \
     libtinfo6 \
+    libsqlite3-0 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
