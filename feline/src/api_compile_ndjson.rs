@@ -21,6 +21,9 @@ pub async fn post_api_compile_ndjson(
     Json(body): Json<CompileParameter>,
 ) -> Result<impl IntoResponse, AppError> {
     let issuer: Issuer = make_issuer(uri.path(), &headers, &body.github_user)?;
+    if !config.compile_rate_limiter.try_acquire(&issuer.real_ip) {
+        return Err(AppError::too_many_requests());
+    }
     let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
     let unique_name: String = make_random_str(6);
 
