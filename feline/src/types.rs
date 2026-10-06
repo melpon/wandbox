@@ -1,3 +1,5 @@
+use crate::rate_limit::CompileRateLimiter;
+use anyhow::anyhow;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -21,6 +23,8 @@ pub struct AppConfig {
     // ヘッダーオンリーライブラリの情報が入った JSON ファイルへのパス
     // 外から更新されるのでリクエストが来るたびにファイルから読み込む
     pub hpplib_file: PathBuf,
+    // /api/compile.json と /api/compile.ndjson 用の IP レート制限
+    pub compile_rate_limiter: Arc<CompileRateLimiter>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
@@ -356,16 +360,24 @@ where
 }
 
 // anyhow::Error をレスポンスとして返せるようにする仕組み
-pub struct AppError(anyhow::Error);
+pub struct AppError {
+    error: anyhow::Error,
+    status: StatusCode,
+}
+
+impl AppError {
+    pub fn too_many_requests() -> Self {
+        Self {
+            error: anyhow!("Too many requests"),
+            status: StatusCode::TOO_MANY_REQUESTS,
+        }
+    }
+}
 
 // Tell axum how to convert `AppError` into a response.
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Error: {}", self.0),
-        )
-            .into_response()
+        (self.status, format!("Error: {}", self.error)).into_response()
     }
 }
 
@@ -376,6 +388,9 @@ where
     E: Into<anyhow::Error>,
 {
     fn from(err: E) -> Self {
-        Self(err.into())
+        Self {
+            error: err.into(),
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 }

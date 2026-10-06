@@ -24,6 +24,9 @@ pub async fn post_api_compile_json(
     Json(body): Json<CompileParameter>,
 ) -> Result<Json<CompileResult>, AppError> {
     let issuer: Issuer = make_issuer(uri.path(), &headers, &body.github_user)?;
+    if !config.compile_rate_limiter.try_acquire(&issuer.real_ip) {
+        return Err(AppError::too_many_requests());
+    }
     let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
     let unique_name: String = make_random_str(6);
     let compiler_infos: Vec<CompilerInfo> =

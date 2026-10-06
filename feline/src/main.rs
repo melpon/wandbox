@@ -8,6 +8,7 @@ mod api_template;
 mod config;
 mod db;
 mod jail;
+mod rate_limit;
 mod types;
 mod util;
 
@@ -89,6 +90,7 @@ async fn main() {
         safe_run_dir: args.safe_run_dir,
         safe_run_log_dir: args.safe_run_log_dir,
         hpplib_file: args.hpplib_file.into(),
+        ..AppConfig::default()
     });
 
     let addr: SocketAddrV4 = args.bind.parse().unwrap();
