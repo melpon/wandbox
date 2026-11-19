@@ -9,7 +9,7 @@ use crate::{
         AppConfig, Code, CompileNdjsonResult, CompileParameter, Compiler, Config, Issuer,
         PodmanConfig, RunLog,
     },
-    util::base64_encode,
+    util::{base64_encode, make_random_str},
 };
 use tokio::{
     fs::{File, create_dir_all},
@@ -18,6 +18,72 @@ use tokio::{
     sync::mpsc,
     time::{Duration, sleep},
 };
+
+// podman run の --cidfile。Drop 時にコンテナ単位で掃除する。
+struct CidFileGuard {
+    path: PathBuf,
+    active: bool,
+}
+
+impl CidFileGuard {
+    fn new() -> Self {
+        Self {
+            path: std::env::temp_dir().join(format!("wandbox-cid-{}", make_random_str(12))),
+            active: true,
+        }
+    }
+
+    fn path(&self) -> &Path {
+        &self.path
+    }
+
+    // 正常終了時用。--rm 済みなので Drop での rm -f は不要。
+    fn defuse(mut self) {
+        self.active = false;
+        let _ = std::fs::remove_file(&self.path);
+    }
+}
+
+impl Drop for CidFileGuard {
+    fn drop(&mut self) {
+        if self.active {
+            force_remove_container_sync(&self.path);
+        }
+    }
+}
+
+fn force_remove_container_sync(cidfile: &Path) {
+    if let Ok(cid) = std::fs::read_to_string(cidfile) {
+        let cid = cid.trim();
+        if !cid.is_empty() {
+            // CLI ではなくコンテナを消す（conmon ごと回収される）
+            let _ = std::process::Command::new("podman")
+                .args(["rm", "-f", "--", cid])
+                .output();
+        }
+    }
+    let _ = std::fs::remove_file(cidfile);
+}
+
+async fn force_remove_container(cidfile: &Path) {
+    if let Ok(cid) = tokio::fs::read_to_string(cidfile).await {
+        let cid = cid.trim().to_string();
+        if !cid.is_empty() {
+            let _ = Command::new("podman")
+                .args(["rm", "-f", "--", &cid])
+                .kill_on_drop(true)
+                .output()
+                .await;
+        }
+    }
+    let _ = tokio::fs::remove_file(cidfile).await;
+}
+
+async fn kill_podman_run(child: &mut Child, cidfile: &Path) {
+    force_remove_container(cidfile).await;
+    let _ = child.kill().await;
+    let _ = child.wait().await;
+}
 
 impl PodmanConfig {
     #[cfg(test)]
@@ -39,9 +105,14 @@ impl PodmanConfig {
     }
 }
 
-pub fn with_podman(config: &PodmanConfig, program: &str, args: &[String]) -> Command {
+pub fn with_podman(
+    config: &PodmanConfig,
+    program: &str,
+    args: &[String],
+    cidfile: Option<&Path>,
+) -> Command {
     // $ nice -- \
-    //     podman run --rm --init -i \
+    //     podman run --rm --init -i [--cidfile path] \
     //     -v src:dst:ro -v src2:dst2 --workdir dst2 \
     //     --ulimit cpu=30 --ulimit nofile=1024 \
     //     --ulimit ... \
@@ -52,6 +123,10 @@ pub fn with_podman(config: &PodmanConfig, program: &str, args: &[String]) -> Com
     let mut xs: Vec<String> = vec![];
     // podman run に渡す引数
     xs.extend(["--rm", "--init", "-i"].map(|x| x.to_string()));
+    if let Some(cidfile) = cidfile {
+        xs.push("--cidfile".to_string());
+        xs.push(cidfile.to_string_lossy().into_owned());
+    }
     for (src, dst, writable) in &config.mounts {
         let ro: &str = if *writable { "" } else { ":ro" };
         xs.push("-v".to_string());
@@ -90,6 +165,9 @@ pub fn with_podman(config: &PodmanConfig, program: &str, args: &[String]) -> Com
         log::info!("Command: {}", args);
     }
     let mut cmd: Command = Command::new(podman_program);
+    // タスクキャンセル時に CLI だけ残らないようにする。
+    // コンテナ本体は cidfile + podman rm -f で別途回収する。
+    cmd.kill_on_drop(true);
     cmd.args(&podman_args)
         .args(&xs)
         .arg(&config.image)
@@ -126,7 +204,10 @@ pub fn run_streaming(
         let sender_stdout: mpsc::Sender<CompileNdjsonResult> = sender.clone();
         let sender_stderr: mpsc::Sender<CompileNdjsonResult> = sender;
         let r: Result<(), anyhow::Error> = async move {
-            let mut command: Command = with_podman(&config, &program, &args);
+            // タスクキャンセルや Drop 時もコンテナを回収できるようにする
+            let cid_guard: CidFileGuard = CidFileGuard::new();
+            let mut command: Command =
+                with_podman(&config, &program, &args, Some(cid_guard.path()));
             let mut child: Child = command
                 .stdin(std::process::Stdio::piped())
                 .stdout(std::process::Stdio::piped())
@@ -212,7 +293,7 @@ pub fn run_streaming(
                             // 一定量以上のデータを出力したら強制終了
                             send_bytes += v.data.len() as u64;
                             if config.max_output_bytes.is_some_and(|v| send_bytes > v) {
-                                child.kill().await?;
+                                kill_podman_run(&mut child, cid_guard.path()).await;
                                 tx2.send(CompileNdjsonResult {
                                         r#type: "Control".to_string(),
                                         data: b"Killed".to_vec(),
@@ -247,15 +328,21 @@ pub fn run_streaming(
                                 })
                                 .await?;
                         }
+                        cid_guard.defuse();
                         break;
                     }
                     _ = sleep(sigkill_timeout) => {
-                        child.kill().await?;
+                        kill_podman_run(&mut child, cid_guard.path()).await;
                         tx2.send(CompileNdjsonResult {
                                 r#type: "Control".to_string(),
                                 data: b"Timeout".to_vec(),
                             })
                             .await?;
+                        break;
+                    }
+                    // 受信側（HTTP クライアント等）が切断したらコンテナごと止める
+                    _ = tx2.closed() => {
+                        kill_podman_run(&mut child, cid_guard.path()).await;
                         break;
                     }
                 }
@@ -368,6 +455,30 @@ fn get_compiler<'a>(config: &'a Config, name: &str) -> Result<&'a Compiler, anyh
         .ok_or(anyhow::anyhow!("Compiler not found"))
 }
 
+// コンテナ内 wandbox ユーザーの uid/gid を取得する。
+// イメージが変わらない限り値は固定なので、起動時に1回だけ呼んでキャッシュする。
+pub async fn fetch_wandbox_ids(image: &str) -> Result<(String, String), anyhow::Error> {
+    async fn run_id(image: &str, flag: &str) -> Result<String, anyhow::Error> {
+        let output: Output = Command::new("podman")
+            .args(["run", "--rm", "--network=none", image, "id", flag, "wandbox"])
+            .kill_on_drop(true)
+            .output()
+            .await?;
+        if !output.status.success() {
+            return Err(anyhow::anyhow!(
+                "Failed to get wandbox id {}: status={}",
+                flag,
+                output.status
+            ));
+        }
+        Ok(String::from_utf8(output.stdout)?.trim().to_string())
+    }
+
+    let uid: String = run_id(image, "-u").await?;
+    let gid: String = run_id(image, "-g").await?;
+    Ok((uid, gid))
+}
+
 pub async fn prepare_environment(
     config: &Config,
     safe_run_dir: &str,
@@ -376,7 +487,8 @@ pub async fn prepare_environment(
     compiler: &str,
     code: &str,
     codes: &Vec<Code>,
-    image: &str,
+    wandbox_uid: &str,
+    wandbox_gid: &str,
 ) -> Result<PathBuf, anyhow::Error> {
     let info: &Compiler = get_compiler(&config, &compiler)?;
 
@@ -395,55 +507,15 @@ pub async fn prepare_environment(
         create_file_with_dirs(&path, &code.code.as_bytes()).await?;
     }
 
-    // 以下のコマンドを実行してコンテナ内のユーザーが書き込めるようにする
-    //
-    // $ podman run --rm wandbox-runner id -u wandbox
-    // 1001
-    // $ podman run --rm wandbox-runner id -g wandbox
-    // 1001
-    // $ podman unshare chown -R 1001:1001 base_dir
-
-    // まず uid と gid を取得
-    let uid: Output = Command::new("podman")
-        .arg("run")
-        .arg("--rm")
-        .arg(&image)
-        .arg("id")
-        .arg("-u")
-        .arg("wandbox")
-        .output()
-        .await?;
-    if !uid.status.success() {
-        return Err(anyhow::anyhow!(
-            "Failed to get uid: status={}, base_dir={}",
-            &uid.status,
-            base_dir.to_str().unwrap_or(""),
-        ));
-    }
-    let uid: String = String::from_utf8(uid.stdout)?.trim().to_string();
-    let gid: Output = Command::new("podman")
-        .arg("run")
-        .arg("--rm")
-        .arg(&image)
-        .arg("id")
-        .arg("-u")
-        .arg("wandbox")
-        .output()
-        .await?;
-    if !gid.status.success() {
-        return Err(anyhow::anyhow!(
-            "Failed to get gid: status={}, base_dir={}",
-            &gid.status,
-            base_dir.to_str().unwrap_or(""),
-        ));
-    }
-    let gid: String = String::from_utf8(gid.stdout)?.trim().to_string();
+    // コンテナ内ユーザーが書き込めるようにする
+    // $ podman unshare chown -R <uid>:<gid> base_dir
     let r: Output = Command::new("podman")
         .arg("unshare")
         .arg("chown")
         .arg("-R")
-        .arg(format!("{}:{}", uid, gid))
+        .arg(format!("{}:{}", wandbox_uid, wandbox_gid))
         .arg(&base_dir)
+        .kill_on_drop(true)
         .output()
         .await?;
     if !r.status.success() {
@@ -618,6 +690,7 @@ mod tests {
             &PodmanConfig::new("wandbox-runner"),
             "echo",
             &vec!["Hello".to_string()],
+            None,
         );
         let output: Output = cmd.output().await.unwrap();
         assert_eq!(String::from_utf8(output.stdout), Ok("Hello\n".to_string()));

@@ -95,7 +95,7 @@ async fn run_version_command(
     config: &PodmanConfig,
     command: &[String],
 ) -> Result<String, anyhow::Error> {
-    let stdout: Vec<u8> = with_podman(&config, &command[0], &command[1..].to_vec())
+    let stdout: Vec<u8> = with_podman(&config, &command[0], &command[1..].to_vec(), None)
         .output()
         .await?
         .stdout;

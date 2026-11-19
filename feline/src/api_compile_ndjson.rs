@@ -51,7 +51,8 @@ pub async fn post_api_compile_ndjson(
         &body.compiler,
         &body.code,
         &body.codes,
-        &config.podman.image,
+        &config.wandbox_uid,
+        &config.wandbox_gid,
     )
     .await?;
 
@@ -65,6 +66,7 @@ mod tests {
     use super::*;
     use crate::{
         AppConfig, create_app,
+        jail::fetch_wandbox_ids,
         types::{Code, CompilerInfo, Config, PodmanConfig},
     };
     use axum::{
@@ -110,11 +112,14 @@ mod tests {
         )
         .unwrap();
         let podman_config: PodmanConfig = PodmanConfig::new("wandbox-runner");
+        let (wandbox_uid, wandbox_gid) = fetch_wandbox_ids(&podman_config.image).await.unwrap();
         let app_config: AppConfig = AppConfig {
             podman: podman_config.clone(),
             config: config.clone(),
             safe_run_dir: safe_run_dir.clone(),
             safe_run_log_dir: safe_run_log_dir.clone(),
+            wandbox_uid,
+            wandbox_gid,
             ..AppConfig::default()
         };
         let app: Router = create_app(app_config);
