@@ -31,6 +31,7 @@ use axum::{
 };
 use clap::Parser;
 use config::get_version_info;
+use jail::fetch_wandbox_ids;
 use sqlx::SqlitePool;
 use sqlx::migrate::Migrator;
 use std::path::Path;
@@ -81,6 +82,7 @@ async fn main() {
         .unwrap();
     migrator.run(&*sqlite).await.unwrap();
 
+    let (wandbox_uid, wandbox_gid) = fetch_wandbox_ids(&podman_config.image).await.unwrap();
     let app: Router = create_app(AppConfig {
         sqlite: Some(sqlite),
         wandbox_url: args.wandbox_url,
@@ -90,6 +92,8 @@ async fn main() {
         safe_run_dir: args.safe_run_dir,
         safe_run_log_dir: args.safe_run_log_dir,
         hpplib_file: args.hpplib_file.into(),
+        wandbox_uid,
+        wandbox_gid,
         ..AppConfig::default()
     });
 

@@ -25,6 +25,9 @@ pub struct AppConfig {
     pub hpplib_file: PathBuf,
     // /api/compile.json と /api/compile.ndjson 用の IP レート制限
     pub compile_rate_limiter: Arc<CompileRateLimiter>,
+    // コンテナ内 wandbox ユーザーの uid/gid（起動時に1回だけ取得してキャッシュ）
+    pub wandbox_uid: String,
+    pub wandbox_gid: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
